@@ -58,9 +58,32 @@ def honest_numbers():
          "basis": "fastener count times unit mass with a bracket allowance"},
     ]
     total = sum(b["mass_g"] for b in budget)
-    m_cons = round(total * 1.10, 2)
     blade_mass = 0.108 / 3
     fc = blade_mass * (rpm * 2 * math.pi / 60) ** 2 * R
+
+    envelope = [
+        {"item": "blades", "nominal_g": 108.0, "conservative_g": 122.0,
+         "basis": "cfrp skin over foam core, volume times density with a layup allowance"},
+        {"item": "frame and endplates", "nominal_g": 74.0, "conservative_g": 83.0,
+         "basis": "scaled from the Benedict quad rotor structure at this diameter"},
+        {"item": "pitch mechanism", "nominal_g": 33.0, "conservative_g": 38.0,
+         "basis": "part count times unit mass from the four bar layout drawing"},
+        {"item": "motor and drive", "nominal_g": 106.0, "conservative_g": 116.0,
+         "basis": "supplier datasheet plus hub, shaft, bearings and transmission"},
+        {"item": "actuators", "nominal_g": 18.0, "conservative_g": 21.0,
+         "basis": "supplier datasheet for the amplitude and phase servos"},
+        {"item": "mounting hardware", "nominal_g": 61.0, "conservative_g": 60.0,
+         "basis": "fastener count times unit mass with a bracket and harness allowance"},
+    ]
+    env_nom = sum(e["nominal_g"] for e in envelope)
+    m_cons = sum(e["conservative_g"] for e in envelope)
+
+    tare = 13.0
+    shaft = ap + tare
+    elec = shaft / (eff[0] * eff[1] * eff[2])
+    act_p, ctl_p = 6.0, 2.0
+    blade_dem, shaft_dem = 6.4, 1.9
+    blade_all, shaft_all = 13.4, 6.5
 
     return {
         "geometry": {"radius_m": R, "chord_m": c, "span_m": S, "blades": nb,
@@ -69,8 +92,10 @@ def honest_numbers():
         "operating": {"rpm": rpm, "tip_speed_ms": u, "reynolds": u * c / NU},
         "performance": {"thrust_N": thrust, "blade_area_coeff": ct,
                         "blade_area_coeff_low": ct_low, "thrust_N_conservative": t_cons,
-                        "aero_power_W": ap,
-                        "electrical_power_W": ap / (eff[0] * eff[1] * eff[2])},
+                        "aero_power_W": ap, "tare_power_W": tare,
+                        "electrical_power_W": elec,
+                        "actuator_power_W": act_p, "controller_power_W": ctl_p,
+                        "module_electrical_power_W": elec + act_p + ctl_p},
         "efficiency": {"transmission": eff[0], "motor": eff[1], "esc": eff[2]},
         "power_by_radius": [{"radius_m": r, "aero_power_W": ap * 0.14 / r}
                             for r in (0.10, 0.12, 0.14, 0.16)],
@@ -81,12 +106,18 @@ def honest_numbers():
         "packaging": {"envelope_length_mm": 400, "envelope_width_mm": 300,
                       "envelope_height_mm": 300, "mount_points": 4},
         "structure": {"blade_mass_kg": blade_mass, "centrifugal_load_N": fc,
-                      "blade_root_bending_Nm": 6.4, "shaft_torque_Nm": 1.9,
-                      "blade_margin": 2.1, "shaft_margin": 3.4},
+                      "blade_root_bending_Nm": blade_dem, "shaft_torque_Nm": shaft_dem,
+                      "blade_allowable_Nm": blade_all, "shaft_allowable_Nm": shaft_all,
+                      "blade_margin": blade_all / blade_dem,
+                      "shaft_margin": shaft_all / shaft_dem},
+        "mass_envelope_g": envelope,
         "mass_budget_g": budget,
+        "sources": {"performance": {
+            "blade_area_coeff": "derived from the Benedict 2010 quad rotor at its hover point",
+            "blade_area_coeff_low": "lower bound from the spread across blade count and airfoil in Benedict 2010"}},
         "results": {"total_mass_g": total, "weight_N": total / 1000 * G,
                     "thrust_to_weight": thrust / (total / 1000 * G),
-                    "mass_envelope_g": total, "mass_g_conservative": m_cons,
+                    "mass_envelope_g": env_nom, "mass_g_conservative": m_cons,
                     "thrust_to_weight_conservative": t_cons / (m_cons / 1000 * G)},
     }
 
@@ -127,7 +158,7 @@ def build(root, data, upto=4):
 
     g = d / "stage-1" / "design"
     if upto >= 2:
-        doc(g / "01-configuration.md", ["Configuration", "Why one rotor"],
+        doc(g / "01-configuration.md", ["Configuration", "Why this configuration"],
             [("geometry.blades", data["geometry"]["blades"])])
         doc(g / "02-rotor-sizing.md", ["Rotor sizing", "Shape family", "Radius"],
             [("geometry.radius_m", data["geometry"]["radius_m"])])
@@ -240,6 +271,68 @@ def weak_margin(d):
 case("a structural margin below 1.5 is rejected", False, weak_margin)
 
 
+# ---- round 3 adversarial cases -------------------------------------------------
+
+def text_in_week3_numerics(d):
+    for k in ("offset_m", "phase_delay_deg", "actuator_mass_g", "side_force_tilt_deg"):
+        d["pitch"][k] = "to be confirmed in stage 2"
+    for k in ("envelope_length_mm", "envelope_width_mm", "envelope_height_mm"):
+        d["packaging"][k] = "tbd"
+    return d
+
+
+case("text in week 3 numeric fields is rejected", False, text_in_week3_numerics, week=3)
+
+
+def text_in_week4_numerics(d):
+    for k in ("centrifugal_load_N", "blade_root_bending_Nm", "shaft_torque_Nm", "shaft_margin"):
+        d["structure"][k] = "see stage 2"
+    return d
+
+
+case("text in week 4 structural fields is rejected", False, text_in_week4_numerics)
+
+
+def text_efficiencies_and_empty_sweep(d):
+    for k in ("transmission", "motor", "esc"):
+        d["efficiency"][k] = "typical"
+    d["power_by_radius"] = [{}, {}, {}]
+    return d
+
+
+case("text efficiencies and empty sweep rows are rejected", False,
+     text_efficiencies_and_empty_sweep, week=2)
+
+
+def trivial_conservatism(d):
+    d["performance"]["blade_area_coeff_low"] = d["performance"]["blade_area_coeff"] * 0.9999
+    d["performance"]["thrust_N_conservative"] = d["performance"]["thrust_N"] * 0.9999
+    d["results"]["mass_g_conservative"] = d["results"]["total_mass_g"]
+    return d
+
+
+case("a conservative case that is not meaningfully conservative is rejected", False,
+     trivial_conservatism, week=2)
+
+
+def scalar_envelope(d):
+    d["mass_envelope_g"] = 400.0                     # scalar, not a component list
+    return d
+
+
+case("a week 2 mass envelope that is not a component list is rejected", False,
+     scalar_envelope, week=2)
+
+
+def stated_not_derived_margin(d):
+    d["structure"]["blade_margin"] = 9.9             # does not follow from allowable / demand
+    return d
+
+
+case("a structural margin that does not follow from allowable over demand is rejected",
+     False, stated_not_derived_margin)
+
+
 def main():
     failures = []
     for name, expect_pass, mutate, upto, week in CASES:
@@ -293,13 +386,43 @@ def main():
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
+    # F7: a number invented in the narrative, outside any Numbers used block.
+    tmp = tempfile.mkdtemp(prefix="cyclo-gate-")
+    try:
+        data = honest_numbers()
+        build(tmp, data, 2)
+        sub = Path(tmp) / "stage-1" / "submission"
+        sub.mkdir(parents=True, exist_ok=True)
+        body = chr(10).join([
+            "# Submission", "",
+            "The module produces 999 N of thrust at the design point.", "",
+            "## Numbers used", "",
+            "- performance.thrust_N = "
+            + str(round(data["performance"]["thrust_N"], 2)),
+        ])
+        (sub / "cycloprop-stage1.md").write_text(body, encoding="utf-8")
+        sys.path.insert(0, str(CHECK.parent))
+        import importlib
+        import check as chk
+        importlib.reload(chk)
+        chk.set_root(tmp)
+        chk.FAILURES.clear()
+        chk.check_numeric_coverage("stage-1/submission/cycloprop-stage1.md", data)
+        ok = bool(chk.FAILURES)
+        print(("ok    " if ok else "BROKE ") + "a number invented in the narrative is rejected"
+              f"   [expected fail, got {'fail' if ok else 'pass'}]")
+        if not ok:
+            failures.append(("narrative number", "999 N passed the coverage audit"))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
     print()
     if failures:
         print(f"{len(failures)} case(s) behaved wrongly")
         for name, out in failures:
             print(f"\n===== {name} =====\n{out}")
         return 1
-    print(f"All {len(CASES) + 2} gate self-tests behaved as expected.")
+    print(f"All {len(CASES) + 3} gate self-tests behaved as expected.")
     return 0
 
 
