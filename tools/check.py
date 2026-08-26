@@ -56,6 +56,7 @@ MIN_BASIS_CHARS = 25     # a basis field has to say something
 MIN_MASS_LINE_G = 0.5    # no vanishing components
 MIN_MARGIN = 1.5
 MIN_DECLARED_NUMBERS = 3
+GROUP_DRIFT_MAX = 0.25   # week 4 refines week 2's envelope, per component and in total
 
 # A "conservative" case has to actually be conservative. Shaving 0.01 percent off the
 # coefficient and calling it a lower bound satisfies an inequality and nothing else.
@@ -219,9 +220,11 @@ def check_declared_numbers(rel, data):
     if not m:
         return report(False, f"{rel} has a 'Numbers used' section")
     decls = [d for d in (NUM_DECL.match(l) for l in m.group(1).splitlines()) if d]
-    if len(decls) < MIN_DECLARED_NUMBERS:
-        return report(False, f"{rel} declares at least {MIN_DECLARED_NUMBERS} numbers",
-                      f"{len(decls)} declared")
+    # Distinct keys. Three copies of one radius is one number written three times.
+    distinct = {d.group(1) for d in decls}
+    if len(distinct) < MIN_DECLARED_NUMBERS:
+        return report(False, f"{rel} declares at least {MIN_DECLARED_NUMBERS} distinct numbers",
+                      f"{len(decls)} declarations covering {len(distinct)} key(s)")
     bad = []
     for d in decls:
         key, val = d.group(1), float(d.group(2))
@@ -316,14 +319,18 @@ PROSE_UNITS = {"kW": ("power", 1000.0), "kg": ("mass", 1000.0), "mm": ("length",
 # The one dimensioned constant that belongs in prose without being a computed value.
 COVERAGE_ALLOW = {(10.0, "force")}
 
+# Scientific notation is included because 9.99e2 N is a fabricated number that the plain
+# pattern walked straight past.
 UNIT_NUM = re.compile(
-    r"(?<![\w.])(-?\d+(?:\.\d+)?)\s*(kW|kg|mm|Nm|m/s|rpm|deg|N|W|g|m)(?![\w/])")
-# An escape has to say why it exists, and there is a ceiling on how many a document may
-# carry. Each one is a number nobody is checking.
+    r"(?<![\w.])(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s*(kW|kg|mm|Nm|m/s|rpm|deg|N|W|g|m)"
+    r"(?![\w/])")
+# An escape has to say why it exists, and the ceiling counts the NUMBERS it hides rather
+# than the markers themselves. One marker can cover a whole line or a whole table, so
+# counting markers measured the wrong thing.
 ALLOW_LINE = re.compile(r"<!--\s*allow:\s*(.{15,}?)\s*-->")
 ALLOW_TABLE = re.compile(r"<!--\s*allow-table:\s*(.{15,}?)\s*-->")
 BARE_ALLOW = re.compile(r"<!--\s*allow(-table)?\s*(:\s*.{0,14})?\s*-->")
-MAX_ALLOW_MARKERS = 4
+MAX_UNCHECKED_NUMBERS = 4
 
 
 def dim_of_key(key):
@@ -350,9 +357,13 @@ def collect_dimensioned(node, out, key=""):
 
 def check_numeric_coverage(rel, data):
     """Every number in the submission narrative that carries a physical unit has to match
-    a computed value in the same dimension, be the 10 N requirement, or be explicitly
-    opted out. Quoted blocks are exempt. Tables are exempt only when preceded by an
-    allow-table marker, so a fabricated number cannot hide in a table."""
+    a computed value in the same dimension, be the 10 N requirement, or sit inside an
+    exempt region: a blockquote, an allow-line, or an allow-table.
+
+    Exempt does not mean free. A number inside an exempt region that still fails to trace
+    counts against a hard ceiling, because the promise being kept here is that at most a
+    handful of numbers in the submission are unchecked by anything. Counting markers let
+    one marker hide a twenty-row table and kept that promise only on paper."""
     p = ROOT / rel
     if not p.is_file():
         return False
@@ -360,15 +371,12 @@ def check_numeric_coverage(rel, data):
     collect_dimensioned(data, known)
 
     text = p.read_text(encoding="utf-8")
-    markers = len(ALLOW_LINE.findall(text)) + len(ALLOW_TABLE.findall(text))
     bare = [m.group(0) for m in BARE_ALLOW.finditer(text)
             if not ALLOW_LINE.search(m.group(0)) and not ALLOW_TABLE.search(m.group(0))]
     ok = report(not bare, f"{rel} every audit escape states a reason",
                 "; ".join(bare[:3]) if bare else "")
-    ok &= report(markers <= MAX_ALLOW_MARKERS,
-                 f"{rel} uses at most {MAX_ALLOW_MARKERS} audit escapes", f"{markers} used")
 
-    unmatched, table_exempt = [], False
+    unmatched, unchecked, table_exempt = [], [], False
     for i, line in enumerate(text.splitlines(), 1):
         stripped = line.strip()
         if ALLOW_TABLE.search(line):
@@ -377,19 +385,22 @@ def check_numeric_coverage(rel, data):
         is_table = stripped.startswith("|")
         if not is_table and stripped:
             table_exempt = False
-        if stripped.startswith(">") or ALLOW_LINE.search(line):
-            continue
-        if is_table and table_exempt:
-            continue
+        exempt = (stripped.startswith(">") or bool(ALLOW_LINE.search(line))
+                  or (is_table and table_exempt))
         for m in UNIT_NUM.finditer(line):
             val, unit = float(m.group(1)), m.group(2)
             dim, scale = PROSE_UNITS[unit]
             canon = val * scale
-            if not any(d == dim and abs(canon - k) <= max(DISPLAY_TOL * abs(k), 1e-12)
-                       for k, d in known):
-                unmatched.append(f"{i}: {m.group(0)}")
+            if any(d == dim and abs(canon - k) <= max(DISPLAY_TOL * abs(k), 1e-12)
+                   for k, d in known):
+                continue                       # traces, so an exemption costs nothing
+            (unchecked if exempt else unmatched).append(f"{i}: {m.group(0)}")
     ok &= report(not unmatched, f"{rel} narrative numbers all trace to numbers.json",
                  f"{len(unmatched)} untraced: " + "; ".join(unmatched[:5]) if unmatched else "")
+    ok &= report(len(unchecked) <= MAX_UNCHECKED_NUMBERS,
+                 f"{rel} exempts at most {MAX_UNCHECKED_NUMBERS} untraceable numbers",
+                 f"{len(unchecked)} exempted: " + "; ".join(unchecked[:6])
+                 if unchecked else "")
     return ok
 
 
@@ -482,10 +493,16 @@ def week2(data):
                      ", ".join(lighter[:5]) if lighter else "")
         ok &= report(not bad, "week2: every envelope line has nominal, conservative and basis",
                      "; ".join(bad[:5]) if bad else "")
-        names = " ".join(str(b.get("item", "")).lower() for b in env if isinstance(b, dict))
+        items = [str(b.get("item", "")).strip().lower() for b in env if isinstance(b, dict)]
+        names = " ".join(items)
         absent = [x for x in MODULE_COMPONENTS if x not in names]
         ok &= report(not absent, "week2: envelope covers every component in the module boundary",
                      "missing: " + ", ".join(absent) if absent else "")
+        # Week 4's budget lines point back at these names, so two lines sharing one name
+        # would merge two components into a single group nobody can tell apart.
+        ok &= report(len(set(items)) == len(items) and "" not in items,
+                     "week2: envelope line names are distinct and non-empty",
+                     f"{len(items)} lines, {len(set(items))} distinct")
 
     sweep = dotted(data, "power_by_radius")
 
@@ -593,9 +610,17 @@ def week2(data):
                          f"spread {spread:.2f}")
             chosen = num(data, "geometry.radius_m")
             if chosen:
-                ok &= report(any(abs(chosen - r_) <= 1e-6 for r_, _ in rows),
-                             "week2: the chosen radius appears in the sweep",
+                at_chosen = [p_ for r_, p_ in rows if abs(chosen - r_) <= 1e-6]
+                ok &= report(bool(at_chosen), "week2: the chosen radius appears in the sweep",
                              f"{chosen} not among {[r_ for r_, _ in rows]}")
+                # A sweep that is not anchored to the design point is a separate curve
+                # that happens to have the right shape. It has to pass through the
+                # aerodynamic power the rest of the week is built on.
+                if at_chosen:
+                    ok &= report(close(num(data, "performance.aero_power_W"), at_chosen[0]),
+                                 "week2: the sweep row at the chosen radius is the design power",
+                                 f"sweep {at_chosen[0]:.2f} W, "
+                                 f"stored {dotted(data, 'performance.aero_power_W')}")
 
     for rel, heads in [
         ("stage-1/design/01-configuration.md",
@@ -669,6 +694,52 @@ def week3(data):
     return ok
 
 
+def check_budget_continuity(data):
+    """Week 4 refines week 2's envelope. Comparing only the totals let the whole budget
+    move into the blades while every other component collapsed to the minimum legal line,
+    because the sum was preserved. Each budget line therefore names the envelope line it
+    refines, and each envelope line has to survive the refinement.
+
+    The mapping is declared rather than guessed. Matching on words fails honestly: an
+    envelope line called "motor and drive" is refined by a hub, a shaft, bearings and a
+    motor, and no keyword rule gets that right without inventing failures."""
+    env, budget = dotted(data, "mass_envelope_g"), dotted(data, "mass_budget_g")
+    if not (isinstance(env, list) and env and isinstance(budget, list) and budget):
+        return True                     # the shape gates above already reported this
+
+    groups = {}
+    for e in env:
+        if isinstance(e, dict) and isinstance(e.get("nominal_g"), (int, float)):
+            groups[str(e.get("item", "")).strip().lower()] = [float(e["nominal_g"]), 0.0]
+
+    ok, orphan = True, []
+    for b in budget:
+        if not isinstance(b, dict):
+            continue
+        key = str(b.get("refines", "")).strip().lower()
+        mass = b.get("mass_g")
+        if key not in groups:
+            orphan.append(f"{b.get('item', '?')} refines {b.get('refines')!r}")
+        elif isinstance(mass, (int, float)) and not isinstance(mass, bool):
+            groups[key][1] += float(mass)
+    ok &= report(not orphan,
+                 "week4: every mass line names the envelope line it refines",
+                 "; ".join(orphan[:5]) if orphan else "")
+
+    empty = [k for k, (_, got) in groups.items() if got <= 0]
+    ok &= report(not empty, "week4: no envelope line vanishes from the refined budget",
+                 "nothing refines: " + ", ".join(empty[:5]) if empty else "")
+
+    drifted = [f"{k}: envelope {want:.1f} g, budget {got:.1f} g "
+               f"({abs(got - want) / want:.0%})"
+               for k, (want, got) in sorted(groups.items())
+               if want > 0 and got > 0 and abs(got - want) / want > GROUP_DRIFT_MAX]
+    ok &= report(not drifted,
+                 f"week4: each component stays within {GROUP_DRIFT_MAX:.0%} of its envelope line",
+                 "; ".join(drifted[:4]) if drifted else "")
+    return ok
+
+
 def week4(data):
     ok = True
     budget = dotted(data, "mass_budget_g")
@@ -703,10 +774,11 @@ def week4(data):
     env_nom = num(data, "results.mass_envelope_g")
     if env_nom and "total_mass_g" in r:
         drift = abs(r["total_mass_g"] - env_nom) / env_nom
-        ok &= report(drift <= 0.25,
-                     "week4: the refined budget is within 25 percent of the week 2 envelope",
+        ok &= report(drift <= GROUP_DRIFT_MAX,
+                     f"week4: the refined budget is within {GROUP_DRIFT_MAX:.0%} of the week 2 envelope",
                      f"budget {r['total_mass_g']:.1f} g vs envelope {env_nom:.1f} g, "
                      f"drift {drift:.1%}")
+    ok &= check_budget_continuity(data)
 
     mc = num(data, "results.mass_g_conservative")
     if mc and "total_mass_g" in r:
@@ -798,12 +870,17 @@ def week5(data):
     if block is None:
         ok &= report(False, "week5: the submission has a criteria map section")
     else:
-        rows = [l for l in block if l.strip().startswith("|")]
-        ok &= report(len(rows) >= 9, "week5: the criteria map is a table of 8 criteria",
-                     f"{len(rows)} table rows including header")
+        # Count data rows, not lines. The separator row is not a criterion and neither
+        # is the header, so a table of 8 criteria is 10 lines.
+        rows = [l for l in block if l.strip().startswith("|")
+                and not set(l.strip()) <= set("|- :")]
+        data_rows = max(0, len(rows) - 1)
+        ok &= report(data_rows >= len(CRITERIA_KEYS),
+                     f"week5: the criteria map is a table of {len(CRITERIA_KEYS)} criteria",
+                     f"{data_rows} data rows under the header")
         low = " ".join(block).lower()
-        absent = [k for k in CRITERIA_KEYS if k not in low]
-        ok &= report(not absent, "week5: the criteria map covers all 8 criteria",
+        absent = [k for k in CRITERIA_KEYS if k.lower() not in low]
+        ok &= report(not absent, f"week5: the criteria map covers all {len(CRITERIA_KEYS)} criteria",
                      "missing: " + ", ".join(absent) if absent else "")
 
     ok &= require_substance("stage-1/submission/cycloprop-stage1.md", 2500)
@@ -834,9 +911,30 @@ def done_set():
     return out
 
 
+NEXT_WEEK = re.compile(r"^NEXT-WEEK:\s*(\d+)\s*$", re.M)
+
+
+def expected_done():
+    """How many weeks the handoff claims are finished. The progress files cannot police
+    their own highest entry: deleting week-4.md just lowers the maximum, and a gap check
+    over 1..max never looks above it. The handoff marker is the external witness, and it
+    is the same marker the supervisor already greps for."""
+    p = ROOT / "handoff.md"
+    if not p.is_file():
+        return None
+    m = NEXT_WEEK.search(p.read_text(encoding="utf-8"))
+    return int(m.group(1)) - 1 if m else None
+
+
 def highest_done():
     done = done_set()
     best = max(done) if done else 0
+    exp = expected_done()
+    if exp is None:
+        report(False, "handoff.md carries a NEXT-WEEK marker to check progress against",
+               "no 'NEXT-WEEK: N' line, so a deleted progress file would be invisible")
+    else:
+        best = max(best, min(exp, max(WEEKS)))
     # A gap means a progress file was removed or a week never finished. --all would
     # otherwise silently stop short of it. The supervisor gates week N itself, so this
     # only has to be visible, but it does have to be visible.
