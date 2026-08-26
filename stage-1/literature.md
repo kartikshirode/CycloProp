@@ -110,7 +110,29 @@ Conceptual cyclo-MAV from S1, 248.9 g:
 | Electronics and servos | 38.0 | 15.3 |
 | Structure | 18.5 | 7.4 |
 
-Both put the rotor between 37 and 48% of all-up weight. Plan the budget around that split rather than hoping for better.
+Both put the rotor between 37 and 48% of all-up weight. That framing is useful for intuition and **wrong for our budget**, because the denominator is all-up aircraft mass including battery, avionics and airframe, none of which the competition's module boundary contains. Re-cut onto the boundary the problem statement actually defines, the picture is harder.
+
+### The published state of the art, on our boundary
+
+The module is blades, frame, pitch mechanism, motor, actuator and mounting hardware. No battery, no avionics, no airframe. Taking each published design and keeping only what falls inside that line:
+
+| Design | Rotor | Motor share | Module per rotor | Thrust per rotor | Module T/W |
+| --- | --- | --- | --- | --- | --- |
+| S2 quad-cyclocopter | 96.2 g | 23.8 g | 120.0 g | 1.98 N | **1.69** |
+| S1 conceptual cyclo-MAV | 45.6 g | 23.9 g | 69.5 g | 1.23 N | **1.80** |
+
+Mounting hardware is not broken out in either paper, so both numbers are optimistic.
+
+**We need 2.5.** That is a 39 to 48 percent improvement in thrust per unit module mass over the closest published work, and it is the single hardest number in this project. Nothing else in the brief is as far from the state of the art.
+
+The case that it is reachable, which week 2 has to make quantitatively rather than assert:
+
+- **Scale.** Both designs are 3 to 6 inch research rotors at Reynolds numbers of 17,000 to 35,000. Ours lands near 100,000, where the published CFD says non-dimensional thrust holds while torque and power fall
+- **Fixed masses amortise.** Bearings, fasteners, ESC and linkage hardware do not shrink with the rotor. On a 120 g module they dominate; on a 400 g module carrying five times the thrust they do not
+- **These were demonstrators, not mass-optimised modules.** S2's own text says the earlier rig weighed 450 g and burned 75 percent of its power on structure, and that the flight-weight redesign cut tare to 10 percent. The same attention applied to mass, with CFRP instead of research-shop parts, is where the margin has to come from
+- **Neither design was trying to hit a T/W target.** They were built to fly and to measure, and their mass budgets show it
+
+The counterweight is the one the brief already names: blade weight per unit thrust stays constant under geometric similarity, and blade stress climbs. If blade mass per newton really is scale-invariant, scale alone does not close the gap and the answer has to come from materials and from the non-blade fraction. Week 2 has to establish which of those it is leaning on.
 
 Drive details worth keeping. S2's twin used two 75 W outrunners geared 5:1 through bevel gears so the motors could sit at 10,000 rpm near peak efficiency while the rotors turned at 2,000. The quad drove all four rotors off a single 250 W outrunner through a two-stage transmission. S4 used 3 g AP-03 4000KV motors on a 7:1 single stage.
 
