@@ -122,10 +122,17 @@ def honest_numbers():
     }
 
 
+def rnd(v, n):
+    """Adversarial fixtures put strings in numeric fields on purpose, so the
+    builder must not choke before the gate gets a chance to reject them."""
+    return round(v, n) if isinstance(v, (int, float)) and not isinstance(v, bool) else v
+
+
 def doc(path, headings, numbers=(), words=600):
     body = [f"# {headings[0]}", "", FILLER[:words * 6], ""]
     for h in headings[1:]:
         body += [f"## {h}", "", FILLER[:words * 3], ""]
+    numbers = [(k, v) for k, v in numbers if v is not None]
     if numbers:
         body += ["## Numbers used", ""] + [f"- {k} = {v}" for k, v in numbers] + [""]
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -158,27 +165,44 @@ def build(root, data, upto=4):
 
     g = d / "stage-1" / "design"
     if upto >= 2:
+        geo, perf = data["geometry"], data["performance"]
         doc(g / "01-configuration.md", ["Configuration", "Why this configuration"],
-            [("geometry.blades", data["geometry"]["blades"])])
+            [("geometry.blades", geo["blades"]), ("geometry.radius_m", geo["radius_m"]),
+             ("geometry.span_m", rnd(geo["span_m"], 4))])
         doc(g / "02-rotor-sizing.md", ["Rotor sizing", "Shape family", "Radius"],
-            [("geometry.radius_m", data["geometry"]["radius_m"])])
+            [("geometry.radius_m", geo["radius_m"]), ("geometry.chord_m", rnd(geo["chord_m"], 4)),
+             ("operating.rpm", rnd(data["operating"]["rpm"], 1))])
         doc(g / "04-thrust-and-power.md", ["Thrust", "Power", "Sensitivity"],
-            [("performance.thrust_N", round(data["performance"]["thrust_N"], 2))])
+            [("performance.thrust_N", rnd(perf["thrust_N"], 2)),
+             ("performance.aero_power_W", perf["aero_power_W"]),
+             ("performance.module_electrical_power_W", rnd(perf["module_electrical_power_W"], 1))])
     if upto >= 3:
+        pit, pack = data["pitch"], data["packaging"]
         pitch_doc(g / "03-pitch-and-vectoring.md",
-                  [("pitch.vector_range_deg", data["pitch"]["vector_range_deg"])])
+                  [("pitch.vector_range_deg", pit["vector_range_deg"]),
+                   ("pitch.offset_m", pit["offset_m"]),
+                   ("pitch.phase_delay_deg", pit["phase_delay_deg"])])
         doc(g / "09-packaging-and-integration.md",
             ["Package envelope", "Mounting", "Drivetrain", "Interfaces"],
-            [("packaging.mount_points", data["packaging"]["mount_points"])])
+            [("packaging.mount_points", pack["mount_points"]),
+             ("packaging.envelope_length_mm", pack["envelope_length_mm"]),
+             ("packaging.envelope_height_mm", pack["envelope_height_mm"])])
     if upto >= 4:
+        res, st = data["results"], data["structure"]
         doc(g / "05-mass-and-tw.md", ["Mass budget", "Thrust-to-weight", "Margin"],
-            [("results.total_mass_g", data["results"]["total_mass_g"])])
+            [("results.total_mass_g", res["total_mass_g"]),
+             ("results.weight_N", rnd(res["weight_N"], 3)),
+             ("results.thrust_to_weight", rnd(res["thrust_to_weight"], 3))])
         doc(g / "06-materials-and-manufacturing.md",
             ["Material selection", "Manufacturing", "Cost"],
-            [("results.total_mass_g", data["results"]["total_mass_g"])])
+            [("results.total_mass_g", res["total_mass_g"]),
+             ("results.mass_envelope_g", res.get("mass_envelope_g")),
+             ("results.mass_g_conservative", res.get("mass_g_conservative"))])
         doc(g / "08-structure-and-loads.md",
             ["Load cases", "Blade", "Shaft", "Margins"],
-            [("structure.blade_margin", data["structure"]["blade_margin"])])
+            [("structure.blade_margin", rnd(st["blade_margin"], 3)),
+             ("structure.shaft_margin", rnd(st["shaft_margin"], 3)),
+             ("structure.centrifugal_load_N", rnd(st["centrifugal_load_N"], 2))])
     return d
 
 
@@ -381,6 +405,19 @@ case("a sweep that omits the chosen radius is rejected", False,
      sweep_without_chosen_radius, week=2)
 
 
+def budget_drifts_from_envelope(d):
+    for b in d["mass_budget_g"]:
+        b["mass_g"] *= 0.6                    # a silent redesign, not a refinement
+    t = sum(b["mass_g"] for b in d["mass_budget_g"])
+    d["results"].update(total_mass_g=t, weight_N=t / 1000 * G,
+                        thrust_to_weight=d["performance"]["thrust_N"] / (t / 1000 * G))
+    return d
+
+
+case("a week 4 budget that drifts from the week 2 envelope is rejected", False,
+     budget_drifts_from_envelope)
+
+
 def main():
     failures = []
     for name, expect_pass, mutate, upto, week in CASES:
@@ -446,7 +483,7 @@ def main():
             "The module produces 999 N of thrust at the design point.", "",
             "## Numbers used", "",
             "- performance.thrust_N = "
-            + str(round(data["performance"]["thrust_N"], 2)),
+            + str(rnd(data["performance"]["thrust_N"], 2)),
         ])
         (sub / "cycloprop-stage1.md").write_text(body, encoding="utf-8")
         sys.path.insert(0, str(CHECK.parent))
@@ -489,6 +526,31 @@ def main():
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
+    # Audit escapes: they must state a reason and there is a ceiling on them.
+    tmp = tempfile.mkdtemp(prefix="cyclo-gate-")
+    try:
+        data = honest_numbers()
+        chk.set_root(tmp)
+        good = "<!-- allow-table: measured data reproduced from Benedict 2010 -->"
+        probes = [
+            ("a bare escape with no reason is rejected", "<!-- allow -->", False),
+            ("an escape with a stated reason is accepted", good, True),
+            ("more escapes than the ceiling is rejected",
+             chr(10).join([good.replace("2010", f"201{i}") for i in range(6)]), False),
+        ]
+        for name, text, want_pass in probes:
+            (Path(tmp) / "t.md").write_text(text, encoding="utf-8")
+            chk.FAILURES.clear()
+            chk.check_numeric_coverage("t.md", data)
+            got = not chk.FAILURES
+            ok = got == want_pass
+            print(("ok    " if ok else "BROKE ") + name +
+                  f"   [expected {'pass' if want_pass else 'fail'}, got {'pass' if got else 'fail'}]")
+            if not ok:
+                failures.append((name, ""))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
     # Unit awareness: value alone is not enough.
     tmp = tempfile.mkdtemp(prefix="cyclo-gate-")
     try:
@@ -516,7 +578,7 @@ def main():
         for name, out in failures:
             print(f"\n===== {name} =====\n{out}")
         return 1
-    print(f"All {len(CASES) + 11} gate self-tests behaved as expected.")
+    print(f"All {len(CASES) + 14} gate self-tests behaved as expected.")
     return 0
 
 

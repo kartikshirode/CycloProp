@@ -91,7 +91,7 @@ From the global CLAUDE.md, and binding on every week-agent:
 Project specific:
 
 - `stage-1/design/numbers.json` is the only place a number is defined. Prose cites it through a `## Numbers used` block listing `dotted.key = value`, and the gate checks each one. Never restate a number from memory
-- The submission gets a further audit: every number in its narrative carrying a physical unit has to match a computed value **in the same dimension**, so 400 N does not pass because 400 happens to be a millimetre dimension. Quoted blocks are exempt. Tables are not, unless an `<!-- allow-table -->` marker sits on the line above, which is for reproducing other people's published data
+- The submission gets a further audit: every number in its narrative carrying a physical unit has to match a computed value **in the same dimension**, so 400 N does not pass because 400 happens to be a millimetre dimension. Quoted blocks are exempt. Tables are not, unless an `<!-- allow-table: reason -->` marker sits on the line above, which is for reproducing other people's published data. The reason is mandatory and the document may carry at most 4 escapes in total
 - `context.md` outranks every other document on what the competition requires. If a week's work seems to conflict with the plan, check context.md before deciding the plan is right
 - No CAD at Stage 1. It is not asked for and it is not scored until Stage 2
 - Do not reopen a frozen decision silently. Reopening is a numbered entry in the decisions file with the reason

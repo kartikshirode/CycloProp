@@ -55,6 +55,7 @@ PLANNING_MASS_AT_10N_G = 408.0   # reported for reference, never gated
 MIN_BASIS_CHARS = 25     # a basis field has to say something
 MIN_MASS_LINE_G = 0.5    # no vanishing components
 MIN_MARGIN = 1.5
+MIN_DECLARED_NUMBERS = 3
 
 # A "conservative" case has to actually be conservative. Shaving 0.01 percent off the
 # coefficient and calling it a lower bound satisfies an inequality and nothing else.
@@ -218,8 +219,9 @@ def check_declared_numbers(rel, data):
     if not m:
         return report(False, f"{rel} has a 'Numbers used' section")
     decls = [d for d in (NUM_DECL.match(l) for l in m.group(1).splitlines()) if d]
-    if not decls:
-        return report(False, f"{rel} declares at least one number")
+    if len(decls) < MIN_DECLARED_NUMBERS:
+        return report(False, f"{rel} declares at least {MIN_DECLARED_NUMBERS} numbers",
+                      f"{len(decls)} declared")
     bad = []
     for d in decls:
         key, val = d.group(1), float(d.group(2))
@@ -316,8 +318,12 @@ COVERAGE_ALLOW = {(10.0, "force")}
 
 UNIT_NUM = re.compile(
     r"(?<![\w.])(-?\d+(?:\.\d+)?)\s*(kW|kg|mm|Nm|m/s|rpm|deg|N|W|g|m)(?![\w/])")
-ALLOW_LINE = re.compile(r"<!--\s*allow\s*-->")
-ALLOW_TABLE = re.compile(r"<!--\s*allow-table\s*-->")
+# An escape has to say why it exists, and there is a ceiling on how many a document may
+# carry. Each one is a number nobody is checking.
+ALLOW_LINE = re.compile(r"<!--\s*allow:\s*(.{15,}?)\s*-->")
+ALLOW_TABLE = re.compile(r"<!--\s*allow-table:\s*(.{15,}?)\s*-->")
+BARE_ALLOW = re.compile(r"<!--\s*allow(-table)?\s*(:\s*.{0,14})?\s*-->")
+MAX_ALLOW_MARKERS = 4
 
 
 def dim_of_key(key):
@@ -353,8 +359,17 @@ def check_numeric_coverage(rel, data):
     known = set(COVERAGE_ALLOW)
     collect_dimensioned(data, known)
 
+    text = p.read_text(encoding="utf-8")
+    markers = len(ALLOW_LINE.findall(text)) + len(ALLOW_TABLE.findall(text))
+    bare = [m.group(0) for m in BARE_ALLOW.finditer(text)
+            if not ALLOW_LINE.search(m.group(0)) and not ALLOW_TABLE.search(m.group(0))]
+    ok = report(not bare, f"{rel} every audit escape states a reason",
+                "; ".join(bare[:3]) if bare else "")
+    ok &= report(markers <= MAX_ALLOW_MARKERS,
+                 f"{rel} uses at most {MAX_ALLOW_MARKERS} audit escapes", f"{markers} used")
+
     unmatched, table_exempt = [], False
-    for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
+    for i, line in enumerate(text.splitlines(), 1):
         stripped = line.strip()
         if ALLOW_TABLE.search(line):
             table_exempt = True
@@ -373,8 +388,24 @@ def check_numeric_coverage(rel, data):
             if not any(d == dim and abs(canon - k) <= max(DISPLAY_TOL * abs(k), 1e-12)
                        for k, d in known):
                 unmatched.append(f"{i}: {m.group(0)}")
-    return report(not unmatched, f"{rel} narrative numbers all trace to numbers.json",
-                  f"{len(unmatched)} untraced: " + "; ".join(unmatched[:5]) if unmatched else "")
+    ok &= report(not unmatched, f"{rel} narrative numbers all trace to numbers.json",
+                 f"{len(unmatched)} untraced: " + "; ".join(unmatched[:5]) if unmatched else "")
+    return ok
+
+
+def section_under(text, keyword):
+    """Lines under the first heading containing keyword, up to the next heading.
+    Written as a line walk so the pattern carries no newline escapes."""
+    out, capturing = [], False
+    for line in text.splitlines():
+        if line.startswith("#"):
+            if capturing:
+                break
+            capturing = keyword.lower() in line.lower()
+            continue
+        if capturing:
+            out.append(line)
+    return out if capturing or out else None
 
 
 def check_pdf(rel, min_pages=4):
@@ -669,6 +700,14 @@ def week4(data):
         ok &= report(close(num(data, "results.weight_N"), r["total_mass_g"] / 1000 * G),
                      "week4: weight reproduces from summed mass")
 
+    env_nom = num(data, "results.mass_envelope_g")
+    if env_nom and "total_mass_g" in r:
+        drift = abs(r["total_mass_g"] - env_nom) / env_nom
+        ok &= report(drift <= 0.25,
+                     "week4: the refined budget is within 25 percent of the week 2 envelope",
+                     f"budget {r['total_mass_g']:.1f} g vs envelope {env_nom:.1f} g, "
+                     f"drift {drift:.1%}")
+
     mc = num(data, "results.mass_g_conservative")
     if mc and "total_mass_g" in r:
         ok &= report(mc >= r["total_mass_g"],
@@ -755,10 +794,17 @@ def week5(data):
     ok &= report(not missing, "week5: all 7 required items are top-level sections",
                  "missing: " + "; ".join(missing) if missing else "")
 
-    low = text.lower()
-    absent = [k for k in CRITERIA_KEYS if k not in low]
-    ok &= report(not absent, "week5: the criteria map covers all 8 criteria",
-                 "missing: " + ", ".join(absent) if absent else "")
+    block = section_under(text, "criteri")
+    if block is None:
+        ok &= report(False, "week5: the submission has a criteria map section")
+    else:
+        rows = [l for l in block if l.strip().startswith("|")]
+        ok &= report(len(rows) >= 9, "week5: the criteria map is a table of 8 criteria",
+                     f"{len(rows)} table rows including header")
+        low = " ".join(block).lower()
+        absent = [k for k in CRITERIA_KEYS if k not in low]
+        ok &= report(not absent, "week5: the criteria map covers all 8 criteria",
+                     "missing: " + ", ".join(absent) if absent else "")
 
     ok &= require_substance("stage-1/submission/cycloprop-stage1.md", 2500)
     ok &= check_declared_numbers("stage-1/submission/cycloprop-stage1.md", data)
