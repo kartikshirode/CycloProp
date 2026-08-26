@@ -18,6 +18,7 @@ import tempfile
 from pathlib import Path
 
 CHECK = Path(__file__).resolve().parent / "check.py"
+REAL_PDF = CHECK.parent.parent / "reference" / "cycloprop-problem-statement.pdf"
 RHO, NU, G = 1.225, 1.5e-5, 9.81
 
 FILLER = ("The rotor operates in a curvilinear flowfield so each chordwise station sees "
@@ -38,23 +39,23 @@ def honest_numbers():
     ap, eff = 118.0, (0.92, 0.80, 0.95)
 
     budget = [
-        {"item": "blades, 3 off", "mass_g": 108.0,
+        {"item": "blades, 3 off", "mass_g": 108.0, "refines": "blades",
          "basis": "cfrp skin over foam core, volume times density with a layup allowance"},
-        {"item": "endplates and frame", "mass_g": 74.0,
+        {"item": "endplates and frame", "mass_g": 74.0, "refines": "frame and endplates",
          "basis": "scaled from the Benedict quad rotor structure at this diameter"},
-        {"item": "pitch linkage and offset disk", "mass_g": 33.0,
+        {"item": "pitch linkage and offset disk", "mass_g": 33.0, "refines": "pitch mechanism",
          "basis": "part count times unit mass from the four bar layout drawing"},
-        {"item": "hub and shaft", "mass_g": 44.0,
+        {"item": "hub and shaft", "mass_g": 44.0, "refines": "motor and drive",
          "basis": "7075 tube sized by the shaft torque margin calculation"},
-        {"item": "bearings", "mass_g": 17.0,
+        {"item": "bearings", "mass_g": 17.0, "refines": "motor and drive",
          "basis": "supplier datasheet masses for the selected bore sizes"},
-        {"item": "motor", "mass_g": 62.0,
+        {"item": "motor", "mass_g": 62.0, "refines": "motor and drive",
          "basis": "supplier datasheet for a motor rated above continuous electrical power"},
-        {"item": "esc and wiring", "mass_g": 21.0,
+        {"item": "esc and wiring", "mass_g": 21.0, "refines": "mounting hardware",
          "basis": "supplier datasheet plus a measured harness allowance"},
-        {"item": "actuators, 2 off", "mass_g": 18.0,
+        {"item": "actuators, 2 off", "mass_g": 18.0, "refines": "actuators",
          "basis": "supplier datasheet for the amplitude and phase servos"},
-        {"item": "mounting hardware and fasteners", "mass_g": 23.0,
+        {"item": "mounting hardware and fasteners", "mass_g": 23.0, "refines": "mounting hardware",
          "basis": "fastener count times unit mass with a bracket allowance"},
     ]
     total = sum(b["mass_g"] for b in budget)
@@ -68,12 +69,12 @@ def honest_numbers():
          "basis": "scaled from the Benedict quad rotor structure at this diameter"},
         {"item": "pitch mechanism", "nominal_g": 33.0, "conservative_g": 38.0,
          "basis": "part count times unit mass from the four bar layout drawing"},
-        {"item": "motor and drive", "nominal_g": 106.0, "conservative_g": 116.0,
+        {"item": "motor and drive", "nominal_g": 123.0, "conservative_g": 135.0,
          "basis": "supplier datasheet plus hub, shaft, bearings and transmission"},
         {"item": "actuators", "nominal_g": 18.0, "conservative_g": 21.0,
          "basis": "supplier datasheet for the amplitude and phase servos"},
-        {"item": "mounting hardware", "nominal_g": 61.0, "conservative_g": 68.0,
-         "basis": "fastener count times unit mass with a bracket and harness allowance"},
+        {"item": "mounting hardware", "nominal_g": 44.0, "conservative_g": 49.0,
+         "basis": "fastener count times unit mass with a harness and bracket allowance"},
     ]
     env_nom = sum(e["nominal_g"] for e in envelope)
     m_cons = sum(e["conservative_g"] for e in envelope)
@@ -152,6 +153,47 @@ def pitch_doc(path, numbers):
     path.write_text("\n".join(body), encoding="utf-8")
 
 
+REQUIRED_ITEMS = [
+    "Cyclorotor concept and configuration",
+    "Preliminary rotor sizing",
+    "Blade arrangement and pitch-control concept",
+    "Estimated thrust and power requirement",
+    "Estimated module weight and thrust-to-weight ratio",
+    "Initial material and manufacturing approach",
+    "Team capability and execution plan",
+]
+
+CRITERIA_ROWS = [
+    ("10 N thrust capability", "Estimated thrust and power requirement"),
+    ("thrust-to-weight above 2.5", "Estimated module weight and thrust-to-weight ratio"),
+    ("kinematic analysis of pitching and vectoring", "Blade arrangement and pitch-control concept"),
+    ("aerodynamic analysis", "Estimated thrust and power requirement"),
+    ("structural analysis", "Estimated module weight and thrust-to-weight ratio"),
+    ("manufacturability", "Initial material and manufacturing approach"),
+    ("packaging and integration", "Cyclorotor concept and configuration"),
+    ("presentation quality", "Team capability and execution plan"),
+]
+
+
+def submission_doc(path, data, rows=None, items=None):
+    """A submission that clears every week 5 gate. Nothing had ever built one, so the
+    criteria map had never been exercised on a document meant to pass."""
+    body = ["# CycloProp Stage 1 submission", ""]
+    for h in (items if items is not None else REQUIRED_ITEMS):
+        body += [f"## {h}", "", FILLER[:2600], ""]
+    body += ["## Evaluation criteria map", "",
+             "| Criterion | Where it is answered |", "| --- | --- |"]
+    for crit, where in (rows if rows is not None else CRITERIA_ROWS):
+        body.append(f"| {crit} | {where} |")
+    perf, geo = data["performance"], data["geometry"]
+    body += ["", "## Numbers used", "",
+             f"- performance.thrust_N = {rnd(perf['thrust_N'], 2)}",
+             f"- geometry.radius_m = {geo['radius_m']}",
+             f"- results.thrust_to_weight = {rnd(data['results']['thrust_to_weight'], 3)}", ""]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(body), encoding="utf-8")
+
+
 def build(root, data, upto=4):
     d = Path(root)
     doc(d / "context.md", ["Context", "Stage 1: the seven required items",
@@ -203,6 +245,16 @@ def build(root, data, upto=4):
             [("structure.blade_margin", rnd(st["blade_margin"], 3)),
              ("structure.shaft_margin", rnd(st["shaft_margin"], 3)),
              ("structure.centrifugal_load_N", rnd(st["centrifugal_load_N"], 2))])
+    if upto >= 5:
+        doc(g / "07-team-and-execution.md", ["Team capability", "Execution plan", "Stage 2"])
+        sub = d / "stage-1" / "submission"
+        submission_doc(sub / "cycloprop-stage1.md", data)
+        shutil.copy(REAL_PDF, sub / "cycloprop-stage1.pdf")
+        (sub / "email-draft.md").write_text(
+            "\n".join(["# Stage 1 submission email", "",
+                       "Subject: PUSHPAK Grand Challenge, CycloProp Stage 1", "",
+                       "The attachment is cycloprop-stage1.pdf and it carries the full",
+                       "design report for the module.", ""]), encoding="utf-8")
     return d
 
 
@@ -215,8 +267,10 @@ def run(root, week):
 CASES = []
 
 
-def case(name, expect_pass, mutate=None, upto=4, week=4):
-    CASES.append((name, expect_pass, mutate, upto, week))
+def case(name, expect_pass, mutate=None, upto=4, week=4, tweak=None):
+    """mutate edits numbers.json before the tree is built. tweak edits the built tree,
+    for attacks that live in the prose rather than in the data."""
+    CASES.append((name, expect_pass, mutate, upto, week, tweak))
 
 
 case("honest design passes weeks 1 to 4", True)
@@ -418,15 +472,120 @@ case("a week 4 budget that drifts from the week 2 envelope is rejected", False,
      budget_drifts_from_envelope)
 
 
+# ---- round 5 adversarial cases -------------------------------------------------
+
+def sweep_off_design_point(d):
+    """A curve with the right 1/R shape that does not pass through the design power."""
+    d["power_by_radius"] = [{"radius_m": r, "aero_power_W": 50.0 * 0.14 / r}
+                            for r in (0.10, 0.12, 0.14, 0.16)]
+    return d
+
+
+case("a power sweep not anchored to the design point is rejected", False,
+     sweep_off_design_point, week=2)
+
+
+def component_redesign_at_constant_total(d):
+    """Everything into the blades, every other line at the minimum legal mass, total
+    preserved. The old total-only continuity check passed this."""
+    budget = d["mass_budget_g"]
+    freed = sum(b["mass_g"] for b in budget[1:]) - 0.5 * len(budget[1:])
+    for b in budget[1:]:
+        b["mass_g"] = 0.5
+    budget[0]["mass_g"] += freed
+    return d
+
+
+case("a component redesign that preserves the total is rejected", False,
+     component_redesign_at_constant_total)
+
+
+def budget_line_refines_nothing(d):
+    d["mass_budget_g"][3]["refines"] = "a group that is not in the envelope"
+    return d
+
+
+case("a mass line refining no envelope line is rejected", False, budget_line_refines_nothing)
+
+
+def duplicate_envelope_names(d):
+    d["mass_envelope_g"][1]["item"] = d["mass_envelope_g"][0]["item"]
+    return d
+
+
+case("two envelope lines sharing one name is rejected", False, duplicate_envelope_names,
+     week=2)
+
+
+# ---- week 5, which nothing had ever exercised on a passing document ------------
+
+SUB = "stage-1/submission/cycloprop-stage1.md"
+
+case("an honest submission passes weeks 1 to 5", True, upto=5, week=5)
+
+
+def short_criteria_table(root, data):
+    submission_doc(root / SUB, data, rows=CRITERIA_ROWS[:7])
+
+
+case("a criteria map covering only 7 criteria is rejected", False, upto=5, week=5,
+     tweak=short_criteria_table)
+
+
+def criteria_prose_not_table(root, data):
+    """The eight criteria named in a paragraph rather than mapped in a table."""
+    text = (root / SUB).read_text(encoding="utf-8")
+    kept = [l for l in text.splitlines() if not l.strip().startswith("|")]
+    kept.insert(kept.index("## Evaluation criteria map") + 1,
+                "This report answers " + ", ".join(c for c, _ in CRITERIA_ROWS) + ".")
+    (root / SUB).write_text("\n".join(kept), encoding="utf-8")
+
+
+case("criteria named in prose instead of mapped in a table is rejected", False,
+     upto=5, week=5, tweak=criteria_prose_not_table)
+
+
+def missing_required_item(root, data):
+    submission_doc(root / SUB, data, items=REQUIRED_ITEMS[:6])
+
+
+case("a submission missing one of the 7 required items is rejected", False,
+     upto=5, week=5, tweak=missing_required_item)
+
+
+def duplicate_declarations(root, data):
+    """Three declarations, one key. The count used to be satisfied by repetition."""
+    text = (root / SUB).read_text(encoding="utf-8")
+    head = text.split("## Numbers used")[0]
+    (root / SUB).write_text(
+        head + "## Numbers used\n\n" +
+        "\n".join([f"- geometry.radius_m = {data['geometry']['radius_m']}"] * 3) + "\n",
+        encoding="utf-8")
+
+
+case("three copies of one number do not count as three numbers", False,
+     upto=5, week=5, tweak=duplicate_declarations)
+
+
+def unsent_email_missing(root, data):
+    (root / "stage-1" / "submission" / "email-draft.md").unlink()
+
+
+case("a submission with no staged email is rejected", False, upto=5, week=5,
+     tweak=unsent_email_missing)
+
+
 def main():
     failures = []
-    for name, expect_pass, mutate, upto, week in CASES:
+    for name, expect_pass, mutate, upto, week, tweak in CASES:
         tmp = tempfile.mkdtemp(prefix="cyclo-gate-")
         try:
             data = honest_numbers()
             if mutate:
                 data = mutate(data)
             build(tmp, data, upto)
+            if tweak:
+                tweak(Path(tmp), data)
             code, out = run(tmp, week)
             got_pass = code == 0
             ok = got_pass == expect_pass
@@ -532,11 +691,21 @@ def main():
         data = honest_numbers()
         chk.set_root(tmp)
         good = "<!-- allow-table: measured data reproduced from Benedict 2010 -->"
+        inline = "<!-- allow: reproducing a published row -->"
         probes = [
             ("a bare escape with no reason is rejected", "<!-- allow -->", False),
             ("an escape with a stated reason is accepted", good, True),
-            ("more escapes than the ceiling is rejected",
-             chr(10).join([good.replace("2010", f"201{i}") for i in range(6)]), False),
+            # The ceiling counts hidden numbers, so these three all breach it with one
+            # marker each. Counting markers let every one of them through.
+            ("one inline marker hiding six numbers is rejected",
+             "thrust 991 N 992 N 993 N 994 N 995 N 996 N " + inline, False),
+            ("one table marker hiding twenty rows is rejected",
+             chr(10).join([good] + [f"| {900 + i} N |" for i in range(20)]), False),
+            ("a blockquote hiding six numbers is rejected",
+             chr(10).join([f"> the module gave {900 + i} N" for i in range(6)]), False),
+            ("an inline marker hiding two numbers is accepted",
+             "thrust 991 N and 992 N " + inline, True),
+            ("scientific notation is not invisible to the audit", "thrust of 9.99e2 N", False),
         ]
         for name, text, want_pass in probes:
             (Path(tmp) / "t.md").write_text(text, encoding="utf-8")
@@ -572,13 +741,46 @@ def main():
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
+    # --all has to notice a deleted progress file, including the highest one. The
+    # progress files cannot police their own maximum, so the handoff marker is the witness.
+    def run_all(root):
+        r = subprocess.run([sys.executable, str(CHECK), "--all", "--root", str(root)],
+                           capture_output=True, text=True)
+        return r.returncode == 0, r.stdout
+
+    probes = [("--all passes with every progress file present", None, True),
+              ("--all fails when the highest progress file is deleted", 4, False),
+              ("--all fails when a middle progress file is deleted", 3, False)]
+    for name, drop, want_pass in probes:
+        tmp = tempfile.mkdtemp(prefix="cyclo-gate-")
+        try:
+            build(tmp, honest_numbers(), 4)
+            (Path(tmp) / "handoff.md").write_text(
+                "\n".join(["# Handoff", "", "NEXT-WEEK: 5", ""]), encoding="utf-8")
+            prog = Path(tmp) / "stage-1" / "progress"
+            prog.mkdir(parents=True, exist_ok=True)
+            for w in range(1, 5):
+                if w == drop:
+                    continue
+                (prog / f"week-{w}.md").write_text(
+                    f"# Week {w}\n\nSTATUS: WEEK-COMPLETE\n", encoding="utf-8")
+            got_pass, out = run_all(tmp)
+            ok = got_pass == want_pass
+            print(("ok    " if ok else "BROKE ") + name +
+                  f"   [expected {'pass' if want_pass else 'fail'}, "
+                  f"got {'pass' if got_pass else 'fail'}]")
+            if not ok:
+                failures.append((name, out))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
     print()
     if failures:
         print(f"{len(failures)} case(s) behaved wrongly")
         for name, out in failures:
             print(f"\n===== {name} =====\n{out}")
         return 1
-    print(f"All {len(CASES) + 14} gate self-tests behaved as expected.")
+    print(f"All {len(CASES) + 20} gate self-tests behaved as expected.")
     return 0
 
 
