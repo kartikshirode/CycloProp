@@ -86,7 +86,21 @@ W < 10 / 2.5 = 4 N
 m < 4 / 9.81 = 0.408 kg
 ```
 
-**The whole module comes in under 408 g**, and the PDF enumerates what "whole module" includes: blades, frame, pitch mechanism, motor, actuator, mounting hardware. Nothing on that list can be pushed onto an imaginary airframe to make the number work. Sizing is unblocked and can start immediately.
+The PDF enumerates what "whole module" includes: blades, frame, pitch mechanism, motor, actuator, mounting hardware. Nothing on that list can be pushed onto an imaginary airframe to make the number work.
+
+**But 408 g is not a requirement.** It is only the ceiling when thrust is exactly 10 N, and the requirement says *at least* 10 N. The two requirements together give a ceiling that moves:
+
+| Design thrust | Mass ceiling for T/W > 2.5 |
+| --- | --- |
+| 10 N | 408 g |
+| 11 N | 449 g |
+| 12 N | 489 g |
+| 13 N | 530 g |
+| 15 N | 612 g |
+
+Treating 408 g as fixed pins the design to the most constrained corner of the feasible region for no reason the problem statement gives. Designing above 10 N buys mass ceiling, at the cost of power, which is not a scored criterion. It is not free, because the margin a paper design has to carry eats into what the extra thrust buys, but it is a real lever and week 2 uses it deliberately.
+
+Sizing is unblocked and can start immediately.
 
 ## Thrust vectoring is a requirement, not a bonus
 
@@ -124,6 +138,24 @@ Team size is up to 5.
 It applies to individuals and to teams, and a team carrying one such person "may be disqualified at any stage of the Grand Challenge, including after selection or announcement of results". Check every member before the team is fixed.
 
 The PDF also lists where preference may be given: rotor design and unsteady aerodynamics, CAD and mechanical design, kinematic analysis of mechanisms, CFD and FEA and multibody dynamics, lightweight structures and material selection, motor and actuator and control selection, UAV subsystem integration and testing. That list is effectively a spec for item 7, so write the capability section against it.
+
+## Stage 1 is not a CAD or CAE deliverable
+
+Worth stating plainly, because the objective paragraph above describes the programme's overall goal as "the detailed, CAE-supported design of an indigenous cycloidal rotor module" and that sentence is about the whole three-stage challenge, not about Stage 1.
+
+Stage 1 asks for the seven items listed earlier and nothing more. CAD models, kinematic models, simulation and structural analysis are all named under Stage 2. The evaluation criteria are published once and attached to the final evaluation, so they describe what the finished package is scored on, not what a preliminary design has to contain. Build Stage 1 so it maps onto those headings and can be defended, then stop.
+
+## Compliance and submission responsibility
+
+The problem statement's disclaimer places several obligations on us that have nothing to do with rotor design. They cost nothing to satisfy and something to miss, so they belong on a checklist:
+
+- **Accuracy and completeness.** We are "solely responsible for the accuracy, completeness, originality, technical feasibility, safety, and performance" of what we submit. This is the clause that makes an optimistic number a liability rather than a tactic
+- **Originality and third-party IP.** The submission must not infringe anyone's intellectual property. Every figure, table or number taken from a paper gets a citation, and nothing gets reproduced wholesale
+- **We keep our IP** unless something else is specifically agreed under the challenge terms
+- **Confidentiality is ours to assert.** Anything we consider proprietary has to be clearly marked as such in the submission, and we must not disclose third-party information without authorisation
+- **Safety and legal compliance.** Proposed solutions must comply with Indian law, aviation requirements and safety protocols. Any permission needed for testing or demonstration is our responsibility, which matters from Stage 2 onward rather than now
+- **Costs are ours.** Development, testing, travel, accommodation, equipment and demonstration, unless stated otherwise
+- **Evaluation is final.** No correspondence on evaluation or ranking will be entertained
 
 ## What Stage 2 will demand
 
