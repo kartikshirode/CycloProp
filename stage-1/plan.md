@@ -22,15 +22,19 @@ Rules that make the weeks machine-checkable:
 
 The requirement is thrust **at or above** 10 N with T/W above 2.5. Those two together set the mass ceiling, and the ceiling moves with thrust:
 
-| Design thrust | Mass ceiling for T/W > 2.5 |
+The ratio has to be strictly greater than 2.5, so these are floors rounded down, not the rounded figures the repo used to quote. 408 g at 10 N actually fails, since the exact ceiling is 407.75 g.
+
+| Design thrust | Safe mass ceiling for T/W > 2.5 |
 | --- | --- |
-| 10 N | 408 g |
+| 10 N | 407 g |
+| 11 N | 448 g |
 | 12 N | 489 g |
 | 13 N | 530 g |
+| 15 N | 611 g |
 
-The old plan treated 408 g as a fixed requirement, which pinned the design to the most constrained corner of the feasible region. It is not a requirement. It is what the ceiling happens to be when thrust is exactly 10 N.
+The old plan treated 408 g as a fixed requirement, which pinned the design to the most constrained corner of the feasible region. It is not a requirement, and taken literally it is not even inside it.
 
-Designing above 10 N is therefore a real lever, though not a free one, because the margin the design carries eats into what the extra thrust buys. Week 2 picks the design thrust deliberately and says why.
+Designing above 10 N is a real lever, though not a free one. Power rises, and the margin a paper design has to carry eats into what the extra thrust buys. Power has no separate weighted criterion, but it is a named Stage 1 deliverable and it feeds the motor, battery and thermal case, so it is not free either. Week 2 picks the design thrust deliberately and says why.
 
 ## Calendar
 
@@ -66,7 +70,9 @@ Not a loop tick. These are things an agent must not do and the plan previously l
 5. **Name who sends the submission** on 26 September, and confirm they will be reachable
 6. **State real weekly hours available.** The schedule is unvalidated without this and it is the cheapest thing here to fix
 
-**Blocking.** Items 1, 2 and 3 gate week 5, and item 2 gates everything, since an ineligible roster makes the whole effort void. If the roster is not fixed by 1 September, week 2 still runs, because the engineering does not depend on it.
+**One policy, stated once so the config and the handoff can match it.** Items 1, 2, 3 and 5 are a **hard block on week 5**, which cannot write a real capability section or stage a submission without them. They are **advisory before week 2**, because the engineering genuinely does not depend on the roster.
+
+So: if week H is not done by 1 September, week 2 runs anyway and the loop records the gap. If it is not done by 23 September, week 5 stops and reports BLOCKED. Item 2, eligibility, is the one worth doing first regardless, because an ineligible roster makes every other week wasted effort.
 
 ---
 
@@ -78,7 +84,7 @@ Covers required items 1, 2 and 4, and settles whether the design closes at all.
 
 ### Tasks
 
-1. **Compare single against clustered properly.** Decision D2 currently rests on the observation that copying one published rotor five times needs 485 g of rotor alone. That rules out copying, not every multi-rotor layout. Compare a single larger rotor against a redesigned two and three rotor cluster on the same component boundary, the same coefficient assumptions and the same power model, then freeze the configuration. Use the module boundary the problem statement defines, not published all-up aircraft mass, which includes battery and avionics we are not carrying.
+1. **Compare single against clustered properly**, under a heading called "Why this configuration" rather than one that presumes the answer. Decision D2 currently rests on the observation that copying one published rotor five times needs 485 g of rotor alone. That rules out copying, not every multi-rotor layout. Compare a single larger rotor against a redesigned two and three rotor cluster on the same component boundary, the same coefficient assumptions and the same power model, then freeze the configuration. Use the module boundary the problem statement defines, not published all-up aircraft mass, which includes battery and avionics we are not carrying.
 2. **Choose the blade shape family.** Texas A&M UAV-scale optimum is 3 blades at c/R 0.66, blade aspect ratio 4, NACA 0020, plus or minus 40 degrees. Benedict's MAV optimum is 4 blades at c/R 0.433, NACA 0015, asymmetric 45 top and 25 bottom. Our Reynolds number lands in the Texas A&M band, so that is the default.
 3. **Bound the thrust coefficient, do not just adopt it.** The 0.607 anchor comes from a 4-blade NACA 0010 rotor at c/R 0.433 and Re near 35,000. Moving it to 3 blades, NACA 0020, c/R 0.66 and Re near 100,000 changes blade count, solidity, airfoil and Reynolds number all at once. Derive a defensible low value from the spread in the published data and record both. Benedict's own results give the direction of several of these effects, so use them rather than guessing a percentage.
 4. **Sweep radius against power, not just rpm.** Within a fixed shape family at fixed thrust, tip speed goes as 1/R, so aerodynamic power goes roughly as 1/R. Radius changes the motor, the thermal load and the mass, not only the envelope. Compute power for at least three candidate radii and record the sweep.
@@ -97,7 +103,7 @@ Covers required items 1, 2 and 4, and settles whether the design closes at all.
 
 **Fallback, in order:** raise design thrust toward the ceiling table; move to a larger radius, which lowers power and rpm; revisit the shape family. If none of the three closes, stop and report. A Stage 1 submission that honestly reports the module is infeasible at this scale is worth more than one that reaches 2.51 by rounding, and the reviewers know the literature better than we do.
 
-**Carry two candidate radii forward** rather than one, so week 4 has somewhere to go without reopening week 3.
+**Carry two candidate radii forward** rather than one. Be honest about what that buys: it saves week 2's exploration if the first choice fails, but it does not save week 3, because link lengths, offset geometry, the pitch schedule and gearing all move with radius. Switching radius after week 3 still costs a week 3 rerun. The second candidate is insurance against a week 2 mistake, not a free option in week 4.
 
 ---
 
@@ -125,7 +131,7 @@ Covers required item 3, the thrust-vectoring requirement at 15%, and the integra
 
 Active or passive freezes here, and actuator count and mass go to week 4.
 
-**Fallback:** ship the kinematics, the vectoring argument and the envelope; defer the phase-delay quantification to a stated Stage 2 item. Do not defer the vectoring section or the envelope, since between them they carry 20% of the rubric.
+**Fallback:** trim the depth of the packaging narrative and the interface table, which is where the least score sits. Do not defer the phase delay, which the gate requires as a number and which falls straight out of the four-bar analysis once the kinematics exist. Do not defer the vectoring section or the envelope either, since between them they carry 20% of the rubric.
 
 ---
 
@@ -153,7 +159,9 @@ This is the heaviest week, but the geometry and mechanism are frozen by now, so 
 
 ### Decision gate
 
-If the refined budget breaks T/W, take the second radius carried out of week 2. **Reopening radius invalidates weeks 2, 3 and 4**, because link lengths, offset geometry, pitch schedule, gearing and centrifugal load all move with it, so this is a last resort and not a routine fallback. That is exactly why the feasibility envelope moved into week 2. If it triggers at all, it triggers on day 2 of the week.
+If the refined budget breaks T/W, the second radius from week 2 is available, but taking it **invalidates weeks 3 and 4** because link lengths, offset geometry, pitch schedule, gearing and centrifugal load all move with radius. With four days left after week 4 that is not recoverable, so treat it as a last resort and trigger it on day 2 of the week or not at all. That is exactly why the feasibility envelope moved into week 2.
+
+The cheaper fallbacks, in order, are to raise design thrust within the ceiling table, then to trim the mass budget where a line has slack, then to reopen radius.
 
 ---
 

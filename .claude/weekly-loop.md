@@ -58,10 +58,11 @@ The done marker goes in the week's progress file, the audit marker at the end of
 
 ```
 checkpoint_every: 2
-human_gate_before_week: 2
+human_gate_advisory_before_week: 2
+human_gate_required_before_week: 5
 ```
 
-`human_gate_before_week` means week 2 does not start until the human tasks in the plan's week H are answered, or explicitly waived. Registration, the eligibility check and the roster are the ones that matter; the engineering does not depend on them, but the submission does, and leaving them to the four-day final week is how a technically finished document ends up ineligible or unsent.
+The plan's week H holds the human tasks: registration, the eligibility check, the roster and who sends the submission. They are **advisory before week 2**, since the engineering does not depend on them, and a **hard block on week 5**, which cannot write a real capability section or stage a submission without them. If week H is outstanding when week 2 starts, run week 2 and record the gap. If it is outstanding when week 5 starts, report BLOCKED.
 
 The human reads after every second completed week. Weeks 2 and 4 both carry decision gates that are judgment calls rather than mechanical ones, so full autopilot to the deadline is not the right trade on a submission that only gets made once.
 

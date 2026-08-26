@@ -45,13 +45,13 @@ Never run a loop longer than 7 to 8 hours. Past that the increment per cycle col
 
 ## Before week 2: the human gate
 
-Week H in the plan. Not a loop tick, and week 2 waits on it. Register the team, check every member against the eligibility clause, fix the roster and what each person actually brings, line up the faculty supervisor, name who sends the submission, and state real weekly hours. These used to sit in week 5 with four days left, which is how a finished document ends up ineligible or unsent.
+Week H in the plan. Not a loop tick. Advisory before week 2, since the engineering does not depend on it, and a hard block on week 5, which cannot write a capability section or stage a submission without it. Register the team, check every member against the eligibility clause, fix the roster and what each person actually brings, line up the faculty supervisor, name who sends the submission, and state real weekly hours. These used to sit in week 5 with four days left, which is how a finished document ends up ineligible or unsent.
 
 ## Week 2, next up
 
 Configuration, rotor sizing, thrust, power, and the feasibility envelope that decides whether this closes at all.
 
-- **Design thrust is a choice, not 10 N by default.** The mass ceiling moves with thrust: 408 g at 10 N, 489 g at 12 N, 530 g at 13 N. Every earlier document here treated 408 g as fixed, which it is not
+- **Design thrust is a choice, not 10 N by default.** The mass ceiling moves with thrust: 407 g at 10 N, 489 g at 12 N, 530 g at 13 N. Every earlier document here treated 408 g as fixed, which it is not, and 408 g fails the strict inequality anyway
 - Default to the Texas A&M UAV-scale optimum, meaning 3 blades at c/R 0.66, blade aspect ratio 4, NACA 0020, plus or minus 40 degrees, because solving that shape family pins Reynolds near 100,000 and that sits inside the band they studied
 - Radius trades rpm, envelope, structural mass **and power**. Within a fixed shape family at fixed thrust, aerodynamic power goes roughly as 1/R, so radius is not power-neutral
 - Bound the 0.607 thrust coefficient rather than adopting it. It comes from a different blade count, airfoil, solidity and Reynolds number

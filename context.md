@@ -88,17 +88,19 @@ m < 4 / 9.81 = 0.408 kg
 
 The PDF enumerates what "whole module" includes: blades, frame, pitch mechanism, motor, actuator, mounting hardware. Nothing on that list can be pushed onto an imaginary airframe to make the number work.
 
-**But 408 g is not a requirement.** It is only the ceiling when thrust is exactly 10 N, and the requirement says *at least* 10 N. The two requirements together give a ceiling that moves:
+**But 408 g is not a requirement**, and read strictly it is not even legal. The ratio has to be *greater than* 2.5, so at 10 N the exact ceiling is 407.75 g and 408 g fails. More to the point, the requirement says *at least* 10 N, so the ceiling moves with the design thrust:
 
-| Design thrust | Mass ceiling for T/W > 2.5 |
+| Design thrust | Safe mass ceiling for T/W > 2.5 |
 | --- | --- |
-| 10 N | 408 g |
-| 11 N | 449 g |
+| 10 N | 407 g |
+| 11 N | 448 g |
 | 12 N | 489 g |
 | 13 N | 530 g |
-| 15 N | 612 g |
+| 15 N | 611 g |
 
-Treating 408 g as fixed pins the design to the most constrained corner of the feasible region for no reason the problem statement gives. Designing above 10 N buys mass ceiling, at the cost of power, which is not a scored criterion. It is not free, because the margin a paper design has to carry eats into what the extra thrust buys, but it is a real lever and week 2 uses it deliberately.
+Floors, rounded down, because the inequality is strict.
+
+Treating 408 g as fixed pins the design to the most constrained corner of the feasible region for no reason the problem statement gives. Designing above 10 N buys mass ceiling at the cost of power. Power carries no separate weighted criterion, but it is a named Stage 1 deliverable and it drives motor, battery and thermal choices, so the trade is real rather than free. Week 2 picks the design thrust deliberately.
 
 Sizing is unblocked and can start immediately.
 
@@ -188,7 +190,7 @@ Stage 2 brings domestic travel and accommodation support per IIT Bombay norms. S
 | No detailed problem statement exists | It exists. It is a 200 kB PDF linked from the API record, and it is far more specific than the page |
 | Stage 1 wants 5 items | It wants 7. Power, T/W as a stated result, and a team capability section were missing |
 | Nine weighted criteria | Eight, and they sum to 100. The FAQ saying nine is stale |
-| T/W basis unknown, size against both readings | Module level, quoted. 408 g confirmed |
+| T/W basis unknown, size against both readings | Module level, quoted. The ceiling is 407 g at 10 N and moves with design thrust |
 | Thrust vectoring not mentioned | Required, and carries 15% |
 | Stage 1 funding contradiction | No contradiction. No money during Stage 1, 1 lakh after results |
 | Prize ceiling is a vague 25.5 lakh | Broken out by named award |

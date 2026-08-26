@@ -1,5 +1,5 @@
 {
-  "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder. Week 2 fills geometry, operating, performance, efficiency, power_by_radius and the results envelope. Week 3 fills pitch and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, not against what is stored here, so an optimistic headline number achieves nothing.",
+  "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder, and a string in a numeric field fails too. Week 2 fills geometry, operating, performance, efficiency, power_by_radius, mass_envelope_g and sources. Week 3 fills pitch and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, so an optimistic headline number achieves nothing.",
   "geometry": {
     "radius_m": null,
     "chord_m": null,
@@ -20,7 +20,11 @@
     "blade_area_coeff_low": null,
     "thrust_N_conservative": null,
     "aero_power_W": null,
-    "electrical_power_W": null
+    "tare_power_W": null,
+    "electrical_power_W": null,
+    "actuator_power_W": null,
+    "controller_power_W": null,
+    "module_electrical_power_W": null
   },
   "efficiency": {
     "transmission": null,
@@ -48,10 +52,19 @@
     "centrifugal_load_N": null,
     "blade_root_bending_Nm": null,
     "shaft_torque_Nm": null,
+    "blade_allowable_Nm": null,
+    "shaft_allowable_Nm": null,
     "blade_margin": null,
     "shaft_margin": null
   },
+  "mass_envelope_g": [],
   "mass_budget_g": [],
+  "sources": {
+    "performance": {
+      "blade_area_coeff": null,
+      "blade_area_coeff_low": null
+    }
+  },
   "results": {
     "total_mass_g": null,
     "weight_N": null,
@@ -59,8 +72,5 @@
     "mass_envelope_g": null,
     "mass_g_conservative": null,
     "thrust_to_weight_conservative": null
-  },
-  "sources": {
-    "_note": "key -> measured | derived | assumed, with the paper or supplier where it applies"
   }
 }
