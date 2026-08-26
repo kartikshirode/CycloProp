@@ -36,34 +36,29 @@ Every decision in the document traces back to that. State it on page 1, because 
 
 ## Starting geometry from the literature
 
-Published cyclorotor configurations worth building a comparison table from:
+**The table that used to sit here was wrong and has been deleted.** It came from search summaries rather than papers. The 700 rpm and 24 rpm figures had no source, the c/R values were scrambled between two different studies, and "1.3 in radius" was actually a 1.3 inch chord. Do not go looking for it in the git history and reuse it.
 
-| Source configuration | Blades | Radius | Chord | Span | Pitch | Speed |
-| --- | --- | --- | --- | --- | --- | --- |
-| Optimised MAV cyclorotor | 6 | c/R = 0.67 | NACA 0015 symmetric | | 45 deg amplitude | 700 RPM |
-| Aerodynamic study config | 4 | 150 mm | 80 mm | 200 mm | 45 deg | low speed |
-| Small scale config | | 1.3 in | c/R = 0.8 | AR 1.62 elliptical | | 4000 RPM |
+Rebuilt from the source PDFs in [literature.md](literature.md), which carries the geometry table, a status column saying which rows were actually read, the published mass breakdowns, and the findings that survived checking. Work from that file.
 
-Useful findings to cite:
-
-- Chord-to-radius around 0.5 gives higher efficiency, though 0.67 and 0.8 both appear in working designs
-- Solidity depends on blade count and c/R, and as with conventional rotors there is an optimum solidity at each thrust level
-- Blade aspect ratios of 1.181, 1.618 and 2.196 were tested; medium and high aspect ratio blades produced nearly identical thrust, so aspect ratio is not where your gains are
-- Blades see a curvilinear flowfield, so chordwise velocity varies along the blade. Worth acknowledging, because it is why simple blade element estimates need caveating
+One thing worth repeating here because it shapes the whole sizing week. Blades see a curvilinear flowfield, so chordwise velocity varies along the blade and each point of the chord sits at its own angle of attack. That is why simple blade element estimates need caveating, and why the published analytical tools over-predict thrust away from their design point.
 
 ## Physics for the thrust and power estimate
 
-- Thrust scales with the square of rotational speed. Power scales with the cube.
-- Measured power loading runs about 12 kgf/HP at low thrust and settles near 5 kgf/HP at high thrust.
+- Thrust scales with the square of rotational speed. Power scales with the cube. Both measured, not assumed.
+- Power loading runs about 12 kgf/HP at low thrust and settles near 5 kgf/HP at high thrust. Those two numbers come from Kim et al. 2003 at a Reynolds number near 260,000, so they are a scale extrapolation for us, not a match.
 
-Order of magnitude anchor for the power budget:
+Anchor for the power budget:
 
 ```
 10 N = 1.02 kgf
-At roughly 8 kgf/HP  ->  about 0.13 HP  ->  about 95 W
+At the 5 kgf/HP asymptote  ->  0.204 HP  ->  152 W aerodynamic
+Cross-check, Benedict's twin rotor at its operating point, 0.062 N/W  ->  161 W
+At 65% chain efficiency  ->  roughly 230 to 250 W electrical
 ```
 
-Treat that as a sanity check on motor and battery selection, not a result. The real number comes out of your sizing once blade count, c/R and RPM are fixed.
+An earlier version of this plan said 95 W, taken from 8 kgf/HP in the middle of that range. That was too low by about 60%. 10 N is a high-thrust point, so read the asymptote rather than the middle. Working the other way, higher Reynolds number at our size should recover some of it, which is the one defensible reason to expect better than the measured MAV figures. Full derivation in [literature.md](literature.md).
+
+Treat it as a sanity check on motor and battery selection, not a result. The real number falls out of the sizing once blade count, c/R and rpm are fixed.
 
 Scaling arguments to use in the document:
 
@@ -75,9 +70,12 @@ Scaling arguments to use in the document:
 The concept is a required section and it is where designs differentiate. Two families:
 
 - **Active**, servo-driven per blade. More control authority, more mass, more parts inside a 408 g budget.
-- **Passive, cam-based.** There is published work on cam-based passive blade pitching for small-scale cyclogyros. Fewer parts, lighter, less authority.
+- **Passive, four-bar.** Every flying cyclocopter in the papers read so far uses this, none use per-blade servos.
+- **Passive, cam-based.** Adams et al. drive the pitch off centrifugal force instead of a linkage, on a 535 g vehicle. Fewer parts again, and the paper is still paywalled.
 
-Given the mass constraint, the passive route deserves the first look. Say why you chose whichever you chose. An unjustified choice reads worse than a conservative one.
+The four-bar version is worth understanding before choosing, because it does more than the word "passive" suggests. The blade pitches about a fixed axis, driven by a pitch link attached aft of that axis, whose far end rides on a disk offset from the shaft centre. The size of that offset sets the pitching amplitude. Rotating the direction of the offset shifts the phase, which vectors the thrust, and that is the same adjustment used to cancel the 30 deg side-force tilt. So one passive linkage gives amplitude and direction control with no per-blade actuator, which is a strong answer to the mass constraint.
+
+Given that, the passive route deserves the first look. Say why you chose whichever you chose. An unjustified choice reads worse than a conservative one.
 
 ## Schedule, 32 days
 
@@ -92,14 +90,20 @@ Dates assume a start of 26 August 2026. This runs in parallel with UAV-X, which 
 | 27 to 31 | 21 to 25 Sep | Write | Document complete against all 5 required sections |
 | 32 | 26 Sep | Submit | Emailed alongside UAV-X |
 
-## Papers to pull first
+## Papers
 
-- Jayant Sirohi, UT Austin, hover performance of a cycloidal rotor for a micro air vehicle. Closest to your scale.
-- Moble Benedict and Inderjit Chopra, meso-scale cycloidal-rotor aircraft for MAV application.
-- Carl Runco and Moble Benedict, 70 gram micro quad-cyclocopter, design, development and flight testing.
-- Cam-based passive blade pitching for a small-scale cyclogyro.
-- Chalmers parametric analysis of a large-scale cycloidal rotor, for the scaling argument.
-- Quad cycloidal-rotor UAV development, for configuration context.
+Pulled and read on 26 August, all recorded in [literature.md](literature.md):
+
+- Sirohi, Parsons and Chopra, hover performance of a cycloidal rotor for a micro air vehicle. This is University of Maryland work from 2007, not UT Austin. Sirohi moved there later and his UT page hosts the PDF
+- Benedict's 2010 UMD dissertation. The fullest parametric study at our kind of scale and the source of both the mass breakdowns and the side-force finding
+- Xisto et al., parametric analysis of a large-scale cycloidal rotor, for the scaling argument
+- Shrestha, Yeo, Benedict and Chopra, meso-scale cycloidal-rotor aircraft for MAV application
+
+Still outstanding:
+
+- The Texas A&M thesis on UAV-scale cyclorotor hover performance. It is the only study in our Reynolds band and the repository blocks direct requests, so it needs a library proxy or the faculty supervisor
+- Cam-based passive blade pitching for a small-scale cyclogyro, Adams et al. Paywalled, and blade pitch is a required section
+- Runco and Benedict, 70 gram micro quad-cyclocopter. Paywalled
 
 ## Judging, and what it implies
 
