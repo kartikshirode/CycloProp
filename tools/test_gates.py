@@ -31,7 +31,7 @@ def honest_numbers():
     c, S = 0.66 * R, 2.64 * R
     ct, ct_low = 0.607, 0.516
     area = nb * c * S
-    thrust = 13.0
+    thrust = 13.5
     u = math.sqrt(thrust / (ct * 0.5 * RHO * area))
     rpm = u / R * 60 / (2 * math.pi)
     t_cons = ct_low * 0.5 * RHO * u * u * area
@@ -72,7 +72,7 @@ def honest_numbers():
          "basis": "supplier datasheet plus hub, shaft, bearings and transmission"},
         {"item": "actuators", "nominal_g": 18.0, "conservative_g": 21.0,
          "basis": "supplier datasheet for the amplitude and phase servos"},
-        {"item": "mounting hardware", "nominal_g": 61.0, "conservative_g": 60.0,
+        {"item": "mounting hardware", "nominal_g": 61.0, "conservative_g": 68.0,
          "basis": "fastener count times unit mass with a bracket and harness allowance"},
     ]
     env_nom = sum(e["nominal_g"] for e in envelope)
@@ -333,6 +333,54 @@ case("a structural margin that does not follow from allowable over demand is rej
      False, stated_not_derived_margin)
 
 
+def lighter_conservative_line(d):
+    d["mass_envelope_g"][0]["conservative_g"] = d["mass_envelope_g"][0]["nominal_g"] - 5
+    return d
+
+
+case("an envelope line lighter in the conservative column is rejected", False,
+     lighter_conservative_line, week=2)
+
+
+def thin_envelope_margin(d):
+    for e in d["mass_envelope_g"]:
+        e["conservative_g"] = e["nominal_g"] * 1.03      # 3 percent, rule wants 5
+    d["results"]["mass_g_conservative"] = sum(e["conservative_g"] for e in d["mass_envelope_g"])
+    return d
+
+
+case("a conservative column only 3 percent above nominal is rejected", False,
+     thin_envelope_margin, week=2)
+
+
+def missing_envelope_total(d):
+    d["results"].pop("mass_envelope_g", None)
+    return d
+
+
+case("a missing nominal envelope total is rejected", False, missing_envelope_total, week=2)
+
+
+def flat_power_sweep(d):
+    d["power_by_radius"] = [{"radius_m": r, "aero_power_W": 1.0}
+                            for r in (0.10, 0.12, 0.14, 0.16)]
+    return d
+
+
+case("a power sweep that does not vary with radius is rejected", False,
+     flat_power_sweep, week=2)
+
+
+def sweep_without_chosen_radius(d):
+    d["power_by_radius"] = [{"radius_m": r, "aero_power_W": 118.0 * 0.14 / r}
+                            for r in (0.10, 0.12, 0.16)]
+    return d
+
+
+case("a sweep that omits the chosen radius is rejected", False,
+     sweep_without_chosen_radius, week=2)
+
+
 def main():
     failures = []
     for name, expect_pass, mutate, upto, week in CASES:
@@ -416,13 +464,59 @@ def main():
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
+    # PDF path: a real PDF, a renamed text file, and a too-short PDF.
+    import importlib
+    sys.path.insert(0, str(CHECK.parent))
+    import check as chk
+    importlib.reload(chk)
+    real = Path(__file__).resolve().parent.parent / "reference" / "cycloprop-problem-statement.pdf"
+    tmp = tempfile.mkdtemp(prefix="cyclo-gate-")
+    try:
+        shutil.copy(real, Path(tmp) / "good.pdf")
+        (Path(tmp) / "fake.pdf").write_text("not a pdf at all", encoding="utf-8")
+        chk.set_root(tmp)
+        for name, path, want_pass in [("a real PDF is accepted", "good.pdf", True),
+                                      ("a renamed text file is rejected", "fake.pdf", False),
+                                      ("a PDF under the page floor is rejected", "good.pdf", False)]:
+            chk.FAILURES.clear()
+            chk.check_pdf(path, min_pages=4 if want_pass or "text" in name else 99)
+            got = not chk.FAILURES
+            ok = got == want_pass
+            print(("ok    " if ok else "BROKE ") + name +
+                  f"   [expected {'pass' if want_pass else 'fail'}, got {'pass' if got else 'fail'}]")
+            if not ok:
+                failures.append((name, ""))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    # Unit awareness: value alone is not enough.
+    tmp = tempfile.mkdtemp(prefix="cyclo-gate-")
+    try:
+        data = honest_numbers()
+        chk.set_root(tmp)
+        probes = [("produces 400 N of thrust", False), ("Envelope is 400 mm long.", True),
+                  ("A force of -10 N acts.", False), ("At least 10 N.", True),
+                  ("| 999 N |", False)]
+        for text, want_pass in probes:
+            (Path(tmp) / "t.md").write_text(text, encoding="utf-8")
+            chk.FAILURES.clear()
+            chk.check_numeric_coverage("t.md", data)
+            got = not chk.FAILURES
+            ok = got == want_pass
+            print(("ok    " if ok else "BROKE ") + f"coverage: {text!r}" +
+                  f"   [expected {'pass' if want_pass else 'fail'}, got {'pass' if got else 'fail'}]")
+            if not ok:
+                failures.append((text, ""))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
     print()
     if failures:
         print(f"{len(failures)} case(s) behaved wrongly")
         for name, out in failures:
             print(f"\n===== {name} =====\n{out}")
         return 1
-    print(f"All {len(CASES) + 3} gate self-tests behaved as expected.")
+    print(f"All {len(CASES) + 11} gate self-tests behaved as expected.")
     return 0
 
 

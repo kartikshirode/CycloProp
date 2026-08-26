@@ -25,7 +25,6 @@ import argparse
 import json
 import math
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -297,70 +296,99 @@ def recompute(data):
 
 # --------------------------------------------------- narrative numeric coverage
 
-# Numbers that legitimately appear in prose without living in numbers.json: the
-# competition requirements themselves, the rubric weights, and the published figures we
-# cite. Anything else carrying a physical unit has to be a value we actually computed.
-COVERAGE_ALLOW = {10.0, 2.5, 100.0, 5.0, 15.0}
-UNIT_NUM = re.compile(r"(?<![\w.])(\d+(?:\.\d+)?)\s*(N|W|kW|g|kg|rpm|mm|m/s|deg)(?![\w])")
+# A number in prose is only traceable if its VALUE and its DIMENSION both match something
+# we computed. Matching on value alone let "400 N" pass because 400 was a packaging
+# dimension in millimetres.
+#
+# Canonical units: force N, power W, mass g, length m, angle deg, torque Nm, speed m/s,
+# rotation rpm.
+KEY_UNITS = [("_Nm", ("torque", 1.0)), ("_ms", ("speed", 1.0)), ("_mm", ("length", 0.001)),
+             ("_kg", ("mass", 1000.0)), ("_deg", ("angle", 1.0)), ("_rpm", ("rot", 1.0)),
+             ("_N", ("force", 1.0)), ("_W", ("power", 1.0)), ("_g", ("mass", 1.0)),
+             ("_m", ("length", 1.0))]
+PROSE_UNITS = {"kW": ("power", 1000.0), "kg": ("mass", 1000.0), "mm": ("length", 0.001),
+               "Nm": ("torque", 1.0), "m/s": ("speed", 1.0), "rpm": ("rot", 1.0),
+               "deg": ("angle", 1.0), "N": ("force", 1.0), "W": ("power", 1.0),
+               "g": ("mass", 1.0), "m": ("length", 1.0)}
+
+# The one dimensioned constant that belongs in prose without being a computed value.
+COVERAGE_ALLOW = {(10.0, "force")}
+
+UNIT_NUM = re.compile(
+    r"(?<![\w.])(-?\d+(?:\.\d+)?)\s*(kW|kg|mm|Nm|m/s|rpm|deg|N|W|g|m)(?![\w/])")
 ALLOW_LINE = re.compile(r"<!--\s*allow\s*-->")
+ALLOW_TABLE = re.compile(r"<!--\s*allow-table\s*-->")
 
 
-def collect_values(node, out):
+def dim_of_key(key):
+    if key == "rpm":
+        return ("rot", 1.0)
+    for suffix, du in KEY_UNITS:
+        if key.endswith(suffix):
+            return du
+    return None
+
+
+def collect_dimensioned(node, out, key=""):
     if isinstance(node, dict):
-        for v in node.values():
-            collect_values(v, out)
+        for k, v in node.items():
+            collect_dimensioned(v, out, k)
     elif isinstance(node, list):
         for v in node:
-            collect_values(v, out)
+            collect_dimensioned(v, out, key)
     elif isinstance(node, (int, float)) and not isinstance(node, bool):
-        out.add(float(node))
+        du = dim_of_key(key)
+        if du:
+            out.add((float(node) * du[1], du[0]))
 
 
 def check_numeric_coverage(rel, data):
-    """Every number with a physical unit in the submission narrative has to trace to
-    numbers.json, be a competition constant, or be explicitly allowed on its line.
-    Scoped to the submission only: the design files are working documents, this is the
-    thing that gets evaluated. Ambiguous cases get an inline allow comment and a human
-    look at the final checkpoint."""
+    """Every number in the submission narrative that carries a physical unit has to match
+    a computed value in the same dimension, be the 10 N requirement, or be explicitly
+    opted out. Quoted blocks are exempt. Tables are exempt only when preceded by an
+    allow-table marker, so a fabricated number cannot hide in a table."""
     p = ROOT / rel
     if not p.is_file():
         return False
     known = set(COVERAGE_ALLOW)
-    collect_values(data, known)
-    rounded = set()
-    for v in known:
-        for nd in (0, 1, 2):
-            rounded.add(round(v, nd))
-    known |= rounded
+    collect_dimensioned(data, known)
 
-    unmatched = []
+    unmatched, table_exempt = [], False
     for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
         stripped = line.strip()
-        if stripped.startswith(">") or stripped.startswith("|") or ALLOW_LINE.search(line):
-            continue                      # quotations, tables of published data, opt-outs
+        if ALLOW_TABLE.search(line):
+            table_exempt = True
+            continue
+        is_table = stripped.startswith("|")
+        if not is_table and stripped:
+            table_exempt = False
+        if stripped.startswith(">") or ALLOW_LINE.search(line):
+            continue
+        if is_table and table_exempt:
+            continue
         for m in UNIT_NUM.finditer(line):
-            val = float(m.group(1))
-            if not any(abs(val - k) <= max(DISPLAY_TOL * abs(k), 1e-9) for k in known):
+            val, unit = float(m.group(1)), m.group(2)
+            dim, scale = PROSE_UNITS[unit]
+            canon = val * scale
+            if not any(d == dim and abs(canon - k) <= max(DISPLAY_TOL * abs(k), 1e-12)
+                       for k, d in known):
                 unmatched.append(f"{i}: {m.group(0)}")
     return report(not unmatched, f"{rel} narrative numbers all trace to numbers.json",
                   f"{len(unmatched)} untraced: " + "; ".join(unmatched[:5]) if unmatched else "")
 
 
-def check_pdf(rel):
+def check_pdf(rel, min_pages=4):
+    """Read with pypdf rather than shelling out to pdfinfo, which resolves to whatever
+    happens to be on PATH and is not guaranteed to be a working poppler build."""
     p = ROOT / rel
     if not report(p.is_file(), f"{rel} exists"):
         return False
     try:
-        out = subprocess.run(["pdfinfo", str(p)], capture_output=True, text=True, timeout=60)
-    except (OSError, subprocess.SubprocessError) as e:
-        return report(False, f"{rel} is a readable PDF", f"pdfinfo failed: {e}")
-    if out.returncode != 0:
-        return report(False, f"{rel} is a readable PDF", out.stderr.strip()[:120])
-    pages = 0
-    for line in out.stdout.splitlines():
-        if line.lower().startswith("pages:"):
-            pages = int(line.split(":", 1)[1].strip())
-    return report(pages >= 4, f"{rel} is a readable PDF with 4 or more pages",
+        import pypdf
+        pages = len(pypdf.PdfReader(str(p)).pages)
+    except Exception as e:
+        return report(False, f"{rel} is a readable PDF", f"{type(e).__name__}: {e}")
+    return report(pages >= min_pages, f"{rel} is a readable PDF with {min_pages}+ pages",
                   f"{pages} pages")
 
 
@@ -403,16 +431,24 @@ def week2(data):
                  "week2: mass envelope is a component list of 6 or more lines",
                  f"found {len(env) if isinstance(env, list) else type(env).__name__}")
     if isinstance(env, list) and env:
-        bad = []
+        bad, lighter = [], []
         for b in env:
             if not isinstance(b, dict):
                 bad.append(repr(b)[:30]); continue
+            vals = {}
             for f in ("nominal_g", "conservative_g"):
                 v = b.get(f)
                 if not isinstance(v, (int, float)) or isinstance(v, bool) or v <= 0:
                     bad.append(f"{b.get('item','?')}.{f}={v!r}")
+                else:
+                    vals[f] = float(v)
             if len(str(b.get("basis", "")).strip()) < MIN_BASIS_CHARS:
                 bad.append(f"{b.get('item','?')} basis too thin")
+            if len(vals) == 2 and vals["conservative_g"] < vals["nominal_g"]:
+                lighter.append(b.get("item", "?"))
+        ok &= report(not lighter,
+                     "week2: no envelope line is lighter in the conservative column",
+                     ", ".join(lighter[:5]) if lighter else "")
         ok &= report(not bad, "week2: every envelope line has nominal, conservative and basis",
                      "; ".join(bad[:5]) if bad else "")
         names = " ".join(str(b.get("item", "")).lower() for b in env if isinstance(b, dict))
@@ -451,16 +487,22 @@ def week2(data):
 
     # Feasibility envelope: the conservative mass must still clear T/W at conservative thrust.
     mc, tc = num(data, "results.mass_g_conservative"), r.get("thrust_N_conservative")
-    if mc and "mass_envelope_total_g" in r:
-        ok &= report(close(r["mass_envelope_total_g"], num(data, "results.mass_envelope_g"))
-                     if num(data, "results.mass_envelope_g") else True,
-                     "week2: stated envelope total matches the component lines")
-        ok &= report(mc >= r["mass_envelope_total_g"] * CONSERVATIVE_MASS_MIN_RATIO,
-                     f"week2: conservative mass is at least {CONSERVATIVE_MASS_MIN_RATIO:.0%} of nominal",
-                     f"{mc:.1f} g vs envelope {r['mass_envelope_total_g']:.1f} g")
-        ok &= report(close(mc, r["mass_envelope_conservative_g"], DISPLAY_TOL),
-                     "week2: conservative mass matches the conservative envelope lines",
-                     f"lines give {r.get('mass_envelope_conservative_g', 0):.1f} g")
+    ok &= require_positive(data, ["results.mass_envelope_g"],
+                           "week2: the nominal envelope total is stated")
+    if "mass_envelope_total_g" in r:
+        nom, cons = r["mass_envelope_total_g"], r["mass_envelope_conservative_g"]
+        ok &= report(close(num(data, "results.mass_envelope_g"), nom),
+                     "week2: stated envelope total matches the nominal lines",
+                     f"lines give {nom:.1f} g")
+        # The 5 percent rule applies to the recomputed column, not to a stated headline
+        # that tolerance could absorb the difference from.
+        ok &= report(cons >= nom * CONSERVATIVE_MASS_MIN_RATIO,
+                     f"week2: conservative lines total at least {CONSERVATIVE_MASS_MIN_RATIO:.0%} of nominal",
+                     f"{cons:.1f} g vs {nom:.1f} g, ratio {cons / nom:.3f}" if nom else "")
+        if mc:
+            ok &= report(close(mc, cons),
+                         "week2: conservative mass matches the conservative envelope lines",
+                         f"lines give {cons:.1f} g, stated {mc:.1f} g")
     if mc and tc:
         tw = tc / (mc / 1000.0 * G)
         ok &= report(tw > TW_MINIMUM,
@@ -502,6 +544,27 @@ def week2(data):
                      "; ".join(bad[:5]) if bad else "")
         ok &= report(len(set(radii)) == len(radii) and len(set(radii)) >= 3,
                      "week2: sweep radii are distinct", f"{sorted(set(radii))}")
+
+        rows = sorted(((float(x["radius_m"]), float(x["aero_power_W"])) for x in sweep
+                       if isinstance(x, dict)
+                       and isinstance(x.get("radius_m"), (int, float))
+                       and isinstance(x.get("aero_power_W"), (int, float))),
+                      key=lambda t: t[0])
+        if len(rows) >= 3:
+            falling = all(b[1] < a[1] for a, b in zip(rows, rows[1:]))
+            ok &= report(falling,
+                         "week2: power falls as radius rises, as a fixed shape family requires",
+                         "; ".join(f"{r_:.3f}m={p_:.1f}W" for r_, p_ in rows))
+            pr = [r_ * p_ for r_, p_ in rows]
+            spread = max(pr) / min(pr) if min(pr) else 999
+            ok &= report(spread <= 1.5,
+                         "week2: power times radius is roughly constant, so P scales near 1/R",
+                         f"spread {spread:.2f}")
+            chosen = num(data, "geometry.radius_m")
+            if chosen:
+                ok &= report(any(abs(chosen - r_) <= 1e-6 for r_, _ in rows),
+                             "week2: the chosen radius appears in the sweep",
+                             f"{chosen} not among {[r_ for r_, _ in rows]}")
 
     for rel, heads in [
         ("stage-1/design/01-configuration.md",
