@@ -45,7 +45,11 @@ Never run a loop longer than 7 to 8 hours. Past that the increment per cycle col
 
 ## Before week 2: the human gate
 
-Week H in the plan. Not a loop tick. Advisory before week 2, since the engineering does not depend on it, and a hard block on week 5, which cannot write a capability section or stage a submission without it. Register the team, check every member against the eligibility clause, fix the roster and what each person actually brings, line up the faculty supervisor, name who sends the submission, and state real weekly hours. These used to sit in week 5 with four days left, which is how a finished document ends up ineligible or unsent.
+Week H in the plan. Not a loop tick.
+
+Registration, the eligibility check, the roster and naming who sends are a **hard block on week 5**, which cannot write a real capability section or stage a submission without them. They are advisory before week 2, because the engineering does not depend on the roster. The faculty supervisor and the weekly-hours figure are wanted early but block nothing; they change what Stage 2 can promise and how much the schedule can be trusted.
+
+Do the eligibility check first regardless. An ineligible roster makes every other week wasted effort, and the clause bites at any stage, including after results.
 
 ## Week 2, next up
 
