@@ -23,7 +23,9 @@ Nothing is sized yet. Week 2 does that, and it is no longer blocked.
 
 ## What the problem statement settled
 
-**The 408 g budget is confirmed.** The PDF says the ratio is measured on "the complete cyclorotor module, including rotor blades, frame, pitch mechanism, motor, actuator, and associated mounting hardware". That was the one question holding up sizing and it is answered. 10 N at T/W above 2.5 puts the whole module under 408 g, and nothing on that list can be pushed onto an airframe to make the number work.
+**The thrust-to-weight basis is settled.** The PDF says the ratio is measured on "the complete cyclorotor module, including rotor blades, frame, pitch mechanism, motor, actuator, and associated mounting hardware". That was the one question holding up sizing. Nothing on that list can be pushed onto an airframe to make the number work.
+
+408 g follows from it, but only at exactly 10 N, and the requirement is at least 10 N. See the ceiling table below.
 
 **Stage 1 wants 7 items, not 5.** Every document here said five. The three that were wrong or missing: power as a named deliverable, thrust-to-weight as a stated result separate from the mass budget, and a team capability and execution plan.
 
@@ -41,16 +43,29 @@ Human checkpoint every 2 weeks. **The submission email is never sent by an agent
 
 Never run a loop longer than 7 to 8 hours. Past that the increment per cycle collapses.
 
+## Before week 2: the human gate
+
+Week H in the plan. Not a loop tick, and week 2 waits on it. Register the team, check every member against the eligibility clause, fix the roster and what each person actually brings, line up the faculty supervisor, name who sends the submission, and state real weekly hours. These used to sit in week 5 with four days left, which is how a finished document ends up ineligible or unsent.
+
 ## Week 2, next up
 
-Configuration, rotor sizing, thrust and power. The plan has the task list. The shape of the answer is already visible from week 1:
+Configuration, rotor sizing, thrust, power, and the feasibility envelope that decides whether this closes at all.
 
-- One larger rotor, not a cluster. Repeating a published MAV rotor to reach 10 N needs 485 g of rotor against a 408 g whole-module budget
-- Default to the Texas A&M UAV-scale optimum, meaning 3 blades at c/R 0.66, blade aspect ratio 4, NACA 0020, plus or minus 40 degrees, because solving that shape family for 10 N pins Reynolds near 100,000 and that sits inside the band they studied
-- Radius is then a free trade of rpm against envelope and structural mass. The table in literature.md runs 80 to 160 mm
-- Power is 152 to 161 W aerodynamic and 230 to 250 W electrical, not the 95 W this file used to carry
+- **Design thrust is a choice, not 10 N by default.** The mass ceiling moves with thrust: 408 g at 10 N, 489 g at 12 N, 530 g at 13 N. Every earlier document here treated 408 g as fixed, which it is not
+- Default to the Texas A&M UAV-scale optimum, meaning 3 blades at c/R 0.66, blade aspect ratio 4, NACA 0020, plus or minus 40 degrees, because solving that shape family pins Reynolds near 100,000 and that sits inside the band they studied
+- Radius trades rpm, envelope, structural mass **and power**. Within a fixed shape family at fixed thrust, aerodynamic power goes roughly as 1/R, so radius is not power-neutral
+- Bound the 0.607 thrust coefficient rather than adopting it. It comes from a different blade count, airfoil, solidity and Reynolds number
+- Single versus clustered has to be compared properly, on the module boundary. D2 only proved that copying one published rotor five times fails
 
-Geometry freezes at the end of week 2. Week 3 needs it fixed.
+**Geometry freezes only if the conservative case closes.** If a low coefficient and a high mass together miss T/W 2.5, that is a finding, not a reason to trim an assumption.
+
+## The number that decides this project
+
+Re-cut onto the competition's module boundary, the closest published designs give a module thrust-to-weight of **1.69 and 1.80**. We need 2.5, so the gap is 39 to 48 percent over the state of the art, and it is further from published work than anything else in the brief.
+
+The earlier "rotor is 37 to 48 percent of all-up weight" benchmark measured against whole-aircraft mass including battery and avionics, which the module boundary excludes. It was not comparable and should not be used for budgeting.
+
+This is survivable. Both published designs are 3 to 6 inch demonstrators at Reynolds numbers of 17,000 to 35,000, neither was trying to hit a T/W target, and fixed masses like bearings and fasteners amortise badly at 120 g and well at 400 g. But the argument has to be made with numbers in week 2, not assumed. Decision D8 and [stage-1/literature.md](stage-1/literature.md) carry the working.
 
 ## Open items
 
@@ -59,7 +74,7 @@ Geometry freezes at the end of week 2. Week 3 needs it fixed.
 - **Registration, team confirmation and the eligibility check** are human tasks and none are done. The eligibility clause disqualifies a whole team at any stage, including after results, so check every member before the team is fixed
 - **A faculty supervisor** is still needed, both for the Stage 2 CAE tool access and because the problem statement's preference list reads like a spec for the team capability section
 - [stage-1/organiser-email.md](stage-1/organiser-email.md) is mostly answered by the problem statement now and should be cut down or dropped
-- Round 2 of the plan cross-check, by Codex, has not run
+- Round 2 of the plan cross-check is done. 11 findings, 4 of them blockers, all addressed; the plan was restructured around them. Prompt kept at [_codex-review-prompt.md](_codex-review-prompt.md) if a round 3 is wanted
 
 ## Standing risk
 
