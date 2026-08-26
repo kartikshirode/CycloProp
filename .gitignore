@@ -23,3 +23,6 @@ out/
 # os
 Thumbs.db
 .DS_Store
+
+# weekly-loop supervisor state, must stay untracked
+.claude/weekly-loop-sentinel.json

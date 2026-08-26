@@ -1,0 +1,46 @@
+{
+  "_note": "Single source of truth for every number in the Stage 1 submission. Week 2 fills geometry, operating, performance and efficiency. Week 3 fills pitch. Week 4 fills mass_budget_g and results. Nulls fail the gates, so nothing here can be left as a placeholder. Each entry that is not derived should carry its basis in the sources block.",
+  "geometry": {
+    "radius_m": null,
+    "chord_m": null,
+    "span_m": null,
+    "blades": null,
+    "airfoil": null,
+    "pitch_amplitude_deg": null,
+    "pitch_axis_pct_chord": null
+  },
+  "operating": {
+    "rpm": null,
+    "tip_speed_ms": null,
+    "reynolds": null
+  },
+  "performance": {
+    "thrust_N": null,
+    "blade_area_coeff": null,
+    "aero_power_W": null,
+    "electrical_power_W": null
+  },
+  "efficiency": {
+    "transmission": null,
+    "motor": null,
+    "esc": null
+  },
+  "pitch": {
+    "mechanism": null,
+    "offset_m": null,
+    "phase_delay_deg": null,
+    "vector_range_deg": null,
+    "actuator_count": null,
+    "actuator_mass_g": null,
+    "side_force_tilt_deg": null
+  },
+  "mass_budget_g": [],
+  "results": {
+    "total_mass_g": null,
+    "weight_N": null,
+    "thrust_to_weight": null
+  },
+  "sources": {
+    "_note": "key -> measured | derived | assumed, with the paper or supplier where it applies"
+  }
+}
