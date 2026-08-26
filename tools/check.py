@@ -824,13 +824,26 @@ def week5(data):
 WEEKS = {1: week1, 2: week2, 3: week3, 4: week4, 5: week5}
 
 
-def highest_done():
-    best = 0
+def done_set():
+    out = set()
     if PROGRESS_DIR.is_dir():
         for p in PROGRESS_DIR.glob("week-*.md"):
             m = re.search(r"week-(\d+)", p.name)
             if m and DONE_MARKER in p.read_text(encoding="utf-8"):
-                best = max(best, int(m.group(1)))
+                out.add(int(m.group(1)))
+    return out
+
+
+def highest_done():
+    done = done_set()
+    best = max(done) if done else 0
+    # A gap means a progress file was removed or a week never finished. --all would
+    # otherwise silently stop short of it. The supervisor gates week N itself, so this
+    # only has to be visible, but it does have to be visible.
+    missing = [w for w in range(1, best + 1) if w not in done]
+    if missing:
+        report(False, "progress files run without gaps",
+               "no done marker for week(s) " + ", ".join(map(str, missing)))
     return best
 
 
