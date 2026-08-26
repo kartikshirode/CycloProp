@@ -1,0 +1,472 @@
+                         Techfest 2026-27
+
+        CycloProp: Advanced UAV Propulsion
+                               Challenge
+
+Overview:
+
+PUSHPAK Grand Challenge 2026: Towards Drone Excellence
+A National Innovation Challenge under the PUSHPAK: National Mission on Drone
+Technology.
+Funded by the Ministry of Electronics and Information Technology
+(MeitY), Government of India.
+Hosted by IIT Bombay.
+In Collaboration
+With Drone Centre, Department of Aerospace Engineering
+
+India is entering a new era of autonomous aerial systems, intelligent mobility,
+and drone-enabled digital infrastructure. The PUSHPAK Grand Challenge 2026 is
+a national platform created to identify and accelerate high-impact engineering
+solutions that can address real-world problems through drones, AI, robotics,
+sensing, communication systems, and autonomous technologies.
+This is not a conventional hackathon or idea competition. The Grand Challenge is
+designed to take promising technical concepts through evaluation, mentoring,
+prototyping, testing, and deployment-oriented development. Selected teams will
+work with researchers, domain experts, and industry mentors to transform
+innovative ideas into functional, field-ready prototypes.
+
+Grand Challenge 2, presented by Drone Centre at IIT Bombay Techfest 2026-27,
+is titled "CycloProp: Advanced UAV Propulsion Challenge"
+
+Guiding Professors / Mentors
+
+Grand Challenge 2 (CycloProp: Advanced UAV Propulsion Challenge) will be
+guided by the following faculty mentors from the collaborating institutes:
+
+                           Prof. Arnab Maity
+                             IIT Bombay ­ Aerospace Engineering
+
+                             Prof. Arnab Maity is an accomplished aerospace researcher and
+                             faculty member at IIT Bombay with strong expertise in dynamics,
+                             guidance, navigation and control of aerospace and autonomous
+                             systems. His key strength lies in combining rigorous theoretical
+                             foundations in control, estimation, optimization and system
+                             dynamics with their application to complex real-world aerospace
+                             problems. His research encompasses autonomous flight systems,
+                             UAV and drone technologies, guidance and navigation algorithms,
+                             adaptive and optimal control, and aerospace vehicle and
+                             propulsion-system control. With a strong analytical and
+                             systems-oriented approach, Prof. Maity contributes to the
+                             development of robust, intelligent and reliable autonomous
+                             platforms, particularly for applications where safety, precision and
+                             real-time decision-making are critical. His expertise makes him well
+                             positioned to contribute to advanced drone technology initiatives
+                             involving autonomous navigation, flight control, collision avoidance,
+                             multi-agent systems and next-generation UAV applications, while
+                             bridging fundamental research with technology development and
+                             mission-oriented outcomes.
+                           Dr. Dhwanil Shukla
+                             IIT Bombay ­ Department of Aerospace Engineering
+                             Dr. Dhwanil Shukla is an aerospace engineering researcher and
+                             faculty member in the Department of Aerospace Engineering at the
+                             Indian Institute of Technology Bombay (IIT Bombay). His work
+                             focuses on aerodynamics, particularly rotorcraft design and
+                             aerodynamics, low-speed aerodynamics, and experimental
+                             flow-diagnostic techniques. He earned his B.Tech. in Mechanical
+                             Engineering from IIT Gandhinagar and his Ph.D. in Aerospace
+                             Engineering from Georgia Institute of Technology. Dr. Shukla is a
+                             two-time recipient of the Vertical Flight Foundation Scholarship and
+                             received the President's Gold Medal at IIT Gandhinagar. Through his
+                             teaching and research, he contributes to the development of
+                             experimental aerodynamics and emerging rotorcraft and
+                             aerial-vehicle technologies.
+
+What Happens After the Grand Finale?
+
+The journey does not end with the finale.
+
+Prototype Development Support (Build & Test Phase)
+
+Selected winning teams (upto 5 teams) will be invited to participate in a
+dedicated Prototype Development Support Programme, beginning December
+2026 onwards. This post-challenge phase is specifically designed to bridge the
+gap between academic/start-ups innovation and real-world deployment.
+
+Build the Future of India's Drone Ecosystem
+
+If you have an idea that can redefine autonomous flight, intelligent sensing,
+aerial mobility, infrastructure automation, and the cybersecurity of drones, this is
+your opportunity.
+
+Design. Build. Test. Demonstrate.
+
+Join the PUSHPAK Grand Challenge 2026 and help create the next generation
+of indigenous drone technologies for India and the world.
+Objective:
+
+The objective of the Grand Challenge is to support the detailed, CAE-supported
+design of an indigenous cycloidal rotor module for drone applications.
+
+The challenge will focus on developing technically sound cyclorotor designs
+through kinematic, aerodynamic, structural, and integration-level analysis. The
+end goal of the Grand Challenge is not immediate prototype fabrication, but the
+identification of strong, build-ready cyclorotor designs.
+
+Challenge Question:
+
+Cycloidal rotors offer a promising alternative to conventional drone propulsion
+systems by enabling rapid thrust vectoring, improved maneuverability, and
+enhanced control authority. Unlike conventional propellers, cyclorotors can
+vary the direction of generated thrust through cyclic blade-pitch variation. This
+capability is useful for drones operating in confined spaces, near structures, in
+gusty environments, and in missions requiring precise attitude and orientation
+control.
+
+However, cyclorotor-based drone technology is not widely available in India.
+Indigenous development of this technology requires focused work on blade-pitch
+kinematics, rotor geometry, aerodynamic performance, structural design,
+lightweight mechanisms, power requirements, and manufacturability.
+
+The problem is to develop a detailed engineering design of a cycloidal rotor
+module suitable for drone applications. The design should target at least 10 N
+thrust and a thrust-to-weight ratio greater than 2.5. Teams must support their
+design through CAD models, kinematic analysis, aerodynamic calculations or
+simulations, structural assessment, mass estimation, material selection,
+actuation strategy, and an implementation plan.
+
+The expected submission is a detailed design package that demonstrates
+technical feasibility and readiness for prototype development. The final selected
+designs will be eligible for a subsequent build phase with support from IIT
+Bombay.
+
+Format of Competition:
+Stage 1: Problem Statement Announcement and Preliminary
+Design
+
+The Grand Challenge will begin with the announcement of the problem
+statement. Teams will be given one month to prepare and submit a preliminary
+design.
+
+The preliminary design submission should include:
+
+    1. Cyclorotor concept and configuration.
+    2. Preliminary rotor sizing.
+    3. Blade arrangement and pitch-control concept.
+    4. Estimated thrust and power requirement.
+    5. Estimated module weight and thrust-to-weight ratio.
+    6. Initial material and manufacturing approach.
+    7. Team capability and execution plan.
+
+No financial support will be provided at this stage. The objective of this stage is
+to identify technically promising teams for detailed design support.
+
+The organizing team will evaluate preliminary designs and shortlist up to 15
+teams. These teams will receive Rs. 1 lakh each to develop a complete,
+CAE-supported detailed design.
+
+Stage 2: Detailed Design Development
+
+During The detailed design phase period, shortlisted teams will prepare a full
+design package including:
+
+    1. CAD model of the complete cyclorotor module.
+    2. Kinematic model of the blade-pitch mechanism.
+    3. Aerodynamic analysis or simulation for thrust prediction.
+    4. Structural analysis of blades, supports, frame, shaft, and critical linkages.
+    5. Motor, actuator, bearing, and controller selection.
+    6. Material selection and mass estimate.
+    7. Thrust-to-weight ratio estimate.
+    8. Manufacturability and assembly plan.
+    9. Bill of materials and cost estimate.
+    10.Risk assessment and mitigation plan.
+    11.Build and test plan for the next phase.
+After submission of detailed design reports, the organizing team will evaluate the
+submissions. Up to 10 teams will be shortlisted for final presentation during
+IIT Bombay Techfest in December 2026.
+
+Stage 3: Detailed Design Evaluation
+
+During this stage, the evaluation committee may provide brief feedback to the
+shortlisted teams. Teams will be encouraged to improve their designs,
+simulations, documentation, and presentation before the final round. Travel or
+participation support may be provided to the shortlisted finalist teams, subject to
+the approved budget norms.
+
+Final Presentation: Techfest Evaluation
+
+The final round will be conducted during IIT Bombay Techfest in December 2026.
+Finalist teams will present their detailed design before the evaluation committee
+and respond to technical questions.
+
+The final evaluation will be based on:
+
+    1. Detailed design report.
+    2. CAD and CAE-supported technical evidence.
+    3. Final presentation.
+    4. Viva and technical defence.
+    5. Feasibility of implementation in the next phase.
+
+Up to 5 winning teams will be selected. These winners will receive awards or
+recognition grants and will be considered for further financial support, technical
+mentoring, and access to resources for prototype development and testing with
+IIT Bombay support.
+
+Evaluation Criteria
+
+Criterion                                                     Weight
+
+Feasibility of achieving 10 N thrust                          15%
+
+Feasibility of achieving thrust-to-weight ratio greater than  15%
+2.5                                                           15%
+Kinematic design of blade-pitch and thrust-vectoring
+mechanism
+Aerodynamic analysis or simulation quality               15%
+
+Structural design and strength assessment                15%
+
+Manufacturability, material selection, and cost realism  10%
+
+CAD quality, integration readiness, and packaging        5%
+
+Presentation, viva, and technical clarity                10%
+
+Total                                                    100%
+
+The final score will be based on the detailed design report, CAE-supported
+evidence, final presentation, and viva during the Techfest evaluation.
+
+The target design requirements are:
+
+Parameter         Target Requirement
+Thrust capacity   At least 10 N
+Thrust-to-weight  Greater than 2.5
+ratio
+Rotor type        Cycloidal rotor with blade-pitch variation
+Thrust vectoring  Demonstrated through kinematic and performance
+                  analysis
+Design support    CAD and CAE-supported design
+Analysis          Kinematic, aerodynamic, and structural simulations
+requirement
+Final outcome     Build-ready cyclorotor design suitable for future
+                  prototype development
+
+The thrust-to-weight ratio shall be estimated based on the complete cyclorotor
+module, including rotor blades, frame, pitch mechanism, motor, actuator, and
+associated mounting hardware.
+
+Team Specification and Eligibility:
+
+Expected Target Audience (Upto 5 members per team)
+The Grand Challenge is intended for teams capable of developing a technically
+rigorous cyclorotor design supported by CAD, simulation, and engineering
+analysis.
+
+The expected target audience includes:
+
+    1. Academic institutions working in UAVs, rotorcraft, aerodynamics, robotics,
+         controls, or mechanical design.
+
+    2. Faculty-led student teams with strong design, simulation, and prototyping
+         capability.
+
+    3. Startups developing drone platforms, propulsion systems, robotics
+         hardware, or UAV subsystems.
+
+    4. MSMEs with capability in precision fabrication, lightweight structures,
+         electric propulsion, embedded systems, or drone components.
+
+    5. Academia­startup­industry consortia interested in developing advanced
+         indigenous UAV technologies.
+
+Preference may be given to teams with demonstrated capability in one or more
+of the following areas:
+
+    1. Rotor design and unsteady aerodynamics.
+    2. CAD modelling and mechanical design.
+    3. Kinematic analysis of mechanisms.
+    4. CFD, FEA, multibody dynamics, or other CAE tools.
+    5. Lightweight structures and material selection.
+    6. Motor, actuator, and control-system selection.
+    7. UAV subsystem integration and testing.
+
+Important Eligibility Restriction
+
+Project staff, research staff, consultants, interns, and other personnel directly
+engaged with the PUSHPAK Project, and Drone Centre, or the organizing/host
+institutions in connection with the Grand Challenge are NOT eligible to
+participate in the Grand Challenge.
+
+This restriction applies whether such personnel participate individually or as part
+of a team.
+
+Any team found to include an ineligible participant may be disqualified at any
+stage of the Grand Challenge, including after selection or announcement of
+results. The organizers reserve the right to verify the eligibility of participants at
+any stage and their decision in this regard shall be final.
+
+Timeline and Key Dates:
+Stage            Timeline(s)         Participation Brief Prize / Reward /
+                                                                       Support
+
+Grand            22 August 2026      PUSHPAK Grand           None
+
+Challenge                            Challenge        2026
+
+Announcement                         opens            for
+
+                                     registrations across
+
+                                     India. Teams of up
+
+                                     to 5 members may
+
+                                     register         and
+
+                                     participate.
+
+Stage 1:     : Work Time: 22 All registered teams INR 1 Lakh per
+Preliminary
+Design           August ­ 27 are eligible. Submit qualifying team after the
+Submission
+                 September 2026      a preliminary design announcement of results
+
+                 Submission          of the cyclorotor of Stage 1
+
+                 Deadline: On or module. (Upto 15
+
+                 Before          27 Teams shall qualify
+
+                 September 2026      for next stage)
+
+                 Results
+
+                 Announcement: 02
+
+                 October 2026
+
+Stage        2:  Work Time: 03       Shortlisted teams       Domestic Travel &
+                 October ­ 02                                Accommodation support
+Detailed         December 2026       develop and submit      as per guidelines of IIT
+                 Submission                                  Bombay to be shared at
+Design           Deadline: On or     a          complete,    a later stage for
+                 Before 02 December                          qualifying team
+Development      2026                CAE-supported
+                 Results
+                 Announcement: 06    detailed      design
+                 December 2026
+                                     package for the
+
+                                     cyclorotor module.
+
+                                     (Upto 10 Teams
+
+                                     shall qualify for next
+
+                                     stage)
+Stage      3: 16 ­ 18 December Finalist  teams Zenith ­ INR 3 Lakh,
+Grand            present                 and Horizon ­ INR 2.5
+Challenge  2026
+Finale           demonstrate their Lakhs, Vector ­ INR 2
+                 detailed                design Lakhs, Ascent (x2) ­
+
+                 before                  the INR 1.5 Lakh, for the
+
+                 evaluation              winning team after the
+
+                 committee at IIT announcement of results
+                 Bombay Techfest. at the TechFest
+                 (Upto 5 Winning
+
+                 Teams gets chance
+
+                 to enter Post-Grand
+
+                 Challenge Stage)
+
+Registration & Submission
+
+     Participants must register for the PUSHPAK Grand Challenge on the official
+         Techfest website: techfest.org > Competitions > PUSHPAK Grand
+         Challenge > Register at www.techfest.org/competitions
+
+     All submissions (Stage 1 and Stage 2) are to be made via email to
+         [pushpak_gc2026@aero.iitb.ac.in] -- no submission links are used; every
+         stage is handled entirely through email correspondence.
+
+Prize Money
+
+Stage 1 (Preliminary Design Verification): INR 1 Lakh per qualifying team after
+the announcement of results of Stage 1.
+Stage 2 (Technical Challenge): Domestic Travel & Accommodation support as per
+guidelines of IIT Bombay to be shared at a later stage for qualifying teams.
+Stage 3 (Grand Challenge Finale):
+Zenith: INR 3 Lakh
+Horizon: INR 2.5 Lakhs
+Vector: INR 2 Lakhs
+Ascent (x2): INR 1.5 Lakh
+for winning teams after the announcement of results at the TechFest.
+Note: At the end of the challenge, up to 5 winning teams will be selected. These
+teams will be considered for further support, funding, mentoring, and access to
+resources for building and testing their cyclorotor designs in the next phase.
+
+The process regarding the disbursement of prize money will be communicated at
+a later stage. Participating teams are requested to regularly check the official
+website and their registered email accounts for updates.
+
+Disclaimer:
+
+Organizer's Rights: The organizers reserve the right to modify, extend,
+postpone, suspend, or cancel the Grand Challenge, or any stage thereof, at their
+discretion. Any such changes will be communicated through the official
+communication channels of the Grand Challenge.
+
+Eligibility & Participation: Participation in the Grand Challenge is subject to
+the eligibility criteria, rules, guidelines, and submission requirements specified
+by the organizers. Submission of an entry does not guarantee selection for any
+subsequent stage or award.
+
+Evaluation: All submissions will be evaluated by the designated evaluation
+committee based on the criteria specified for the respective stage. The decision
+of the evaluation committee shall be final and binding, and no correspondence
+regarding the evaluation or ranking will be entertained.
+
+Technical Responsibility: Participants are solely responsible for the accuracy,
+completeness, originality, technical feasibility, safety, and performance of their
+submissions. Selection or recognition of a submission by the organizers does not
+constitute certification, approval, or endorsement of the proposed technology for
+operational deployment.
+
+Safety & Compliance: Participants shall ensure that their proposed solutions
+and demonstrations comply with all applicable laws, regulations, standards,
+aviation requirements, safety protocols, and permissions applicable in India.
+Participants shall be responsible for obtaining any permissions, approvals, or
+clearances required for testing or demonstration.
+
+Intellectual Property: Participants shall ensure that their submissions do not
+infringe upon any third-party intellectual property rights. Participants retain
+ownership of their intellectual property unless otherwise specifically agreed
+under the terms of the Grand Challenge. Any use, disclosure, licensing, or
+transfer of intellectual property arising from the Grand Challenge shall be
+governed by the applicable terms and agreements communicated by the
+organizers.
+Confidentiality: Participants should clearly identify any information submitted
+that they consider confidential or proprietary. Participants are responsible for
+ensuring that they do not disclose information belonging to third parties without
+appropriate authorization.
+
+Prizes & Recognition: Prizes, awards, certificates, or other forms of recognition
+are subject to fulfillment of the applicable eligibility and evaluation requirements.
+The organizers reserve the right to withhold or modify an award where no
+submission meets the required standards.
+
+Expenses: Unless expressly stated otherwise, participation in the Grand
+Challenge, including development, testing, travel, accommodation, equipment,
+and demonstration-related expenses, shall be borne by the participating teams.
+
+Liability: The organizers, host institutions, funding agencies, partners, mentors,
+evaluators, and their respective personnel shall not be liable for any loss,
+damage, injury, delay, technical failure, or other consequence arising from
+participation in the Grand Challenge, except to the extent required by applicable
+law.
+
+Force Majeure: The organizers shall not be responsible for any delay,
+modification, suspension, or cancellation resulting from circumstances beyond
+their reasonable control, including natural disasters, technical failures, regulatory
+changes, government directives, or other unforeseen events.
+
+Acceptance of Terms: By registering for or participating in the Grand
+Challenge, participants acknowledge that they have read, understood, and
+agreed to abide by the applicable rules, guidelines, terms, and conditions of the
+Grand Challenge.
+
