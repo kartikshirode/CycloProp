@@ -89,13 +89,13 @@ Covers required items 1, 2 and 4, and settles whether the design closes at all.
 3. **Bound the thrust coefficient, do not just adopt it.** The 0.607 anchor comes from a 4-blade NACA 0010 rotor at c/R 0.433 and Re near 35,000. Moving it to 3 blades, NACA 0020, c/R 0.66 and Re near 100,000 changes blade count, solidity, airfoil and Reynolds number all at once. Derive a defensible low value from the spread in the published data and record both. Benedict's own results give the direction of several of these effects, so use them rather than guessing a percentage.
 4. **Sweep radius against power, not just rpm.** Within a fixed shape family at fixed thrust, tip speed goes as 1/R, so aerodynamic power goes roughly as 1/R. Radius changes the motor, the thermal load and the mass, not only the envelope. Compute power for at least three candidate radii and record the sweep.
 5. **Compute thrust two ways** and report the gap. Coefficient scaling, plus a momentum estimate with its closure assumption stated. A momentum calculation without an independent closure is a bound, not a second opinion, and should be labelled as one.
-6. **Build the whole-module mass envelope now, at line-item level but coarse.** Blades, frame, pitch mechanism, motor, actuator, mounting. Week 4 refines it. Week 2 only has to answer whether it can close.
+6. **Build the whole-module mass envelope now, at line-item level but coarse.** Blades, frame, pitch mechanism, motor, actuator, mounting. Week 4 refines it. Week 2 only has to answer whether it can close. Give each line a distinct name, because every week 4 budget line has to point back at one of them by name.
 7. **Pick the design thrust** using the ceiling table above, and say why.
 8. **Add rotor tare, transmission, actuator and controller draw** to module power. The published power loading figures are blade aerodynamic power on a rig whose structure power was a tenth of the total, so tare is not already included.
 
 ### Done when
 
-`python tools/check.py --week 2` exits 0. Beyond the file and heading checks it recomputes tip speed, Reynolds, thrust and conservative thrust from geometry, requires the conservative coefficient to actually be lower than the nominal one, requires **both** the nominal and the conservative recomputed thrust to clear 10 N, requires the conservative mass at conservative thrust to still clear T/W 2.5, and requires the power sweep to cover at least three radii.
+`python tools/check.py --week 2` exits 0. Beyond the file and heading checks it recomputes tip speed, Reynolds, thrust and conservative thrust from geometry, requires the conservative coefficient to actually be lower than the nominal one, requires **both** the nominal and the conservative recomputed thrust to clear 10 N, requires the conservative mass at conservative thrust to still clear T/W 2.5, and requires the power sweep to cover at least three radii. The sweep also has to pass through the design point: the row at the chosen radius must carry the same aerodynamic power the rest of the week uses, or the curve is a different curve that happens to have the right shape.
 
 ### Decision gate
 
@@ -147,7 +147,7 @@ This is the heaviest week, but the geometry and mechanism are frozen by now, so 
 
 1. **Load cases and strength.** Centrifugal load on the blade at design speed, blade root bending from aerodynamic and inertial load, shaft torque from the power and speed already fixed, and the pitch link load. Analytical, closed form, with the assumptions written down. No FEA, and none is expected at Stage 1.
 2. **Margins.** Each load case against an allowable for the chosen material, with a stated safety factor. Margins below 1.5 fail the gate.
-3. **Component mass budget.** Every line the problem statement names, plus bearings, shaft, hub, ESC and fasteners. Each line carries a basis, meaning a measured analogue, a material calculation or a supplier figure. The gate rejects one-word bases.
+3. **Component mass budget.** Every line the problem statement names, plus bearings, shaft, hub, ESC and fasteners. Each line carries a basis, meaning a measured analogue, a material calculation or a supplier figure. The gate rejects one-word bases. Each line also names the week 2 envelope line it refines, through a `refines` field holding that line's name. Several budget lines may refine one envelope line, which is the normal case: a coarse "motor and drive" turns into a motor, a hub, a shaft and bearings.
 4. **Compute T/W nominal and conservative** and state the margin against 2.5.
 5. **Material selection tied to the load cases**, not chosen first and justified after.
 6. **Manufacturing route per part**, with Indian sourcing where it exists, since indigenous development is the point of the programme.
@@ -156,6 +156,8 @@ This is the heaviest week, but the geometry and mechanism are frozen by now, so 
 ### Done when
 
 `python tools/check.py --week 4` exits 0, cumulatively. It sums the mass lines and rejects any that vanish or carry a thin basis, recomputes weight and both T/W values, requires the conservative mass not to be lighter than the budget, recomputes the centrifugal load from blade mass, speed and radius, and requires both structural margins to be at least 1.5.
+
+Continuity with week 2 is checked per component, not just on the total. Each envelope line has to stay within 25 percent of what the budget lines refining it add up to, and no envelope line may end up with nothing refining it. Comparing totals alone let the whole budget move into the blades while every other component shrank to the smallest legal line, because the sum came out the same.
 
 ### Decision gate
 
