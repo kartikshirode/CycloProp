@@ -4,28 +4,46 @@ Execution plan, one week per loop tick. Requirements live in [../context.md](../
 
 **Deadline 27 September 2026, submitting 26 September.** Email to pushpak_gc2026@aero.iitb.ac.in.
 
+Revised 26 August after the round 2 review. What changed: mass and power feasibility moved into week 2 so geometry no longer freezes before anyone knows the module can close, two rubric criteria that had no home got sections, and the human steps that were sitting unscheduled at the end got a gate of their own before week 2 starts.
+
 ## How this plan is executed
 
 Driven by the `weekly-loop` skill under `/loop`. One tick runs one week through a fresh agent, then the supervisor runs the gates in its own shell. Config at [../.claude/weekly-loop.md](../.claude/weekly-loop.md).
 
 Rules that make the weeks machine-checkable:
 
-- Every number the submission states lives in `stage-1/design/numbers.json` and nowhere else. Prose cites it, never restates it from memory. The gate recomputes the arithmetic and fails on any disagreement
-- Each week writes its own final prose into its own file under `stage-1/design/`. Week 5 stitches, it does not write from scratch
-- A week is done when `python tools/check.py --week N` exits 0, not when the agent says so
-- Every week ends with a go or no-go decision recorded in `stage-1/decisions.md`, with the fallback already written down before the week starts
+- Every number the submission states lives in `stage-1/design/numbers.json` and nowhere else. Prose cites it through a `## Numbers used` block. The gate recomputes the arithmetic and fails on disagreement
+- **Hard limits are applied to recomputed values, never stored ones.** Thrust comes from the geometry, weight from the mass lines, T/W from both. Writing a flattering headline number does nothing
+- Weeks are cumulative. `--week 4` reruns weeks 1 to 3, so week 4 cannot pass by breaking week 2
+- A week is done when `python tools/check.py --week N` exits 0
+- The gates have their own test suite at `tools/test_gates.py`, which builds throwaway trees and checks that an honest design passes and eleven specific attacks fail. Run it if you change `check.py`
+
+## The target is not exactly 10 N
+
+The requirement is thrust **at or above** 10 N with T/W above 2.5. Those two together set the mass ceiling, and the ceiling moves with thrust:
+
+| Design thrust | Mass ceiling for T/W > 2.5 |
+| --- | --- |
+| 10 N | 408 g |
+| 12 N | 489 g |
+| 13 N | 530 g |
+
+The old plan treated 408 g as a fixed requirement, which pinned the design to the most constrained corner of the feasible region. It is not a requirement. It is what the ceiling happens to be when thrust is exactly 10 N.
+
+Designing above 10 N is therefore a real lever, though not a free one, because the margin the design carries eats into what the extra thrust buys. Week 2 picks the design thrust deliberately and says why.
 
 ## Calendar
 
-| Week | Dates | Days | Covers required items |
+| Week | Dates | Days | Covers |
 | --- | --- | --- | --- |
 | 1 | 26 Aug to 1 Sep | 7 | Requirements and literature. Done |
-| 2 | 2 to 8 Sep | 7 | 1 configuration, 2 rotor sizing, 4 thrust and power |
-| 3 | 9 to 15 Sep | 7 | 3 blade arrangement and pitch control, plus thrust vectoring |
-| 4 | 16 to 22 Sep | 7 | 5 module weight and T/W, 6 material and manufacturing |
-| 5 | 23 to 26 Sep | 4 | 7 team capability and execution plan, assembly, submit |
+| H | by 1 Sep | human | Registration, eligibility, roster, tool access |
+| 2 | 2 to 8 Sep | 7 | Items 1, 2, 4. Configuration, sizing, thrust, power, feasibility envelope |
+| 3 | 9 to 15 Sep | 7 | Item 3 plus thrust vectoring and packaging |
+| 4 | 16 to 22 Sep | 7 | Items 5, 6 plus structural loads and strength |
+| 5 | 23 to 26 Sep | 4 | Item 7, assembly, PDF, staged for a human to send |
 
-Week 5 is the short one and it carries the deadline, so weeks 2 to 4 do not get to slip into it. Each of those has a fallback below that trades depth for schedule rather than pushing work forward.
+Week 5 is the short one and it carries the deadline, so weeks 2 to 4 do not get to slip into it. Each has a fallback below that trades depth rather than pushing work forward.
 
 Runs alongside UAV-X. Week 3 collides with the UAV-X comms layer. If one has to give, this one gives, because writing compresses under pressure and debugging does not.
 
@@ -33,124 +51,145 @@ Runs alongside UAV-X. Week 3 collides with the UAV-X comms layer. If one has to 
 
 ## Week 1: requirements and literature
 
-**Status: done, 26 August 2026.**
-
-Delivered [../context.md](../context.md) and [literature.md](literature.md). Recovered the official problem statement PDF, which nobody had found before, and it moved several things:
-
-- Stage 1 wants 7 items, not 5. Power, T/W as a stated result, and a team capability section were all missing from the old plan
-- Thrust vectoring is a requirement carrying 15%, and had never been mentioned in this repo
-- The thrust-to-weight ratio is measured on the module, quoted in the PDF, so the 408 g budget is confirmed and sizing is unblocked
-- Eight evaluation criteria, not nine, summing to 100
-
-Progress at `stage-1/progress/week-1.md`.
+**Status: done, 26 August 2026.** Delivered [../context.md](../context.md) and [literature.md](literature.md), and recovered the official problem statement. Progress at `stage-1/progress/week-1.md`.
 
 ---
 
-## Week 2: configuration, rotor sizing, thrust and power
+## Week H: the human gate, before week 2 starts
 
-Covers required items 1, 2 and 4.
+Not a loop tick. These are things an agent must not do and the plan previously left sitting in week 5 with four days to go.
 
-**Scope files:** `stage-1/design/01-configuration.md`, `stage-1/design/02-rotor-sizing.md`, `stage-1/design/04-thrust-and-power.md`, `stage-1/design/numbers.json`, `stage-1/decisions.md`
+1. **Register** the team on techfest.org under Competitions, then PUSHPAK Grand Challenge
+2. **Check eligibility for every member.** Nobody attached to the PUSHPAK Project, the Drone Centre, or the organising and host institutions. This disqualifies an entire team at any stage, including after results are announced
+3. **Fix the roster** and collect what each member actually brings, against the preference list in the problem statement. Week 5 writes the section around real names and real capability, and cannot invent either
+4. **Line up the faculty supervisor**, and with them the Stage 2 CAE tool access
+5. **Name who sends the submission** on 26 September, and confirm they will be reachable
+6. **State real weekly hours available.** The schedule is unvalidated without this and it is the cheapest thing here to fix
+
+**Blocking.** Items 1, 2 and 3 gate week 5, and item 2 gates everything, since an ineligible roster makes the whole effort void. If the roster is not fixed by 1 September, week 2 still runs, because the engineering does not depend on it.
+
+---
+
+## Week 2: configuration, sizing, thrust, power, feasibility
+
+Covers required items 1, 2 and 4, and settles whether the design closes at all.
+
+**Scope files:** `stage-1/design/01-configuration.md`, `02-rotor-sizing.md`, `04-thrust-and-power.md`, `numbers.json`, `stage-1/decisions.md`
 
 ### Tasks
 
-1. **Fix the configuration.** Single cyclorotor module, or several small ones. The literature already answers this: repeating a published MAV rotor to reach 10 N needs 485 g of rotor against a 408 g whole-module budget, so it has to be one larger rotor. Write the argument properly, with the aerodynamic half as well as the mass half, since non-dimensional thrust holds while torque and power fall as Reynolds number rises.
-2. **Choose the blade shape family.** Two candidates, both from measured work. The Texas A&M UAV-scale optimum is 3 blades at c/R 0.66, blade aspect ratio 4, NACA 0020, plus or minus 40 degrees. Benedict's MAV optimum is 4 blades at c/R 0.433, NACA 0015, asymmetric 45 at top and 25 at bottom, axis at 25 percent chord. Our Reynolds number lands in the Texas A&M band, so that is the default and the burden of proof is on choosing otherwise.
-3. **Pick the radius.** Solving the shape family for 10 N pins Reynolds near 100,000 whatever radius is chosen, so radius is a free trade of rpm against envelope and structural mass. Take the table in [literature.md](literature.md), add an estimated blade mass column, and choose. Larger radius means lower rpm and lower tip speed but more bending moment and more material.
-4. **Compute thrust two ways.** Blade-area coefficient scaling off Benedict's measured quad rotor, and a streamtube momentum estimate. Report both and the gap between them. One method agreeing with itself is not a check.
-5. **Compute power.** Aerodynamic power from measured power loading at the high-thrust end, then the electrical number through transmission, motor and ESC efficiencies, each stated separately with a source or a justified assumption.
-6. **Write `numbers.json`.** Every fixed quantity, with units, and a `source` field on each saying whether it is measured, derived or assumed.
+1. **Compare single against clustered properly.** Decision D2 currently rests on the observation that copying one published rotor five times needs 485 g of rotor alone. That rules out copying, not every multi-rotor layout. Compare a single larger rotor against a redesigned two and three rotor cluster on the same component boundary, the same coefficient assumptions and the same power model, then freeze the configuration. Use the module boundary the problem statement defines, not published all-up aircraft mass, which includes battery and avionics we are not carrying.
+2. **Choose the blade shape family.** Texas A&M UAV-scale optimum is 3 blades at c/R 0.66, blade aspect ratio 4, NACA 0020, plus or minus 40 degrees. Benedict's MAV optimum is 4 blades at c/R 0.433, NACA 0015, asymmetric 45 top and 25 bottom. Our Reynolds number lands in the Texas A&M band, so that is the default.
+3. **Bound the thrust coefficient, do not just adopt it.** The 0.607 anchor comes from a 4-blade NACA 0010 rotor at c/R 0.433 and Re near 35,000. Moving it to 3 blades, NACA 0020, c/R 0.66 and Re near 100,000 changes blade count, solidity, airfoil and Reynolds number all at once. Derive a defensible low value from the spread in the published data and record both. Benedict's own results give the direction of several of these effects, so use them rather than guessing a percentage.
+4. **Sweep radius against power, not just rpm.** Within a fixed shape family at fixed thrust, tip speed goes as 1/R, so aerodynamic power goes roughly as 1/R. Radius changes the motor, the thermal load and the mass, not only the envelope. Compute power for at least three candidate radii and record the sweep.
+5. **Compute thrust two ways** and report the gap. Coefficient scaling, plus a momentum estimate with its closure assumption stated. A momentum calculation without an independent closure is a bound, not a second opinion, and should be labelled as one.
+6. **Build the whole-module mass envelope now, at line-item level but coarse.** Blades, frame, pitch mechanism, motor, actuator, mounting. Week 4 refines it. Week 2 only has to answer whether it can close.
+7. **Pick the design thrust** using the ceiling table above, and say why.
+8. **Add rotor tare, transmission, actuator and controller draw** to module power. The published power loading figures are blade aerodynamic power on a rig whose structure power was a tenth of the total, so tare is not already included.
 
 ### Done when
 
-`python tools/check.py --week 2` exits 0. That checks the three prose files exist with their required headings, `numbers.json` parses and carries every key in the week 2 schema, the thrust arithmetic reproduces from the stored geometry, the Reynolds number reproduces, and no prose file states a number that contradicts `numbers.json`.
+`python tools/check.py --week 2` exits 0. Beyond the file and heading checks it recomputes tip speed, Reynolds, thrust and conservative thrust from geometry, requires the conservative coefficient to actually be lower than the nominal one, requires **both** the nominal and the conservative recomputed thrust to clear 10 N, requires the conservative mass at conservative thrust to still clear T/W 2.5, and requires the power sweep to cover at least three radii.
 
 ### Decision gate
 
-Radius, blade count, chord, span, airfoil, pitch amplitude and rpm are all frozen at the end of this week and recorded in `stage-1/decisions.md`. Later weeks may not quietly reopen them; changing one is a numbered decision entry with a reason.
+**Geometry freezes only if the conservative case closes.** If the conservative coefficient and the conservative mass together fail T/W 2.5, geometry does not freeze and the week has produced a finding rather than a design.
 
-**Fallback if the week overruns:** drop the second thrust method and ship the coefficient scaling alone, flagged in the text as single-method. Do not push the freeze into week 3, because week 3's kinematics need fixed geometry.
+**Fallback, in order:** raise design thrust toward the ceiling table; move to a larger radius, which lowers power and rpm; revisit the shape family. If none of the three closes, stop and report. A Stage 1 submission that honestly reports the module is infeasible at this scale is worth more than one that reaches 2.51 by rounding, and the reviewers know the literature better than we do.
+
+**Carry two candidate radii forward** rather than one, so week 4 has somewhere to go without reopening week 3.
 
 ---
 
-## Week 3: blade arrangement, pitch control, thrust vectoring
+## Week 3: pitch, thrust vectoring, packaging
 
-Covers required item 3, and the thrust-vectoring requirement that carries 15%.
+Covers required item 3, the thrust-vectoring requirement at 15%, and the integration half of the 5% packaging criterion.
 
-**Scope files:** `stage-1/design/03-pitch-and-vectoring.md`, `stage-1/design/numbers.json`, `stage-1/decisions.md`
+**Scope files:** `stage-1/design/03-pitch-and-vectoring.md`, `09-packaging-and-integration.md`, `numbers.json`, `stage-1/decisions.md`
 
 ### Tasks
 
-1. **Choose active or passive, and justify it.** Passive four-bar is the default on mass evidence, since every flying cyclocopter in the read literature uses one and none use per-blade servos. Say what the choice costs as well as what it buys.
-2. **Work the four-bar kinematics.** Link lengths, pitching axis location, and the offset distance that produces the chosen amplitude. Produce blade pitch angle against azimuth as a table of computed values, not a sketch.
-3. **Show the phase delay.** The mechanism does not put peak pitch exactly at 90 and 270 degrees. Quantify the delay for our geometry, because it is the origin of the side force and pretending it is not there would be caught in a viva.
-4. **Thrust vectoring, quantified.** Offset magnitude sets amplitude, offset direction sets phase, and phase steers the vector. Give the achievable vector range in degrees and what actuates it. This is the section that answers criterion 3, so it gets the most care.
-5. **Handle the side force.** Predict the resultant tilt for our geometry, benchmark it against the 30 degrees Benedict measured, and state the correction, which is rotating the mechanism offset by the same angle.
-6. **Select the actuators** for amplitude and phase, with masses, and hand those masses to week 4.
+1. **Choose active or passive and justify it.** Passive four-bar is the default on mass evidence, since every flying cyclocopter in the read literature uses one and none use per-blade servos.
+2. **Work the four-bar kinematics.** Link lengths, pitching axis, and the offset that produces the chosen amplitude, for the frozen geometry.
+3. **Produce the pitch schedule** as computed values across the revolution, not a sketch.
+4. **Quantify the phase delay.** Peak pitch does not land exactly at 90 and 270 degrees, and that is where the side force comes from.
+5. **Thrust vectoring, quantified.** Offset magnitude sets amplitude, offset direction sets phase, phase steers the vector. Give the achievable range in degrees and what actuates it. This answers a 15% criterion, so it gets the most care in the week.
+6. **Handle the side force.** Predict the resultant tilt, benchmark against the 30 degrees Benedict measured, and state the correction.
+7. **Package envelope and interfaces.** Overall dimensions, mounting scheme and mount count, drivetrain arrangement from motor through transmission to shaft, and the electrical and mechanical interfaces the module presents to an airframe. Dimensioned sketches and a table, no CAD.
 
 ### Done when
 
-`python tools/check.py --week 3` exits 0. Checks the file exists with its required headings, the pitch schedule table has at least 24 azimuth rows, the actuator masses are present in `numbers.json`, and the stated vector range is a number rather than a claim.
+`python tools/check.py --week 3` exits 0, cumulatively with weeks 1 and 2. Checks both files, requires the pitch schedule to have 24 or more **distinct** azimuths spanning at least 300 degrees, and requires a non-zero actuator count and a real package envelope.
 
 ### Decision gate
 
-Active or passive is frozen here, and the actuator count and mass go into the mass budget. **Fallback if the week overruns:** ship the kinematics and the vectoring argument, defer the phase-delay quantification to a stated Stage 2 item. Do not defer the vectoring section itself, since it is 15 percent of the score.
+Active or passive freezes here, and actuator count and mass go to week 4.
+
+**Fallback:** ship the kinematics, the vectoring argument and the envelope; defer the phase-delay quantification to a stated Stage 2 item. Do not defer the vectoring section or the envelope, since between them they carry 20% of the rubric.
 
 ---
 
-## Week 4: mass budget, thrust-to-weight, materials, manufacturing
+## Week 4: structure, mass, thrust-to-weight, materials, manufacturing
 
-Covers required items 5 and 6.
+Covers required items 5 and 6, plus the 15% structural criterion that had no section before.
 
-**Scope files:** `stage-1/design/05-mass-and-tw.md`, `stage-1/design/06-materials-and-manufacturing.md`, `stage-1/design/numbers.json`, `stage-1/decisions.md`
+**Scope files:** `stage-1/design/05-mass-and-tw.md`, `06-materials-and-manufacturing.md`, `08-structure-and-loads.md`, `numbers.json`, `stage-1/decisions.md`
+
+This is the heaviest week, but the geometry and mechanism are frozen by now, so it is execution rather than exploration. The three files run in order, because loads size the structure, the structure sets the mass, and the mass decides T/W.
 
 ### Tasks
 
-1. **Component mass budget to 408 g.** Every line the problem statement names has to appear: blades, frame, pitch mechanism, motor, actuator, mounting hardware. Add bearings, shaft, hub, ESC and fasteners. Each line gets a basis, meaning a measured analogue, a material calculation or a supplier figure.
-2. **Benchmark the split.** Published designs put the rotor at 37 to 48 percent of all-up weight. If our budget lands far outside that, either the budget is wrong or there is a reason worth stating.
-3. **Compute T/W and state the margin.** The requirement is above 2.5. Landing at 2.51 is not a design, it is a rounding error, so carry visible margin and say how much.
-4. **Material selection with reasons.** Carbon fibre for spars and skins, core choice for the blades, hub and endplate material, bearing selection. Each choice tied to a property that matters, since blade stiffness is one of the few things the literature shows hurting performance directly when it is missing.
-5. **Manufacturing route per part.** How each piece actually gets made, with Indian sourcing where it exists, because indigenous development is the point of the programme and manufacturability carries 10 percent.
-6. **Cost realism.** A preliminary bill of materials with indicative prices. Cost realism is named in the same criterion as manufacturability.
+1. **Load cases and strength.** Centrifugal load on the blade at design speed, blade root bending from aerodynamic and inertial load, shaft torque from the power and speed already fixed, and the pitch link load. Analytical, closed form, with the assumptions written down. No FEA, and none is expected at Stage 1.
+2. **Margins.** Each load case against an allowable for the chosen material, with a stated safety factor. Margins below 1.5 fail the gate.
+3. **Component mass budget.** Every line the problem statement names, plus bearings, shaft, hub, ESC and fasteners. Each line carries a basis, meaning a measured analogue, a material calculation or a supplier figure. The gate rejects one-word bases.
+4. **Compute T/W nominal and conservative** and state the margin against 2.5.
+5. **Material selection tied to the load cases**, not chosen first and justified after.
+6. **Manufacturing route per part**, with Indian sourcing where it exists, since indigenous development is the point of the programme.
+7. **Bill of materials with indicative costs.** Cost realism sits in the same criterion as manufacturability.
 
 ### Done when
 
-`python tools/check.py --week 4` exits 0. Checks both files exist with required headings, every mass line in `numbers.json` has a non-empty basis field, the mass lines sum to the stated total, the total is under 408 g, and the T/W recomputed from thrust and total mass matches the stated value and exceeds 2.5.
+`python tools/check.py --week 4` exits 0, cumulatively. It sums the mass lines and rejects any that vanish or carry a thin basis, recomputes weight and both T/W values, requires the conservative mass not to be lighter than the budget, recomputes the centrifugal load from blade mass, speed and radius, and requires both structural margins to be at least 1.5.
 
 ### Decision gate
 
-If the budget will not close under 408 g, that is a real finding and not a reason to fudge a line. **Fallback:** reopen radius from week 2 as a numbered decision, since a smaller rotor at higher rpm is lighter, and rerun weeks 2 and 4 numbers. Trigger this by day 4 of the week, not day 7.
+If the refined budget breaks T/W, take the second radius carried out of week 2. **Reopening radius invalidates weeks 2, 3 and 4**, because link lengths, offset geometry, pitch schedule, gearing and centrifugal load all move with it, so this is a last resort and not a routine fallback. That is exactly why the feasibility envelope moved into week 2. If it triggers at all, it triggers on day 2 of the week.
 
 ---
 
-## Week 5: team capability, execution plan, assembly, submit
+## Week 5: team, execution plan, assembly, staging
 
-Covers required item 7, then ships.
+Covers required item 7, then packages for a human to send.
 
 **Scope files:** `stage-1/design/07-team-and-execution.md`, `stage-1/submission/`, `stage-1/decisions.md`
 
 ### Tasks
 
-1. **Team capability section**, written against the preference list the problem statement publishes: rotor design and unsteady aerodynamics, CAD and mechanical design, kinematic analysis, CFD and FEA and multibody dynamics, lightweight structures, motor and actuator selection, UAV subsystem integration. Claim only what is real and name who covers what.
-2. **Execution plan for Stage 2**, mapped onto the 11 items Stage 2 will demand, with the CAE tool access named. This is where faculty backing shows up as an asset rather than a formality.
-3. **Assemble the submission.** All 7 required items in the problem statement's own order, with a short map at the front showing which section answers which of the 8 evaluation criteria. Evaluators scoring against a rubric should not have to hunt.
-4. **Final consistency pass.** Every number in the document traced to `numbers.json`.
-5. **Send on 26 September**, a day early, and record what went where.
+1. **Team capability section** against the problem statement's preference list, using the roster and capability evidence from week H. The agent writes structure and argument. **Real names, institutions and claimed capability come from the human**, and the agent must not invent them.
+2. **Execution plan for Stage 2**, mapped onto the 11 items Stage 2 demands, with the CAE tool access named.
+3. **Assemble the submission** with all 7 required items as top-level sections in the problem statement's order, plus a map at the front showing which section answers each of the 8 criteria.
+4. **Build the PDF.** `pandoc` and `xelatex` are both present on this machine. The attachment is what gets evaluated, not the markdown.
+5. **Final consistency pass.** Every number traced to `numbers.json`.
+6. **Draft the email**, naming the attachment, and stage everything. **Do not send.** A human sends it on 26 September.
 
 ### Done when
 
-`python tools/check.py --week 5` exits 0. Checks the submission document exists, contains all 7 required item headings, contains the criteria map, and that no number in it contradicts `numbers.json`.
+`python tools/check.py --week 5` exits 0, cumulatively. Requires all 7 items as real top-level headings, a criteria map naming all 8 criteria, a submission of substance rather than an outline, a built PDF over 50 kB, and a staged email draft that names the attachment.
 
 ### Decision gate
 
-**Fallback if the team is not assembled by 23 September:** submit as a smaller team and say so plainly in item 7. An honest two-person team with a credible plan reads better than five names that cannot be stood behind in a viva.
+**Fallback if the roster is smaller than hoped:** submit as a smaller team and say so plainly. An honest two-person team with a credible plan reads better than five names nobody can stand behind in a viva.
 
 ---
 
 ## Standing risks
 
-**The schedule assumes hours nobody has counted.** This is the input most likely to invalidate the rest, and it stays open until someone states real weekly availability. Writing compresses better than code, which is why this project rather than UAV-X absorbs a squeeze.
+**The highest-risk assumption is the thrust coefficient transfer.** The 0.607 anchor is a single measured point on a rotor with a different blade count, airfoil, solidity and Reynolds number. Everything downstream scales off it. Week 2 bounds it rather than adopting it, and the conservative case has to close on its own, which is the only real defence available without a wind tunnel.
 
-**Three papers are still unread**, one of them the only study in our own Reynolds band. Week 2 leans on a search summary of it. If a library proxy or the faculty supervisor opens it, re-derive the shape family and record a decision entry.
+**The published benchmark is worse than tight.** Re-cut onto the competition's module boundary, the closest published designs give a module thrust-to-weight of 1.69 and 1.80, and both exclude mounting hardware neither paper breaks out. We need 2.5, so the gap is 39 to 48 percent over the state of the art, and it is further from published work than anything else in the brief. The case for closing it rests on scale, on fixed masses amortising over more thrust, and on these being flying demonstrators rather than mass-optimised modules. Week 2 makes that case quantitatively or reports that it cannot. Full working in [literature.md](literature.md) and decision D8.
 
-**No CAD is required at Stage 1** and none should be built. CAD quality is scored at Stage 2 and 3. Time spent modelling now is time not spent on the five 15-percent criteria.
+**Three papers are still unread**, one of them the only study in our Reynolds band. If a library proxy or the faculty supervisor opens it, re-derive the shape family and record a decision entry.
+
+**Weekly hours and team size are unknown** until week H returns them.
+
+**No CAD is required at Stage 1** and none should be built. CAD quality is scored at Stage 2 and 3.

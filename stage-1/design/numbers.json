@@ -1,5 +1,5 @@
 {
-  "_note": "Single source of truth for every number in the Stage 1 submission. Week 2 fills geometry, operating, performance and efficiency. Week 3 fills pitch. Week 4 fills mass_budget_g and results. Nulls fail the gates, so nothing here can be left as a placeholder. Each entry that is not derived should carry its basis in the sources block.",
+  "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder. Week 2 fills geometry, operating, performance, efficiency, power_by_radius and the results envelope. Week 3 fills pitch and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, not against what is stored here, so an optimistic headline number achieves nothing.",
   "geometry": {
     "radius_m": null,
     "chord_m": null,
@@ -17,6 +17,8 @@
   "performance": {
     "thrust_N": null,
     "blade_area_coeff": null,
+    "blade_area_coeff_low": null,
+    "thrust_N_conservative": null,
     "aero_power_W": null,
     "electrical_power_W": null
   },
@@ -25,6 +27,7 @@
     "motor": null,
     "esc": null
   },
+  "power_by_radius": [],
   "pitch": {
     "mechanism": null,
     "offset_m": null,
@@ -34,11 +37,28 @@
     "actuator_mass_g": null,
     "side_force_tilt_deg": null
   },
+  "packaging": {
+    "envelope_length_mm": null,
+    "envelope_width_mm": null,
+    "envelope_height_mm": null,
+    "mount_points": null
+  },
+  "structure": {
+    "blade_mass_kg": null,
+    "centrifugal_load_N": null,
+    "blade_root_bending_Nm": null,
+    "shaft_torque_Nm": null,
+    "blade_margin": null,
+    "shaft_margin": null
+  },
   "mass_budget_g": [],
   "results": {
     "total_mass_g": null,
     "weight_N": null,
-    "thrust_to_weight": null
+    "thrust_to_weight": null,
+    "mass_envelope_g": null,
+    "mass_g_conservative": null,
+    "thrust_to_weight_conservative": null
   },
   "sources": {
     "_note": "key -> measured | derived | assumed, with the paper or supplier where it applies"

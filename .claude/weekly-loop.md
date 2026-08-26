@@ -2,7 +2,7 @@
 
 Per-repo config for the `weekly-loop` skill. One tick runs one plan week.
 
-This is a design and writing project, not a code project. There is no test suite and there will not be one. The gates are document integrity and arithmetic consistency instead, and they are real: the numbers in the submission have to reproduce from the stored geometry, so a week cannot pass by writing a flattering number into prose.
+This is a design and writing project, not a code project, so the gates are document integrity and arithmetic consistency rather than unit tests on product code. They are real: the numbers in the submission have to reproduce from the stored geometry, so a week cannot pass by writing a flattering number into prose. The gate script itself does have a test suite, at `tools/test_gates.py`.
 
 ## Paths
 
@@ -34,7 +34,15 @@ python tools/check.py --global
 
 `--week {N}` validates that week's deliverable files exist with their required sections, that `numbers.json` carries the keys that week is responsible for, and that the arithmetic reproduces. `--global` runs the style and attribution checks over every markdown file we wrote.
 
-What the arithmetic gate actually checks, so nobody assumes it is decorative: tip speed against rpm and radius, Reynolds against tip speed and chord, thrust against geometry and the blade-area coefficient, electrical power against aerodynamic power and the efficiency chain, the mass lines against the stated total, weight against mass, and thrust-to-weight against thrust and weight. Tolerance is 2 percent. It also enforces the two hard limits from the problem statement: module mass under 408 g and T/W above 2.5.
+What the arithmetic gate actually checks, so nobody assumes it is decorative: tip speed against rpm and radius, Reynolds against tip speed and chord, thrust against geometry and the blade-area coefficient, electrical power against aerodynamic power and the efficiency chain, the mass lines against the stated total, weight against mass, thrust-to-weight against both, and centrifugal load against blade mass, speed and radius.
+
+Two properties matter more than the list.
+
+**Hard limits are applied to recomputed values, never stored ones.** An earlier version compared stored headline numbers against the limits while only checking consistency to 2 percent, which let a 1.9 percent overstatement of thrust and a 1.9 percent understatement of mass compound into a design that missed both targets and passed every gate. Internal arithmetic now has to reproduce to 0.5 percent, and the limits are tested against what the geometry and the mass lines actually give.
+
+**There is no 408 g gate.** 408 g is only the ceiling when thrust is exactly 10 N, and the requirement is at least 10 N. The gate tests the real requirement: recomputed thrust at or above 10 N, and recomputed T/W above 2.5, for both a nominal and a conservative case.
+
+Weeks are cumulative, so `--week 4` reruns 1 through 3 and a later week cannot pass by breaking an earlier one. The gates have their own test suite at `tools/test_gates.py`, which builds throwaway trees and checks that an honest design passes and eleven specific attacks fail. Run it after changing `check.py`.
 
 ## Markers
 
@@ -50,7 +58,10 @@ The done marker goes in the week's progress file, the audit marker at the end of
 
 ```
 checkpoint_every: 2
+human_gate_before_week: 2
 ```
+
+`human_gate_before_week` means week 2 does not start until the human tasks in the plan's week H are answered, or explicitly waived. Registration, the eligibility check and the roster are the ones that matter; the engineering does not depend on them, but the submission does, and leaving them to the four-day final week is how a technically finished document ends up ineligible or unsent.
 
 The human reads after every second completed week. Weeks 2 and 4 both carry decision gates that are judgment calls rather than mechanical ones, so full autopilot to the deadline is not the right trade on a submission that only gets made once.
 
@@ -61,8 +72,9 @@ Stop the week and report BLOCKED, with unblock steps, on any of these. Do not wo
 - **Sending anything to the organisers.** The Stage 1 submission email, or any other mail to pushpak_gc2026@aero.iitb.ac.in, is a human action. Draft it, stage it, never send it. This holds even in week 5 when the plan says "submit"
 - **Registering the team** on techfest.org, or entering anyone's personal details
 - **Naming real people, institutions or capabilities** in the team capability section. Week 5 writes the structure and leaves the specifics for the human, because inventing a team is fabrication
-- **The mass budget will not close under 408 g** after the week 4 fallback has been tried. That is a design finding and needs a human decision, not a fudged line
-- A paywalled paper the week depends on. Record the gap, carry on with what is available, and say so in the progress file
+- **The mass budget will not close** after the week 4 fallback has been tried, meaning the second radius carried out of week 2 also fails T/W. That is a design finding and needs a human decision, not a fudged line
+- **The conservative case will not close.** If week 2's low coefficient and high mass together fail T/W 2.5, geometry does not freeze. Work the fallbacks in the plan first, in order; if none closes, stop and report rather than trimming an assumption until the number appears
+- **A paper that is a hard dependency for the week.** Stop and report. A paper that is only supporting evidence is not a blocker: record the gap, carry on with what is available, and state the limitation in the progress file. Today the three unread papers are supporting evidence, not hard dependencies, so week 2 runs
 
 ## Rules digest
 
