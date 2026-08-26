@@ -2,6 +2,8 @@
 
 Dates: 26 August to 1 September 2026. Executed 26 August, outside the loop, before the loop config existed.
 
+**Two statements below were superseded later the same day by rounds 2 and 3 of review, and are left in place because this is a record of the week rather than a live document.** The 408 g budget is not confirmed as a fixed number; it is the ceiling at exactly 10 N and it moves with design thrust, so the current figure is 407 g at 10 N. And the conclusion that the module must be one larger rotor only rules out copying a published rotor five times, not every cluster. Current readings are in [../../context.md](../../context.md) and [../decisions.md](../decisions.md).
+
 STATUS: WEEK-COMPLETE
 
 ## What the week was meant to produce

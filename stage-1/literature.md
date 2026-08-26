@@ -88,7 +88,7 @@ From S3, at roughly 10x our linear scale:
 
 ## Published mass breakdowns
 
-This is the part that bears on the 408 g question.
+This is the part that bears on whether the mass budget closes.
 
 Quad-cyclocopter from S2, 809 g all up, four 6 inch rotors:
 
@@ -121,15 +121,24 @@ The module is blades, frame, pitch mechanism, motor, actuator and mounting hardw
 | S2 quad-cyclocopter | 96.2 g | 23.8 g | 120.0 g | 1.98 N | **1.69** |
 | S1 conceptual cyclo-MAV | 45.6 g | 23.9 g | 69.5 g | 1.23 N | **1.80** |
 
-Mounting hardware is not broken out in either paper, so both numbers are optimistic.
+**Both are optimistic upper bounds, not measurements.** Neither paper reports a module on this boundary, so the numbers are assembled from line items and several allocations are unknown:
 
-**We need 2.5.** That is a 39 to 48 percent improvement in thrust per unit module mass over the closest published work, and it is the single hardest number in this project. Nothing else in the brief is as far from the state of the art.
+| | S2 quad | S1 concept |
+| --- | --- | --- |
+| Included | rotors, motor and controller share | rotor system, motor share |
+| Excluded, arguably wrongly | mounting hardware, not broken out | mounting, plus the whole 38 g electronics and servos line, which contains the vectoring servos the module boundary requires |
+| Unallocated | how much of the 225 g vehicle structure is module frame | how much of the 18.5 g structure is module frame |
+| Thrust basis | 1.98 N is the vehicle weight share per rotor, not a plotted measurement. The thesis plots about 1.91 N at the operating point | conceptual design, never built, so 1.23 N is a predicted requirement |
+
+Correcting any of those pushes the ratio down, not up.
+
+**We need 2.5.** So the improvement required over the closest published work is **at least** roughly 39 to 48 percent, and worse once actuators and a fair share of module frame are allocated. It is the single hardest number in this project and nothing else in the brief is as far from the state of the art.
 
 The case that it is reachable, which week 2 has to make quantitatively rather than assert:
 
 - **Scale.** Both designs are 3 to 6 inch research rotors at Reynolds numbers of 17,000 to 35,000. Ours lands near 100,000, where the published CFD says non-dimensional thrust holds while torque and power fall
 - **Fixed masses amortise.** Bearings, fasteners, ESC and linkage hardware do not shrink with the rotor. On a 120 g module they dominate; on a 400 g module carrying five times the thrust they do not
-- **These were demonstrators, not mass-optimised modules.** S2's own text says the earlier rig weighed 450 g and burned 75 percent of its power on structure, and that the flight-weight redesign cut tare to 10 percent. The same attention applied to mass, with CFRP instead of research-shop parts, is where the margin has to come from
+- **Neither was a mass-optimised module.** S2's quad flew; S1's design was never built. Both were exploring the concept rather than chasing a ratio. S2's own text says the earlier rig weighed 450 g and burned 75 percent of its power on structure, and that the flight-weight redesign cut tare to 10 percent. The same attention applied to mass, with CFRP instead of research-shop parts, is where the margin has to come from
 - **Neither design was trying to hit a T/W target.** They were built to fly and to measure, and their mass budgets show it
 
 The counterweight is the one the brief already names: blade weight per unit thrust stays constant under geometric similarity, and blade stress climbs. If blade mass per newton really is scale-invariant, scale alone does not close the gap and the answer has to come from materials and from the non-blade fraction. Week 2 has to establish which of those it is leaning on.
@@ -138,13 +147,17 @@ Drive details worth keeping. S2's twin used two 75 W outrunners geared 5:1 throu
 
 ## What this does to the Stage 1 numbers
 
-All three of these are provisional. None should be locked until the organisers answer whether T/W of 2.5 is measured on the module or on the aircraft.
+**Superseded in part, 26 August, after rounds 2 and 3 of review.** What follows is the current reading. The three conclusions this section used to carry, that the thrust-to-weight basis was unanswered, that the module must be one larger rotor, and that radius only trades speed against envelope, are all wrong and have been replaced below. Do not work from an older revision of this file.
 
-**Power. The plan's 95 W is too low, probably by about 60%.** That figure came from picking 8 kgf/HP out of the middle of a 12-to-5 range. Two independent measured routes disagree with it. S2's twin rotor at its actual operating point gives 0.062 N/W, which is 4.71 kgf/HP. Kim's high-thrust asymptote in S1 is 5 kgf/HP. Both land at 152 to 161 W of aerodynamic power for 10 N, and 10 N is a high-thrust point, so the asymptote is the right end of that curve to read. Call it 230 to 250 W electrical at a 65% chain efficiency. Higher Reynolds number at our size should claw some of that back, which is the one honest reason to expect better than the measured MAV figures.
+**Power. The 95 W figure was too low, probably by about 60 percent.** It came from picking 8 kgf/HP out of the middle of a 12-to-5 range. Two independent measured routes disagree. S2's twin rotor at its operating point gives 0.062 N/W, which is 4.71 kgf/HP, and Kim's high-thrust asymptote in S1 is 5 kgf/HP. Both land at 152 to 161 W of aerodynamic power for 10 N, and 10 N is a high-thrust point, so the asymptote is the right end of the curve.
 
-**Mass. A scaled-out MAV rotor cannot make the budget.** S2's flight-weight 6 inch rotor masses 96 g and carries 1.98 N at hover. Getting to 10 N by repeating that rotor takes 5.04 of them, so 485 g of rotor and nothing else, against a whole-module budget of 408 g. The module therefore has to be one larger rotor rather than a cluster of small ones, and the case for that is aerodynamic as well as structural, since non-dimensional thrust holds while torque and power fall as Reynolds number rises.
+That is blade aerodynamic power only. S2 measured rotor structure power at about 10 percent of total on the flight-weight design, and that tare sits at the rotor shaft, before the transmission. Actuator and controller draw sit outside the drive chain again. The module power number therefore has four parts, not one, and week 2 computes them separately.
 
-**Geometry. Similarity at fixed thrust pins the Reynolds number.** Take S5's shape family, meaning chord at 0.66 R and span at 2.64 R with 3 blades, and solve for 10 N using an effective blade-area thrust coefficient of 0.607 derived from S2's quad rotor at its hover point. Reynolds number comes out near 100,000 whatever radius you pick, because scaling chord and span with R while holding thrust fixed cancels size out of Re. Radius then buys nothing except a trade of speed against envelope:
+**Power depends on radius.** Within a fixed shape family at fixed thrust, tip speed goes as 1/R and aerodynamic power goes roughly as 1/R with it. A larger rotor is a lower-power rotor. So radius is not a free trade of rpm against envelope; it moves the motor, the thermal load and the mass budget too, which is why week 2 sweeps it rather than picking one.
+
+**Mass. Copying a published MAV rotor does not close.** S2's flight-weight 6 inch rotor masses 96 g and carries 1.98 N. Reaching 10 N by repeating it takes 5.04 of them, so 485 g of rotor and nothing else. That rules out copying. It does not rule out a redesigned two or three rotor cluster, which is a different claim and is settled in week 2 on a like-for-like boundary. See decision D2.
+
+**Geometry. Similarity at fixed thrust pins the Reynolds number.** Take S5's shape family, chord at 0.66 R and span at 2.64 R with 3 blades, and solve for 10 N using a blade-area thrust coefficient of 0.607 derived from S2's quad rotor at its hover point. Reynolds comes out near 100,000 whatever radius is chosen, because scaling chord and span with R cancels size out of Re.
 
 | Radius | Chord | Span | Diameter | Speed | Tip speed |
 | --- | --- | --- | --- | --- | --- |
@@ -154,9 +167,9 @@ All three of these are provisional. None should be locked until the organisers a
 | 140 mm | 92.4 mm | 370 mm | 280 mm | 1106 rpm | 16.2 m/s |
 | 160 mm | 105.6 mm | 422 mm | 320 mm | 846 rpm | 14.2 m/s |
 
-That 100,000 sits at the bottom edge of the 100,000 to 300,000 band S5 studied, so its optimum applies to us directly instead of being an extrapolation off the end of somebody's data. Of everything this week turned up, that is the most useful.
+That 100,000 sits at the bottom edge of the 100,000 to 300,000 band S5 studied, so its optimum applies directly instead of being an extrapolation.
 
-The 0.607 coefficient is mine, derived for scaling, not a published quantity. It is thrust over tip dynamic pressure times total blade area, taken from S2's quad rotor at 2000 rpm carrying 809 g across four rotors. Treat it as a working anchor and re-derive it if S5 ever opens.
+**The 0.607 coefficient is a single-point anchor and it is transferred across a geometry change.** It comes from 4 blades, NACA 0010, c/R 0.433 and Re near 35,000. The shape family it gets applied to is 3 blades, NACA 0020, c/R 0.66 and Re near 100,000. Blade count, solidity, airfoil and Reynolds number all move at once. Week 2 bounds it with a low value derived from the spread in S2's own parametric results rather than adopting it, and the conservative case has to clear both targets on its own. It is the highest-risk assumption in the project.
 
 ## Still to pull
 
