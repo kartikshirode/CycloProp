@@ -27,6 +27,18 @@ FILLER = ("The rotor operates in a curvilinear flowfield so each chordwise stati
           "from their design point. ") * 30
 
 
+def schedule_points(amp, phase, step=10):
+    """The pitch schedule the fixture writes and measures itself against. A pure cosine
+    would fit the harmonic model exactly and leave a zero residual, which is not what a
+    four-bar produces, so a small third harmonic rides on it."""
+    pts = []
+    for i in range(int(360 / step) + 1):
+        az = i * step
+        phi = math.radians(az - 90.0 - phase)
+        pts.append((float(az), 0.98 * amp * math.cos(phi) + 0.02 * amp * math.cos(3 * phi)))
+    return pts
+
+
 def honest_numbers():
     R, nb = 0.14, 3
     c, S = 0.66 * R, 2.64 * R
@@ -36,7 +48,16 @@ def honest_numbers():
     u = math.sqrt(thrust / (ct * 0.5 * RHO * area))
     rpm = u / R * 60 / (2 * math.pi)
     t_cons = ct_low * 0.5 * RHO * u * u * area
-    ap, eff = 118.0, (0.92, 0.80, 0.95)
+    # Aerodynamic power now has to clear the momentum bound and land at a figure of merit
+    # a cyclorotor could actually reach. The old 118 W implied 0.84, which no cyclorotor
+    # has ever reached, and the gate had nothing to say about it.
+    mom_area = 2 * R * S
+    ideal = thrust ** 1.5 / math.sqrt(2 * RHO * mom_area)
+    ap, eff = 175.0, (0.92, 0.80, 0.95)
+    fm = ideal / ap
+    pl_ref = 0.070
+    ap_pub = thrust / pl_ref
+    spread = abs(ap - ap_pub) / ap
 
     budget = [
         {"item": "blades, 3 off", "mass_g": 108.0, "refines": "blades",
@@ -59,8 +80,10 @@ def honest_numbers():
          "basis": "fastener count times unit mass with a bracket allowance"},
     ]
     total = sum(b["mass_g"] for b in budget)
-    blade_mass = 0.108 / 3
-    fc = blade_mass * (rpm * 2 * math.pi / 60) ** 2 * R
+    omega = rpm * 2 * math.pi / 60
+    # Per-blade mass is the blade budget over the blade count, not a free number.
+    blade_mass = sum(b["mass_g"] for b in budget if "blade" in b["item"]) / 1000.0 / nb
+    fc = blade_mass * omega ** 2 * R
 
     envelope = [
         {"item": "blades", "nominal_g": 108.0, "conservative_g": 122.0,
@@ -83,12 +106,30 @@ def honest_numbers():
     shaft = ap + tare
     elec = shaft / (eff[0] * eff[1] * eff[2])
     act_p, ctl_p = 6.0, 2.0
-    blade_dem, shaft_dem = 6.4, 1.9
-    blade_all, shaft_all = 13.4, 6.5
+
+    # Structural demands derived from the design rather than asserted beside it.
+    ratio, lever, load_factor = 2.0, S / 4, 2.0
+    shaft_dem = shaft / omega
+    blade_dem = thrust / nb * lever * load_factor
+    blade_all, shaft_all = blade_dem * 2.9, shaft_dem * 3.0
+    link_dem, link_all = 42.0, 95.0
+
+    amp, phase = 40, 9.0
+    pts = schedule_points(amp, phase)
+    model = [amp * math.cos(math.radians(a - 90.0 - phase)) for a, _ in pts]
+    rms = math.sqrt(sum((p - m) ** 2 for (_, p), m in zip(pts, model)) / len(pts))
+
+    sensitivity = [
+        {"thrust_N": t,
+         "mass_ceiling_g": math.floor(t / (2.5 * G) * 1000.0),
+         "ideal_power_W": t ** 1.5 / math.sqrt(2 * RHO * mom_area),
+         "rpm": rpm * math.sqrt(t / thrust)}
+        for t in (10.0, 12.0, thrust)
+    ]
 
     return {
         "geometry": {"radius_m": R, "chord_m": c, "span_m": S, "blades": nb,
-                     "airfoil": "NACA 0020", "pitch_amplitude_deg": 40,
+                     "airfoil": "NACA 0020", "pitch_amplitude_deg": amp,
                      "pitch_axis_pct_chord": 25},
         "operating": {"rpm": rpm, "tip_speed_ms": u, "reynolds": u * c / NU},
         "performance": {"thrust_N": thrust, "blade_area_coeff": ct,
@@ -96,12 +137,17 @@ def honest_numbers():
                         "aero_power_W": ap, "tare_power_W": tare,
                         "electrical_power_W": elec,
                         "actuator_power_W": act_p, "controller_power_W": ctl_p,
-                        "module_electrical_power_W": elec + act_p + ctl_p},
+                        "module_electrical_power_W": elec + act_p + ctl_p,
+                        "momentum_area_m2": mom_area, "ideal_power_W": ideal,
+                        "figure_of_merit": fm, "power_loading_ref_N_per_W": pl_ref,
+                        "aero_power_W_published": ap_pub, "power_spread": spread},
         "efficiency": {"transmission": eff[0], "motor": eff[1], "esc": eff[2]},
         "power_by_radius": [{"radius_m": r, "aero_power_W": ap * 0.14 / r}
                             for r in (0.10, 0.12, 0.14, 0.16)],
+        "thrust_sensitivity": sensitivity,
         "pitch": {"mechanism": "passive four-bar", "offset_m": 0.024,
-                  "phase_delay_deg": 9.0, "vector_range_deg": 360.0,
+                  "phase_delay_deg": phase, "vector_range_deg": 360.0,
+                  "phase_authority_deg": 360.0, "schedule_rms_residual_deg": rms,
                   "actuator_count": 2, "actuator_mass_g": 18.0,
                   "side_force_tilt_deg": 28.0},
         "packaging": {"envelope_length_mm": 400, "envelope_width_mm": 300,
@@ -110,12 +156,24 @@ def honest_numbers():
                       "blade_root_bending_Nm": blade_dem, "shaft_torque_Nm": shaft_dem,
                       "blade_allowable_Nm": blade_all, "shaft_allowable_Nm": shaft_all,
                       "blade_margin": blade_all / blade_dem,
-                      "shaft_margin": shaft_all / shaft_dem},
+                      "shaft_margin": shaft_all / shaft_dem,
+                      "transmission_ratio": ratio,
+                      "torque_reference": "rotor shaft, upstream of the 2 to 1 reduction",
+                      "blade_load_lever_m": lever, "blade_load_factor": load_factor,
+                      "pitch_link_load_N": link_dem, "pitch_link_allowable_N": link_all,
+                      "pitch_link_margin": link_all / link_dem},
         "mass_envelope_g": envelope,
         "mass_budget_g": budget,
-        "sources": {"performance": {
-            "blade_area_coeff": "derived from the Benedict 2010 quad rotor at its hover point",
-            "blade_area_coeff_low": "lower bound from the spread across blade count and airfoil in Benedict 2010"}},
+        "sources": {
+            "performance": {
+                "blade_area_coeff": "derived from the Benedict 2010 quad rotor at its hover point",
+                "blade_area_coeff_low": "lower bound from the spread across blade count and airfoil in Benedict 2010",
+                "momentum_area_m2": "projected frontal area, 2R times span, the closure Benedict uses for cyclorotors",
+                "power_loading_ref_N_per_W": "measured power loading from the Benedict 2010 rig at its hover point"},
+            "structure": {
+                "blade_root_bending_Nm": "thrust per blade over a quarter span lever with a peak to mean factor of 2",
+                "shaft_torque_Nm": "shaft power divided by rotor angular speed at the design point",
+                "pitch_link_load_N": "four bar link load from the offset disk reaction at peak pitching moment"}},
         "results": {"total_mass_g": total, "weight_N": total / 1000 * G,
                     "thrust_to_weight": thrust / (total / 1000 * G),
                     "mass_envelope_g": env_nom, "mass_g_conservative": m_cons,
@@ -140,11 +198,10 @@ def doc(path, headings, numbers=(), words=600):
     path.write_text("\n".join(body), encoding="utf-8")
 
 
-def pitch_doc(path, numbers):
+def pitch_doc(path, numbers, points=None):
     rows = ["| azimuth | pitch |", "| --- | --- |"]
-    for i in range(36):
-        a = i * 10
-        rows.append(f"| {a} | {40 * math.cos(math.radians(a)):.2f} |")
+    for a, p in (points if points is not None else schedule_points(40, 9.0)):
+        rows.append(f"| {a:.0f} | {p:.2f} |")
     body = ["# Pitch mechanism", "", FILLER[:2000], "", "## Kinematics", "",
             FILLER[:1500], "", "## Pitch schedule", ""] + rows + [
         "", "## Thrust vectoring", "", FILLER[:1500], "", "## Side force", "",
@@ -173,6 +230,37 @@ CRITERIA_ROWS = [
     ("packaging and integration", "Cyclorotor concept and configuration"),
     ("presentation quality", "Team capability and execution plan"),
 ]
+
+
+def make_pdf(path, pages):
+    """A real multi-page PDF, written by hand so the fixture does not need pandoc. The
+    week 5 gate now reads the attachment back, so copying an unrelated PDF no longer
+    stands in for building one."""
+    def esc(s):
+        return s.replace("\\", r"\\").replace("(", r"\(").replace(")", r"\)")
+
+    objs = ["<< /Type /Catalog /Pages 2 0 R >>", "",
+            "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"]
+    page_ids = [4 + 2 * i for i in range(len(pages))]
+    objs[1] = (f"<< /Type /Pages /Count {len(pages)} /Kids "
+               f"[{' '.join(f'{i} 0 R' for i in page_ids)}] >>")
+    for i, lines in enumerate(pages):
+        objs.append(f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources "
+                    f"<< /Font << /F1 3 0 R >> >> /Contents {5 + 2 * i} 0 R >>")
+        stream = ("BT /F1 11 Tf 54 740 Td 15 TL\n"
+                  + "\n".join(f"({esc(l)}) Tj T*" for l in lines) + "\nET")
+        objs.append(f"<< /Length {len(stream)} >>\nstream\n{stream}\nendstream")
+
+    out, offsets = "%PDF-1.4\n", []
+    for i, o in enumerate(objs, 1):
+        offsets.append(len(out))
+        out += f"{i} 0 obj\n{o}\nendobj\n"
+    start = len(out)
+    out += f"xref\n0 {len(objs) + 1}\n0000000000 65535 f \n"
+    out += "".join(f"{o:010d} 00000 n \n" for o in offsets)
+    out += f"trailer\n<< /Size {len(objs) + 1} /Root 1 0 R >>\nstartxref\n{start}\n%%EOF\n"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(out.encode("latin-1"))
 
 
 def submission_doc(path, data, rows=None, items=None):
@@ -249,13 +337,28 @@ def build(root, data, upto=4):
         doc(g / "07-team-and-execution.md", ["Team capability", "Execution plan", "Stage 2"])
         sub = d / "stage-1" / "submission"
         submission_doc(sub / "cycloprop-stage1.md", data)
-        shutil.copy(REAL_PDF, sub / "cycloprop-stage1.pdf")
+        build_pdf_from(sub / "cycloprop-stage1.md", sub / "cycloprop-stage1.pdf")
         (sub / "email-draft.md").write_text(
             "\n".join(["# Stage 1 submission email", "",
+                       "To: pushpak_gc2026@aero.iitb.ac.in",
                        "Subject: PUSHPAK Grand Challenge, CycloProp Stage 1", "",
                        "The attachment is cycloprop-stage1.pdf and it carries the full",
                        "design report for the module.", ""]), encoding="utf-8")
+        (d / "stage-1" / "human-gate.md").write_text(
+            "\n".join(["# Week H", "", "REGISTRATION-CONFIRMED", "ELIGIBILITY-CHECKED",
+                       "ROSTER-CONFIRMED", "SENDER-CONFIRMED", ""]), encoding="utf-8")
     return d
+
+
+def build_pdf_from(md, pdf):
+    """Stands in for the pandoc build: every heading and every declared number reaches the
+    attachment, which is what the identity gate reads back."""
+    lines = [l.lstrip("# ").rstrip() for l in md.read_text(encoding="utf-8").splitlines()
+             if l.startswith("#") or l.strip().startswith("- ")]
+    pages = [lines[i:i + 6] or ["(blank)"] for i in range(0, max(len(lines), 1), 6)]
+    while len(pages) < 4:
+        pages.append(["CycloProp Stage 1, continued"])
+    make_pdf(pdf, pages)
 
 
 def run(root, week):
@@ -517,6 +620,135 @@ case("two envelope lines sharing one name is rejected", False, duplicate_envelop
      week=2)
 
 
+# ---- round 6: the goal audit, where green gates did not mean feasible ----------
+
+def thrust_from_one_watt(d):
+    """13.5 N of thrust produced by 1 W of aerodynamic power. Every stored value agrees
+    with every other stored value, and the design is impossible."""
+    p, eff = d["performance"], d["efficiency"]
+    p["aero_power_W"], p["tare_power_W"] = 1.0, 0.1
+    elec = 1.1 / (eff["transmission"] * eff["motor"] * eff["esc"])
+    p["electrical_power_W"] = elec
+    p["module_electrical_power_W"] = elec + p["actuator_power_W"] + p["controller_power_W"]
+    p["figure_of_merit"] = p["ideal_power_W"] / 1.0
+    p["power_spread"] = abs(1.0 - p["aero_power_W_published"]) / 1.0
+    d["power_by_radius"] = [{"radius_m": r, "aero_power_W": 1.0 * 0.14 / r}
+                            for r in (0.10, 0.12, 0.14, 0.16)]
+    return d
+
+
+case("thrust produced by one watt is rejected", False, thrust_from_one_watt, week=2)
+
+
+def inflated_momentum_area(d):
+    """Softening the bound by claiming a bigger disk than the rotor presents."""
+    p = d["performance"]
+    p["momentum_area_m2"] *= 4.0
+    p["ideal_power_W"] = p["thrust_N"] ** 1.5 / math.sqrt(2 * RHO * p["momentum_area_m2"])
+    p["figure_of_merit"] = p["ideal_power_W"] / p["aero_power_W"]
+    return d
+
+
+case("a momentum area larger than the projected area is rejected", False,
+     inflated_momentum_area, week=2)
+
+
+def disconnected_structure(d):
+    """1 g blades beside a 108 g blade budget, with loads to match and margins of 2."""
+    st = d["structure"]
+    st["blade_mass_kg"] = 0.001
+    st["blade_root_bending_Nm"] = st["shaft_torque_Nm"] = 0.001
+    st["blade_allowable_Nm"] = st["shaft_allowable_Nm"] = 0.002
+    st["blade_margin"] = st["shaft_margin"] = 2.0
+    st["centrifugal_load_N"] = 0.001 * (d["operating"]["rpm"] * 2 * math.pi / 60) ** 2 \
+        * d["geometry"]["radius_m"]
+    return d
+
+
+case("structural loads disconnected from the design are rejected", False,
+     disconnected_structure)
+
+
+def asserted_shaft_torque(d):
+    """Shaft torque a reviewer can recompute from power and speed in ten seconds."""
+    d["structure"]["shaft_torque_Nm"] *= 0.4
+    d["structure"]["shaft_margin"] = (d["structure"]["shaft_allowable_Nm"]
+                                      / d["structure"]["shaft_torque_Nm"])
+    return d
+
+
+case("shaft torque that does not follow from power and speed is rejected", False,
+     asserted_shaft_torque)
+
+
+def fractional_hardware(d):
+    d["pitch"]["actuator_count"] = 0.5
+    d["packaging"]["mount_points"] = 0.1
+    return d
+
+
+case("half an actuator and a tenth of a mount point are rejected", False,
+     fractional_hardware, week=3)
+
+
+def flat_pitch_schedule(root, data):
+    """A 37 point schedule spanning the revolution with no pitching motion in it."""
+    pitch_doc(root / "stage-1" / "design" / "03-pitch-and-vectoring.md",
+              [("pitch.vector_range_deg", data["pitch"]["vector_range_deg"]),
+               ("pitch.offset_m", data["pitch"]["offset_m"]),
+               ("pitch.phase_delay_deg", data["pitch"]["phase_delay_deg"])],
+              points=[(a, 0.0) for a, _ in schedule_points(40, 9.0)])
+
+
+case("a pitch schedule with no motion in it is rejected", False, week=3, upto=3,
+     tweak=flat_pitch_schedule)
+
+
+def wrong_phase_in_schedule(root, data):
+    """The table shows one phase and the stated number claims another."""
+    pitch_doc(root / "stage-1" / "design" / "03-pitch-and-vectoring.md",
+              [("pitch.vector_range_deg", data["pitch"]["vector_range_deg"]),
+               ("pitch.offset_m", data["pitch"]["offset_m"]),
+               ("pitch.phase_delay_deg", data["pitch"]["phase_delay_deg"])],
+              points=schedule_points(40, 70.0))
+
+
+case("a stated phase delay the schedule does not show is rejected", False, week=3, upto=3,
+     tweak=wrong_phase_in_schedule)
+
+
+def vectoring_beyond_authority(d):
+    d["pitch"]["phase_authority_deg"] = 90.0     # the mechanism, against a claimed 360
+    return d
+
+
+case("a vectoring range wider than the mechanism allows is rejected", False,
+     vectoring_beyond_authority, week=3)
+
+
+def thrust_not_prequalified(d):
+    d["thrust_sensitivity"] = [r for r in d["thrust_sensitivity"] if r["thrust_N"] != 13.5]
+    d["thrust_sensitivity"].append({"thrust_N": 11.0,
+                                    "mass_ceiling_g": math.floor(11.0 / (2.5 * G) * 1000.0),
+                                    "ideal_power_W": 11.0 ** 1.5 / math.sqrt(
+                                        2 * RHO * d["performance"]["momentum_area_m2"]),
+                                    "rpm": 1150.0})
+    return d
+
+
+case("a design thrust outside the sensitivity table is rejected", False,
+     thrust_not_prequalified, week=2)
+
+
+def wrong_mass_ceiling(d):
+    d["thrust_sensitivity"][0]["mass_ceiling_g"] = 600.0
+    return d
+
+
+case("a sensitivity row whose mass ceiling does not follow is rejected", False,
+     wrong_mass_ceiling, week=2)
+
+
 # ---- week 5, which nothing had ever exercised on a passing document ------------
 
 SUB = "stage-1/submission/cycloprop-stage1.md"
@@ -573,6 +805,66 @@ def unsent_email_missing(root, data):
 
 case("a submission with no staged email is rejected", False, upto=5, week=5,
      tweak=unsent_email_missing)
+
+
+def unrelated_pdf(root, data):
+    """The attachment is what gets evaluated. This was the passing fixture until now:
+    a complete markdown report beside the competition's own problem statement."""
+    shutil.copy(REAL_PDF, root / "stage-1" / "submission" / "cycloprop-stage1.pdf")
+
+
+case("an unrelated PDF attached as the submission is rejected", False, upto=5, week=5,
+     tweak=unrelated_pdf)
+
+
+def stale_pdf(root, data):
+    """A PDF built from an earlier draft, missing a section the markdown now carries."""
+    md = root / SUB
+    text = md.read_text(encoding="utf-8")
+    md.write_text(text.replace("## " + REQUIRED_ITEMS[3], "## Thrust and power, old title"),
+                  encoding="utf-8")
+    build_pdf_from(md, root / "stage-1" / "submission" / "cycloprop-stage1.pdf")
+    md.write_text(text, encoding="utf-8")
+
+
+case("a PDF built from an earlier draft is rejected", False, upto=5, week=5, tweak=stale_pdf)
+
+
+def email_without_recipient(root, data):
+    p = root / "stage-1" / "submission" / "email-draft.md"
+    p.write_text(p.read_text(encoding="utf-8")
+                 .replace("To: pushpak_gc2026@aero.iitb.ac.in", "To: the organisers"),
+                 encoding="utf-8")
+
+
+case("a staged email that names no recipient is rejected", False, upto=5, week=5,
+     tweak=email_without_recipient)
+
+
+def human_gate_outstanding(root, data):
+    p = root / "stage-1" / "human-gate.md"
+    p.write_text(p.read_text(encoding="utf-8").replace("ELIGIBILITY-CHECKED", "eligibility: tbd"),
+                 encoding="utf-8")
+
+
+case("week 5 with the eligibility check outstanding is rejected", False, upto=5, week=5,
+     tweak=human_gate_outstanding)
+
+
+def criteria_named_only_in_prose(root, data):
+    """Eight junk rows in the table and the eight real criteria in a sentence beside it."""
+    junk = [(f"criterion {i}", f"section {i}") for i in range(8)]
+    submission_doc(root / SUB, data, rows=junk)
+    p = root / SUB
+    t = p.read_text(encoding="utf-8").replace(
+        "## Evaluation criteria map",
+        "## Evaluation criteria map\n\nThis report answers "
+        + ", ".join(c for c, _ in CRITERIA_ROWS) + ".\n")
+    p.write_text(t, encoding="utf-8")
+
+
+case("criteria named beside the table instead of in it is rejected", False,
+     upto=5, week=5, tweak=criteria_named_only_in_prose)
 
 
 def main():
@@ -748,22 +1040,31 @@ def main():
                            capture_output=True, text=True)
         return r.returncode == 0, r.stdout
 
-    probes = [("--all passes with every progress file present", None, True),
-              ("--all fails when the highest progress file is deleted", 4, False),
-              ("--all fails when a middle progress file is deleted", 3, False)]
-    for name, drop, want_pass in probes:
+    probes = [("--all passes with every progress file present", None, None, True),
+              ("--all fails when the highest progress file is deleted", 4, None, False),
+              ("--all fails when a middle progress file is deleted", 3, None, False),
+              ("--all fails when a completed week has no audit", None, 2, False),
+              ("--all fails on two NEXT-WEEK markers", None, None, False, "double")]
+    for name, drop, no_audit, want_pass, *extra in probes:
         tmp = tempfile.mkdtemp(prefix="cyclo-gate-")
         try:
             build(tmp, honest_numbers(), 4)
-            (Path(tmp) / "handoff.md").write_text(
-                "\n".join(["# Handoff", "", "NEXT-WEEK: 5", ""]), encoding="utf-8")
+            hand = ["# Handoff", "", "NEXT-WEEK: 5", ""]
+            if extra and extra[0] == "double":
+                hand += ["NEXT-WEEK: 3", ""]
+            (Path(tmp) / "handoff.md").write_text("\n".join(hand), encoding="utf-8")
             prog = Path(tmp) / "stage-1" / "progress"
+            audit = Path(tmp) / "stage-1" / "audit"
             prog.mkdir(parents=True, exist_ok=True)
+            audit.mkdir(parents=True, exist_ok=True)
             for w in range(1, 5):
                 if w == drop:
                     continue
                 (prog / f"week-{w}.md").write_text(
                     f"# Week {w}\n\nSTATUS: WEEK-COMPLETE\n", encoding="utf-8")
+                if w != no_audit:
+                    (audit / f"week-{w}.md").write_text(
+                        f"# Week {w} audit\n\nAUDIT-COMPLETE\n", encoding="utf-8")
             got_pass, out = run_all(tmp)
             ok = got_pass == want_pass
             print(("ok    " if ok else "BROKE ") + name +
@@ -780,7 +1081,7 @@ def main():
         for name, out in failures:
             print(f"\n===== {name} =====\n{out}")
         return 1
-    print(f"All {len(CASES) + 20} gate self-tests behaved as expected.")
+    print(f"All {len(CASES) + 22} gate self-tests behaved as expected.")
     return 0
 
 
