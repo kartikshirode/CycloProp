@@ -1,5 +1,5 @@
 {
-  "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder, and a string in a numeric field fails too. Week 2 fills geometry, operating, performance, efficiency, power_by_radius, mass_envelope_g and sources. Week 3 fills pitch and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, so an optimistic headline number achieves nothing. mass_envelope_g lines are {item, nominal_g, conservative_g, basis} with distinct item names. mass_budget_g lines are {item, mass_g, basis, refines}, where refines names the mass_envelope_g item this line came from, so week 4 continuity is checked per component and not only on the total.",
+  "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder, and a string in a numeric field fails too. Week 2 fills geometry, operating, performance, efficiency, power_by_radius, mass_envelope_g and sources. Week 3 fills pitch and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, so an optimistic headline number achieves nothing. mass_envelope_g lines are {item, nominal_g, conservative_g, basis} with distinct item names. mass_budget_g lines are {item, mass_g, basis, refines}, where refines names the mass_envelope_g item this line came from, so week 4 continuity is checked per component and not only on the total. Aerodynamic power is bounded below by momentum theory over the declared momentum_area_m2, which may not exceed 2R times span, and the figure of merit that falls out has to be credible for a cyclorotor. thrust_sensitivity freezes in week 2 what raising thrust costs, and week 4 may only choose a row from it. Structural demands are derived: per-blade mass from the blade budget and blade count, rotor shaft torque from shaft power and speed, blade root bending from thrust per blade, lever arm and load factor.",
   "geometry": {
     "radius_m": null,
     "chord_m": null,
@@ -24,7 +24,13 @@
     "electrical_power_W": null,
     "actuator_power_W": null,
     "controller_power_W": null,
-    "module_electrical_power_W": null
+    "module_electrical_power_W": null,
+    "momentum_area_m2": null,
+    "ideal_power_W": null,
+    "figure_of_merit": null,
+    "power_loading_ref_N_per_W": null,
+    "aero_power_W_published": null,
+    "power_spread": null
   },
   "efficiency": {
     "transmission": null,
@@ -39,7 +45,9 @@
     "vector_range_deg": null,
     "actuator_count": null,
     "actuator_mass_g": null,
-    "side_force_tilt_deg": null
+    "side_force_tilt_deg": null,
+    "phase_authority_deg": null,
+    "schedule_rms_residual_deg": null
   },
   "packaging": {
     "envelope_length_mm": null,
@@ -55,14 +63,28 @@
     "blade_allowable_Nm": null,
     "shaft_allowable_Nm": null,
     "blade_margin": null,
-    "shaft_margin": null
+    "shaft_margin": null,
+    "transmission_ratio": null,
+    "torque_reference": null,
+    "blade_load_lever_m": null,
+    "blade_load_factor": null,
+    "pitch_link_load_N": null,
+    "pitch_link_allowable_N": null,
+    "pitch_link_margin": null
   },
   "mass_envelope_g": [],
   "mass_budget_g": [],
   "sources": {
     "performance": {
       "blade_area_coeff": null,
-      "blade_area_coeff_low": null
+      "blade_area_coeff_low": null,
+      "momentum_area_m2": null,
+      "power_loading_ref_N_per_W": null
+    },
+    "structure": {
+      "blade_root_bending_Nm": null,
+      "shaft_torque_Nm": null,
+      "pitch_link_load_N": null
     }
   },
   "results": {
@@ -72,5 +94,6 @@
     "mass_envelope_g": null,
     "mass_g_conservative": null,
     "thrust_to_weight_conservative": null
-  }
+  },
+  "thrust_sensitivity": []
 }
