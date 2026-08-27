@@ -58,6 +58,17 @@ MIN_MARGIN = 1.5
 MIN_DECLARED_NUMBERS = 3
 GROUP_DRIFT_MAX = 0.25   # week 4 refines week 2's envelope, per component and in total
 
+# Momentum theory gives the power no rotor can beat. Applied to a cyclorotor the standard
+# closure is the projected frontal area, 2R times span, so the area may not be inflated
+# past that to soften the bound. A figure of merit is ideal over actual: above 0.75 is not
+# a cyclorotor result, and below 0.20 usually means an arithmetic error rather than a bad
+# rotor. Without this floor the gate certified 13.5 N produced by 1 W.
+FM_MAX = 0.75
+FM_MIN = 0.20
+MAX_POWER_SPREAD = 0.35   # primary estimate against the published power-loading route
+MIN_BLADES = 2
+MIN_MOUNT_POINTS = 2
+
 # A "conservative" case has to actually be conservative. Shaving 0.01 percent off the
 # coefficient and calling it a lower bound satisfies an inequality and nothing else.
 CONSERVATIVE_COEFF_MAX_RATIO = 0.90   # low coefficient at most 90 percent of nominal
@@ -174,6 +185,21 @@ def require_positive(data, keys, label):
     return report(not bad, label, "; ".join(bad[:6]) if bad else "")
 
 
+def require_integer(data, keys, label, minimum=1):
+    """Hardware comes in whole units. Half an actuator and a tenth of a mount point both
+    satisfied a positive-number check, and neither feeds an equation that would catch it."""
+    bad = []
+    for k in keys:
+        v = num(data, k)
+        if v is None:
+            bad.append(f"{k}={dotted(data, k)!r}")
+        elif abs(v - round(v)) > 1e-9:
+            bad.append(f"{k}={v} is not a whole number")
+        elif v < minimum:
+            bad.append(f"{k}={v:.0f} is below {minimum}")
+    return report(not bad, label, "; ".join(bad[:6]) if bad else "")
+
+
 def require_text(data, keys, label, min_chars=3):
     bad = []
     for k in keys:
@@ -256,6 +282,25 @@ def recompute(data):
             if ct is not None:
                 out[tag] = ct * 0.5 * RHO * u * u * out["blade_area_m2"]
 
+    # Momentum floor. Uses recomputed thrust, so an optimistic stored thrust cannot buy a
+    # softer bound, and the declared area, so the closure being used is visible.
+    area = num(data, "performance.momentum_area_m2")
+    if area and "thrust_N" in out:
+        out["ideal_power_W"] = out["thrust_N"] ** 1.5 / math.sqrt(2 * RHO * area)
+        if R and S:
+            out["momentum_area_max_m2"] = 2 * R * S
+    ap0 = num(data, "performance.aero_power_W")
+    if ap0 and "ideal_power_W" in out:
+        out["figure_of_merit"] = out["ideal_power_W"] / ap0
+
+    # Second route: published power loading, which is an independent closure rather than
+    # the same equation rearranged.
+    pl = num(data, "performance.power_loading_ref_N_per_W")
+    if pl and "thrust_N" in out:
+        out["aero_power_W_published"] = out["thrust_N"] / pl
+        if ap0:
+            out["power_spread"] = abs(ap0 - out["aero_power_W_published"]) / ap0
+
     ap, tare = num(data, "performance.aero_power_W"), num(data, "performance.tare_power_W")
     if ap and tare:
         out["shaft_power_W"] = ap + tare
@@ -270,10 +315,36 @@ def recompute(data):
     for tag, dem, allow in (("blade_margin", "structure.blade_root_bending_Nm",
                              "structure.blade_allowable_Nm"),
                             ("shaft_margin", "structure.shaft_torque_Nm",
-                             "structure.shaft_allowable_Nm")):
+                             "structure.shaft_allowable_Nm"),
+                            ("pitch_link_margin", "structure.pitch_link_load_N",
+                             "structure.pitch_link_allowable_N")):
         d_, a_ = num(data, dem), num(data, allow)
         if d_ and a_:
             out[tag] = a_ / d_
+
+    # Structural demands are derived, not asserted. A reviewer recomputes rotor shaft
+    # torque from shaft power and speed in about ten seconds, so the gate does it first.
+    ratio = num(data, "structure.transmission_ratio")
+    if "shaft_power_W" in out and rpm and ratio:
+        omega = rpm * 2 * math.pi / 60
+        out["rotor_omega_rad_s"] = omega
+        out["shaft_torque_Nm_derived"] = out["shaft_power_W"] / omega
+        out["motor_torque_Nm_derived"] = out["shaft_power_W"] / (omega * ratio)
+
+    # Per-blade mass follows from the blade mass budget and the blade count. It used to be
+    # an independent number, so a 1 g blade could sit beside a 108 g blade budget.
+    budget_rows = dotted(data, "mass_budget_g")
+    if isinstance(budget_rows, list) and nb:
+        blade_g = sum(float(b["mass_g"]) for b in budget_rows
+                      if isinstance(b, dict) and "blade" in str(b.get("item", "")).lower()
+                      and isinstance(b.get("mass_g"), (int, float))
+                      and not isinstance(b.get("mass_g"), bool))
+        if blade_g > 0:
+            out["blade_mass_kg_derived"] = blade_g / 1000.0 / nb
+
+    lever, lf = num(data, "structure.blade_load_lever_m"), num(data, "structure.blade_load_factor")
+    if lever and lf and nb and "thrust_N" in out:
+        out["blade_root_bending_Nm_derived"] = out["thrust_N"] / nb * lever * lf
 
     env = dotted(data, "mass_envelope_g")
     if isinstance(env, list) and env:
@@ -321,16 +392,26 @@ COVERAGE_ALLOW = {(10.0, "force")}
 
 # Scientific notation is included because 9.99e2 N is a fabricated number that the plain
 # pattern walked straight past.
+# The decimal grammar covers 999, 999.5, .999, 999. and 9.99e2, because every form the
+# matcher did not recognise was a number nobody was checking.
 UNIT_NUM = re.compile(
-    r"(?<![\w.])(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s*(kW|kg|mm|Nm|m/s|rpm|deg|N|W|g|m)"
-    r"(?![\w/])")
+    r"(?<![\w.])(-?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*"
+    r"(kW|kg|mm|Nm|m/s|rpm|deg|N|W|g|m)(?![\w/])")
 # An escape has to say why it exists, and the ceiling counts the NUMBERS it hides rather
 # than the markers themselves. One marker can cover a whole line or a whole table, so
 # counting markers measured the wrong thing.
-ALLOW_LINE = re.compile(r"<!--\s*allow:\s*(.{15,}?)\s*-->")
-ALLOW_TABLE = re.compile(r"<!--\s*allow-table:\s*(.{15,}?)\s*-->")
-BARE_ALLOW = re.compile(r"<!--\s*allow(-table)?\s*(:\s*.{0,14})?\s*-->")
+ANY_ALLOW = re.compile(r"<!--\s*allow(-table)?\s*:?(.*?)-->")
+MIN_ALLOW_REASON = 15
 MAX_UNCHECKED_NUMBERS = 4
+
+
+def allow_reason(line, table=False):
+    """A stated reason has to contain 15 characters of actual reason. Counting characters
+    in the pattern let 15 spaces through, which is a bare escape wearing a hat."""
+    for m in ANY_ALLOW.finditer(line):
+        if bool(m.group(1)) == table and len(m.group(2).strip()) >= MIN_ALLOW_REASON:
+            return True
+    return False
 
 
 def dim_of_key(key):
@@ -371,21 +452,21 @@ def check_numeric_coverage(rel, data):
     collect_dimensioned(data, known)
 
     text = p.read_text(encoding="utf-8")
-    bare = [m.group(0) for m in BARE_ALLOW.finditer(text)
-            if not ALLOW_LINE.search(m.group(0)) and not ALLOW_TABLE.search(m.group(0))]
+    bare = [m.group(0) for m in ANY_ALLOW.finditer(text)
+            if len(m.group(2).strip()) < MIN_ALLOW_REASON]
     ok = report(not bare, f"{rel} every audit escape states a reason",
                 "; ".join(bare[:3]) if bare else "")
 
     unmatched, unchecked, table_exempt = [], [], False
     for i, line in enumerate(text.splitlines(), 1):
         stripped = line.strip()
-        if ALLOW_TABLE.search(line):
+        if allow_reason(line, table=True):
             table_exempt = True
             continue
         is_table = stripped.startswith("|")
         if not is_table and stripped:
             table_exempt = False
-        exempt = (stripped.startswith(">") or bool(ALLOW_LINE.search(line))
+        exempt = (stripped.startswith(">") or allow_reason(line)
                   or (is_table and table_exempt))
         for m in UNIT_NUM.finditer(line):
             val, unit = float(m.group(1)), m.group(2)
@@ -419,19 +500,34 @@ def section_under(text, keyword):
     return out if capturing or out else None
 
 
-def check_pdf(rel, min_pages=4):
+def pdf_text(path):
     """Read with pypdf rather than shelling out to pdfinfo, which resolves to whatever
     happens to be on PATH and is not guaranteed to be a working poppler build."""
+    import pypdf
+    reader = pypdf.PdfReader(str(path))
+    return len(reader.pages), "\n".join(pg.extract_text() or "" for pg in reader.pages)
+
+
+def check_pdf(rel, min_pages=4, must_contain=()):
+    """The attachment is what gets evaluated, so it has to be THIS submission. Page count
+    and readability alone accepted an unrelated PDF: the week 5 fixture passed while
+    attaching the competition's own problem statement."""
     p = ROOT / rel
     if not report(p.is_file(), f"{rel} exists"):
         return False
     try:
-        import pypdf
-        pages = len(pypdf.PdfReader(str(p)).pages)
+        pages, text = pdf_text(p)
     except Exception as e:
         return report(False, f"{rel} is a readable PDF", f"{type(e).__name__}: {e}")
-    return report(pages >= min_pages, f"{rel} is a readable PDF with {min_pages}+ pages",
-                  f"{pages} pages")
+    ok = report(pages >= min_pages, f"{rel} is a readable PDF with {min_pages}+ pages",
+                f"{pages} pages")
+    if must_contain:
+        flat = " ".join(text.split()).lower()
+        absent = [s for s in must_contain if " ".join(s.split()).lower() not in flat]
+        ok &= report(not absent, f"{rel} is built from this submission, not another document",
+                     f"{len(absent)} expected string(s) absent: "
+                     + "; ".join(absent[:4]) if absent else "")
+    return ok
 
 
 # ------------------------------------------------------------------ week gates
@@ -445,6 +541,55 @@ def week1(data):
     ok &= require_headings("stage-1/literature.md", [
         "Geometry and measured performance", "Published mass breakdowns",
     ])
+    return ok
+
+
+def check_thrust_sensitivity(data, r):
+    """Week 2 freezes what raising thrust actually costs, so week 4 cannot treat it as a
+    free knob on the numerator of T/W. Within the fixed shape family, raising thrust from
+    10 N to 13 N buys 30 percent of mass ceiling and spends 14 percent more rpm, 30 percent
+    more centrifugal load and 48 percent more ideal power. That can move the motor, the
+    transmission, the thermal case and the structure, none of which fits in week 4."""
+    rows = dotted(data, "thrust_sensitivity")
+    ok = report(isinstance(rows, list) and len(rows) >= 3,
+                "week2: a thrust sensitivity table covers at least 3 candidate thrusts",
+                f"found {len(rows) if isinstance(rows, list) else 0}")
+    if not (isinstance(rows, list) and rows):
+        return ok
+
+    area = num(data, "performance.momentum_area_m2")
+    bad, thrusts = [], []
+    for row in rows:
+        if not isinstance(row, dict):
+            bad.append(repr(row)[:30]); continue
+        vals = {}
+        for f in ("thrust_N", "mass_ceiling_g", "ideal_power_W", "rpm"):
+            v = row.get(f)
+            if not isinstance(v, (int, float)) or isinstance(v, bool) or v <= 0:
+                bad.append(f"{row.get('thrust_N', '?')} N row: {f}={v!r}")
+            else:
+                vals[f] = float(v)
+        if len(vals) < 4:
+            continue
+        thrusts.append(vals["thrust_N"])
+        # The ceiling is what T/W above 2.5 allows, floored because the inequality is strict.
+        ceiling = math.floor(vals["thrust_N"] / (TW_MINIMUM * G) * 1000.0)
+        if abs(vals["mass_ceiling_g"] - ceiling) > 1.0:
+            bad.append(f"{vals['thrust_N']} N: ceiling {vals['mass_ceiling_g']} g, "
+                       f"the inequality gives {ceiling} g")
+        if area:
+            ideal = vals["thrust_N"] ** 1.5 / math.sqrt(2 * RHO * area)
+            if not close(vals["ideal_power_W"], ideal, DISPLAY_TOL):
+                bad.append(f"{vals['thrust_N']} N: ideal power {vals['ideal_power_W']} W, "
+                           f"momentum gives {ideal:.1f} W")
+    ok &= report(not bad, "week2: every sensitivity row reproduces its ceiling and ideal power",
+                 "; ".join(bad[:4]) if bad else "")
+
+    design = num(data, "performance.thrust_N")
+    if design and thrusts:
+        ok &= report(any(close(design, t, DISPLAY_TOL) for t in thrusts),
+                     "week2: the design thrust is one of the prequalified rows",
+                     f"{design} N not among {sorted(thrusts)}")
     return ok
 
 
@@ -462,6 +607,8 @@ def week2(data):
         "efficiency.transmission", "efficiency.motor", "efficiency.esc",
         "results.mass_g_conservative",
     ], "week2: numbers.json carries the week 2 schema as positive finite values")
+    ok &= require_integer(data, ["geometry.blades"], "week2: blades come in whole units",
+                          MIN_BLADES)
     ok &= require_text(data, ["geometry.airfoil"], "week2: airfoil is named")
     ok &= require_text(data, ["sources.performance.blade_area_coeff",
                               "sources.performance.blade_area_coeff_low"],
@@ -560,6 +707,57 @@ def week2(data):
              f"{tc / (TW_MINIMUM * G) * 1000:.0f} g "
              f"({PLANNING_MASS_AT_10N_G:.0f} g would apply only at exactly 10 N)")
 
+    # ---- the physical floor under the power estimate -----------------------------
+    # Everything else in week 2 checks that stored arithmetic agrees with itself. This is
+    # the only gate that asks whether the thrust and power pair could exist at all.
+    ok &= require_positive(data, ["performance.momentum_area_m2", "performance.ideal_power_W",
+                                  "performance.figure_of_merit",
+                                  "performance.power_loading_ref_N_per_W",
+                                  "performance.aero_power_W_published",
+                                  "performance.power_spread"],
+                           "week2: the power estimate carries a momentum bound and a second route")
+    ok &= require_text(data, ["sources.performance.momentum_area_m2",
+                              "sources.performance.power_loading_ref_N_per_W"],
+                       "week2: the momentum closure and the published power loading cite a source", 20)
+    if "ideal_power_W" in r:
+        ok &= report(close(num(data, "performance.ideal_power_W"), r["ideal_power_W"]),
+                     "week2: ideal power reproduces from thrust and the declared area",
+                     f"computed {r['ideal_power_W']:.2f} W")
+        if "momentum_area_max_m2" in r:
+            ok &= report(num(data, "performance.momentum_area_m2")
+                         <= r["momentum_area_max_m2"] * (1 + DISPLAY_TOL),
+                         "week2: the momentum area is not inflated past the projected area",
+                         f"declared {num(data, 'performance.momentum_area_m2'):.4f} m2, "
+                         f"2R times span is {r['momentum_area_max_m2']:.4f} m2")
+        ap_ = num(data, "performance.aero_power_W")
+        ok &= report(ap_ is not None and ap_ >= r["ideal_power_W"],
+                     "week2: aerodynamic power is at or above the momentum bound",
+                     f"{ap_} W against an ideal {r['ideal_power_W']:.2f} W" if ap_ else "")
+    if "figure_of_merit" in r:
+        fm = r["figure_of_merit"]
+        ok &= report(close(num(data, "performance.figure_of_merit"), fm),
+                     "week2: figure of merit reproduces from ideal over actual power",
+                     f"computed {fm:.3f}")
+        ok &= report(FM_MIN <= fm <= FM_MAX,
+                     f"week2: figure of merit is between {FM_MIN} and {FM_MAX}",
+                     f"{fm:.3f}")
+    if "aero_power_W_published" in r:
+        ok &= report(close(num(data, "performance.aero_power_W_published"),
+                           r["aero_power_W_published"]),
+                     "week2: the published-power-loading route reproduces from thrust",
+                     f"computed {r['aero_power_W_published']:.2f} W")
+    if "power_spread" in r:
+        ok &= report(close(num(data, "performance.power_spread"), r["power_spread"], DISPLAY_TOL),
+                     "week2: the stated spread between the two power routes reproduces",
+                     f"computed {r['power_spread']:.3f}")
+        ok &= report(r["power_spread"] <= MAX_POWER_SPREAD,
+                     f"week2: the two power routes agree within {MAX_POWER_SPREAD:.0%}",
+                     f"spread {r['power_spread']:.1%}")
+
+    # Thrust is a free variable, so the sensitivity of everything to it gets frozen here.
+    # Week 4 may only pick a row from this table, never invent a new thrust under deadline.
+    ok &= check_thrust_sensitivity(data, r)
+
     if "electrical_power_W" in r:
         ok &= report(close(num(data, "performance.electrical_power_W"), r["electrical_power_W"]),
                      "week2: rotor electrical power reproduces from shaft power and the chain",
@@ -636,6 +834,68 @@ def week2(data):
     return ok
 
 
+def check_pitch_motion(data, az, pitches):
+    """A table that spans 360 degrees is not evidence of pitching. This one asks whether
+    the mechanism actually moves: real extrema in both directions, the stated amplitude
+    reached, the revolution closing, and the stated phase delay recoverable from the table
+    rather than asserted next to it. Kinematics and vectoring carry 15 percent together."""
+    amp = num(data, "geometry.pitch_amplitude_deg")
+    phase = num(data, "pitch.phase_delay_deg")
+    if not (pitches and amp and len(az) == len(pitches)):
+        return True
+    hi, lo = max(pitches), min(pitches)
+    ok = report(hi >= amp * 0.9 and lo <= -amp * 0.9,
+                "week3: the schedule reaches the stated amplitude in both directions",
+                f"peak {hi:.1f} deg, trough {lo:.1f} deg against an amplitude of {amp} deg")
+    ok &= report(abs((hi - lo) - 2 * amp) <= 0.15 * 2 * amp,
+                 "week3: peak to peak travel matches twice the stated amplitude",
+                 f"{hi - lo:.1f} deg against {2 * amp:.1f} deg")
+
+    # Periodic closure, only when the table actually carries both ends.
+    ends = {round(a) % 360: p for a, p in zip(az, pitches)}
+    first = [p for a, p in zip(az, pitches) if abs(a - min(az)) < 1e-6]
+    last = [p for a, p in zip(az, pitches) if abs(a - max(az)) < 1e-6]
+    if max(az) - min(az) >= 360 - 1e-6 and first and last:
+        ok &= report(abs(first[0] - last[0]) <= 0.02 * amp,
+                     "week3: the schedule closes on itself over a revolution",
+                     f"{first[0]:.2f} deg at {min(az):.0f} against {last[0]:.2f} deg "
+                     f"at {max(az):.0f}")
+
+    # The phase delay is where the side force comes from, so it has to be in the table.
+    if phase is not None:
+        peak_az = az[pitches.index(hi)]
+        implied = (peak_az - 90.0) % 360.0
+        if implied > 180:
+            implied -= 360.0
+        gap = abs(implied - phase)
+        ok &= report(gap <= 10.0,
+                     "week3: the stated phase delay is the one the schedule shows",
+                     f"peak at {peak_az:.0f} deg implies {implied:.1f} deg, "
+                     f"pitch.phase_delay_deg says {phase}")
+
+        # Residual against the harmonic the four-bar is meant to approximate. A real
+        # linkage is not a pure cosine, so the cap is loose; a flat table is not.
+        stated = num(data, "pitch.schedule_rms_residual_deg")
+        model = [amp * math.cos(math.radians(a - 90.0 - phase)) for a in az]
+        rms = math.sqrt(sum((p - m) ** 2 for p, m in zip(pitches, model)) / len(pitches))
+        if stated is not None:
+            ok &= report(close(stated, rms, DISPLAY_TOL) or abs(stated - rms) <= 0.05,
+                         "week3: the stated fit residual reproduces from the table",
+                         f"computed {rms:.3f} deg, stated {stated}")
+        ok &= report(rms <= 0.25 * amp,
+                     "week3: the schedule tracks the harmonic model it claims to follow",
+                     f"rms residual {rms:.2f} deg against an amplitude of {amp} deg")
+
+    # Vectoring follows from how far the offset direction can be driven, one to one.
+    # It used to be a number asserted beside the mechanism with nothing tying them.
+    auth, rng = num(data, "pitch.phase_authority_deg"), num(data, "pitch.vector_range_deg")
+    if auth and rng:
+        ok &= report(close(rng, auth, DISPLAY_TOL),
+                     "week3: the vectoring range is the phase authority of the mechanism",
+                     f"range {rng} deg against an authority of {auth} deg")
+    return ok
+
+
 def week3(data):
     ok = True
     ok &= require_positive(data, [
@@ -643,7 +903,11 @@ def week3(data):
         "pitch.actuator_count", "pitch.actuator_mass_g", "pitch.side_force_tilt_deg",
         "packaging.envelope_length_mm", "packaging.envelope_width_mm",
         "packaging.envelope_height_mm", "packaging.mount_points",
+        "pitch.phase_authority_deg", "pitch.schedule_rms_residual_deg",
     ], "week3: numbers.json carries the pitch and packaging schema")
+    ok &= require_integer(data, ["pitch.actuator_count"], "week3: actuators come in whole units")
+    ok &= require_integer(data, ["packaging.mount_points"],
+                          "week3: mount points come in whole units", MIN_MOUNT_POINTS)
     ok &= require_text(data, ["pitch.mechanism"], "week3: pitch mechanism is named", 6)
 
     rel = "stage-1/design/03-pitch-and-vectoring.md"
@@ -685,6 +949,7 @@ def week3(data):
             ok &= report(max(uniq) - min(uniq) >= 300,
                          "week3: pitch schedule spans the revolution",
                          f"{min(uniq):.0f} to {max(uniq):.0f} deg")
+        ok &= check_pitch_motion(data, az, pitches)
 
     rel = "stage-1/design/09-packaging-and-integration.md"
     ok &= require_headings(rel, ["Package envelope", "Mounting", "Drivetrain",
@@ -802,10 +1067,33 @@ def week4(data):
         "structure.blade_root_bending_Nm", "structure.shaft_torque_Nm",
         "structure.blade_allowable_Nm", "structure.shaft_allowable_Nm",
         "structure.blade_margin", "structure.shaft_margin",
+        "structure.transmission_ratio", "structure.blade_load_lever_m",
+        "structure.blade_load_factor", "structure.pitch_link_load_N",
+        "structure.pitch_link_allowable_N", "structure.pitch_link_margin",
     ], "week4: numbers.json carries the structural schema")
+    ok &= require_text(data, ["structure.torque_reference",
+                              "sources.structure.blade_root_bending_Nm",
+                              "sources.structure.shaft_torque_Nm",
+                              "sources.structure.pitch_link_load_N"],
+                       "week4: every structural demand names the calculation behind it", 20)
+
+    # Demands are derived from the design, not asserted next to it. A 1 g blade used to sit
+    # happily beside a 108 g blade budget because nothing connected the two.
+    for stated, computed, label in [
+        ("structure.blade_mass_kg", "blade_mass_kg_derived",
+         "per-blade mass follows from the blade budget and the blade count"),
+        ("structure.shaft_torque_Nm", "shaft_torque_Nm_derived",
+         "rotor shaft torque follows from shaft power and rotor speed"),
+        ("structure.blade_root_bending_Nm", "blade_root_bending_Nm_derived",
+         "blade root bending follows from thrust per blade, lever arm and load factor"),
+    ]:
+        if computed in r:
+            ok &= report(close(num(data, stated), r[computed], DISPLAY_TOL),
+                         f"week4: {label}",
+                         f"computed {r[computed]:.4g}, stated {dotted(data, stated)}")
 
     # Margins are derived from allowable over demand, never asserted.
-    for tag in ("blade_margin", "shaft_margin"):
+    for tag in ("blade_margin", "shaft_margin", "pitch_link_margin"):
         v, computed = num(data, f"structure.{tag}"), r.get(tag)
         if computed is not None:
             ok &= report(close(v, computed),
@@ -871,34 +1159,93 @@ def week5(data):
         ok &= report(False, "week5: the submission has a criteria map section")
     else:
         # Count data rows, not lines. The separator row is not a criterion and neither
-        # is the header, so a table of 8 criteria is 10 lines.
-        rows = [l for l in block if l.strip().startswith("|")
-                and not set(l.strip()) <= set("|- :")]
-        data_rows = max(0, len(rows) - 1)
-        ok &= report(data_rows >= len(CRITERIA_KEYS),
+        # is the header, so a table of 8 criteria is 10 lines. A real markdown table has
+        # that separator, and the criteria have to be IN the rows: reading the whole
+        # section let eight junk rows pass beside a sentence that named the eight criteria.
+        pipes = [l.strip() for l in block if l.strip().startswith("|")]
+        sep = [l for l in pipes if set(l) <= set("|- :") and "-" in l]
+        ok &= report(bool(sep), "week5: the criteria map is a real markdown table",
+                     "no header separator row")
+        rows = [l for l in pipes if l not in sep]
+        data_rows = rows[1:] if sep else []
+        ok &= report(len(data_rows) >= len(CRITERIA_KEYS),
                      f"week5: the criteria map is a table of {len(CRITERIA_KEYS)} criteria",
-                     f"{data_rows} data rows under the header")
-        low = " ".join(block).lower()
+                     f"{len(data_rows)} data rows under the header")
+        low = " ".join(data_rows).lower()
         absent = [k for k in CRITERIA_KEYS if k.lower() not in low]
         ok &= report(not absent, f"week5: the criteria map covers all {len(CRITERIA_KEYS)} criteria",
-                     "missing: " + ", ".join(absent) if absent else "")
+                     "missing from the table rows: " + ", ".join(absent) if absent else "")
 
     ok &= require_substance("stage-1/submission/cycloprop-stage1.md", 2500)
     ok &= check_declared_numbers("stage-1/submission/cycloprop-stage1.md", data)
 
     ok &= check_numeric_coverage("stage-1/submission/cycloprop-stage1.md", data)
-    ok &= check_pdf("stage-1/submission/cycloprop-stage1.pdf")
+
+    # The PDF has to be this document. Its own required sections and a few of its declared
+    # values are the cheapest identity evidence that survives a rebuild.
+    want = list(REQUIRED_ITEMS)
+    decl = re.search(r"##\s*Numbers used\s*(.*?)(\n##\s|\Z)", text, re.S | re.I)
+    if decl:
+        for d in [m for m in (NUM_DECL.match(l) for l in decl.group(1).splitlines()) if m][:3]:
+            want.append(d.group(2).rstrip("0").rstrip(".") if "." in d.group(2) else d.group(2))
+    ok &= check_pdf("stage-1/submission/cycloprop-stage1.pdf", must_contain=want)
+
+    ok &= check_human_gate()
 
     draft = ROOT / "stage-1" / "submission" / "email-draft.md"
     ok &= report(draft.is_file(), "week5: the email is drafted and staged for a human to send")
     if draft.is_file():
         d = draft.read_text(encoding="utf-8").lower()
-        ok &= report("attachment" in d and "cycloprop-stage1.pdf" in d,
-                     "week5: the email names the attachment")
+        # Naming the organiser in a draft is not sending to them. Sending stays a blocked
+        # trigger; this only stops a finished draft going to nobody in particular.
+        for needle, label in [("cycloprop-stage1.pdf", "names the attachment"),
+                              ("attachment", "says there is an attachment"),
+                              ("pushpak_gc2026@aero.iitb.ac.in", "names the organiser address"),
+                              ("subject", "carries a subject line")]:
+            ok &= report(needle in d, f"week5: the staged email {label}")
     return ok
 
 
 WEEKS = {1: week1, 2: week2, 3: week3, 4: week4, 5: week5}
+
+
+AUDIT_MARKER = "AUDIT-COMPLETE"
+HUMAN_GATE_MARKERS = ["REGISTRATION-CONFIRMED", "ELIGIBILITY-CHECKED",
+                      "ROSTER-CONFIRMED", "SENDER-CONFIRMED"]
+HUMAN_GATE_FILE = "stage-1/human-gate.md"
+
+
+def check_audits_exist(target):
+    """The accepted judgment gaps around prose quality, mass bases and source strength are
+    supposed to be caught by the weekly audit. That mitigation was named in the config and
+    enforced nowhere in this script, so a week could be green with no audit written.
+
+    Only weeks already marked done are required to carry one. The week being gated right
+    now is mid-flight and its audit does not exist yet."""
+    done = done_set()
+    missing = []
+    for w in sorted(x for x in done if x <= target):
+        p = ROOT / "stage-1" / "audit" / f"week-{w}.md"
+        if not p.is_file():
+            missing.append(f"week {w} has no audit file")
+        elif AUDIT_MARKER not in p.read_text(encoding="utf-8"):
+            missing.append(f"week {w} audit has no {AUDIT_MARKER}")
+    return report(not missing, "every completed week carries a finished audit",
+                  "; ".join(missing[:4]) if missing else f"{len(done)} week(s) audited")
+
+
+def check_human_gate():
+    """Week H is a human task list and week 5 is a hard block on it. These are status
+    markers a person writes, never personal details, and never anything an agent may
+    assert on their behalf."""
+    p = ROOT / HUMAN_GATE_FILE
+    if not p.is_file():
+        return report(False, "week5: the human gate file exists",
+                      f"{HUMAN_GATE_FILE} is missing")
+    text = p.read_text(encoding="utf-8")
+    absent = [m for m in HUMAN_GATE_MARKERS if m not in text]
+    return report(not absent, "week5: the human gate is confirmed before anything is staged",
+                  "outstanding: " + ", ".join(absent) if absent else "")
 
 
 def done_set():
@@ -920,20 +1267,20 @@ def expected_done():
     over 1..max never looks above it. The handoff marker is the external witness, and it
     is the same marker the supervisor already greps for."""
     p = ROOT / "handoff.md"
-    if not p.is_file():
+    found = NEXT_WEEK.findall(p.read_text(encoding="utf-8")) if p.is_file() else []
+    # Exactly one. Two markers and the first wins silently, which is a way for the handoff
+    # to say one thing to the gate and another to the reader.
+    if not report(len(found) == 1, "handoff.md carries exactly one NEXT-WEEK marker",
+                  f"{len(found)} found, so a deleted progress file would be invisible"):
         return None
-    m = NEXT_WEEK.search(p.read_text(encoding="utf-8"))
-    return int(m.group(1)) - 1 if m else None
+    return int(found[0]) - 1
 
 
 def highest_done():
     done = done_set()
     best = max(done) if done else 0
     exp = expected_done()
-    if exp is None:
-        report(False, "handoff.md carries a NEXT-WEEK marker to check progress against",
-               "no 'NEXT-WEEK: N' line, so a deleted progress file would be invisible")
-    else:
+    if exp is not None:
         best = max(best, min(exp, max(WEEKS)))
     # A gap means a progress file was removed or a week never finished. --all would
     # otherwise silently stop short of it. The supervisor gates week N itself, so this
@@ -972,6 +1319,7 @@ def main():
     for w in range(1, target + 1):
         print(f"--- week {w} ---")
         WEEKS[w](data)
+    check_audits_exist(target)
     return finish()
 
 
