@@ -75,7 +75,7 @@ This is survivable. Both published designs are 3 to 6 inch demonstrators at Reyn
 
 ## Open items
 
-- **Weekly hours and team size are still unknown.** This is the input most likely to invalidate the schedule and the cheapest one to fix
+- **Working solo.** Confirmed 27 August. More people are available if the work needs them, but the plan should assume one person until that changes. Weekly hours are still unstated, which now matters more than it did, because there is nobody to absorb a slipped week
 - **Three papers unread.** The Texas A&M thesis is the only study in our own Reynolds band and the repository refuses direct requests. Week 2 leans on a summary of it whose internal consistency checks out but which has not been opened. A library proxy or the faculty supervisor would close it
 - **Registration, team confirmation and the eligibility check** are human tasks and none are done. The eligibility clause disqualifies a whole team at any stage, including after results, so check every member before the team is fixed
 - **A faculty supervisor** is still needed, both for the Stage 2 CAE tool access and because the problem statement's preference list reads like a spec for the team capability section

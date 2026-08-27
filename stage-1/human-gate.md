@@ -18,7 +18,7 @@ clause quoted in [../context.md](../context.md) before the team is fixed.
 **2. Registration** on techfest.org, and keep the registration reference. The submission
 email is expected to quote it.
 
-**3. Roster confirmed.** Who is actually on the team, and what each person can evidence.
+**3. Roster confirmed.** Currently one person, confirmed 27 August. If that is still true at week 5, the capability section is written for a solo entry.
 Week 5 writes the team capability section around real capability, and the problem
 statement's preference list reads like a spec for it. Structure comes from the agent, the
 substance comes from you.

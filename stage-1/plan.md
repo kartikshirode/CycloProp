@@ -196,7 +196,7 @@ Week 5 also blocks on the four markers in [human-gate.md](human-gate.md). It can
 
 ### Decision gate
 
-**Fallback if the roster is smaller than hoped:** submit as a smaller team and say so plainly. An honest two-person team with a credible plan reads better than five names nobody can stand behind in a viva.
+**The roster is one person and that is what the section says.** A solo entry with a credible plan and honest scope reads better in a viva than five names nobody can stand behind. Name the capability gaps and say how Stage 2 fills them, because the problem statement's preference list is a spec for this section and pretending to cover all of it is the failure mode.
 
 ---
 
@@ -208,6 +208,6 @@ Week 5 also blocks on the four markers in [human-gate.md](human-gate.md). It can
 
 **Three papers are still unread**, one of them the only study in our Reynolds band. If a library proxy or the faculty supervisor opens it, re-derive the shape family and record a decision entry.
 
-**Weekly hours and team size are unknown** until week H returns them.
+**One person is doing this.** Confirmed 27 August. More people can be brought in if the work needs them. Until then every week is serial, nothing runs in parallel, and a slipped week is a slipped project. Weekly hours are still unstated.
 
 **No CAD is required at Stage 1** and none should be built. CAD quality is scored at Stage 2 and 3.
