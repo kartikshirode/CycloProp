@@ -59,3 +59,42 @@ The requirement is 2.5. That is a 39 to 48 percent improvement over the closest 
 The earlier 37 to 48 percent rotor-fraction benchmark in the literature file was measured against all-up aircraft mass including battery, avionics and airframe. It is not comparable and should not be used for budgeting.
 
 This does not stop the project. It does mean the argument for clearing 2.5 has to be made explicitly in week 2, resting on scale, on fixed masses amortising over more thrust, and on the fact that the published designs were flying demonstrators rather than mass-optimised modules. If week 2's conservative case cannot close, that is a reportable finding and not something to trim assumptions around.
+
+## D9: a paper design has to clear a physical bound, not only its own arithmetic
+
+27 August 2026, after the goal-based review.
+
+Every gate up to this point checked that stored numbers agreed with each other. None asked
+whether the design could exist. A review demonstrated the consequence: a module claiming
+13.5 N of thrust from 1 W of aerodynamic power passed week 2 completely, because the power
+chain, the radius sweep and the thrust recompute were all internally consistent with it.
+
+Aerodynamic power is now bounded below by momentum theory, computed over a declared
+effective area that may not exceed the projected frontal area of 2R times span, and the
+figure of merit that falls out has to land between 0.20 and 0.75. The momentum route is a
+bound rather than a second opinion, since it is the same equation rearranged, so the
+independent cross-check is the published power loading route and the two have to agree
+within 35 percent.
+
+The same principle applies to structure in week 4. Per-blade mass comes from the blade mass
+budget divided by the blade count, rotor shaft torque from shaft power over angular speed,
+and blade root bending from thrust per blade with a declared lever arm and load factor. A
+reviewer recomputes shaft torque from power and speed in about ten seconds, and a
+structural model disconnected from the design costs more than the 15 percent it is scored
+on, because it makes everything else look unchecked too.
+
+## D10: design thrust is frozen as a table in week 2, not reopened in week 4
+
+27 August 2026, after the goal-based review.
+
+D6 made design thrust a free variable above 10 N, which was right. The plan then listed
+raising thrust as the cheapest week 4 fallback, which was wrong. Within the fixed shape
+family, going from 10 N to 13 N buys 30 percent more mass ceiling and spends 14 percent
+more rpm, 30 percent more centrifugal load and 48 percent more ideal power. That can move
+the motor, the transmission, the thermal case and the structure at once, in a week with
+four days left after it.
+
+Week 2 therefore freezes a thrust sensitivity table with at least three candidates, each
+carrying its mass ceiling, ideal power and rpm. Week 4 may only select a row from it. A
+design thrust outside the table fails the gate, because an unstudied increase is a rerun of
+week 2 wearing the costume of a small edit.

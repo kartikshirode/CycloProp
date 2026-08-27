@@ -39,13 +39,15 @@ Under `/loop` with the `weekly-loop` skill, one tick per plan week, config at [.
 
 The gates are not decorative. Every number in the submission is defined once in `stage-1/design/numbers.json`, prose cites it through a `## Numbers used` block, and the gate recomputes thrust from the geometry, weight from the mass lines and T/W from both. Writing a flattering number into prose fails the week.
 
+They are also not sufficient on their own, which took a goal-based review to establish. Agreement between stored numbers is not feasibility: the gates once certified 13.5 N of thrust from 1 W of aerodynamic power, and a structural model with 1 g blades sitting beside a 108 g blade budget. Week 2 now has a momentum floor under its power estimate and week 4 derives its structural loads from the design. Decisions D9 and D10 carry the reasoning.
+
 Human checkpoint every 2 weeks. **The submission email is never sent by an agent**, nor is the team registered or real names written into the capability section. Those are blocked triggers in the config.
 
 Never run a loop longer than 7 to 8 hours. Past that the increment per cycle collapses.
 
 ## Before week 2: the human gate
 
-Week H in the plan. Not a loop tick.
+Week H in the plan, with the task list and the status markers in [stage-1/human-gate.md](stage-1/human-gate.md). Not a loop tick.
 
 Registration, the eligibility check, the roster and naming who sends are a **hard block on week 5**, which cannot write a real capability section or stage a submission without them. They are advisory before week 2, because the engineering does not depend on the roster. The faculty supervisor and the weekly-hours figure are wanted early but block nothing; they change what Stage 2 can promise and how much the schedule can be trusted.
 

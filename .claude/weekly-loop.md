@@ -42,6 +42,8 @@ Two properties matter more than the list.
 
 **There is no 408 g gate.** 408 g is only the ceiling when thrust is exactly 10 N, and the requirement is at least 10 N. The gate tests the real requirement: recomputed thrust at or above 10 N, and recomputed T/W above 2.5, for both a nominal and a conservative case.
 
+**One gate asks whether the design is physically possible, and the rest only check that the arithmetic agrees with itself.** That one is the momentum bound in week 2. Aerodynamic power must sit at or above the ideal induced power over a declared area no larger than 2R times span, and the resulting figure of merit must land between 0.20 and 0.75. Before it existed the gate certified 13.5 N produced by 1 W, with every stored number in perfect agreement. Week 4 carries the structural half of the same idea: per-blade mass, shaft torque and blade root bending are recomputed from the design rather than read back from where they were asserted.
+
 Weeks are cumulative, so `--week 4` reruns 1 through 3 and a later week cannot pass by breaking an earlier one. The gates have their own test suite at `tools/test_gates.py`, which builds throwaway trees and checks that an honest design passes and eleven specific attacks fail. Run it after changing `check.py`.
 
 ## Markers
@@ -63,6 +65,10 @@ human_gate_required_before_week: 5
 ```
 
 The plan's week H holds the human tasks: registration, the eligibility check, the roster and who sends the submission. They are **advisory before week 2**, since the engineering does not depend on them, and a **hard block on week 5**, which cannot write a real capability section or stage a submission without them. If week H is outstanding when week 2 starts, run week 2 and record the gap. If it is outstanding when week 5 starts, report BLOCKED.
+
+That block is now mechanical rather than advisory. `stage-1/human-gate.md` carries four status markers, `REGISTRATION-CONFIRMED`, `ELIGIBILITY-CHECKED`, `ROSTER-CONFIRMED` and `SENDER-CONFIRMED`, and week 5 fails until a human has added all four. An agent never writes them. They are status only and no personal details belong in that file.
+
+The weekly audit is also a gate now. Every week already marked done has to carry `stage-1/audit/week-N.md` containing `AUDIT-COMPLETE`, checked in `check.py` rather than only by the supervisor. The week being gated right now is exempt, since its audit does not exist yet. This matters because the audit is the stated mitigation for everything the gates deliberately do not check: whether the prose says anything, whether a mass basis is real, whether a source is strong enough. That mitigation used to be named in this file and enforced nowhere.
 
 The human reads after every second completed week. Weeks 2 and 4 both carry decision gates that are judgment calls rather than mechanical ones, so full autopilot to the deadline is not the right trade on a submission that only gets made once.
 

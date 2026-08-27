@@ -89,8 +89,10 @@ Covers required items 1, 2 and 4, and settles whether the design closes at all.
 3. **Bound the thrust coefficient, do not just adopt it.** The 0.607 anchor comes from a 4-blade NACA 0010 rotor at c/R 0.433 and Re near 35,000. Moving it to 3 blades, NACA 0020, c/R 0.66 and Re near 100,000 changes blade count, solidity, airfoil and Reynolds number all at once. Derive a defensible low value from the spread in the published data and record both. Benedict's own results give the direction of several of these effects, so use them rather than guessing a percentage.
 4. **Sweep radius against power, not just rpm.** Within a fixed shape family at fixed thrust, tip speed goes as 1/R, so aerodynamic power goes roughly as 1/R. Radius changes the motor, the thermal load and the mass, not only the envelope. Compute power for at least three candidate radii and record the sweep.
 5. **Compute thrust two ways** and report the gap. Coefficient scaling, plus a momentum estimate with its closure assumption stated. A momentum calculation without an independent closure is a bound, not a second opinion, and should be labelled as one.
+
+   The gate now treats it as exactly that. Aerodynamic power has to sit at or above the momentum bound computed over a declared `momentum_area_m2`, which may not exceed the projected frontal area of 2R times span, and the figure of merit that falls out has to land between 0.20 and 0.75. Nothing else in week 2 asks whether the thrust and power pair could exist: without this the gate certified 13.5 N produced by 1 W. The second opinion is the published power loading route, which is an independent closure rather than the same equation rearranged, and the two have to agree within 35 percent.
 6. **Build the whole-module mass envelope now, at line-item level but coarse.** Blades, frame, pitch mechanism, motor, actuator, mounting. Week 4 refines it. Week 2 only has to answer whether it can close. Give each line a distinct name, because every week 4 budget line has to point back at one of them by name.
-7. **Pick the design thrust** using the ceiling table above, and say why.
+7. **Pick the design thrust** using the ceiling table above, and say why. Then freeze a `thrust_sensitivity` table of at least three candidates, each carrying its mass ceiling, its ideal power, its rpm and what it does to the motor and the structure. Raising thrust is not a free knob on the numerator of T/W: going from 10 N to 13 N buys 30 percent more mass ceiling and spends 14 percent more rpm, 30 percent more centrifugal load and 48 percent more ideal power, which can move the motor, the transmission, the thermal case and the structure together. Week 4 may only pick a row from this table, so the sensitivity has to be worked here, where there is time for it.
 8. **Add rotor tare, transmission, actuator and controller draw** to module power. The published power loading figures are blade aerodynamic power on a rig whose structure power was a tenth of the total, so tare is not already included.
 
 ### Done when
@@ -117,9 +119,9 @@ Covers required item 3, the thrust-vectoring requirement at 15%, and the integra
 
 1. **Choose active or passive and justify it.** Passive four-bar is the default on mass evidence, since every flying cyclocopter in the read literature uses one and none use per-blade servos.
 2. **Work the four-bar kinematics.** Link lengths, pitching axis, and the offset that produces the chosen amplitude, for the frozen geometry.
-3. **Produce the pitch schedule** as computed values across the revolution, not a sketch.
-4. **Quantify the phase delay.** Peak pitch does not land exactly at 90 and 270 degrees, and that is where the side force comes from.
-5. **Thrust vectoring, quantified.** Offset magnitude sets amplitude, offset direction sets phase, phase steers the vector. Give the achievable range in degrees and what actuates it. This answers a 15% criterion, so it gets the most care in the week.
+3. **Produce the pitch schedule** as computed values across the revolution, not a sketch. It has to show motion: reach the stated amplitude in both directions, travel peak to peak by roughly twice the amplitude, and close on itself over a revolution. A table that spanned 360 degrees with zero pitch at every azimuth used to pass, and that is not evidence of a mechanism.
+4. **Quantify the phase delay.** Peak pitch does not land exactly at 90 and 270 degrees, and that is where the side force comes from. The stated delay has to be the one the schedule shows, within 10 degrees of where the table actually peaks, and the schedule has to track the harmonic model it claims to follow to a stated RMS residual.
+5. **Thrust vectoring, quantified.** Offset magnitude sets amplitude, offset direction sets phase, phase steers the vector. Give the achievable range in degrees and what actuates it, and state the mechanism's phase authority separately: the range is the authority, so a claimed 360 degrees of vectoring on a linkage that can only drive 90 degrees of phase now fails rather than passing as an assertion. This answers a 15% criterion, so it gets the most care in the week.
 6. **Handle the side force.** Predict the resultant tilt, benchmark against the 30 degrees Benedict measured, and state the correction.
 7. **Package envelope and interfaces.** Overall dimensions, mounting scheme and mount count, drivetrain arrangement from motor through transmission to shaft, and the electrical and mechanical interfaces the module presents to an airframe. Dimensioned sketches and a table, no CAD.
 
@@ -146,7 +148,9 @@ This is the heaviest week, but the geometry and mechanism are frozen by now, so 
 ### Tasks
 
 1. **Load cases and strength.** Centrifugal load on the blade at design speed, blade root bending from aerodynamic and inertial load, shaft torque from the power and speed already fixed, and the pitch link load. Analytical, closed form, with the assumptions written down. No FEA, and none is expected at Stage 1.
-2. **Margins.** Each load case against an allowable for the chosen material, with a stated safety factor. Margins below 1.5 fail the gate.
+
+   Every one of these is derived from the design, not asserted beside it, and the gate recomputes three of them. Per-blade mass is the blade mass budget divided by the blade count, so a 1 g blade cannot sit next to a 108 g blade budget. Rotor shaft torque is shaft power over rotor angular speed, which is the first thing a reviewer recomputes and takes about ten seconds. Blade root bending is thrust per blade times a declared lever arm times a declared peak-to-mean load factor. State which shaft each torque refers to and give the transmission ratio, because torque upstream and downstream of a reduction are different numbers.
+2. **Margins.** Each load case against an allowable for the chosen material, with a stated safety factor. Margins below 1.5 fail the gate. The pitch link gets a demand, an allowable and a margin like everything else.
 3. **Component mass budget.** Every line the problem statement names, plus bearings, shaft, hub, ESC and fasteners. Each line carries a basis, meaning a measured analogue, a material calculation or a supplier figure. The gate rejects one-word bases. Each line also names the week 2 envelope line it refines, through a `refines` field holding that line's name. Several budget lines may refine one envelope line, which is the normal case: a coarse "motor and drive" turns into a motor, a hub, a shaft and bearings.
 4. **Compute T/W nominal and conservative** and state the margin against 2.5.
 5. **Material selection tied to the load cases**, not chosen first and justified after.
@@ -155,7 +159,7 @@ This is the heaviest week, but the geometry and mechanism are frozen by now, so 
 
 ### Done when
 
-`python tools/check.py --week 4` exits 0, cumulatively. It sums the mass lines and rejects any that vanish or carry a thin basis, recomputes weight and both T/W values, requires the conservative mass not to be lighter than the budget, recomputes the centrifugal load from blade mass, speed and radius, and requires both structural margins to be at least 1.5.
+`python tools/check.py --week 4` exits 0, cumulatively. It sums the mass lines and rejects any that vanish or carry a thin basis, recomputes weight and both T/W values, requires the conservative mass not to be lighter than the budget, recomputes the centrifugal load from blade mass, speed and radius, recomputes per-blade mass, shaft torque and blade root bending from the design, and requires all three structural margins to be at least 1.5.
 
 Continuity with week 2 is checked per component, not just on the total. Each envelope line has to stay within 25 percent of what the budget lines refining it add up to, and no envelope line may end up with nothing refining it. Comparing totals alone let the whole budget move into the blades while every other component shrank to the smallest legal line, because the sum came out the same.
 
@@ -163,7 +167,7 @@ Continuity with week 2 is checked per component, not just on the total. Each env
 
 If the refined budget breaks T/W, the second radius from week 2 is available, but taking it **invalidates weeks 3 and 4** because link lengths, offset geometry, pitch schedule, gearing and centrifugal load all move with radius. With four days left after week 4 that is not recoverable, so treat it as a last resort and trigger it on day 2 of the week or not at all. That is exactly why the feasibility envelope moved into week 2.
 
-The cheaper fallbacks, in order, are to raise design thrust within the ceiling table, then to trim the mass budget where a line has slack, then to reopen radius.
+The cheaper fallbacks, in order, are to **move to another row of week 2's frozen thrust sensitivity table**, then to trim the mass budget where a line has slack, then to reopen radius. Raising thrust to a point week 2 never studied is not a cheap fallback and the gate rejects it: a thrust outside the table fails, because the row carries the rpm, the ideal power and the structural loading that come with it. An unstudied increase is a rerun of week 2, not a week 4 edit.
 
 ---
 
@@ -184,7 +188,11 @@ Covers required item 7, then packages for a human to send.
 
 ### Done when
 
-`python tools/check.py --week 5` exits 0, cumulatively. Requires all 7 items as real top-level headings, a criteria map naming all 8 criteria, a submission of substance rather than an outline, a built PDF over 50 kB, and a staged email draft that names the attachment.
+`python tools/check.py --week 5` exits 0, cumulatively. Requires all 7 items as real top-level headings, a criteria map that is an actual table with all 8 criteria in its rows, a submission of substance rather than an outline, and a staged email draft naming the attachment, the organiser address and a subject line.
+
+The PDF condition is no longer a byte count. The gate reads the attachment back with pypdf and requires it to carry this submission's seven section names and its declared values, because a file size cannot tell the difference between the right report and an unrelated one. The old wording asked for 50 kB and the earlier gate only asked for four readable pages, which between them accepted the competition's own problem statement as our submission.
+
+Week 5 also blocks on the four markers in [human-gate.md](human-gate.md). It cannot write a real capability section or stage a submission without them.
 
 ### Decision gate
 
