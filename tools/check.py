@@ -73,8 +73,11 @@ FM_MIN = 0.20
 SOLIDITY_MIN, SOLIDITY_MAX = 0.30, 0.40
 
 # Peak blade thrust runs 3 to 4 times the cycle mean on 2 and 3 bladed rotors, which a
-# cycle-averaged coefficient hides completely. Structure gets sized on the peak.
-MIN_BLADE_LOAD_FACTOR = 3.0
+# cycle-averaged coefficient hides completely. The range is simulated, so take the top of
+# it rather than the bottom. Aero peak is not the whole story either: at Runco's scale
+# centrifugal load beat aerodynamic load by 4.4 times, so the blade attachment gets its own
+# margin against the recomputed centrifugal force.
+MIN_BLADE_LOAD_FACTOR = 4.0
 MAX_POWER_SPREAD = 0.35   # primary estimate against the published power-loading route
 MIN_BLADES = 2
 MIN_MOUNT_POINTS = 2
@@ -357,6 +360,13 @@ def recompute(data):
         if blade_g > 0:
             out["blade_mass_kg_derived"] = blade_g / 1000.0 / nb
 
+    if None not in (R, rpm, mb_stored := num(data, "structure.blade_mass_kg")):
+        fc = mb_stored * (rpm * 2 * math.pi / 60) ** 2 * R
+        out["centrifugal_load_N_derived"] = fc
+        att = num(data, "structure.blade_attachment_allowable_N")
+        if att:
+            out["blade_attachment_margin"] = att / fc
+
     lever, lf = num(data, "structure.blade_load_lever_m"), num(data, "structure.blade_load_factor")
     if lever and lf and nb and "thrust_N" in out:
         out["blade_root_bending_Nm_derived"] = out["thrust_N"] / nb * lever * lf
@@ -616,6 +626,7 @@ def week2(data):
         "operating.rpm", "operating.tip_speed_ms", "operating.reynolds",
         "performance.thrust_N", "performance.blade_area_coeff",
         "performance.blade_area_coeff_low", "performance.thrust_N_conservative",
+        "performance.blade_deflection_thrust_loss",
         "performance.aero_power_W", "performance.electrical_power_W",
         "performance.tare_power_W", "performance.actuator_power_W",
         "performance.controller_power_W", "performance.module_electrical_power_W",
@@ -703,6 +714,16 @@ def week2(data):
         ok &= report(cl <= cn * CONSERVATIVE_COEFF_MAX_RATIO,
                      f"week2: the low coefficient is at most {CONSERVATIVE_COEFF_MAX_RATIO:.0%} of nominal",
                      f"low {cl} vs nominal {cn}, ratio {cl / cn:.3f}")
+        # Blade deflection is the one published mechanism for losing thrust against the
+        # coefficient, and Benedict and Chopra put it as high as 40 percent. A haircut
+        # picked for comfort is not a bound; the low value has to answer a stated loss.
+        loss = num(data, "performance.blade_deflection_thrust_loss")
+        if loss:
+            ok &= report(loss < 1.0 and cl <= cn * (1 - loss) * (1 + TOL),
+                         "week2: the low coefficient covers the stated blade deflection loss",
+                         f"loss {loss:.0%} allows at most {cn * (1 - loss):.4f}, low is {cl}")
+    ok &= require_text(data, ["sources.performance.blade_deflection_thrust_loss"],
+                       "week2: the deflection loss cites the stiffness case behind it", 20)
 
     # Feasibility envelope: the conservative mass must still clear T/W at conservative thrust.
     mc, tc = num(data, "results.mass_g_conservative"), r.get("thrust_N_conservative")
@@ -1094,6 +1115,7 @@ def week4(data):
         "structure.transmission_ratio", "structure.blade_load_lever_m",
         "structure.blade_load_factor", "structure.pitch_link_load_N",
         "structure.pitch_link_allowable_N", "structure.pitch_link_margin",
+        "structure.blade_attachment_allowable_N", "structure.blade_attachment_margin",
     ], "week4: numbers.json carries the structural schema")
     lf_ = num(data, "structure.blade_load_factor")
     if lf_:
@@ -1122,7 +1144,8 @@ def week4(data):
                          f"computed {r[computed]:.4g}, stated {dotted(data, stated)}")
 
     # Margins are derived from allowable over demand, never asserted.
-    for tag in ("blade_margin", "shaft_margin", "pitch_link_margin"):
+    for tag in ("blade_margin", "shaft_margin", "pitch_link_margin",
+                "blade_attachment_margin"):
         v, computed = num(data, f"structure.{tag}"), r.get(tag)
         if computed is not None:
             ok &= report(close(v, computed),

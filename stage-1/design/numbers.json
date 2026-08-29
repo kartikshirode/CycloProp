@@ -30,7 +30,8 @@
     "figure_of_merit": null,
     "power_loading_ref_N_per_W": null,
     "aero_power_W_published": null,
-    "power_spread": null
+    "power_spread": null,
+    "blade_deflection_thrust_loss": null
   },
   "efficiency": {
     "transmission": null,
@@ -70,7 +71,9 @@
     "blade_load_factor": null,
     "pitch_link_load_N": null,
     "pitch_link_allowable_N": null,
-    "pitch_link_margin": null
+    "pitch_link_margin": null,
+    "blade_attachment_allowable_N": null,
+    "blade_attachment_margin": null
   },
   "mass_envelope_g": [],
   "mass_budget_g": [],
@@ -79,7 +82,8 @@
       "blade_area_coeff": null,
       "blade_area_coeff_low": null,
       "momentum_area_m2": null,
-      "power_loading_ref_N_per_W": null
+      "power_loading_ref_N_per_W": null,
+      "blade_deflection_thrust_loss": null
     },
     "structure": {
       "blade_root_bending_Nm": null,

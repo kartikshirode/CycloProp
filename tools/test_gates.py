@@ -42,7 +42,7 @@ def schedule_points(amp, phase, step=10):
 def honest_numbers():
     R, nb = 0.14, 3
     c, S = 0.66 * R, 2.64 * R
-    ct, ct_low = 0.607, 0.516
+    ct, ct_low, defl_loss = 0.607, 0.515, 0.15
     area = nb * c * S
     thrust = 13.5
     u = math.sqrt(thrust / (ct * 0.5 * RHO * area))
@@ -108,11 +108,12 @@ def honest_numbers():
     act_p, ctl_p = 6.0, 2.0
 
     # Structural demands derived from the design rather than asserted beside it.
-    ratio, lever, load_factor = 2.0, S / 4, 3.0
+    ratio, lever, load_factor = 2.0, S / 4, 4.0
     shaft_dem = shaft / omega
     blade_dem = thrust / nb * lever * load_factor
     blade_all, shaft_all = blade_dem * 2.9, shaft_dem * 3.0
     link_dem, link_all = 42.0, 95.0
+    att_all = fc * 2.2
 
     amp, phase = 40, 9.0
     pts = schedule_points(amp, phase)
@@ -140,7 +141,8 @@ def honest_numbers():
                         "module_electrical_power_W": elec + act_p + ctl_p,
                         "momentum_area_m2": mom_area, "ideal_power_W": ideal,
                         "figure_of_merit": fm, "power_loading_ref_N_per_W": pl_ref,
-                        "aero_power_W_published": ap_pub, "power_spread": spread},
+                        "aero_power_W_published": ap_pub, "power_spread": spread,
+                        "blade_deflection_thrust_loss": defl_loss},
         "efficiency": {"transmission": eff[0], "motor": eff[1], "esc": eff[2]},
         "power_by_radius": [{"radius_m": r, "aero_power_W": ap * 0.14 / r}
                             for r in (0.10, 0.12, 0.14, 0.16)],
@@ -161,7 +163,9 @@ def honest_numbers():
                       "torque_reference": "rotor shaft, upstream of the 2 to 1 reduction",
                       "blade_load_lever_m": lever, "blade_load_factor": load_factor,
                       "pitch_link_load_N": link_dem, "pitch_link_allowable_N": link_all,
-                      "pitch_link_margin": link_all / link_dem},
+                      "pitch_link_margin": link_all / link_dem,
+                      "blade_attachment_allowable_N": att_all,
+                      "blade_attachment_margin": att_all / fc},
         "mass_envelope_g": envelope,
         "mass_budget_g": budget,
         "sources": {
@@ -169,7 +173,8 @@ def honest_numbers():
                 "blade_area_coeff": "derived from the Benedict 2010 quad rotor at its hover point",
                 "blade_area_coeff_low": "lower bound from the spread across blade count and airfoil in Benedict 2010",
                 "momentum_area_m2": "projected frontal area, 2R times span, the closure Benedict uses for cyclorotors",
-                "power_loading_ref_N_per_W": "measured power loading from the Benedict 2010 rig at its hover point"},
+                "power_loading_ref_N_per_W": "measured power loading from the Benedict 2010 rig at its hover point",
+                "blade_deflection_thrust_loss": "thrust loss from blade deflection at the chosen skin thickness, bounded against Benedict and Chopra"},
             "structure": {
                 "blade_root_bending_Nm": "thrust per blade over a quarter span lever with a peak to mean factor of 2",
                 "shaft_torque_Nm": "shaft power divided by rotor angular speed at the design point",
