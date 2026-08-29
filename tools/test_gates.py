@@ -86,17 +86,17 @@ def honest_numbers():
     fc = blade_mass * omega ** 2 * R
 
     envelope = [
-        {"item": "blades", "nominal_g": 108.0, "conservative_g": 122.0,
+        {"item": "blades", "nominal_g": 108.0, "scaling_class": "geometry", "conservative_g": 122.0,
          "basis": "cfrp skin over foam core, volume times density with a layup allowance"},
-        {"item": "frame and endplates", "nominal_g": 74.0, "conservative_g": 83.0,
+        {"item": "frame and endplates", "nominal_g": 74.0, "scaling_class": "geometry", "conservative_g": 83.0,
          "basis": "scaled from the Benedict quad rotor structure at this diameter"},
-        {"item": "pitch mechanism", "nominal_g": 33.0, "conservative_g": 38.0,
+        {"item": "pitch mechanism", "nominal_g": 33.0, "scaling_class": "geometry", "conservative_g": 38.0,
          "basis": "part count times unit mass from the four bar layout drawing"},
-        {"item": "motor and drive", "nominal_g": 123.0, "conservative_g": 135.0,
+        {"item": "motor and drive", "nominal_g": 123.0, "scaling_class": "power", "conservative_g": 135.0,
          "basis": "supplier datasheet plus hub, shaft, bearings and transmission"},
-        {"item": "actuators", "nominal_g": 18.0, "conservative_g": 21.0,
+        {"item": "actuators", "nominal_g": 18.0, "scaling_class": "fixed", "conservative_g": 21.0,
          "basis": "supplier datasheet for the amplitude and phase servos"},
-        {"item": "mounting hardware", "nominal_g": 44.0, "conservative_g": 49.0,
+        {"item": "mounting hardware", "nominal_g": 44.0, "scaling_class": "fixed", "conservative_g": 49.0,
          "basis": "fastener count times unit mass with a harness and bracket allowance"},
     ]
     env_nom = sum(e["nominal_g"] for e in envelope)
@@ -147,6 +147,36 @@ def honest_numbers():
         "power_by_radius": [{"radius_m": r, "aero_power_W": ap * 0.14 / r}
                             for r in (0.10, 0.12, 0.14, 0.16)],
         "thrust_sensitivity": sensitivity,
+        "configuration_candidates": [
+            {"config": "single rotor", "rotors": 1, "module_mass_g": 400.0,
+             "thrust_N": thrust, "module_tw": thrust / (0.400 * G), "selected": True},
+            {"config": "two rotor cluster", "rotors": 2, "module_mass_g": 470.0,
+             "thrust_N": thrust, "module_tw": thrust / (0.470 * G), "selected": False},
+            {"config": "three rotor cluster", "rotors": 3, "module_mass_g": 540.0,
+             "thrust_N": thrust, "module_tw": thrust / (0.540 * G), "selected": False}],
+        "coefficient_scenarios": [
+            {"name": "nominal", "blade_area_coeff": ct, "evidence_class": "derived",
+             "basis": "Benedict 2010 quad rotor at its hover point, transferred"},
+            {"name": "downside", "blade_area_coeff": ct_low, "evidence_class": "downside",
+             "basis": "nominal reduced by the stated blade deflection loss"},
+            {"name": "upside", "blade_area_coeff": ct * 1.05, "evidence_class": "derived",
+             "basis": "thicker section benefit reported at UAV scale"}],
+        "aero_azimuthal_loads": [
+            {"azimuth_deg": a, "normal_force_N": abs(thrust / nb * math.cos(math.radians(a))) + 0.5}
+            for a in range(0, 360, 10)],
+        "drive_candidates": [
+            {"name": "outrunner A", "continuous_power_W": 320.0,
+             "continuous_torque_Nm": 1.6, "mass_g": 62.0, "selected": True},
+            {"name": "outrunner B", "continuous_power_W": 400.0,
+             "continuous_torque_Nm": 2.1, "mass_g": 88.0, "selected": False}],
+        "linkage_dimensions": [
+            {"link": "crank", "length_mm": 24.0}, {"link": "coupler", "length_mm": 61.0},
+            {"link": "rocker", "length_mm": 33.0}, {"link": "ground", "length_mm": 70.0}],
+        "pitch_schedule": [{"azimuth_deg": a, "pitch_deg": pv} for a, pv in pts],
+        "vector_map": [
+            {"phase_command_deg": ph, "vertical_force_N": thrust * math.cos(math.radians(ph)),
+             "lateral_force_N": thrust * math.sin(math.radians(ph))}
+            for ph in (0.0, 30.0, 60.0)],
         "pitch": {"mechanism": "passive four-bar", "offset_m": 0.024,
                   "phase_delay_deg": phase, "vector_range_deg": 360.0,
                   "phase_authority_deg": 360.0, "schedule_rms_residual_deg": rms,
@@ -292,6 +322,8 @@ def build(root, data, upto=4):
     doc(d / "context.md", ["Context", "Stage 1: the seven required items",
                            "Evaluation criteria", "The thrust-to-weight basis, settled"])
     doc(d / "stage-1" / "plan.md", ["Plan", "Calendar"])
+    doc(d / "stage-1" / "design" / "evidence-ledger.md",
+        ["Evidence ledger", "Selection rules"])
     doc(d / "stage-1" / "literature.md",
         ["Literature", "Geometry and measured performance", "Published mass breakdowns"])
     (d / "stage-1" / "design").mkdir(parents=True, exist_ok=True)
@@ -351,7 +383,8 @@ def build(root, data, upto=4):
                        "design report for the module.", ""]), encoding="utf-8")
         (d / "stage-1" / "human-gate.md").write_text(
             "\n".join(["# Week H", "", "REGISTRATION-CONFIRMED", "ELIGIBILITY-CHECKED",
-                       "ROSTER-CONFIRMED", "SENDER-CONFIRMED", ""]), encoding="utf-8")
+                       "ROSTER-CONFIRMED", "SENDER-CONFIRMED",
+                       "TECHNICAL-READ-COMPLETE", ""]), encoding="utf-8")
     return d
 
 
@@ -752,6 +785,92 @@ def wrong_mass_ceiling(d):
 
 case("a sensitivity row whose mass ceiling does not follow is rejected", False,
      wrong_mass_ceiling, week=2)
+
+
+# ---- round 7: schema added by review with no gate behind it --------------------
+
+def empty_candidate_list(d):
+    d["configuration_candidates"] = []
+    return d
+
+
+case("a configuration comparison with no candidates is rejected", False,
+     empty_candidate_list, week=2)
+
+
+def one_coefficient_scenario(d):
+    d["coefficient_scenarios"] = d["coefficient_scenarios"][:1]
+    return d
+
+
+case("a single coefficient scenario is rejected", False, one_coefficient_scenario, week=2)
+
+
+def unlabelled_scenario(d):
+    d["coefficient_scenarios"][1]["evidence_class"] = "published lower bound"
+    return d
+
+
+case("a downside scenario dressed as a published bound is rejected", False,
+     unlabelled_scenario, week=2)
+
+
+def envelope_without_scaling_class(d):
+    for e in d["mass_envelope_g"]:
+        e.pop("scaling_class", None)
+    return d
+
+
+case("a mass envelope with no scaling class is rejected", False,
+     envelope_without_scaling_class, week=2)
+
+
+def motor_called_fixed(d):
+    for e in d["mass_envelope_g"]:
+        if "motor" in e["item"]:
+            e["scaling_class"] = "constant"      # not one of the three allowed classes
+    return d
+
+
+case("a scaling class outside the three allowed is rejected", False,
+     motor_called_fixed, week=2)
+
+
+def two_phase_commands(d):
+    d["vector_map"] = d["vector_map"][:2]
+    return d
+
+
+case("a vector map with fewer than three phase commands is rejected", False,
+     two_phase_commands, week=3)
+
+
+def incomplete_drive_row(d):
+    d["drive_candidates"][0].pop("continuous_torque_Nm")
+    return d
+
+
+case("a drive candidate with no continuous torque is rejected", False,
+     incomplete_drive_row, week=2)
+
+
+def no_evidence_ledger(root, data):
+    (root / "stage-1" / "design" / "evidence-ledger.md").unlink()
+
+
+case("week 2 without an evidence ledger is rejected", False, week=2, upto=2,
+     tweak=no_evidence_ledger)
+
+
+def technical_read_outstanding(root, data):
+    p = root / "stage-1" / "human-gate.md"
+    p.write_text(p.read_text(encoding="utf-8")
+                 .replace("TECHNICAL-READ-COMPLETE", "TECHNICAL-READ-PENDING"),
+                 encoding="utf-8")
+
+
+case("staging before a human has read the PDF is rejected", False, upto=5, week=5,
+     tweak=technical_read_outstanding)
 
 
 # ---- week 5, which nothing had ever exercised on a passing document ------------

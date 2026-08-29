@@ -559,6 +559,43 @@ def check_pdf(rel, min_pages=4, must_contain=()):
 
 # ------------------------------------------------------------------ week gates
 
+
+ROW_SPECS = {
+    # key: (min_rows, required fields, owning week). Added after a review supplied these
+    # lists to the schema with no row shape and no gate, which is how an unchecked number
+    # gets into a submission.
+    "configuration_candidates": (3, ("config", "module_mass_g", "thrust_N"), 2),
+    "coefficient_scenarios": (3, ("name", "blade_area_coeff", "basis", "evidence_class"), 2),
+    "aero_azimuthal_loads": (24, ("azimuth_deg", "normal_force_N"), 2),
+    "drive_candidates": (2, ("name", "continuous_power_W", "continuous_torque_Nm", "mass_g"), 2),
+    "linkage_dimensions": (4, ("link", "length_mm"), 3),
+    "pitch_schedule": (24, ("azimuth_deg", "pitch_deg"), 3),
+    "vector_map": (3, ("phase_command_deg", "vertical_force_N", "lateral_force_N"), 3),
+}
+EVIDENCE_CLASSES = {"measured", "derived", "downside"}
+SCALING_CLASSES = {"geometry", "power", "fixed"}
+
+
+def require_rows(data, key, week):
+    """A list in the schema that no gate reads is a place to keep a number nobody checks."""
+    min_rows, fields, _ = ROW_SPECS[key]
+    rows = dotted(data, key)
+    if not report(isinstance(rows, list) and len(rows) >= min_rows,
+                  f"week{week}: {key} has {min_rows} or more rows",
+                  f"found {len(rows) if isinstance(rows, list) else type(rows).__name__}"):
+        return False
+    bad = []
+    for i, r in enumerate(rows):
+        if not isinstance(r, dict):
+            bad.append(f"row {i} is not an object"); continue
+        for f in fields:
+            v = r.get(f)
+            if v is None or (isinstance(v, str) and not v.strip()):
+                bad.append(f"row {i} missing {f}")
+    return report(not bad, f"week{week}: every {key} row is complete",
+                  "; ".join(bad[:5]) if bad else f"{len(rows)} rows")
+
+
 def week1(data):
     ok = True
     ok &= require_headings("context.md", [
@@ -661,6 +698,9 @@ def week2(data):
                     vals[f] = float(v)
             if len(str(b.get("basis", "")).strip()) < MIN_BASIS_CHARS:
                 bad.append(f"{b.get('item','?')} basis too thin")
+            # D15: the drive is not a fixed mass, so every line says how it scales.
+            if str(b.get("scaling_class")) not in SCALING_CLASSES:
+                bad.append(f"{b.get('item','?')} scaling_class={b.get('scaling_class')!r}")
             if len(vals) == 2 and vals["conservative_g"] < vals["nominal_g"]:
                 lighter.append(b.get("item", "?"))
         ok &= report(not lighter,
@@ -678,6 +718,19 @@ def week2(data):
         ok &= report(len(set(items)) == len(items) and "" not in items,
                      "week2: envelope line names are distinct and non-empty",
                      f"{len(items)} lines, {len(set(items))} distinct")
+
+    for key, (_, _, w) in ROW_SPECS.items():
+        if w == 2:
+            ok &= require_rows(data, key, 2)
+    ok &= require_headings("stage-1/design/evidence-ledger.md",
+                           ["Evidence ledger", "Selection rules"])
+    scen = dotted(data, "coefficient_scenarios")
+    if isinstance(scen, list) and scen:
+        bad = [str(s.get("evidence_class")) for s in scen if isinstance(s, dict)
+               and str(s.get("evidence_class")) not in EVIDENCE_CLASSES]
+        ok &= report(not bad,
+                     "week2: every coefficient scenario is labelled measured, derived or downside",
+                     "; ".join(bad[:4]) if bad else "")
 
     sweep = dotted(data, "power_by_radius")
 
@@ -952,6 +1005,9 @@ def week3(data):
         "packaging.envelope_height_mm", "packaging.mount_points",
         "pitch.phase_authority_deg", "pitch.schedule_rms_residual_deg",
     ], "week3: numbers.json carries the pitch and packaging schema")
+    for key, (_, _, w) in ROW_SPECS.items():
+        if w == 3:
+            ok &= require_rows(data, key, 3)
     ok &= require_integer(data, ["pitch.actuator_count"], "week3: actuators come in whole units")
     ok &= require_integer(data, ["packaging.mount_points"],
                           "week3: mount points come in whole units", MIN_MOUNT_POINTS)
@@ -1265,7 +1321,8 @@ WEEKS = {1: week1, 2: week2, 3: week3, 4: week4, 5: week5}
 
 AUDIT_MARKER = "AUDIT-COMPLETE"
 HUMAN_GATE_MARKERS = ["REGISTRATION-CONFIRMED", "ELIGIBILITY-CHECKED",
-                      "ROSTER-CONFIRMED", "SENDER-CONFIRMED"]
+                      "ROSTER-CONFIRMED", "SENDER-CONFIRMED",
+                      "TECHNICAL-READ-COMPLETE"]
 HUMAN_GATE_FILE = "stage-1/human-gate.md"
 
 
