@@ -206,3 +206,40 @@ micro scale, which supports the 0.66 baseline independently of Kellen. And the s
 chose NACA 0015 at 25 kg, so the record does not show 0020 winning at every scale. Our
 Reynolds number sits beside Kellen's rather than Ramsey's, so 0020 still holds, but the
 submission should not claim thicker is universally better.
+
+## D15: the fixed-mass case excludes the power-scaled drive
+
+29 August 2026, after the execution review. This narrows one phrase in D11.
+
+D11 is right that blade mass per unit thrust does not improve through geometric scaling.
+It then groups the motor with fixed masses. That part is not safe. Motor mass follows
+continuous power, speed and thermal duty. Transmission, shaft and bearing mass also follow
+torque and speed. A larger radius lowers aerodynamic power inside the chosen family, but it
+raises rotor torque, so the drive cannot be treated as a constant allowance.
+
+Week 2 now sorts every mass line into three groups: blade or geometry-scaled, power or
+torque-scaled, and fixed or duplicated. The last group includes items such as controller
+electronics, fasteners and linkage pivots only when the basis supports it. The 2.13 Runco
+benchmark remains a starting point, not a scaling law. The design closes only through the
+component-level mass envelope and named drive hardware.
+
+## D16: use the top of the published peak-load range
+
+29 August 2026, after the execution review. This supersedes the 3.0 minimum stated in the
+second consequence under D12.
+
+The cited simulated range for peak blade thrust is 3 to 4 times the cycle mean. The source
+has not yet been replaced by measured Heimerl data, so taking the bottom of the range is not
+conservative. The minimum blade load factor stays 4.0, matching `tools/check.py` and the
+current plan.
+
+## D17: geometry needs paper margin, not bare compliance
+
+29 August 2026, after the execution review.
+
+The competition limit remains strictly above 2.5 and `tools/check.py` still enforces that
+limit. A paper estimate built on a transferred thrust coefficient should not freeze at
+2.51 and be presented as safe. Week 2 therefore targets a conservative T/W of 2.75, which
+is 10 percent above the hard limit. A result between 2.5 and 2.75 is compliant but remains
+red and needs a human decision before geometry freezes. This is a judgment gate, not a
+replacement for the competition rule.

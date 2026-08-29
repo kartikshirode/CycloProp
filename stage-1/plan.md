@@ -4,11 +4,17 @@ Execution plan, one week per loop tick. Requirements live in [../context.md](../
 
 **Deadline 27 September 2026, submitting 26 September.** Email to pushpak_gc2026@aero.iitb.ac.in.
 
-Revised 26 August after the round 2 review. What changed: mass and power feasibility moved into week 2 so geometry no longer freezes before anyone knows the module can close, two rubric criteria that had no home got sections, and the human steps that were sitting unscheduled at the end got a gate of their own before week 2 starts.
+Revised 29 August after the execution review. The week 2 order now follows the actual
+dependencies, the mass case separates fixed hardware from power-scaled hardware, and each
+high-score claim has an evidence route. PDF assembly and the hostile viva check also start
+before the final four days.
 
 ## How this plan is executed
 
-Driven by the `weekly-loop` skill under `/loop`. One tick runs one week through a fresh agent, then the supervisor runs the gates in its own shell. Config at [../.claude/weekly-loop.md](../.claude/weekly-loop.md).
+Driven by the `weekly-loop` skill under `/loop`. One tick runs one week through a fresh
+week-agent, then the supervisor runs the gates in its own shell. The Codex config is at
+[../.codex/weekly-loop.md](../.codex/weekly-loop.md). It needs one human confirmation before
+the first tick. The old `.claude` config is history and is not the Codex execution contract.
 
 Rules that make the weeks machine-checkable:
 
@@ -18,17 +24,17 @@ Rules that make the weeks machine-checkable:
 - A week is done when `python tools/check.py --week N` exits 0
 - The gates have their own test suite at `tools/test_gates.py`, which builds throwaway trees and checks that an honest design passes and eleven specific attacks fail. Run it if you change `check.py`
 
-## How each week is broken into subsessions
+## How each week is broken into work packages
 
-One tick is one week. Inside it the week-agent runs the subsessions below rather than doing
-everything in one context. The budget is **7 where subsessions can run in parallel, 5 where
-they must run in sequence**, because a long serial chain in one context loses the thread
-before it reaches the documents.
+One tick is one week. The packages below are checkpoints inside the week-agent's turn, not
+extra loop ticks and not a promise of seven fresh contexts. Read-only source extraction and
+independent calculations may be delegated. Repo writes stay sequential unless isolated in
+git worktrees. One subagent slot stays free for the mandatory audit at the end.
 
 The "fills" column is the count of sub-parameters in `numbers.json` that week is
 responsible for. Every one of them is gated.
 
-| Week | Fills | Subsessions | Of those, parallel |
+| Week | Fills | Work packages | Of those, parallel |
 | --- | --- | --- | --- |
 | 2 | 38 scalars plus 3 tables, roughly 80 cells | 7 | 2 |
 | 3 | 13 scalars | 6 | 3 |
@@ -37,15 +43,16 @@ responsible for. Every one of them is gated.
 
 **Week 2**, the heaviest week and the one that decides feasibility.
 
-1. Configuration: single rotor against a redesigned 2 and 3 rotor cluster, same boundary
-2. Shape family, thrust coefficient bounding, solidity band check. Needs 1
-3. Radius against power sweep, design thrust choice, sensitivity table. Needs 2
-4. Power chain, momentum floor, published power loading route. Needs 3
-5. Whole-module mass envelope. Needs 3, **runs parallel with 4**
-6. Write the three design documents and fill `numbers.json`. Needs 4 and 5
-7. Audit
+1. Evidence ledger, module boundary and selection rules
+2. Common shape families and single, 2 rotor and 3 rotor candidates. Needs 1
+3. Thrust, azimuthal load and power model, with coefficient scenarios. Needs 2
+4. Drive shortlist and preliminary blade and frame section. Both need 3 and can run in
+   parallel as read-only calculations
+5. Coupled configuration, radius, thrust and mass comparison. Needs both parts of 4
+6. Freeze one design point, fill `numbers.json` and write the three design documents
+7. Audit, including a hostile-examiner read
 
-**Week 3.** Subsessions 3 and 4 are independent of 1 and 2 and of each other.
+**Week 3.** Packages 3 and 4 can run after the first linkage solution exists.
 
 1. Pitch mechanism, kinematics, the schedule table
 2. Vectoring, phase authority, side force. Needs 1
@@ -72,7 +79,7 @@ responsible for. Every one of them is gated.
 4. Draft the email and stage everything. **Never send**
 5. Audit
 
-Totals: 24 subsessions across 4 ticks, plus the 4 supervisor runs that gate them.
+Totals: 24 work packages across 4 ticks, plus the 4 supervisor runs that gate them.
 
 ## What every week ends with, without exception
 
@@ -148,6 +155,29 @@ three papers.
 
 Week 5 is the short one and it carries the deadline, so weeks 2 to 4 do not get to slip into it. Each has a fallback below that trades depth rather than pushing work forward.
 
+This plan needs about 84 focused hours after week 1: 26 in week 2, 18 in week 3, 24 in week
+4 and 16 in week 5. Week H has to replace that estimate with real availability. If fewer
+than 84 hours exist, run the reduced scope from the start: keep the 2 and 3 rotor branches
+to a first-pass rejection table, carry one blade construction after the screen, carry one
+drive after the shortlist, and compress the packaging narrative. Do not cut coefficient
+sensitivity, linkage closure, the force-vector map, the mass evidence or the structural
+load path. Those are the claims an evaluator will attack first.
+
+Internal dates stop a quiet overrun:
+
+| Date | Must be true |
+| --- | --- |
+| 4 Sep | Evidence ledger and coefficient scenarios fixed |
+| 6 Sep | Coupled candidate comparison complete |
+| 8 Sep | Week 2 decision and audit complete |
+| 12 Sep | Linkage closes without singularity or interference |
+| 15 Sep | Vector map, packaging sketch and first PDF smoke build complete |
+| 18 Sep | Blade stiffness and refined mass budget agree with week 2 |
+| 22 Sep | Week 4 decision and audit complete |
+| 24 Sep | Full PDF and claims audit complete |
+| 25 Sep | Human technical read complete |
+| 26 Sep | Named human sends and keeps proof of sending |
+
 Runs alongside UAV-X. Week 3 collides with the UAV-X comms layer. If one has to give, this one gives, because writing compresses under pressure and debugging does not.
 
 ---
@@ -168,6 +198,13 @@ Not a loop tick. These are things an agent must not do and the plan previously l
 4. **Line up the faculty supervisor**, and with them the Stage 2 CAE tool access
 5. **Name who sends the submission** on 26 September, and confirm they will be reachable
 6. **State real weekly hours available.** The schedule is unvalidated without this and it is the cheapest thing here to fix
+7. **Pull the three priority papers in a browser** if access works. Save the PDFs under
+   `reference/` and record the exact pages or figures used. Kellen is first because its
+   measured coefficient could replace the weakest transfer in week 2. Missing papers stay
+   a disclosed evidence gap, not a licence to invent their figures
+8. **Ask the two submission questions by 2 September.** Page limit and file naming, then the
+   registration reference format. If no answer arrives by 8 September, use a 15 page main
+   body plus cited appendices and a plain registration reference in the email draft
 
 **One policy, stated once so the config and the handoff can match it.** Items 1, 2, 3 and 5 are a **hard block on week 5**, which cannot write a real capability section or stage a submission without them. They are **advisory before week 2**, because the engineering genuinely does not depend on the roster.
 
@@ -179,22 +216,63 @@ So: if week H is not done by 1 September, week 2 runs anyway and the loop record
 
 Covers required items 1, 2 and 4, and settles whether the design closes at all.
 
-**Scope files:** `stage-1/design/01-configuration.md`, `02-rotor-sizing.md`, `04-thrust-and-power.md`, `numbers.json`, `stage-1/decisions.md`
+**Scope files:** `stage-1/design/01-configuration.md`, `02-rotor-sizing.md`,
+`04-thrust-and-power.md`, `stage-1/design/evidence-ledger.md`, `numbers.json`,
+`stage-1/decisions.md`
 
 ### Tasks
 
-1. **Compare single against clustered properly**, under a heading called "Why this configuration" rather than one that presumes the answer. Decision D2 currently rests on the observation that copying one published rotor five times needs 485 g of rotor alone. That rules out copying, not every multi-rotor layout. Compare a single larger rotor against a redesigned two and three rotor cluster on the same component boundary, the same coefficient assumptions and the same power model, then freeze the configuration. Use the module boundary the problem statement defines, not published all-up aircraft mass, which includes battery and avionics we are not carrying.
-2. **Choose the blade shape family.** Texas A&M UAV-scale optimum is 3 blades at c/R 0.66, blade aspect ratio 4, NACA 0020, plus or minus 40 degrees. Benedict's MAV optimum is 4 blades at c/R 0.433, NACA 0015, asymmetric 45 top and 25 bottom. Our Reynolds number lands in the Texas A&M band, so that is the default.
-3. **Bound the thrust coefficient, do not just adopt it.** The 0.607 anchor comes from a 4-blade NACA 0010 rotor at c/R 0.433 and Re near 35,000. Moving it to 3 blades, NACA 0020, c/R 0.66 and Re near 100,000 changes blade count, solidity, airfoil and Reynolds number all at once. Derive a defensible low value from the spread in the published data and record both. Benedict's own results give the direction of several of these effects, so use them rather than guessing a percentage.
-
-   Two constraints now sit under this. The Reynolds part of the transfer is defensible, because non-dimensional thrust is roughly Reynolds invariant across this band; the configuration part is not de-risked by anything, and **solidity is gated to Kellen's measured optimum of 0.30 to 0.40**, outside which the coefficient gets re-derived rather than carried across. Our default family gives 0.315. And the low value has to answer a **stated blade deflection loss** rather than a comfortable percentage: Benedict and Chopra put deflection losses as high as 40 percent, so a 15 percent haircut is not self-evidently conservative and the gate makes the deflection figure and its stiffness case explicit.
-4. **Sweep radius against power, not just rpm.** Within a fixed shape family at fixed thrust, tip speed goes as 1/R, so aerodynamic power goes roughly as 1/R. Radius changes the motor, the thermal load and the mass, not only the envelope. Compute power for at least three candidate radii and record the sweep.
-5. **Compute thrust two ways** and report the gap. Coefficient scaling, plus a momentum estimate with its closure assumption stated. A momentum calculation without an independent closure is a bound, not a second opinion, and should be labelled as one.
-
-   The gate now treats it as exactly that. Aerodynamic power has to sit at or above the momentum bound computed over a declared `momentum_area_m2`, which may not exceed the projected frontal area of 2R times span, and the figure of merit that falls out has to land between 0.20 and 0.75. Nothing else in week 2 asks whether the thrust and power pair could exist: without this the gate certified 13.5 N produced by 1 W. The second opinion is the published power loading route, which is an independent closure rather than the same equation rearranged, and the two have to agree within 35 percent.
-6. **Build the whole-module mass envelope now, at line-item level but coarse.** Blades, frame, pitch mechanism, motor, actuator, mounting. Week 4 refines it. Week 2 only has to answer whether it can close. Give each line a distinct name, because every week 4 budget line has to point back at one of them by name.
-7. **Pick the design thrust** using the ceiling table above, and say why. Then freeze a `thrust_sensitivity` table of at least three candidates, each carrying its mass ceiling, its ideal power, its rpm and what it does to the motor and the structure. Raising thrust is not a free knob on the numerator of T/W: going from 10 N to 13 N buys 30 percent more mass ceiling and spends 14 percent more rpm, 30 percent more centrifugal load and 48 percent more ideal power, which can move the motor, the transmission, the thermal case and the structure together. Week 4 may only pick a row from this table, so the sensitivity has to be worked here, where there is time for it.
-8. **Add rotor tare, transmission, actuator and controller draw** to module power. The published power loading figures are blade aerodynamic power on a rig whose structure power was a tenth of the total, so tare is not already included.
+1. **Build the evidence ledger before sizing.** For every value that carries a design
+   decision, record the source, source status, exact page or figure when available, area
+   convention, source geometry, Reynolds number and how the value is used. A summary-only
+   result stays labelled summary. If Kellen is still unavailable, the low coefficient is
+   an engineering downside scenario, not a published lower bound. The submission has to
+   say that plainly.
+2. **Fix the comparison rules before seeing a winner.** Use the official module boundary.
+   Count the ESC, vectoring actuator, its controller and a full mounting allocation in the
+   conservative column. Set a stated selection rule and packaging assumption because the
+   brief gives no maximum rotor size. Use conservative T/W, continuous drive rating,
+   largest dimension and part count as decision metrics. A larger radius lowers power but
+   also lowers rpm and raises rotor torque, so power alone cannot pick it.
+3. **Define common candidates.** Compare a single rotor with redesigned 2 and 3 rotor
+   layouts. Give every row its rotor count, per-rotor radius and span, blade count, solidity,
+   total blade area, projected area, rpm and hardware count. Add an interaction penalty for
+   clustered rotors or state that the comparison assumes non-overlapping wakes. Include
+   reaction torque and mounting complexity in the decision. D2 only ruled out copying five
+   old rotors.
+4. **Choose and bound the blade family.** The default is Kellen's 3 blade, c/R 0.66,
+   aspect-ratio 4, NACA 0020 family at plus or minus 40 degrees. Recompute the 0.607 anchor
+   in the same area convention. Split the low case into configuration-transfer uncertainty
+   and blade-flexibility loss. Use values extracted from source figures when available. If
+   they are not available, run named downside scenarios and do not call the range measured.
+   Solidity stays inside 0.30 to 0.40 unless a new coefficient is derived.
+5. **Add a preliminary azimuthal load model.** Use at least 24 azimuths with a prescribed
+   pitch schedule, induced-flow assumption and the stated peak-to-mean load factor. Calibrate
+   its cycle mean to the coefficient route. It is a load distribution and a sanity check,
+   not CFD and not an independent thrust measurement. Week 3 reruns it with the solved
+   linkage schedule. Show which assumptions set vertical force, side force and peak blade
+   load.
+6. **Sweep the coupled design, not radius alone.** For at least three radii and three thrust
+   rows, carry rpm, Reynolds number, ideal and actual aerodynamic power, rotor torque,
+   electrical power, largest dimension and mass. Power should fall roughly as 1/R inside a
+   fixed family, while torque and structural mass may move the other way.
+7. **Close power with three levels.** Coefficient scaling predicts thrust. Momentum theory
+   is only a power floor over an area no larger than 2R times span. Figure of merit turns
+   that floor into a working power estimate, and published power loading is the independent
+   cross-check. Add rotor tare, transmission loss, actuator draw and controller draw. Name
+   a motor, ESC and transmission shortlist with continuous power, speed, torque and mass
+   evidence, not only assumed efficiencies.
+8. **Build a coarse but physical mass envelope.** Blade mass comes from preliminary skin,
+   core, spar, adhesive and end hardware geometry. Run a first beam stiffness and deflection
+   check so the flexibility loss in task 4 has a real section behind it. Frame and mounting
+   come from dimensions and density. Motor, transmission, bearings, ESC, actuator,
+   controller, wiring and fasteners come from named hardware or a measured analogue.
+   Classify each line as blade or geometry-scaled, power or torque-scaled, or fixed and
+   duplicated. Do not call the motor fixed mass.
+9. **Freeze the design thrust and configuration together.** Store the configuration,
+   coefficient, radius and thrust tables in `numbers.json`. The `thrust_sensitivity` table
+   has at least three rows, each with its mass ceiling, ideal power, rpm, torque and drive
+   consequence. Week 4 may select a prequalified row, not invent a new operating point.
 
 ### Done when
 
@@ -207,11 +285,25 @@ Four more, all added after the gates were shown to certify an impossible design:
 - **The thrust sensitivity table**, at least 3 rows, each reproducing its own mass ceiling and ideal power, with the chosen design thrust among them
 - **Solidity inside 0.30 to 0.40**, and a low thrust coefficient that answers a stated blade deflection loss with its stiffness case cited
 
+The audit adds the credibility checks that are not mechanical: the evidence ledger has no
+summary result presented as measured, the coefficient scenarios are reproducible, the
+candidate comparison follows the rule fixed in task 2, the named drive works continuously
+at the design point, and every mass line has a usable scaling basis. The conservative T/W
+target is 2.75, giving 10 percent paper margin over the hard limit. A value from 2.5 to 2.75
+is compliant but stays red and needs a human decision before geometry freezes. This is a
+judgment gate and does not weaken or change `tools/check.py`.
+
 ### Decision gate
 
-**Geometry freezes only if the conservative case closes.** If the conservative coefficient and the conservative mass together fail T/W 2.5, geometry does not freeze and the week has produced a finding rather than a design.
+**Geometry freezes only if the conservative case closes and its inputs have evidence.** If
+the low coefficient and high mass miss either hard target, geometry does not freeze. If the
+case clears 2.5 but misses the 2.75 internal target, stop for a human margin decision rather
+than describing the result as safe.
 
-**Fallback, in order:** raise design thrust toward the ceiling table; move to a larger radius, which lowers power and rpm; revisit the shape family. If none of the three closes, stop and report. A Stage 1 submission that honestly reports the module is infeasible at this scale is worth more than one that reaches 2.51 by rounding, and the reviewers know the literature better than we do.
+**Fallback, in order:** pick a higher precomputed thrust row; move along the coupled radius
+table; reject duplicated hardware and return to the single-rotor branch; revisit the shape
+family. If none closes, stop and report. A result that reaches 2.51 by paper rounding is not
+a design margin.
 
 **Carry two candidate radii forward** rather than one. Be honest about what that buys: it saves week 2's exploration if the first choice fails, but it does not save week 3, because link lengths, offset geometry, the pitch schedule and gearing all move with radius. Switching radius after week 3 still costs a week 3 rerun. The second candidate is insurance against a week 2 mistake, not a free option in week 4.
 
