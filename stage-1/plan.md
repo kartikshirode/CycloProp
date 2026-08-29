@@ -101,6 +101,13 @@ Covers required items 1, 2 and 4, and settles whether the design closes at all.
 
 `python tools/check.py --week 2` exits 0. Beyond the file and heading checks it recomputes tip speed, Reynolds, thrust and conservative thrust from geometry, requires the conservative coefficient to actually be lower than the nominal one, requires **both** the nominal and the conservative recomputed thrust to clear 10 N, requires the conservative mass at conservative thrust to still clear T/W 2.5, and requires the power sweep to cover at least three radii. The sweep also has to pass through the design point: the row at the chosen radius must carry the same aerodynamic power the rest of the week uses, or the curve is a different curve that happens to have the right shape.
 
+Four more, all added after the gates were shown to certify an impossible design:
+
+- **The momentum floor.** Aerodynamic power must sit at or above the ideal induced power over a declared area no larger than the projected 2R times span, and the resulting figure of merit must land between 0.20 and 0.75. Kellen measured 0.6 at UAV scale, so that is the number to design toward. This is the only gate in the whole plan that asks whether the design could exist rather than whether it agrees with itself
+- **A second power route.** The published power loading gives an independent closure, and the two estimates have to agree within 35 percent
+- **The thrust sensitivity table**, at least 3 rows, each reproducing its own mass ceiling and ideal power, with the chosen design thrust among them
+- **Solidity inside 0.30 to 0.40**, and a low thrust coefficient that answers a stated blade deflection loss with its stiffness case cited
+
 ### Decision gate
 
 **Geometry freezes only if the conservative case closes.** If the conservative coefficient and the conservative mass together fail T/W 2.5, geometry does not freeze and the week has produced a finding rather than a design.
@@ -129,7 +136,9 @@ Covers required item 3, the thrust-vectoring requirement at 15%, and the integra
 
 ### Done when
 
-`python tools/check.py --week 3` exits 0, cumulatively with weeks 1 and 2. Checks both files, requires the pitch schedule to have 24 or more **distinct** azimuths spanning at least 300 degrees, and requires a non-zero actuator count and a real package envelope.
+`python tools/check.py --week 3` exits 0, cumulatively with weeks 1 and 2. Checks both files, requires the pitch schedule to have 24 or more **distinct** azimuths spanning at least 300 degrees, and requires whole numbers of actuators and mount points rather than merely positive ones.
+
+The schedule also has to show a mechanism working. It must reach the stated amplitude in both directions, travel peak to peak by roughly twice the amplitude, close on itself over a revolution, and peak where the stated phase delay says it should, within 10 degrees. It has to track the harmonic model it claims to follow to a stated residual. And the vectoring range has to equal the mechanism's phase authority, so a claimed 360 degrees on a linkage that can drive 90 fails instead of passing as an assertion. A 37 row table spanning the full revolution with zero pitch at every azimuth used to pass all of this.
 
 ### Decision gate
 
@@ -163,7 +172,9 @@ This is the heaviest week, but the geometry and mechanism are frozen by now, so 
 
 ### Done when
 
-`python tools/check.py --week 4` exits 0, cumulatively. It sums the mass lines and rejects any that vanish or carry a thin basis, recomputes weight and both T/W values, requires the conservative mass not to be lighter than the budget, recomputes the centrifugal load from blade mass, speed and radius, recomputes per-blade mass, shaft torque and blade root bending from the design, and requires all three structural margins to be at least 1.5.
+`python tools/check.py --week 4` exits 0, cumulatively. It sums the mass lines and rejects any that vanish or carry a thin basis, recomputes weight and both T/W values, requires the conservative mass not to be lighter than the budget, recomputes the centrifugal load from blade mass, speed and radius, recomputes per-blade mass, shaft torque and blade root bending from the design, and requires all four structural margins, blade, shaft, pitch link and blade attachment, to be at least 1.5.
+
+Two of those come from reading the published loads properly. The blade attachment carries its own margin against the recomputed centrifugal force, because Runco measured centrifugal beating aerodynamic load by 4.4 times on the same blade, and the aerodynamic peak to mean factor must be at least 4.0.
 
 Continuity with week 2 is checked per component, not just on the total. Each envelope line has to stay within 25 percent of what the budget lines refining it add up to, and no envelope line may end up with nothing refining it. Comparing totals alone let the whole budget move into the blades while every other component shrank to the smallest legal line, because the sum came out the same.
 
