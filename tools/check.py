@@ -65,6 +65,16 @@ GROUP_DRIFT_MAX = 0.25   # week 4 refines week 2's envelope, per component and i
 # rotor. Without this floor the gate certified 13.5 N produced by 1 W.
 FM_MAX = 0.75
 FM_MIN = 0.20
+
+# Kellen 2019 measured the optimum for this shape family at a solidity of 0.30 to 0.40.
+# The 0.607 coefficient is transferred into that family, and the transfer is only
+# defensible inside the band it was measured in. Leaving the band means re-deriving the
+# coefficient, not carrying it across and hoping.
+SOLIDITY_MIN, SOLIDITY_MAX = 0.30, 0.40
+
+# Peak blade thrust runs 3 to 4 times the cycle mean on 2 and 3 bladed rotors, which a
+# cycle-averaged coefficient hides completely. Structure gets sized on the peak.
+MIN_BLADE_LOAD_FACTOR = 3.0
 MAX_POWER_SPREAD = 0.35   # primary estimate against the published power-loading route
 MIN_BLADES = 2
 MIN_MOUNT_POINTS = 2
@@ -77,6 +87,9 @@ CONSERVATIVE_MASS_MIN_RATIO = 1.05    # conservative mass at least 5 percent hea
 MODULE_COMPONENTS = ["blade", "frame", "pitch", "motor", "actuator", "mount"]
 
 VERBATIM_DIRS = {"reference"}
+# Documents written by someone else and kept as received. The style rules exist so our own
+# prose reads as ours; rewriting incoming evidence to satisfy them would damage it.
+VERBATIM_FILES = {"_research.md"}
 RULES_FILES = {".claude/weekly-loop.md"}
 BANNED_ATTRIBUTION = ["co-authored-by", "generated with claude", "claude opus", "anthropic"]
 
@@ -98,6 +111,8 @@ def md_files():
     for p in sorted(ROOT.rglob("*.md")):
         rel = p.relative_to(ROOT)
         if (rel.parts and rel.parts[0] in VERBATIM_DIRS) or ".git" in rel.parts:
+            continue
+        if rel.as_posix() in VERBATIM_FILES:
             continue
         yield p
 
@@ -674,6 +689,15 @@ def week2(data):
                      f"week2: {label} thrust clears 10 N",
                      f"{t:.3f} N" if t else "not computable")
 
+    # Solidity decides whether the borrowed thrust coefficient is transferable at all.
+    R_, c_, nb_ = num(data, "geometry.radius_m"), num(data, "geometry.chord_m"), num(data, "geometry.blades")
+    if R_ and c_ and nb_:
+        sigma = nb_ * c_ / (2 * math.pi * R_)
+        ok &= report(SOLIDITY_MIN <= sigma <= SOLIDITY_MAX,
+                     f"week2: solidity is inside the measured optimum band "
+                     f"{SOLIDITY_MIN} to {SOLIDITY_MAX}",
+                     f"sigma {sigma:.4f}, so the transferred coefficient needs re-deriving")
+
     cl, cn = num(data, "performance.blade_area_coeff_low"), num(data, "performance.blade_area_coeff")
     if cl and cn:
         ok &= report(cl <= cn * CONSERVATIVE_COEFF_MAX_RATIO,
@@ -1071,6 +1095,11 @@ def week4(data):
         "structure.blade_load_factor", "structure.pitch_link_load_N",
         "structure.pitch_link_allowable_N", "structure.pitch_link_margin",
     ], "week4: numbers.json carries the structural schema")
+    lf_ = num(data, "structure.blade_load_factor")
+    if lf_:
+        ok &= report(lf_ >= MIN_BLADE_LOAD_FACTOR,
+                     f"week4: the blade load factor is at least {MIN_BLADE_LOAD_FACTOR}",
+                     f"{lf_}, against a measured peak to mean of 3 to 4 on 3 bladed rotors")
     ok &= require_text(data, ["structure.torque_reference",
                               "sources.structure.blade_root_bending_Nm",
                               "sources.structure.shaft_torque_Nm",
