@@ -18,6 +18,62 @@ Rules that make the weeks machine-checkable:
 - A week is done when `python tools/check.py --week N` exits 0
 - The gates have their own test suite at `tools/test_gates.py`, which builds throwaway trees and checks that an honest design passes and eleven specific attacks fail. Run it if you change `check.py`
 
+## How each week is broken into subsessions
+
+One tick is one week. Inside it the week-agent runs the subsessions below rather than doing
+everything in one context. The budget is **7 where subsessions can run in parallel, 5 where
+they must run in sequence**, because a long serial chain in one context loses the thread
+before it reaches the documents.
+
+The "fills" column is the count of sub-parameters in `numbers.json` that week is
+responsible for. Every one of them is gated.
+
+| Week | Fills | Subsessions | Of those, parallel |
+| --- | --- | --- | --- |
+| 2 | 38 scalars plus 3 tables, roughly 80 cells | 7 | 2 |
+| 3 | 13 scalars | 6 | 3 |
+| 4 | 23 scalars plus the mass budget, roughly 55 cells | 6 | 2 |
+| 5 | 0, it assembles | 5 | 0 |
+
+**Week 2**, the heaviest week and the one that decides feasibility.
+
+1. Configuration: single rotor against a redesigned 2 and 3 rotor cluster, same boundary
+2. Shape family, thrust coefficient bounding, solidity band check. Needs 1
+3. Radius against power sweep, design thrust choice, sensitivity table. Needs 2
+4. Power chain, momentum floor, published power loading route. Needs 3
+5. Whole-module mass envelope. Needs 3, **runs parallel with 4**
+6. Write the three design documents and fill `numbers.json`. Needs 4 and 5
+7. Audit
+
+**Week 3.** Subsessions 3 and 4 are independent of 1 and 2 and of each other.
+
+1. Pitch mechanism, kinematics, the schedule table
+2. Vectoring, phase authority, side force. Needs 1
+3. Packaging and integration. **Parallel**
+4. Item 7 structure draft, if week H has returned. **Parallel**, zero engineering dependency
+5. Write the documents. Needs 1 to 4
+6. Audit
+
+**Week 4.**
+
+1. Material selection, which feeds mass
+2. Mass budget refinement, each line naming the envelope line it refines. Needs 1
+3. Structural loads: blade bending, shaft torque, attachment against centrifugal, pitch
+   link. **Runs parallel with 2**, since it needs week 2 geometry rather than the budget
+4. Thrust-to-weight results and margin reconciliation. Needs 2 and 3
+5. Write the three design documents. Needs 4
+6. Audit
+
+**Week 5**, strictly sequential because each step consumes the last.
+
+1. Finish item 7 specifics from week H
+2. Assemble the submission, all 7 items in order, with the criteria map table
+3. Build the PDF and verify it carries this submission's sections and numbers
+4. Draft the email and stage everything. **Never send**
+5. Audit
+
+Totals: 24 subsessions across 4 ticks, plus the 4 supervisor runs that gate them.
+
 ## What every week ends with, without exception
 
 The scope files listed under each week are the deliverables. These four are the protocol,
