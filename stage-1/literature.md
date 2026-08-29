@@ -44,7 +44,9 @@ S5 could not be downloaded. The TAMU repository refused the request from here an
 
 ## What the old table got wrong
 
-The 700 rpm entry has no source I can find. Every measured rig at this scale sits somewhere else. S1 was mechanically limited to 1200 rpm, S2 swept 400 to 2000, S4 runs at 3000. Nothing lands at 700.
+The 700 rpm entry has no source at our scale. S1 was mechanically limited to 1200 rpm, S2 swept 400 to 2000, S4 runs at 3000. Nothing at MAV or UAV scale lands at 700.
+
+**Probable provenance, found 27 August.** Ramsey's 25 kg quad-cyclocopter runs at 700 RPM. If that is where the figure came from, the old table was not inventing it, it was carrying a 25 kg operating point into a 10 N design, which is a scale mismatch rather than a fabrication. Confirm when the thesis is in hand. Either way it does not apply here.
 
 The 24 rpm entry is junk, as the handoff guessed. No 150 mm radius, 80 mm chord, 200 mm span 4-blade config appears in anything I read.
 
@@ -241,7 +243,12 @@ The return could not find the CycloProp problem statement online and flagged the
 
 - S5, the TAMU thesis. It is the only study in our Reynolds band and the repository blocks direct requests. Worth a library proxy, or ask the faculty supervisor once one is lined up
 - S6, the cam-based passive pitching paper. Blade pitch is a required Stage 1 section and this is the closest published passive mechanism, on a 535 g vehicle
-- **Ramsey and Benedict, "Design, development, and flight testing of a 25-kilogram quad-cyclocopter", VFS 78th Forum.** Three orders of magnitude above Runco and the same lab. If it carries a subsystem mass table, then Runco at 70 g, this at 25 kg and Benedict 2010 in between give **three points across scale from one design lineage**, which is the closest thing to the mass scaling law this project asked for and could not find
+- **Ramsey, Ramsay Allen, "Development and Flight Testing of a 25-Kilogram Quad-Cyclocopter", MS thesis, Texas A&M, December 2022.** Handle 1969.1/198531, and a better source than the VFS 78th Forum paper of the same work. 25 kg, 1.8 by 1.4 by 0.8 m, four cantilevered cyclorotors, five-bar pitching, 6 blades at c/R 0.64, NACA 0015, pitch axis at 45 percent chord, plus or minus 45 degrees, 700 RPM. Flight tested to lift-off.
+
+  Two lines from the abstract land directly on gates added this week. Blades are **foam core with carbon fibre skin, giving large bending and torsional stiffness**, which is the closest published analogue to our construction and is the stiffness case the deflection gate now demands. And the supporting structure and transmission are designed **resilient to large centrifugal loads**, which is the blade attachment gate treated as a first-order driver by someone building at 25 kg.
+
+  Note a conflict: the conference abstract says c/R 0.67 and the thesis says 0.64. Prefer the thesis and state the conflict if either is cited
 - Shrestha, "Experimental Investigation of a MAV-Scale Cyclocopter", PhD, University of Maryland 2018, DOI 10.13016/S6EN-WSUK. Open
 - Runco, Himmelberg and Benedict, Journal of Aircraft 2018, the optimisation study behind the micro rotor. Likely carries thrust coefficient data at low Reynolds
+- **Heimerl, Halder, Benedict et al., "Experimental and Computational Investigation of a UAV-Scale Cycloidal Rotor in Forward Flight", VFS 77th Annual Forum.** **The highest-value paper on this list.** They measured **instantaneous radial and tangential blade forces** in a water tunnel across **Re 30,000 to 100,000**, sweeping rotational speed, flow speed, pitch amplitude and pitch offset at advance ratios from 0, meaning hover, to 0.44. That brackets our Reynolds band exactly and converts two currently-simulated gated numbers into measured ones: the blade peak-to-mean load factor, and the side force angle against pitch offset, which is also the input to the vectoring section
 - **Aerospace 13(7):606, 2026, on end-plates.** Reports that thicker sections delay leading edge vortex formation and cut both force fluctuation and thrust deflection. If that holds, NACA 0020 lowers the peak to mean load ratio **and** the side force angle, improving two open problems through a choice already made

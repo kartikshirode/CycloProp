@@ -174,3 +174,35 @@ mounting share, that move it.
 Neither D8 nor D11 is withdrawn. D8's benchmarks are still correct for the designs they
 describe, and D11's finding that scale buys nothing on blade mass still holds and still
 constrains where the remaining margin comes from.
+
+## D14: the three-point mass series bounds the argument, it does not fit a law
+
+27 August 2026.
+
+Runco at 70 g, Kellen at roughly 17 lb and Ramsey at 25 kg span four orders of magnitude
+from one lab, and the temptation is to fit mass per newton against scale and call it the
+scaling law this project could not find. That would be wrong, and week 2 must not do it.
+
+The three designs are not geometrically similar:
+
+| | Runco 70 g | Kellen UAV | Ramsey 25 kg |
+| --- | --- | --- | --- |
+| Blades | 4 | 3 | 6 |
+| Chord to radius | 0.8 | 0.66 | 0.64 |
+| Airfoil | flat plate | NACA 0020 | NACA 0015 |
+| Pitch amplitude | 45 deg | 40 deg | 45 deg |
+
+Blade count and airfoil do not move monotonically with scale, so any exponent fitted to
+these three points conflates scale with design choice, and at three points the two cannot
+be separated. Shrestha's blade-mass invariance, which D11 rests on, is derived **under
+geometric similarity**, and these designs are not that.
+
+So the series is used to **bound** the fixed-mass amortisation argument and to show the
+direction of travel. It is not used to fit an exponent, and any figure taken from it is
+quoted with the scatter and with the fact that three different rotors are being compared.
+
+Two smaller readings from the same table. Chord to radius converges on roughly 0.65 above
+micro scale, which supports the 0.66 baseline independently of Kellen. And the same lab
+chose NACA 0015 at 25 kg, so the record does not show 0020 winning at every scale. Our
+Reynolds number sits beside Kellen's rather than Ramsey's, so 0020 still holds, but the
+submission should not claim thicker is universally better.
