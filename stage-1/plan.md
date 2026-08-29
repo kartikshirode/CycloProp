@@ -18,6 +18,29 @@ Rules that make the weeks machine-checkable:
 - A week is done when `python tools/check.py --week N` exits 0
 - The gates have their own test suite at `tools/test_gates.py`, which builds throwaway trees and checks that an honest design passes and eleven specific attacks fail. Run it if you change `check.py`
 
+## What every week ends with, without exception
+
+The scope files listed under each week are the deliverables. These four are the protocol,
+they are the same every week, and three of them are supervisor gates that fail the tick if
+they are missing. A week that produces perfect design documents and skips these has not
+finished.
+
+1. **`stage-1/progress/week-{N}.md`** containing the literal line `STATUS: WEEK-COMPLETE`.
+   What the week was meant to produce, what it actually produced, what changed, and what is
+   carried forward as a debt
+2. **`stage-1/audit/week-{N}.md`** containing the literal line `AUDIT-COMPLETE`. Written by
+   the audit subagent, checking plan against delivered and documents against the actual
+   diff. This is where the things the gates deliberately cannot check get caught: whether
+   the prose says anything, whether a mass basis is real, whether a source carries the
+   weight put on it
+3. **`handoff.md`** with its `NEXT-WEEK:` line bumped to the next week number. Exactly one
+   such line in the file. The supervisor greps for it and does not read around it
+4. **`stage-1/decisions.md`** gets a numbered entry for anything frozen, and
+   `stage-1/journal.md` a short note. Reopening an earlier decision is a new entry saying
+   which one it supersedes, never an edit in place
+
+Commit at the end of the week, split by concern, on the branch that is already checked out.
+
 ## The target is not exactly 10 N
 
 The requirement is thrust **at or above** 10 N with T/W above 2.5. Those two together set the mass ceiling, and the ceiling moves with thrust:

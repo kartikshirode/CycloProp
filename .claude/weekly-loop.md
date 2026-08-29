@@ -59,7 +59,7 @@ The done marker goes in the week's progress file, the audit marker at the end of
 ## Checkpoints
 
 ```
-checkpoint_every: 2
+checkpoint_every: 1
 human_gate_advisory_before_week: 2
 human_gate_required_before_week: 5
 ```
@@ -70,7 +70,7 @@ That block is now mechanical rather than advisory. `stage-1/human-gate.md` carri
 
 The weekly audit is also a gate now. Every week already marked done has to carry `stage-1/audit/week-N.md` containing `AUDIT-COMPLETE`, checked in `check.py` rather than only by the supervisor. The week being gated right now is exempt, since its audit does not exist yet. This matters because the audit is the stated mitigation for everything the gates deliberately do not check: whether the prose says anything, whether a mass basis is real, whether a source is strong enough. That mitigation used to be named in this file and enforced nowhere.
 
-The human reads after every second completed week. Weeks 2 and 4 both carry decision gates that are judgment calls rather than mechanical ones, so full autopilot to the deadline is not the right trade on a submission that only gets made once.
+**Set to 1 deliberately, so the loop halts after every week.** Nothing here has run a tick yet, and the first few weeks are worth reading before the next one builds on them. Weeks 2 and 4 also carry decision gates that are judgment calls rather than mechanical ones, so full autopilot to the deadline was never the right trade on a submission that only gets made once. Raise it to 2 once a couple of weeks have come back clean and the shape of the output is known.
 
 ## Blocked triggers
 
