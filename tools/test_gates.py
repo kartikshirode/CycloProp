@@ -108,7 +108,7 @@ def honest_numbers():
     act_p, ctl_p = 6.0, 2.0
 
     # Structural demands derived from the design rather than asserted beside it.
-    ratio, lever, load_factor = 2.0, S / 4, 2.0
+    ratio, lever, load_factor = 2.0, S / 4, 3.0
     shaft_dem = shaft / omega
     blade_dem = thrust / nb * lever * load_factor
     blade_all, shaft_all = blade_dem * 2.9, shaft_dem * 3.0
