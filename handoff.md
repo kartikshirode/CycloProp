@@ -71,12 +71,16 @@ Re-cut onto the competition's module boundary, the closest published designs giv
 
 The earlier "rotor is 37 to 48 percent of all-up weight" benchmark measured against whole-aircraft mass including battery and avionics, which the module boundary excludes. It was not comparable and should not be used for budgeting.
 
-This is survivable. Both published designs are 3 to 6 inch demonstrators at Reynolds numbers of 17,000 to 35,000, neither was trying to hit a T/W target, and fixed masses like bearings and fasteners amortise badly at 120 g and well at 400 g. But the argument has to be made with numbers in week 2, not assumed. Decision D8 and [stage-1/literature.md](stage-1/literature.md) carry the working.
+This is survivable, but the argument is narrower than it was. External research settled the piece D8 could not: blade mass per newton is scale invariant and blade stress climbs, so **scale buys aerodynamic efficiency and nothing on blade mass**. What is left is the non-blade fixed masses, bearings and fasteners and ESC and linkage and motor, amortising over five times the thrust, plus materials. Week 2 makes that case in those terms and drops the scale-shrinks-blade-mass claim, which the record contradicts. Decisions D8 and D11 and [stage-1/literature.md](stage-1/literature.md) carry the working.
+
+Early test worth running first in week 2: if the non-blade fixed masses cannot come in under roughly 40 percent of the mass ceiling at the chosen thrust, this does not close at that radius.
 
 ## Open items
 
 - **Working solo.** Confirmed 27 August. More people are available if the work needs them, but the plan should assume one person until that changes. Weekly hours are still unstated, which now matters more than it did, because there is nobody to absorb a slipped week
-- **Three papers unread.** The Texas A&M thesis is the only study in our own Reynolds band and the repository refuses direct requests. Week 2 leans on a summary of it whose internal consistency checks out but which has not been opened. A library proxy or the faculty supervisor would close it
+- **Two papers to pull in a browser, and both are open access.** Scripted fetching fails on Cloudflare, so these need a human with a browser and about five minutes:
+  - **Kellen 2019**, Texas A&M handle 1969.1/184958, the thesis behind our whole baseline geometry. Wanted from the body: the measured blade-area thrust coefficient, power loading in N/W, per-rotor thrust and the rpm at the optimum. **Getting the coefficient would retire most of the project's second-biggest risk**, since it is the same shape family in the same Reynolds band
+  - **Runco and Benedict 2023**, IJMAV 15, DOI 10.1177/17568293231189999. Wanted: thrust per rotor, because the research return quotes 10 gf per rotor and 68 gf total on a 4 rotor vehicle, and those disagree. The module T/W re-cut is 1.22 on one reading and 2.07 on the other, which is the difference between the gap widening and nearly closing
 - **Registration, team confirmation and the eligibility check** are human tasks and none are done. The eligibility clause disqualifies a whole team at any stage, including after results, so check every member before the team is fixed
 - **A faculty supervisor** is still needed, both for the Stage 2 CAE tool access and because the problem statement's preference list reads like a spec for the team capability section
 - [stage-1/organiser-email.md](stage-1/organiser-email.md) is mostly answered by the problem statement now and should be cut down or dropped

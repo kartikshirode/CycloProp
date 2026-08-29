@@ -98,3 +98,49 @@ Week 2 therefore freezes a thrust sensitivity table with at least three candidat
 carrying its mass ceiling, ideal power and rpm. Week 4 may only select a row from it. A
 design thrust outside the table fails the gate, because an unstudied increase is a rerun of
 week 2 wearing the costume of a small edit.
+
+## D11: the thrust-to-weight case rests on fixed masses, not on blade scaling
+
+27 August 2026, after the external research round.
+
+D8 left the case for clearing 2.5 resting on four arguments, one of which was scale, and
+flagged a counterargument it could not dismiss: that blade mass per newton is scale
+invariant under geometric similarity, so growing the rotor buys nothing on blade mass.
+
+Shrestha and Benedict, JAHS 2022, settle it, and they settle it against us on that point.
+Their validated model gives both halves at once. Non-dimensional thrust holds as Reynolds
+rises while torque and power fall, so efficiency does improve with scale. But blade weight
+per unit thrust stays constant and blade stress rises monotonically, independent of how the
+blade is designed.
+
+So the argument narrows. Scale buys aerodynamic efficiency and nothing on blade mass. The
+gap has to be closed by the non-blade fixed masses, meaning bearings, fasteners, ESC,
+linkage and motor, amortising over roughly five times the thrust, plus materials and stress
+management on the blades themselves. Week 2 makes that case in those terms and drops the
+claim that scale shrinks blade mass fraction, which the published record contradicts.
+
+The practical threshold, worth testing early in week 2: if the non-blade fixed masses
+cannot come in under roughly 40 percent of the mass ceiling at the chosen thrust, the
+target is not reachable at that radius and the answer is a larger radius, a higher design
+thrust, or fewer fixed parts, meaning one motor per module and passive pitching rather than
+per-blade servos.
+
+## D12: the borrowed coefficient is only valid inside the solidity band it was measured in
+
+27 August 2026, after the external research round.
+
+Kellen 2019 is the source of the shape family this project defaults to, and its measured
+optimum sits at a solidity of 0.30 to 0.40. Our family gives 0.315, which is inside it.
+
+The 0.607 coefficient is transferred into that family across a change in blade count,
+airfoil and chord ratio all at once. The published record says the Reynolds part of that
+transfer is safe, since non-dimensional thrust is roughly Reynolds invariant from 35,000 to
+100,000, and that the configuration part is not de-risked by anything. Solidity is the one
+piece of the configuration change that has a measured optimum attached to it, so it is
+gated: outside 0.30 to 0.40 the coefficient has to be re-derived rather than carried
+across.
+
+Two other consequences of the same round. Peak blade thrust runs 3 to 4 times the cycle
+mean on 2 and 3 bladed rotors, which a cycle-averaged coefficient hides, so the blade load
+factor is gated at 3.0 or above. And the figure of merit to design against is about 0.6,
+which is what Kellen measured, comfortably inside the 0.20 to 0.75 band the gate allows.

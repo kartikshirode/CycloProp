@@ -171,6 +171,63 @@ That 100,000 sits at the bottom edge of the 100,000 to 300,000 band S5 studied, 
 
 **The 0.607 coefficient is a single-point anchor and it is transferred across a geometry change.** It comes from 4 blades, NACA 0010, c/R 0.433 and Re near 35,000. The shape family it gets applied to is 3 blades, NACA 0020, c/R 0.66 and Re near 100,000. Blade count, solidity, airfoil and Reynolds number all move at once. Week 2 bounds it with a low value derived from the spread in S2's own parametric results rather than adopting it, and the conservative case has to clear both targets on its own. It is the highest-risk assumption in the project.
 
+## External research round, 27 August 2026
+
+An outside agent worked the brief at [../_research-brief.md](../_research-brief.md) and returned [../_research.md](../_research.md). What survived checking, and what did not.
+
+### The decisive scaling result
+
+**Shrestha, Benedict et al., "Understanding Upward Scalability of Cycloidal Rotors for Large-Scale UAS Applications", JAHS 67(4), October 2022.** 2D CFD plus a lower-order aeroelastic model, validated against UAV-scale experiment at chord Reynolds 200,000, optimised across 1 to 1000 lb of thrust. Two findings, both quoted in the return:
+
+- Non-dimensional thrust stays almost unchanged as Reynolds rises, while non-dimensional torque and power fall significantly from Re 10,000 to 100,000
+- Blade weight per unit thrust stays constant as the rotor grows, and blade stress rises monotonically under geometric similarity, independent of blade structural design
+
+This settles the argument D8 was carrying both ways at once. The favourable half holds: efficiency improves with scale. The counterargument also holds: blade mass per newton does not shrink. So scale cannot close the mass gap through the blades, and the case has to rest on the non-blade fixed masses amortising plus materials. Recorded as D11.
+
+Status: simulated and validated, not a transcribed measured Reynolds sweep. Read the paper before the submission quotes it.
+
+### Kellen 2019, which confirms the baseline geometry
+
+The Texas A&M thesis is **Kellen, Adam John, "Performance Measurements on a UAV-Scale Cycloidal Rotor in Hover", MS thesis, Texas A&M University, 2019, handle 1969.1/184958**. S5 in the table above, now identified. From the abstract and the companion Forum papers:
+
+- 37 configurations, optimum at Re 200,000: c/R 0.66, 3 blades, blade aspect ratio 4, NACA 0020, rotor aspect ratio 1.33, plus or minus 40 degrees, **figure of merit 0.6**
+- Optimal **solidity 0.30 to 0.40**
+- Airfoil thickness up to 25 percent of chord is efficient, and thicker sections widen the usable pitch range
+- Thrust referenced per unit blade area, which is the convention this project already uses
+
+Our shape family gives a solidity of 0.315, inside the measured band. That is now a week 2 gate, because the 0.607 transfer is only defensible inside the band it was measured in.
+
+The measured blade-area coefficient itself is still not in hand. It sits in the thesis body figures. **Getting it would retire most of the coefficient risk**, because it is the same shape family in the same Reynolds band.
+
+### Runco 2023, and why its headline number is not usable yet
+
+**Runco, C. and Benedict, M., "Design, development, and flight testing of a 70-gram micro quad-cyclocopter", IJMAV 15, 2023.** Open access. Sub-system masses from its Table 3, four rotors: motors and transmission 13.4 g, servos 5.0 g, cyclorotors 14.4 g, structure and wires 13.1 g, batteries 18.4 g, electronics 5.7 g.
+
+Module per rotor comes to 8.2 g. The return concludes the design re-cuts to a module T/W of 1.0 to 1.2, **worse** than Benedict 2010, and builds its central recommendation on that.
+
+**The two thrust figures it quotes cannot both be right.** It states 10 gf per rotor and 68 gf of total design thrust, on a 4 rotor vehicle, and 4 times 10 is 40. The re-cut swings on which is correct:
+
+| Thrust basis | Module T/W per rotor |
+| --- | --- |
+| 10 gf per rotor | 1.22 |
+| 68 gf over 4 rotors, so 17 gf | 2.07 |
+
+1.22 says the gap got worse. 2.07 says a micro design nearly reaches our target and the argument is much stronger than D8 assumed. **Do not cite either until the paper is open.** It is open access and the arithmetic is a two minute check.
+
+### Smaller findings that hold
+
+- **Peak blade thrust runs 3 to 4 times the cycle mean** on 2 and 3 bladed rotors, which a cycle-averaged coefficient hides entirely. Week 4 now gates the blade load factor at 3.0 or above. Attributed to Alsabri et al., Aerospace 13(9):765, 2025, 2D URANS, and not yet read here
+- **Coefficient conversion.** Blade-area to projected-area is a factor of (N/2)(c/R), which for 3 blades at c/R 0.66 is 0.99. The two conventions happen to coincide for this geometry, which is a coincidence of the shape and not an identity. Checked and correct. It also confirms the projected area 2R times span used as the momentum area cap
+- **Thicker airfoils help at every scale.** Kellen at UAV scale and Xisto at large scale both support NACA 0020, at a possible cost in peak thrust against power loading
+- **Vectoring offset angles.** Adams 2013 measured the resultant tilted 15 to 35 degrees in the direction of rotation depending on amplitude and rpm, Sirohi about 10 degrees, Benedict 30 degrees. The offset grows with pitch amplitude and varies with rpm, so it is a schedule and not a constant
+- **Simple models err optimistically in both directions** off-design, over-predicting thrust and under-predicting power. Size against that, and prefer the two measured power routes already cross-checked here
+- **No published cyclorotor states a T/W target and reports whether it met it.** Searched and not found, which is worth saying in the submission
+- **No openly tabulated blade-area coefficient spread exists.** The values are inside primary figures. The 0.516 low bound here is still a caution rather than a published lower bound
+
+### One caveat that is ours to answer
+
+The return could not find the CycloProp problem statement online and flagged the module boundary and the mass ceilings as unverifiable. They are verified: the PDF is at [../reference/cycloprop-problem-statement.pdf](../reference/cycloprop-problem-statement.pdf), pulled from the Techfest API in week 1, and the boundary is quoted from it in [../context.md](../context.md).
+
 ## Still to pull
 
 - S5, the TAMU thesis. It is the only study in our Reynolds band and the repository blocks direct requests. Worth a library proxy, or ask the faculty supervisor once one is lined up
