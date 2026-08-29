@@ -26,3 +26,4 @@ Thumbs.db
 
 # weekly-loop supervisor state, must stay untracked
 .claude/weekly-loop-sentinel.json
+.codex/weekly-loop-sentinel.json
