@@ -1,3 +1,11 @@
+> **Editorial note added 27 August 2026, not part of the original return.** The Problem 1
+> headline below, that Runco 2023 re-cuts to a module T/W of 1.0 to 1.2 and that the gap is
+> a thrust-density rather than a mass-fraction problem, is **withdrawn**. It rested on 10 gf
+> per rotor, which is the older 1 inch rotor quoted in passing; the aircraft's rotor is
+> 16.9 gf and it hovered at 70 g on four of them. The corrected re-cut is 2.13, and the
+> corrected reading is in `stage-1/literature.md` and decision D13. Everything else here
+> stands. Kept as received rather than rewritten, because it is evidence.
+
 # Cycloidal Rotor Aerodynamics & Mass Properties: Evidence Review for PUSHPAK CycloProp Stage 1
 
 *Scope: evidence, numbers, and provenance for the three problems in the brief. Every numeric finding carries source, measured configuration, and a MEASURED / SIMULATED / PREDICTED tag. Points where the published record contradicts an assumption in the brief are flagged in bold. Stated gaps are given where no source exists rather than inferred.*

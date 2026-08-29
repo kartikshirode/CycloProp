@@ -199,20 +199,29 @@ Our shape family gives a solidity of 0.315, inside the measured band. That is no
 
 The measured blade-area coefficient itself is still not in hand. It sits in the thesis body figures. **Getting it would retire most of the coefficient risk**, because it is the same shape family in the same Reynolds band.
 
-### Runco 2023, and why its headline number is not usable yet
+### Runco 2023, settled, and it is the best published point we have
 
-**Runco, C. and Benedict, M., "Design, development, and flight testing of a 70-gram micro quad-cyclocopter", IJMAV 15, 2023.** Open access. Sub-system masses from its Table 3, four rotors: motors and transmission 13.4 g, servos 5.0 g, cyclorotors 14.4 g, structure and wires 13.1 g, batteries 18.4 g, electronics 5.7 g.
+**Runco, C. and Benedict, M., "Design, development, and flight testing of a 70-gram micro quad-cyclocopter", IJMAV 15, 2023.** Open access. Sub-system masses from Table 3 across four rotors: motors and transmission 13.4 g, servos 5.0 g, cyclorotors 14.4 g, structure and wires 13.1 g, batteries 18.4 g, electronics 5.7 g. Module per rotor is 8.2 g.
 
-Module per rotor comes to 8.2 g. The return concludes the design re-cuts to a module T/W of 1.0 to 1.2, **worse** than Benedict 2010, and builds its central recommendation on that.
+The first research pass reported two thrust figures that contradicted each other, 10 gf per rotor against 68 gf total on a four rotor vehicle, and built its conclusion on the low one. The paper settles it. The 10 gf belongs to the **older 1 inch rotor** from the twin, quoted while explaining why mirroring the twin would not work. The new rotor is 30 percent larger and thrust scales with the square: 4 times 10 times 1.3 squared is 67.6, which is the 68 gf quoted. **So the rotor in this aircraft is 16.9 gf, and the paper separately states a 16 gf design requirement against a 13 gf need.**
 
-**The two thrust figures it quotes cannot both be right.** It states 10 gf per rotor and 68 gf of total design thrust, on a 4 rotor vehicle, and 4 times 10 is 40. The re-cut swings on which is correct:
+Two independent confirmations inside the paper. Blade loading is given as 71 gf of centrifugal force against 16 gf of aerodynamic loading. And the aircraft hovered at 70 g for about 3 minutes on four cyclorotors in an H configuration with nothing else producing lift, which is a measured floor of 17.5 gf per rotor.
 
-| Thrust basis | Module T/W per rotor |
-| --- | --- |
-| 10 gf per rotor | 1.22 |
-| 68 gf over 4 rotors, so 17 gf | 2.07 |
+The 40 gf branch fails the simplest check available: 40 gf cannot lift a 70 g aircraft.
 
-1.22 says the gap got worse. 2.07 says a micro design nearly reaches our target and the argument is much stronger than D8 assumed. **Do not cite either until the paper is open.** It is open access and the arithmetic is a two minute check.
+| Boundary | Module per rotor | Module T/W |
+| --- | --- | --- |
+| Design thrust, 16.9 gf | 8.2 g | 2.06 |
+| Flight-demonstrated, 17.5 gf | 8.2 g | **2.13** |
+| Plus ESCs at roughly 1 g each | 9.2 g | 1.90 |
+| Plus half the structure and wiring share | 9.8 g | 1.78 |
+| Plus the whole structure and wiring share | 11.5 g | 1.53 |
+
+**The caveat cuts in our favour for once.** Runco's 8.2 g already includes the servo, which is the actuator the module boundary explicitly requires. Sirohi's 1.80 excludes an entire 38 g electronics and servos line. So on a like-for-like boundary this re-cut is **less** optimistic than the two we already had, not more.
+
+Two allocations week 2 has to decide and state: whether the DYS XSD7A ESCs, about 1 g each and living inside the 5.7 g electronics line, are module hardware, and what share of structure and wiring counts as mounting. The defensible band is roughly 1.5 to 2.13, and on the same optimistic boundary used for 1.69 and 1.80 it is **2.13**.
+
+**This is the best published point by a wide margin and it changes the feasibility case.** At Reynolds 18,600, with flat plate blades, no CFRP airfoil, and no thrust to weight target in mind, a mass-optimised micro module already sits near 2.1 on our boundary. See D11.
 
 ### Smaller findings that hold
 
@@ -232,4 +241,7 @@ The return could not find the CycloProp problem statement online and flagged the
 
 - S5, the TAMU thesis. It is the only study in our Reynolds band and the repository blocks direct requests. Worth a library proxy, or ask the faculty supervisor once one is lined up
 - S6, the cam-based passive pitching paper. Blade pitch is a required Stage 1 section and this is the closest published passive mechanism, on a 535 g vehicle
-- Runco, C. and Benedict, M. "Design, development, and flight testing of a 70-gram micro quad-cyclocopter", 2023. Paywalled
+- **Ramsey and Benedict, "Design, development, and flight testing of a 25-kilogram quad-cyclocopter", VFS 78th Forum.** Three orders of magnitude above Runco and the same lab. If it carries a subsystem mass table, then Runco at 70 g, this at 25 kg and Benedict 2010 in between give **three points across scale from one design lineage**, which is the closest thing to the mass scaling law this project asked for and could not find
+- Shrestha, "Experimental Investigation of a MAV-Scale Cyclocopter", PhD, University of Maryland 2018, DOI 10.13016/S6EN-WSUK. Open
+- Runco, Himmelberg and Benedict, Journal of Aircraft 2018, the optimisation study behind the micro rotor. Likely carries thrust coefficient data at low Reynolds
+- **Aerospace 13(7):606, 2026, on end-plates.** Reports that thicker sections delay leading edge vortex formation and cut both force fluctuation and thrust deflection. If that holds, NACA 0020 lowers the peak to mean load ratio **and** the side force angle, improving two open problems through a choice already made

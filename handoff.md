@@ -67,13 +67,29 @@ Configuration, rotor sizing, thrust, power, and the feasibility envelope that de
 
 ## The number that decides this project
 
-Re-cut onto the competition's module boundary, the closest published designs give a module thrust-to-weight of **1.69 and 1.80**. We need 2.5, so the gap is 39 to 48 percent over the state of the art, and it is further from published work than anything else in the brief.
+Re-cut onto the competition's module boundary, the best published design gives a module
+thrust to weight of **2.13**, and we need 2.5. That is a gap of about 17 percent, not the 39
+to 48 percent this file carried until 27 August.
 
-The earlier "rotor is 37 to 48 percent of all-up weight" benchmark measured against whole-aircraft mass including battery and avionics, which the module boundary excludes. It was not comparable and should not be used for budgeting.
+The 1.69 and 1.80 figures from Benedict 2010 and Sirohi 2007 are still correct for those
+designs. They were simply not the best available point. Runco's 70 g quad-cyclocopter re-cuts
+to 2.13 on the same optimistic boundary, and to 1.53 on the harshest allocation of ESCs and
+mounting share. It is also the **least** optimistic of the three, because its 8.2 g already
+includes the servo that the module boundary requires and that Sirohi's number leaves out.
 
-This is survivable, but the argument is narrower than it was. External research settled the piece D8 could not: blade mass per newton is scale invariant and blade stress climbs, so **scale buys aerodynamic efficiency and nothing on blade mass**. What is left is the non-blade fixed masses, bearings and fasteners and ESC and linkage and motor, amortising over five times the thrust, plus materials. Week 2 makes that case in those terms and drops the scale-shrinks-blade-mass claim, which the record contradicts. Decisions D8 and D11 and [stage-1/literature.md](stage-1/literature.md) carry the working.
+So the case reads: a mass-optimised micro module at Reynolds 18,600, built from flat plate
+blades with no T/W target in mind, already sits near 2.1 on our boundary. Scaling it to 10 N
+is neutral on blade mass per newton, favourable on fixed mass amortisation, and favourable on
+power. The expectation is above 2.1.
 
-Early test worth running first in week 2: if the non-blade fixed masses cannot come in under roughly 40 percent of the mass ceiling at the chosen thrust, this does not close at that radius.
+One piece of the old argument is gone for good. Blade mass per newton is scale invariant and
+blade stress climbs regardless of blade design, so **scale buys aerodynamic efficiency and
+nothing on blade mass**. The remaining margin has to come from fixed masses amortising and
+from materials. Decisions D8, D11 and D13 carry the working.
+
+Week 2 argues from 2.13, states the two allocation choices that move it, and runs the early
+test: if the non-blade fixed masses cannot come in under roughly 40 percent of the mass
+ceiling at the chosen thrust, this does not close at that radius.
 
 ## Open items
 

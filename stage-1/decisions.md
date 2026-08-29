@@ -144,3 +144,33 @@ Two other consequences of the same round. Peak blade thrust runs 3 to 4 times th
 mean on 2 and 3 bladed rotors, which a cycle-averaged coefficient hides, so the blade load
 factor is gated at 3.0 or above. And the figure of merit to design against is about 0.6,
 which is what Kellen measured, comfortably inside the 0.20 to 0.75 band the gate allows.
+
+## D13: the feasibility case starts from 2.1, not from 1.69
+
+27 August 2026, after the Runco figure was settled.
+
+D8 set the benchmark at 1.69 and 1.80 and called the gap 39 to 48 percent. D11 then removed
+the blade-mass half of the argument for closing it. Both stand on their own terms, and
+together they read worse than the record actually supports.
+
+Runco 2023, read properly, gives a module thrust to weight of **2.13** on the same
+optimistic boundary that produced 1.69 and 1.80, and 1.53 on the harshest allocation. It is
+the best published point available and it is better than either of the two this project has
+been budgeting against. Its 8.2 g already carries the servo that the module boundary
+requires and that Sirohi's number excludes, so it is the least optimistic of the three, not
+the most.
+
+The case therefore reads: a mass-optimised micro module at Reynolds 18,600, built from flat
+plate blades with no thrust to weight target in mind, already reaches about 2.1 on our
+boundary. Scaling that to 10 N is neutral on blade mass per newton, favourable on fixed
+mass amortisation, and favourable on power, since power falls with Reynolds. The
+expectation is therefore **above** 2.1, not below.
+
+That is a materially different argument from the one D8 and D11 leave standing. The gap to
+2.5 is roughly 17 percent from the best comparable point, not 39 to 48 percent from the
+second and third best. Week 2 argues from 2.13 and states the allocation choices, ESCs and
+mounting share, that move it.
+
+Neither D8 nor D11 is withdrawn. D8's benchmarks are still correct for the designs they
+describe, and D11's finding that scale buys nothing on blade mass still holds and still
+constrains where the remaining margin comes from.
