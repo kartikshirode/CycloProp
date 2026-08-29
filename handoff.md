@@ -1,6 +1,6 @@
 # CycloProp handoff
 
-Updated 26 August 2026. Stage 1 is due **27 September 2026** and we submit on 26 September. This file is where a fresh session starts.
+Updated 29 August 2026. Stage 1 is due **27 September 2026** and we submit on 26 September. This file is where a fresh session starts.
 
 NEXT-WEEK: 2
 
@@ -69,7 +69,7 @@ Configuration, rotor sizing, thrust, power, and the feasibility envelope that de
 
 Re-cut onto the competition's module boundary, the best published design gives a module
 thrust to weight of **2.13**, and we need 2.5. That is a gap of about 17 percent, not the 39
-to 48 percent this file carried until 27 August.
+to 48 percent this file carried until 29 August.
 
 The 1.69 and 1.80 figures from Benedict 2010 and Sirohi 2007 are still correct for those
 designs. They were simply not the best available point. Runco's 70 g quad-cyclocopter re-cuts

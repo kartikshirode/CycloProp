@@ -46,7 +46,7 @@ S5 could not be downloaded. The TAMU repository refused the request from here an
 
 The 700 rpm entry has no source at our scale. S1 was mechanically limited to 1200 rpm, S2 swept 400 to 2000, S4 runs at 3000. Nothing at MAV or UAV scale lands at 700.
 
-**Probable provenance, found 27 August.** Ramsey's 25 kg quad-cyclocopter runs at 700 RPM. If that is where the figure came from, the old table was not inventing it, it was carrying a 25 kg operating point into a 10 N design, which is a scale mismatch rather than a fabrication. Confirm when the thesis is in hand. Either way it does not apply here.
+**Probable provenance, found 29 August.** Ramsey's 25 kg quad-cyclocopter runs at 700 RPM. If that is where the figure came from, the old table was not inventing it, it was carrying a 25 kg operating point into a 10 N design, which is a scale mismatch rather than a fabrication. Confirm when the thesis is in hand. Either way it does not apply here.
 
 The 24 rpm entry is junk, as the handoff guessed. No 150 mm radius, 80 mm chord, 200 mm span 4-blade config appears in anything I read.
 
@@ -173,7 +173,7 @@ That 100,000 sits at the bottom edge of the 100,000 to 300,000 band S5 studied, 
 
 **The 0.607 coefficient is a single-point anchor and it is transferred across a geometry change.** It comes from 4 blades, NACA 0010, c/R 0.433 and Re near 35,000. The shape family it gets applied to is 3 blades, NACA 0020, c/R 0.66 and Re near 100,000. Blade count, solidity, airfoil and Reynolds number all move at once. Week 2 bounds it with a low value derived from the spread in S2's own parametric results rather than adopting it, and the conservative case has to clear both targets on its own. It is the highest-risk assumption in the project.
 
-## External research round, 27 August 2026
+## External research round, 29 August 2026
 
 An outside agent worked the brief at [../_research-brief.md](../_research-brief.md) and returned [../_research.md](../_research.md). What survived checking, and what did not.
 

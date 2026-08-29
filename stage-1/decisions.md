@@ -101,7 +101,7 @@ week 2 wearing the costume of a small edit.
 
 ## D11: the thrust-to-weight case rests on fixed masses, not on blade scaling
 
-27 August 2026, after the external research round.
+29 August 2026, after the external research round.
 
 D8 left the case for clearing 2.5 resting on four arguments, one of which was scale, and
 flagged a counterargument it could not dismiss: that blade mass per newton is scale
@@ -127,7 +127,7 @@ per-blade servos.
 
 ## D12: the borrowed coefficient is only valid inside the solidity band it was measured in
 
-27 August 2026, after the external research round.
+29 August 2026, after the external research round.
 
 Kellen 2019 is the source of the shape family this project defaults to, and its measured
 optimum sits at a solidity of 0.30 to 0.40. Our family gives 0.315, which is inside it.
@@ -147,7 +147,7 @@ which is what Kellen measured, comfortably inside the 0.20 to 0.75 band the gate
 
 ## D13: the feasibility case starts from 2.1, not from 1.69
 
-27 August 2026, after the Runco figure was settled.
+29 August 2026, after the Runco figure was settled.
 
 D8 set the benchmark at 1.69 and 1.80 and called the gap 39 to 48 percent. D11 then removed
 the blade-mass half of the argument for closing it. Both stand on their own terms, and
@@ -177,7 +177,7 @@ constrains where the remaining margin comes from.
 
 ## D14: the three-point mass series bounds the argument, it does not fit a law
 
-27 August 2026.
+29 August 2026.
 
 Runco at 70 g, Kellen at roughly 17 lb and Ramsey at 25 kg span four orders of magnitude
 from one lab, and the temptation is to fit mass per newton against scale and call it the
