@@ -13,6 +13,11 @@ NEXT-WEEK: 2
 
 `brief.md`, `_shared-timeline.md` and `_plan-review-round1.md` are earlier work kept as history. They were written from page summaries and contradict `context.md` in several places. When they disagree, context.md wins.
 
+## To start the next week
+
+Prompts are in [_run-prompts.md](_run-prompts.md), one per tick, each for a fresh session.
+Run the pre-flight block at the top first. The loop halts after every week.
+
 ## Where we are
 
 Week 1 of 5 is done. Week 2 is next and starts 2 September.
