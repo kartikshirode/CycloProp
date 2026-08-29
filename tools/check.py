@@ -74,7 +74,9 @@ SOLIDITY_MIN, SOLIDITY_MAX = 0.30, 0.40
 
 # Peak blade thrust runs 3 to 4 times the cycle mean on 2 and 3 bladed rotors, which a
 # cycle-averaged coefficient hides completely. The range is simulated, so take the top of
-# it rather than the bottom. Aero peak is not the whole story either: at Runco's scale
+# it rather than the bottom. Heimerl et al. measured instantaneous blade forces across
+# Re 30,000 to 100,000, which brackets our band; replace this with their measured figure
+# when that paper is in hand. Aero peak is not the whole story either: at Runco's scale
 # centrifugal load beat aerodynamic load by 4.4 times, so the blade attachment gets its own
 # margin against the recomputed centrifugal force.
 MIN_BLADE_LOAD_FACTOR = 4.0
