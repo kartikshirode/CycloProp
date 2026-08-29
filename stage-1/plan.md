@@ -59,6 +59,26 @@ The old plan treated 408 g as a fixed requirement, which pinned the design to th
 
 Designing above 10 N is a real lever, though not a free one. Power rises, and the margin a paper design has to carry eats into what the extra thrust buys. Power has no separate weighted criterion, but it is a named Stage 1 deliverable and it feeds the motor, battery and thermal case, so it is not free either. Week 2 picks the design thrust deliberately and says why.
 
+## The one thing that can run in parallel
+
+Weeks 2 to 4 are strictly serial. Week 3 needs frozen geometry, week 4 needs the pitch
+mechanism mass, and the gates are cumulative, so none of that can be reordered.
+
+**Required item 7, team capability and execution plan, is the exception.** It needs nothing
+from `numbers.json`, and the week 5 gate asks only for its three headings. Its only
+dependency is week H returning the roster. It currently sits in week 5, which is the 4 day
+week that carries the deadline, and that is the worst place for the one deliverable that
+does not have to be there.
+
+So: **`07-team-and-execution.md` gets its structure and its Stage 2 argument drafted from
+week 3 onward**, as soon as week H returns. Week 5 then fills specifics and assembles,
+rather than writing an entire required item in a week that also builds the PDF. The
+specifics still come from a human. Inventing a team is a blocked trigger, and that does not
+change by moving the file earlier.
+
+Everything else that is genuinely parallel is human work: week H itself, and pulling the
+three papers.
+
 ## Calendar
 
 | Week | Dates | Days | Covers |
@@ -145,7 +165,7 @@ Four more, all added after the gates were shown to certify an impossible design:
 
 Covers required item 3, the thrust-vectoring requirement at 15%, and the integration half of the 5% packaging criterion.
 
-**Scope files:** `stage-1/design/03-pitch-and-vectoring.md`, `09-packaging-and-integration.md`, `numbers.json`, `stage-1/decisions.md`
+**Scope files:** `stage-1/design/03-pitch-and-vectoring.md`, `09-packaging-and-integration.md`, `numbers.json`, `stage-1/decisions.md`, and `07-team-and-execution.md` if week H has returned
 
 ### Tasks
 
@@ -217,7 +237,7 @@ Covers required item 7, then packages for a human to send.
 
 ### Tasks
 
-1. **Team capability section** against the problem statement's preference list, using the roster and capability evidence from week H. The agent writes structure and argument. **Real names, institutions and claimed capability come from the human**, and the agent must not invent them.
+1. **Finish the team capability section**, which should already be drafted from week 3 under the parallel note above. If it is not, write it now. Structure and argument against the problem statement's preference list, using the roster from week H. **Real names, institutions and claimed capability come from the human**, and the agent must not invent them.
 2. **Execution plan for Stage 2**, mapped onto the 11 items Stage 2 demands, with the CAE tool access named.
 3. **Assemble the submission** with all 7 required items as top-level sections in the problem statement's order, plus a map at the front showing which section answers each of the 8 criteria.
 4. **Build the PDF.** `pandoc` and `xelatex` are both present on this machine. The attachment is what gets evaluated, not the markdown.
