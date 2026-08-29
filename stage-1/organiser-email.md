@@ -21,4 +21,4 @@ Worth asking, in one paragraph:
 
 Both are cheap questions with a real answer, unlike the three above, and getting the format right costs nothing.
 
-Send it after registering, from the registered address, with the team name and lead in the signature. Do not send anything to the organisers automatically; that is a blocked trigger in [../.claude/weekly-loop.md](../.claude/weekly-loop.md) and stays a human action.
+Send it after registering, from the registered address, with the team name and lead in the signature. Do not send anything to the organisers automatically; that is a blocked trigger in [../.codex/weekly-loop.md](../.codex/weekly-loop.md) and stays a human action.

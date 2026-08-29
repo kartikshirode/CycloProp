@@ -57,7 +57,7 @@ agent, adds the four confirmed markers in `stage-1/human-gate.md`.
 
 ## Work and audit rules
 
-- Execute one plan week only. Treat the plan's subsessions as work packages inside that
+- Execute one plan week only. Treat the plan's work packages as checkpoints inside that
   week, not as extra loop ticks
 - Read `handoff.md`, the current plan week, the current codemap entries, the last progress
   file and recent decisions before editing
@@ -87,6 +87,7 @@ Stop and return exact unblock steps when any of these occurs:
 - The week 4 mass budget still misses after the prequalified fallbacks
 - A source or resource marked as a hard dependency is unavailable
 - Human gate markers are missing when week 5 starts
+- `TECHNICAL-READ-COMPLETE` is missing before final email staging
 
 The three unread papers are supporting evidence unless the plan explicitly promotes one to
 a hard dependency. Missing support must be disclosed in the design notes and handoff.

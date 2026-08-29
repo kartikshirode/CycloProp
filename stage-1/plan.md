@@ -37,8 +37,8 @@ responsible for. Every one of them is gated.
 | Week | Fills | Work packages | Of those, parallel |
 | --- | --- | --- | --- |
 | 2 | 38 scalars plus 3 tables, roughly 80 cells | 7 | 2 |
-| 3 | 13 scalars | 6 | 3 |
-| 4 | 23 scalars plus the mass budget, roughly 55 cells | 6 | 2 |
+| 3 | 13 scalars | 6 | 2 |
+| 4 | 23 scalars plus the mass budget, roughly 55 cells | 6 | 1 |
 | 5 | 0, it assembles | 5 | 0 |
 
 **Week 2**, the heaviest week and the one that decides feasibility.
@@ -52,32 +52,31 @@ responsible for. Every one of them is gated.
 6. Freeze one design point, fill `numbers.json` and write the three design documents
 7. Audit, including a hostile-examiner read
 
-**Week 3.** Packages 3 and 4 can run after the first linkage solution exists.
+**Week 3.** Packaging and item 7 can move while the force map is being checked.
 
-1. Pitch mechanism, kinematics, the schedule table
-2. Vectoring, phase authority, side force. Needs 1
-3. Packaging and integration. **Parallel**
-4. Item 7 structure draft, if week H has returned. **Parallel**, zero engineering dependency
-5. Write the documents. Needs 1 to 4
+1. Linkage topology, loop closure and the solved pitch schedule
+2. Vectoring actuator and force-vector map. Needs 1
+3. Moving envelope, packaging and interfaces. Needs the linkage geometry from 1
+4. Item 7 structure and the draft PDF build. **Parallel**, no force-map dependency
+5. Write and reconcile the documents. Needs 1 to 4
 6. Audit
 
 **Week 4.**
 
-1. Material selection, which feeds mass
-2. Mass budget refinement, each line naming the envelope line it refines. Needs 1
-3. Structural loads: blade bending, shaft torque, attachment against centrifugal, pitch
-   link. **Runs parallel with 2**, since it needs week 2 geometry rather than the budget
-4. Thrust-to-weight results and margin reconciliation. Needs 2 and 3
+1. Final material allowables and blade stiffness closure
+2. Structural loads and the full load path. Needs 1
+3. Mass budget, BOM and manufacturing route. Starts after 1 and can overlap the load work
+4. Thrust-to-weight and margin reconciliation. Needs 2 and 3
 5. Write the three design documents. Needs 4
 6. Audit
 
 **Week 5**, strictly sequential because each step consumes the last.
 
 1. Finish item 7 specifics from week H
-2. Assemble the submission, all 7 items in order, with the criteria map table
-3. Build the PDF and verify it carries this submission's sections and numbers
-4. Draft the email and stage everything. **Never send**
-5. Audit
+2. Assemble the submission with its criteria, claims and risk tables
+3. Run the hostile-viva, citation and human technical-read passes
+4. Build and inspect the final PDF
+5. Audit, then draft and stage the email. **Never send**
 
 Totals: 24 work packages across 4 ticks, plus the 4 supervisor runs that gate them.
 
@@ -122,7 +121,7 @@ The old plan treated 408 g as a fixed requirement, which pinned the design to th
 
 Designing above 10 N is a real lever, though not a free one. Power rises, and the margin a paper design has to carry eats into what the extra thrust buys. Power has no separate weighted criterion, but it is a named Stage 1 deliverable and it feeds the motor, battery and thermal case, so it is not free either. Week 2 picks the design thrust deliberately and says why.
 
-## The one thing that can run in parallel
+## The one deliverable that can move between weeks
 
 Weeks 2 to 4 are strictly serial. Week 3 needs frozen geometry, week 4 needs the pitch
 mechanism mass, and the gates are cumulative, so none of that can be reordered.
@@ -270,9 +269,10 @@ Covers required items 1, 2 and 4, and settles whether the design closes at all.
    Classify each line as blade or geometry-scaled, power or torque-scaled, or fixed and
    duplicated. Do not call the motor fixed mass.
 9. **Freeze the design thrust and configuration together.** Store the configuration,
-   coefficient, radius and thrust tables in `numbers.json`. The `thrust_sensitivity` table
-   has at least three rows, each with its mass ceiling, ideal power, rpm, torque and drive
-   consequence. Week 4 may select a prequalified row, not invent a new operating point.
+   coefficient, azimuthal load, drive, radius and thrust tables in `numbers.json`. The
+   `thrust_sensitivity` table has at least three rows, each with its mass ceiling, ideal
+   power, rpm, torque and drive consequence. Week 4 may select a prequalified row, not
+   invent a new operating point.
 
 ### Done when
 
@@ -313,17 +313,50 @@ a design margin.
 
 Covers required item 3, the thrust-vectoring requirement at 15%, and the integration half of the 5% packaging criterion.
 
-**Scope files:** `stage-1/design/03-pitch-and-vectoring.md`, `09-packaging-and-integration.md`, `numbers.json`, `stage-1/decisions.md`, and `07-team-and-execution.md` if week H has returned
+**Scope files:** `stage-1/design/03-pitch-and-vectoring.md`,
+`09-packaging-and-integration.md`, `numbers.json`, `stage-1/decisions.md`,
+`07-team-and-execution.md` if week H has returned, and a submission skeleton plus draft
+PDF under `stage-1/submission/`
 
 ### Tasks
 
-1. **Choose active or passive and justify it.** Passive four-bar is the default on mass evidence, since every flying cyclocopter in the read literature uses one and none use per-blade servos.
-2. **Work the four-bar kinematics.** Link lengths, pitching axis, and the offset that produces the chosen amplitude, for the frozen geometry.
-3. **Produce the pitch schedule** as computed values across the revolution, not a sketch. It has to show motion: reach the stated amplitude in both directions, travel peak to peak by roughly twice the amplitude, and close on itself over a revolution. A table that spanned 360 degrees with zero pitch at every azimuth used to pass, and that is not evidence of a mechanism.
-4. **Quantify the phase delay.** Peak pitch does not land exactly at 90 and 270 degrees, and that is where the side force comes from. The stated delay has to be the one the schedule shows, within 10 degrees of where the table actually peaks, and the schedule has to track the harmonic model it claims to follow to a stated RMS residual.
-5. **Thrust vectoring, quantified.** Offset magnitude sets amplitude, offset direction sets phase, phase steers the vector. Give the achievable range in degrees and what actuates it, and state the mechanism's phase authority separately: the range is the authority, so a claimed 360 degrees of vectoring on a linkage that can only drive 90 degrees of phase now fails rather than passing as an assertion. This answers a 15% criterion, so it gets the most care in the week.
-6. **Handle the side force.** Predict the resultant tilt, benchmark against the 30 degrees Benedict measured, and state the correction.
-7. **Package envelope and interfaces.** Overall dimensions, mounting scheme and mount count, drivetrain arrangement from motor through transmission to shaft, and the electrical and mechanical interfaces the module presents to an airframe. Dimensioned sketches and a table, no CAD.
+1. **Confirm the architecture screened in week 2.** Passive cyclic pitch remains the
+   default because it avoids per-blade actuators. The vectoring actuator, controller and
+   linkage mass must still match the week 2 envelope. If the actual mechanism needs another
+   actuator or a heavier part, update the envelope before doing the rest of the week.
+2. **Solve a real linkage.** State the topology, fixed pivots, moving pivots, link lengths,
+   blade pitch axis and eccentric offset. Write the loop-closure equation or keep the small
+   calculation script used to solve it. Evaluate every rotor position. Report assembly
+   mode, transmission angle, joint travel, minimum clearance and any singularity. A target
+   cosine is not a linkage solution.
+3. **Produce the pitch schedule from that solution.** Use at least 24 distinct azimuths,
+   close the revolution and compare the solved schedule with the intended harmonic. Record
+   the residual, extrema and phase delay. Feed this schedule back into week 2's azimuthal
+   load model instead of leaving the preliminary prescribed schedule in place. Store every
+   schedule row in `numbers.json` as well as the readable design table.
+4. **Size the vectoring input.** Show how the eccentric direction changes, the mechanical
+   stop range, actuator travel, holding torque, slew time and electrical draw. Tie those to
+   a named actuator and controller. This is a slow vector command, separate from the
+   once-per-revolution blade motion.
+5. **Map command to force.** Evaluate at least three phase commands. For each, give vertical
+   force, lateral force, resultant magnitude and resultant direction from the updated load
+   model, with the table stored in `numbers.json`. Mechanical phase authority sets the
+   possible command span, but it is not evidence of force magnitude by itself. Keep
+   `pitch.vector_range_deg` equal to phase authority only when the axisymmetric model
+   supports one-to-one direction control. If the model does not, change that gate and its
+   tests before making the claim.
+6. **Handle the side force.** Compare the predicted nominal tilt with the measured 10 to 35
+   degree literature range, explain the phase correction and show what happens at the ends
+   of the operating range. State the uncertainty instead of using one measured angle as a
+   universal correction.
+7. **Package the moving mechanism.** Draw the swept linkage envelope, blade clearance,
+   shaft supports, bearings, motor and transmission, actuator, ESC, controller, wiring and
+   mounting points. Include the reaction-torque path, service access and the mechanical and
+   electrical interface table. Dimensioned sketches are enough. No CAD.
+8. **Start final assembly early.** Create the seven top-level submission headings, put the
+   finished week 2 and 3 material under them and run one real pandoc and xelatex build. Read
+   the draft PDF back. This smoke build is due 15 September, not during the final four days.
+   Draft item 7's structure when week H has returned.
 
 ### Done when
 
@@ -331,11 +364,20 @@ Covers required item 3, the thrust-vectoring requirement at 15%, and the integra
 
 The schedule also has to show a mechanism working. It must reach the stated amplitude in both directions, travel peak to peak by roughly twice the amplitude, close on itself over a revolution, and peak where the stated phase delay says it should, within 10 degrees. It has to track the harmonic model it claims to follow to a stated residual. And the vectoring range has to equal the mechanism's phase authority, so a claimed 360 degrees on a linkage that can drive 90 fails instead of passing as an assertion. A 37 row table spanning the full revolution with zero pitch at every azimuth used to pass all of this.
 
+The audit checks what `check.py` cannot: every schedule row comes from the stated loop
+closure, the linkage avoids singularity and interference, the named actuator meets travel
+and holding torque, and the force-vector table follows from the load model at three or more
+commands. It also records the successful draft PDF command and readback. If force direction
+does not follow phase one to one, update `tools/check.py`, its fixtures and the plan together.
+
 ### Decision gate
 
 Active or passive freezes here, and actuator count and mass go to week 4.
 
-**Fallback:** trim the depth of the packaging narrative and the interface table, which is where the least score sits. Do not defer the phase delay, which the gate requires as a number and which falls straight out of the four-bar analysis once the kinematics exist. Do not defer the vectoring section or the envelope either, since between them they carry 20% of the rubric.
+**Fallback:** cut prose around packaging and carry one actuator rather than several supplier
+options. Keep the dimensioned layout and interface table. Do not defer linkage closure, the
+phase delay or the force-vector map. Those are the defensible core of the 15 percent
+kinematics and vectoring criterion.
 
 ---
 
@@ -345,21 +387,46 @@ Covers required items 5 and 6, plus the 15% structural criterion that had no sec
 
 **Scope files:** `stage-1/design/05-mass-and-tw.md`, `06-materials-and-manufacturing.md`, `08-structure-and-loads.md`, `numbers.json`, `stage-1/decisions.md`
 
-This is the heaviest week, but the geometry and mechanism are frozen by now, so it is execution rather than exploration. The three files run in order, because loads size the structure, the structure sets the mass, and the mass decides T/W.
+This is the second heavy week. Geometry and the mechanism are frozen, but the blade section
+and drive still have to survive the loads. Material allowables and structural calculations
+run first, then the refined mass and T/W close together.
 
 ### Tasks
 
-1. **Load cases and strength.** Centrifugal load on the blade at design speed, blade root bending from aerodynamic and inertial load, shaft torque from the power and speed already fixed, and the pitch link load. Analytical, closed form, with the assumptions written down. No FEA, and none is expected at Stage 1.
+1. **Close the blade stiffness assumption first.** Rebuild the week 2 skin, core, spar,
+   adhesive and root section with the final material allowables. Calculate bending
+   deflection and torsional twist at peak aerodynamic load and operating centrifugal load.
+   The result has to support the blade-flexibility loss used for the low thrust coefficient.
+   If it does not, week 2 reopens on 18 September rather than failing on the last day.
+2. **Load cases and strength.** Use operating and a declared overspeed condition. Calculate
+   blade centrifugal load, peak aerodynamic root bending, blade-root and attachment demand,
+   rotor shaft torque, shaft and bearing reactions, pitch-link and pin load, and the frame
+   and mount load path. Use closed-form calculations with assumptions shown. No FEA is
+   claimed at Stage 1.
 
    **Centrifugal is the larger term, not a secondary one.** Runco measured 71 gf of centrifugal force against 16 gf of aerodynamic loading on the same blade, a factor of 4.4. The blade attachment therefore carries its own margin against the recomputed centrifugal load, and the aerodynamic peak-to-mean factor is gated at 4.0 rather than 3.0, since the 3-to-4 range it comes from is simulated and 3.0 is the bottom of it.
 
    Every one of these is derived from the design, not asserted beside it, and the gate recomputes three of them. Per-blade mass is the blade mass budget divided by the blade count, so a 1 g blade cannot sit next to a 108 g blade budget. Rotor shaft torque is shaft power over rotor angular speed, which is the first thing a reviewer recomputes and takes about ten seconds. Blade root bending is thrust per blade times a declared lever arm times a declared peak-to-mean load factor. State which shaft each torque refers to and give the transmission ratio, because torque upstream and downstream of a reduction are different numbers.
-2. **Margins.** Each load case against an allowable for the chosen material, with a stated safety factor. Margins below 1.5 fail the gate. The pitch link gets a demand, an allowable and a margin like everything else.
-3. **Component mass budget.** Every line the problem statement names, plus bearings, shaft, hub, ESC and fasteners. Each line carries a basis, meaning a measured analogue, a material calculation or a supplier figure. The gate rejects one-word bases. Each line also names the week 2 envelope line it refines, through a `refines` field holding that line's name. Several budget lines may refine one envelope line, which is the normal case: a coarse "motor and drive" turns into a motor, a hub, a shaft and bearings.
-4. **Compute T/W nominal and conservative** and state the margin against 2.5.
-5. **Material selection tied to the load cases**, not chosen first and justified after.
-6. **Manufacturing route per part**, with Indian sourcing where it exists, since indigenous development is the point of the programme.
-7. **Bill of materials with indicative costs.** Cost realism sits in the same criterion as manufacturability.
+3. **Margins and missing analyses.** Compare each demand with the right allowable and a
+   safety factor. Margins below 1.5 fail. Name the work left for Stage 2, including fatigue,
+   modal response, balance sensitivity and FEA. Do not imply that a static beam check covers
+   it.
+4. **Refine the component mass budget.** Cover blades, frame, pitch mechanism, motor,
+   vectoring actuator, mounting, bearings, shaft, hub, transmission, ESC, controller,
+   wiring, adhesive and fasteners. Each line carries a material calculation, measured
+   analogue or named supplier figure and points to the week 2 line it refines. Add a visible
+   design-maturity reserve rather than hiding it across rounded lines.
+5. **Compute nominal and conservative T/W.** State compliance against 2.5, margin against
+   the 2.75 internal target and the contribution of every mass category from D15. Reconcile
+   any line that moved more than 25 percent from week 2 before accepting the total.
+6. **Tie material and process to the load.** Give each part its material, stock form,
+   process, key tolerance, joining method, balance or inspection step and make-or-buy
+   choice. Include an assembly order and the measurements that decide whether a built rotor
+   is safe to spin.
+7. **Build a costed BOM.** Record quantity, supplier or calculation basis, quote date, unit
+   cost, lead time and Indian source where one exists. Separate bought parts from tooling
+   and fabricated parts. Cost realism is 10 percent with manufacturing, so a total without
+   traceable rows is not enough.
 
 ### Done when
 
@@ -368,6 +435,11 @@ This is the heaviest week, but the geometry and mechanism are frozen by now, so 
 Two of those come from reading the published loads properly. The blade attachment carries its own margin against the recomputed centrifugal force, because Runco measured centrifugal beating aerodynamic load by 4.4 times on the same blade, and the aerodynamic peak to mean factor must be at least 4.0.
 
 Continuity with week 2 is checked per component, not just on the total. Each envelope line has to stay within 25 percent of what the budget lines refining it add up to, and no envelope line may end up with nothing refining it. Comparing totals alone let the whole budget move into the blades while every other component shrank to the smallest legal line, because the sum came out the same.
+
+The audit also requires the calculated blade deflection to support week 2's thrust-loss
+case, a visible shaft and frame load path, a mass reserve, supplier or calculation evidence
+for every expensive line and a BOM with lead times. These are judgment checks. The existing
+week 4 gate remains unchanged.
 
 ### Decision gate
 
@@ -385,12 +457,32 @@ Covers required item 7, then packages for a human to send.
 
 ### Tasks
 
-1. **Finish the team capability section**, which should already be drafted from week 3 under the parallel note above. If it is not, write it now. Structure and argument against the problem statement's preference list, using the roster from week H. **Real names, institutions and claimed capability come from the human**, and the agent must not invent them.
-2. **Execution plan for Stage 2**, mapped onto the 11 items Stage 2 demands, with the CAE tool access named.
-3. **Assemble the submission** with all 7 required items as top-level sections in the problem statement's order, plus a map at the front showing which section answers each of the 8 criteria.
-4. **Build the PDF.** `pandoc` and `xelatex` are both present on this machine. The attachment is what gets evaluated, not the markdown.
-5. **Final consistency pass.** Every number traced to `numbers.json`.
-6. **Draft the email**, naming the attachment, and stage everything. **Do not send.** A human sends it on 26 September.
+1. **Finish the team capability section** from the week 3 draft. Map real capability and
+   real gaps against the preference list. **Names, institutions, claimed capability and
+   tool access come from the human.** The agent does not infer them.
+2. **Finish the Stage 2 execution plan.** Map it onto all 11 required items, with tool
+   access, owners, dependencies, build and test gates and the missing capability route. A
+   list of 11 headings without dates or ownership is not a plan.
+3. **Assemble, do not rewrite.** Put all 7 required items in the official order and add the
+   8-row criteria map. Pull from the reviewed design files so week 5 does not introduce a
+   fresh set of technical claims.
+4. **Add a claims, evidence and risk table.** Every headline claim names its calculation or
+   source, confidence, main failure mode and Stage 2 validation. Put the transferred thrust
+   coefficient, module mass, blade deflection and vector map first.
+5. **Run the hostile viva pass.** Write and answer at least 10 short questions. Cover the
+   coefficient transfer, why 2.5 is believable from a 2.13 benchmark, what mass is truly
+   fixed, why the radius was chosen, motor continuous rating, reaction torque, linkage
+   singularity, vector direction, blade stiffness and the first Stage 2 test. Fix the report
+   when an answer exposes a gap.
+6. **Build and inspect the PDF.** Run the known week 3 toolchain, read the attachment back,
+   inspect page breaks, figure labels, citations, units and the 15 page target when no
+   organiser limit was supplied. The attachment is what gets evaluated.
+7. **Run final consistency and provenance checks.** Every design number traces to
+   `numbers.json`. Every borrowed figure or table has permission or is redrawn from cited
+   data. No summary-only source is presented as a read paper. The title, team details,
+   registration reference and file name are checked by the human on 25 September.
+8. **Draft the email** with the final attachment name and stage it. **Do not send.** The
+   named human sends it on 26 September and keeps the sent-message record.
 
 ### Done when
 
@@ -400,9 +492,36 @@ The PDF condition is no longer a byte count. The gate reads the attachment back 
 
 Week 5 also blocks on the four markers in [human-gate.md](human-gate.md). It cannot write a real capability section or stage a submission without them.
 
+The audit must also find the claims table, the hostile-viva notes, complete citations and
+`TECHNICAL-READ-COMPLETE` in the human gate. The final audit owns these checks. `check.py`
+still owns document identity and number consistency.
+
 ### Decision gate
 
 **The roster is one person and that is what the section says.** A solo entry with a credible plan and honest scope reads better in a viva than five names nobody can stand behind. Name the capability gaps and say how Stage 2 fills them, because the problem statement's preference list is a spec for this section and pretending to cover all of it is the failure mode.
+
+---
+
+## What counts as enough against the evaluation criteria
+
+The published weights belong to the final evaluation, not a separate Stage 1 rubric. They
+are still the best signal available. Passing `check.py` is the floor. The table below is the
+standard for a Stage 1 report an evaluator could believe.
+
+| Criterion | Stage 1 evidence this plan must produce | Honest ceiling |
+| --- | --- | --- |
+| 10 N thrust, 15% | Recomputed coefficient model, source ledger, area conversion, three coefficient scenarios, coupled sensitivity and a load distribution | Good preliminary case, not proof without test or CFD |
+| T/W above 2.5, 15% | Physical blade estimate, named drive and actuator, complete boundary, component scaling classes, mass reserve and conservative T/W target of 2.75 | Strong only if the named hardware and section close |
+| Kinematics and vectoring, 15% | Solved loop closure, linkage dimensions, singularity and clearance check, actuator sizing and a force-vector map | Can be strong at Stage 1 |
+| Aerodynamic analysis, 15% | Dimensionless match, momentum floor, measured power route, azimuthal analytical model and uncertainty table | Credible preliminary analysis, not a top CFD or wind-tunnel score |
+| Structural design, 15% | Centrifugal, peak aerodynamic, shaft, bearing, linkage and mount load paths, blade deflection and stated missing analyses | Good preliminary strength case, with FEA left to Stage 2 |
+| Manufacturing and cost, 10% | Material and process per part, tolerances, inspection, assembly order, supplier-backed BOM and lead times | Can be strong if rows are traceable |
+| CAD, integration and packaging, 5% | Dimensioned moving-envelope sketches, drivetrain layout, mounts and interface table | Intentionally medium because Stage 1 has no CAD |
+| Presentation and clarity, 10% | Criteria map, claims and risk table, clean figures, traced numbers and hostile-viva answers | Can be strong |
+
+The aerodynamic criterion stays the thinnest even after these changes. The report should
+say why full CFD is scheduled for Stage 2 and avoid phrases such as "validated model" for a
+coefficient transfer. Transparency helps more here than another decimal place.
 
 ---
 
@@ -410,10 +529,28 @@ Week 5 also blocks on the four markers in [human-gate.md](human-gate.md). It can
 
 **The highest-risk assumption is the thrust coefficient transfer.** The 0.607 anchor is a single measured point on a rotor with a different blade count, airfoil, solidity and Reynolds number. Everything downstream scales off it. Week 2 bounds it rather than adopting it, and the conservative case has to close on its own, which is the only real defence available without a wind tunnel.
 
-**The published benchmark is tight but not hopeless.** Re-cut onto the module boundary, the best published design, Runco's 70 g quad-cyclocopter, gives 2.13 against the 2.5 we need, so the gap is about 17 percent. Benedict 2010 and Sirohi 2007 give 1.69 and 1.80 and are still correct for those designs; they were not the best point available. The case for closing the remaining gap rests on fixed masses amortising over more thrust and on materials. It does **not** rest on scale reducing blade mass, which the published record contradicts: blade mass per newton is scale invariant and blade stress climbs. Week 2 argues from 2.13 and states the ESC and mounting allocations that move it. Full working in [literature.md](literature.md) and decisions D8, D11 and D13.
+**The published benchmark is tight and does not prove this design.** Re-cut onto the module
+boundary, Runco gives 2.13 on the optimistic allocation and 1.53 on the harsh allocation.
+The target is 2.5. Blade mass per newton is scale invariant, and the motor and transmission
+cannot be treated as fixed either. Only genuinely fixed and duplicated hardware amortises.
+Week 2 has to close the gap component by component with named hardware, blade construction
+and a full mounting allocation. Full working in [literature.md](literature.md) and decisions
+D8, D11, D13 and D15.
 
-**Three papers are still unread**, one of them the only study in our Reynolds band. If a library proxy or the faculty supervisor opens it, re-derive the shape family and record a decision entry.
+**Three papers are still unread**, one of them the only study in our Reynolds band. Kellen's
+measured coefficient is the highest-value pull for week 2. If it stays unavailable, the
+submission carries a labelled downside scenario and does not describe it as a published
+bound. Heimerl improves week 3 and 4 loads. Ramsey improves the blade mass and stiffness
+basis.
 
-**One person is doing this.** Confirmed 27 August. More people can be brought in if the work needs them. Until then every week is serial, nothing runs in parallel, and a slipped week is a slipped project. Weekly hours are still unstated.
+**One person is doing this.** Confirmed 27 August. The full plan needs about 84 focused hours
+after week 1 and another project collides with week 3. Until real hours are written down,
+the calendar is an assumption. Use the reduced scope in the calendar when the hours do not
+exist. Never repay a schedule slip from the final four days.
+
+**Late integration can still kill an otherwise sound report.** The draft PDF is built on 15
+September, source status is carried in the evidence ledger, and the human reads the final
+attachment on 25 September. Team markers, registration reference, file name and the actual
+sent email remain human responsibilities.
 
 **No CAD is required at Stage 1** and none should be built. CAD quality is scored at Stage 2 and 3.

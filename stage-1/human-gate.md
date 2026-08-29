@@ -36,10 +36,15 @@ Both are cheap now and expensive on 26 September. They are in
 
 ## Also before week 5
 
-Run one real PDF build from a draft, `pandoc` through `xelatex`, so the first time we
-discover a toolchain problem is not the week the deadline lands. The gate reads the
-attachment back and checks it carries this submission's sections and numbers, but it
-cannot tell you that the build works until there is something to build.
+Run one real PDF build from a draft, `pandoc` through `xelatex`, by 15 September. Week 3
+owns this smoke build. The gate reads the final attachment back and checks it carries this
+submission's sections and numbers, but it cannot catch a toolchain problem before a file
+exists.
+
+The human technical read happens on 25 September. Replace
+`TECHNICAL-READ-PENDING` below with `TECHNICAL-READ-COMPLETE` only after opening the final
+PDF and checking the title, team details, registration reference, figures and main design
+claims. This fifth marker does not block the start of week 5. It blocks final staging.
 
 ## Status
 
@@ -50,3 +55,4 @@ REGISTRATION-PENDING
 ELIGIBILITY-PENDING
 ROSTER-PENDING
 SENDER-PENDING
+TECHNICAL-READ-PENDING

@@ -35,7 +35,11 @@ Nothing is sized yet. Week 2 does that, and it is no longer blocked.
 
 ## How this gets executed
 
-Under `/loop` with the `weekly-loop` skill, one tick per plan week, config at [.claude/weekly-loop.md](.claude/weekly-loop.md). Gates are mechanical and run by the supervisor, not self-reported: `python tools/check.py --week N`.
+Under `/loop` with the `weekly-loop` skill, one tick per plan week, config at
+[.codex/weekly-loop.md](.codex/weekly-loop.md). The config is drafted and needs its one-time
+human confirmation before the first Codex tick. The `.claude` config is historical. Gates
+are run by the supervisor, not taken from the week-agent's report:
+`python tools/check.py --week N`.
 
 The gates are not decorative. Every number in the submission is defined once in `stage-1/design/numbers.json`, prose cites it through a `## Numbers used` block, and the gate recomputes thrust from the geometry, weight from the mass lines and T/W from both. Writing a flattering number into prose fails the week.
 
@@ -59,9 +63,11 @@ Configuration, rotor sizing, thrust, power, and the feasibility envelope that de
 
 - **Design thrust is a choice, not 10 N by default.** The mass ceiling moves with thrust: 407 g at 10 N, 489 g at 12 N, 530 g at 13 N. Every earlier document here treated 408 g as fixed, which it is not, and 408 g fails the strict inequality anyway
 - Default to the Texas A&M UAV-scale optimum, meaning 3 blades at c/R 0.66, blade aspect ratio 4, NACA 0020, plus or minus 40 degrees, because solving that shape family pins Reynolds near 100,000 and that sits inside the band they studied
-- Radius trades rpm, envelope, structural mass **and power**. Within a fixed shape family at fixed thrust, aerodynamic power goes roughly as 1/R, so radius is not power-neutral
-- Bound the 0.607 thrust coefficient rather than adopting it. It comes from a different blade count, airfoil, solidity and Reynolds number
-- Single versus clustered has to be compared properly, on the module boundary. D2 only proved that copying one published rotor five times fails
+- Build the evidence ledger first. The exact Kellen coefficient is still unavailable, so a low coefficient remains a labelled engineering scenario unless the paper is pulled
+- Compare single, 2 rotor and 3 rotor layouts only after a common thrust, power, mass and boundary model exists. D2 proved that copying five old rotors fails, nothing more
+- Radius trades rpm, envelope, structural mass, power and torque. The week runs a coupled geometry, drive and mass table rather than choosing radius from power alone
+- The preliminary blade section and named motor, ESC, transmission and vectoring actuator must support the mass envelope. Motor and drive mass are not treated as fixed
+- Hard compliance remains T/W above 2.5. Geometry targets a conservative 2.75 and needs a human margin decision if it lands between the two
 
 **Geometry freezes only if the conservative case closes.** If a low coefficient and a high mass together miss T/W 2.5, that is a finding, not a reason to trim an assumption.
 
@@ -79,29 +85,31 @@ includes the servo that the module boundary requires and that Sirohi's number le
 
 So the case reads: a mass-optimised micro module at Reynolds 18,600, built from flat plate
 blades with no T/W target in mind, already sits near 2.1 on our boundary. Scaling it to 10 N
-is neutral on blade mass per newton, favourable on fixed mass amortisation, and favourable on
-power. The expectation is above 2.1.
+is neutral on blade mass per newton and favourable on aerodynamic power. Some hardware may
+amortise, but the motor and transmission still scale with power and torque. A result above
+2.1 is plausible, not established by the benchmark.
 
 One piece of the old argument is gone for good. Blade mass per newton is scale invariant and
 blade stress climbs regardless of blade design, so **scale buys aerodynamic efficiency and
-nothing on blade mass**. The remaining margin has to come from fixed masses amortising and
-from materials. Decisions D8, D11 and D13 carry the working.
+nothing on blade mass**. The remaining margin has to come from the physical blade section,
+an efficient named drive and only the hardware that is genuinely fixed or duplicated.
+Decisions D8, D11, D13 and D15 carry the working.
 
-Week 2 argues from 2.13, states the two allocation choices that move it, and runs the early
-test: if the non-blade fixed masses cannot come in under roughly 40 percent of the mass
-ceiling at the chosen thrust, this does not close at that radius.
+Week 2 starts from the full 1.53 to 2.13 allocation band and closes every component against
+geometry, rating or supplier evidence. It does not fit a mass law or rely on a fixed-mass
+percentage to declare success.
 
 ## Open items
 
 - **Working solo.** Confirmed 27 August. More people are available if the work needs them, but the plan should assume one person until that changes. Weekly hours are still unstated, which now matters more than it did, because there is nobody to absorb a slipped week
 - **Three papers to pull in a browser, all open access, all on the same repository.** The 403 is a Cloudflare **JavaScript challenge**, not an IP block or a permissions gate, confirmed from two machines. A user-agent string cannot pass it; a real browser passes it in about two seconds. Open the item page, click Download, drop the PDF in `reference/`. In priority order:
-  - **Heimerl, Halder, Benedict et al., "Experimental and Computational Investigation of a UAV-Scale Cycloidal Rotor in Forward Flight", VFS 77th Forum.** Measured instantaneous blade forces across Re 30,000 to 100,000, sweeping pitch amplitude and pitch offset from hover upward. Converts two gated numbers from simulated to measured, the blade load factor and the side force angle, and feeds the vectoring section as well
   - **Kellen 2019**, handle 1969.1/184958, item `a4c62d38-3778-44f4-b398-cdcba283fa06`. The thesis behind our baseline geometry. Wanted from the body: the measured blade-area thrust coefficient, power loading in N/W, per-rotor thrust and rpm at the optimum. The coefficient would retire most of the project's second-biggest risk
+  - **Heimerl, Halder, Benedict et al., "Experimental and Computational Investigation of a UAV-Scale Cycloidal Rotor in Forward Flight", VFS 77th Forum.** Measured instantaneous blade forces across Re 30,000 to 100,000, sweeping pitch amplitude and pitch offset from hover upward. Converts two gated numbers from simulated to measured, the blade load factor and the side force angle, and feeds the vectoring section as well
   - **Ramsey 2022**, handle 1969.1/198531, item `692efcdd-c56a-4c7a-b507-f3e673986b51`. 25 kg quad-cyclocopter, foam core with carbon fibre skin blades. Wanted: the subsystem mass table, and any blade mass or deflection figures, which answer the deflection gate directly
 - **Registration, team confirmation and the eligibility check** are human tasks and none are done. The eligibility clause disqualifies a whole team at any stage, including after results, so check every member before the team is fixed
 - **A faculty supervisor** is still needed, both for the Stage 2 CAE tool access and because the problem statement's preference list reads like a spec for the team capability section
 - [stage-1/organiser-email.md](stage-1/organiser-email.md) is mostly answered by the problem statement now and should be cut down or dropped
-- Round 2 of the plan cross-check is done. 11 findings, 4 of them blockers, all addressed; the plan was restructured around them. Prompt kept at [_codex-review-prompt.md](_codex-review-prompt.md) if a round 3 is wanted
+- The 29 August execution review is done. It reordered week 2, added a solved-linkage and force-vector standard, moved the PDF smoke build to week 3 and added an 84 hour capacity check. The active prompt is [_codex-prompt.md](_codex-prompt.md)
 
 ## Standing risk
 

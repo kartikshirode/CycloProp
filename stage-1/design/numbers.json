@@ -1,5 +1,5 @@
 {
-  "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder, and a string in a numeric field fails too. Week 2 fills geometry, operating, performance, efficiency, power_by_radius, mass_envelope_g and sources. Week 3 fills pitch and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, so an optimistic headline number achieves nothing. mass_envelope_g lines are {item, nominal_g, conservative_g, basis} with distinct item names. mass_budget_g lines are {item, mass_g, basis, refines}, where refines names the mass_envelope_g item this line came from, so week 4 continuity is checked per component and not only on the total. Aerodynamic power is bounded below by momentum theory over the declared momentum_area_m2, which may not exceed 2R times span, and the figure of merit that falls out has to be credible for a cyclorotor. thrust_sensitivity freezes in week 2 what raising thrust costs, and week 4 may only choose a row from it. Structural demands are derived: per-blade mass from the blade budget and blade count, rotor shaft torque from shaft power and speed, blade root bending from thrust per blade, lever arm and load factor.",
+  "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder, and a string in a numeric field fails too. Week 2 fills geometry, operating, performance, efficiency, the candidate and sensitivity tables, power_by_radius, mass_envelope_g and sources. Week 3 fills pitch, pitch_schedule, vector_map and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, so an optimistic headline number achieves nothing. mass_envelope_g lines are {item, nominal_g, conservative_g, basis, scaling_class} with distinct item names. mass_budget_g lines are {item, mass_g, basis, refines}, where refines names the mass_envelope_g item this line came from, so week 4 continuity is checked per component and not only on the total. Aerodynamic power is bounded below by momentum theory over the declared momentum_area_m2, which may not exceed 2R times span, and the figure of merit that falls out has to be credible for a cyclorotor. thrust_sensitivity freezes in week 2 what raising thrust costs, and week 4 may only choose a row from it. Structural demands are derived: per-blade mass from the blade budget and blade count, rotor shaft torque from shaft power and speed, blade root bending from thrust per blade, lever arm and load factor.",
   "geometry": {
     "radius_m": null,
     "chord_m": null,
@@ -39,6 +39,10 @@
     "esc": null
   },
   "power_by_radius": [],
+  "configuration_candidates": [],
+  "coefficient_scenarios": [],
+  "aero_azimuthal_loads": [],
+  "drive_candidates": [],
   "pitch": {
     "mechanism": null,
     "offset_m": null,
@@ -50,6 +54,9 @@
     "phase_authority_deg": null,
     "schedule_rms_residual_deg": null
   },
+  "linkage_dimensions": [],
+  "pitch_schedule": [],
+  "vector_map": [],
   "packaging": {
     "envelope_length_mm": null,
     "envelope_width_mm": null,
