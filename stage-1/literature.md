@@ -159,6 +159,8 @@ That is blade aerodynamic power only. S2 measured rotor structure power at about
 
 **Mass. Copying a published MAV rotor does not close.** S2's flight-weight 6 inch rotor masses 96 g and carries 1.98 N. Reaching 10 N by repeating it takes 5.04 of them, so 485 g of rotor and nothing else. That rules out copying. It does not rule out a redesigned two or three rotor cluster, which is a different claim and is settled in week 2 on a like-for-like boundary. See decision D2.
 
+**Superseded in part, 2 September 2026, by week 2. See D26.** The table below is a 10 N first cut. Week 2's design thrust is 18 N, which puts the chord Reynolds number at 134,000 rather than near 100,000, and that is above the range the coefficient transfer has published support over. See D25 and `design/02-rotor-sizing.md`.
+
 **Geometry. Similarity at fixed thrust pins the Reynolds number.** Take S5's shape family, chord at 0.66 R and span at 2.64 R with 3 blades, and solve for 10 N using a blade-area thrust coefficient of 0.607 derived from S2's quad rotor at its hover point. Reynolds comes out near 100,000 whatever radius is chosen, because scaling chord and span with R cancels size out of Re.
 
 | Radius | Chord | Span | Diameter | Speed | Tip speed |
@@ -171,7 +173,7 @@ That is blade aerodynamic power only. S2 measured rotor structure power at about
 
 That 100,000 sits at the bottom edge of the 100,000 to 300,000 band S5 studied, so its optimum applies directly instead of being an extrapolation.
 
-**The 0.607 coefficient is a single-point anchor and it is transferred across a geometry change.** It comes from 4 blades, NACA 0010, c/R 0.433 and Re near 35,000. The shape family it gets applied to is 3 blades, NACA 0020, c/R 0.66 and Re near 100,000. Blade count, solidity, airfoil and Reynolds number all move at once. Week 2 bounds it with a low value derived from the spread in S2's own parametric results rather than adopting it, and the conservative case has to clear both targets on its own. It is the highest-risk assumption in the project.
+**The 0.607 coefficient is a single-point anchor and it is transferred across a geometry change.** It comes from 4 blades, NACA 0010, c/R 0.433 and Re near 35,000. The shape family it gets applied to is 3 blades, NACA 0020, c/R 0.66 and Re near 100,000. Blade count, solidity, airfoil and Reynolds number all move at once. Week 2 bounds it with a low value built from two named allowances rather than adopting it. **Superseded 2 September 2026: no usable spread exists in the open literature, so the low value is a 5 percent blade flexibility allowance plus a 10 percent configuration transfer allowance, added. See D20 and D26**, and the conservative case has to clear both targets on its own. It is the highest-risk assumption in the project.
 
 ## External research round, 29 August 2026
 

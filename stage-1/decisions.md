@@ -378,3 +378,110 @@ to a file, and the git-commits skill owns the commit procedure.
 The plan is not edited here. Two files each claiming to be the execution contract is a real
 problem for a repeatable loop, and it needs a person to say which one wins rather than an
 agent quietly picking. Carried as a debt.
+
+## D25: no compliant point in this shape family sits inside the Reynolds band the coefficient is supported over
+
+2 September 2026, week 2, after the audit. This does not supersede D12, it adds the axis D12
+did not cover.
+
+D12 gates the transferred coefficient on solidity, because solidity is the piece of the
+configuration change that has a measured optimum attached to it. It also records the reason
+the Reynolds half of the transfer was called safe: Shrestha and Benedict give non-dimensional
+thrust as roughly invariant from 10,000 to 100,000.
+
+The week 2 design point sits at a chord Reynolds number of 134,000. That is above the range,
+so the Reynolds half of the transfer is an extrapolation and not an interpolation, and three
+week 2 documents claimed the opposite before the audit caught it. The claim came from
+substituting Kellen's study band of 100,000 to 300,000, which is where the figure of merit and
+the solidity optimum live, for the band Benedict's coefficient was actually measured in.
+
+Worse, it is not avoidable inside this family. The conservative thrust has to clear 10 N on its
+own and the coefficient haircut is 15 percent, so design thrust cannot sit below 11.76 N.
+Reynolds goes with the square root of thrust in this family, so the lowest compliant point is
+already at 108,000. Every design that satisfies the gates is outside the documented band.
+
+Two things stop this being fatal on its own. The direction is the benign one, since Shrestha's
+result is that thrust holds while power falls, so pushing Reynolds up should not cost thrust.
+And Kellen studied this exact shape family from 100,000 to 300,000 and reported it as the
+optimum there, so the geometry is at home even if the coefficient is not.
+
+Neither is evidence. It is one more reason geometry does not freeze this week, and one more
+thing Kellen's measured coefficient would settle, since Kellen measured in the band the design
+actually sits in.
+
+## D26: literature.md is superseded on two points and is not rewritten
+
+2 September 2026, week 2, after the audit.
+
+`stage-1/literature.md` is week 1's deliverable and D1's convention is to leave superseded
+documents standing rather than edit every one and risk leaving one stale. Week 2 overtook it in
+two places and both are now marked in the file itself:
+
+- The first-cut sizing table applies the shape family at Reynolds near 100,000, which was right
+  for a 10 N design point and is not right for the 18 N one week 2 carries. See D25
+- It says week 2 will bound the coefficient "with a low value derived from the spread in S2's
+  own parametric results". Week 2 did not do that. No usable spread exists in the open
+  literature, so the low value is two named allowances instead. See D20
+
+The 0.607 against 0.6055 drift is a rounding difference and is not worth a note. The method and
+the Reynolds statements are, so those two carry a dated pointer to this week's documents.
+
+## D27: the audit moved the week 2 numbers, and these are the ones that stand
+
+2 September 2026, week 2. Supersedes the figures in D18, D20, D21 and D22, and nothing else in
+them.
+
+Those four entries were written and committed before the week's own audit ran. The audit found
+eighteen items, and fixing them moved the design point. The reasoning in all four entries
+stands. The numbers do not, and rather than editing four entries in place, the corrected set
+lives here.
+
+**What moved and why.**
+
+The conservative mass column now follows the rule the documents state for it. Blades and the
+rotor shaft were taking the 15 percent catalogue rate while being built entirely from assumed
+sections; they take 20 percent now. That alone cost 0.025 of conservative thrust to weight.
+
+The mass envelope was resorted after the audit found three lines called fixed that scale. The
+wiring harness follows the module envelope, the fasteners follow the frame, and the vectoring
+servos are sized by a pitch link load that follows thrust. Sorted honestly, exactly one line in
+this module is genuinely fixed: an 8 g controller board. That is a real finding in itself,
+because D11 and D13 rest the thrust to weight case on fixed hardware amortising over more
+thrust, and there is almost no fixed hardware to amortise.
+
+The drive shortlist was wrong in two directions. It was missing two lighter and stronger real
+motors, and it treated the datasheet figure as a continuous rating when T-Motor publishes it as
+a maximum for 180 seconds. Week 2 now derates by 0.80 for continuous duty and checks power,
+torque and attainable speed together rather than power alone. The selected motor changed to the
+MN5006 KV450, which is lighter than the previous choice and carries more.
+
+**The figures that stand.**
+
+| | Value |
+| --- | --- |
+| design thrust | 18.0 N, with the table frozen at 13, 16, 18 and 20 N |
+| radius | 110 mm, second candidate 120 mm |
+| conservative thrust to weight | 2.252 |
+| nominal thrust to weight | 3.163 |
+| shortfall to the 2.5 hard limit | 69 g of conservative module mass, 9.9 percent |
+| shortfall to the 2.75 internal target | 125 g, 18.1 percent |
+| single against two and three rotors | 2.252, 1.659, 1.323 |
+| selected drive | MN5006 KV450 at 3.5 to 1, 88 percent of derated continuous power |
+
+D20's construction of the low coefficient also needs one correction. It said the 5 percent
+flexibility allowance was sized against the computed blade section. It was not, and no
+arithmetic connects a 0.078 mm tip deflection to a 5 percent thrust loss. The section bounds
+the allowance from above and says it should be well under 1 percent. The 5 percent is a floor
+covering build tolerance, bond line variation and unsteady effects the section does not model,
+and it is kept because the section is preliminary.
+
+D22's conclusion is unchanged and is now further from closing than it was. The week reports
+BLOCKED.
+
+**One thing the audit made better rather than worse.** The design is drive limited, not
+aerodynamics limited and not structure limited. Conservative thrust to weight keeps rising as
+the radius falls, and the 100 mm row would give 2.376, but no motor in the shortlist can hold
+it: the torque wants a belt ratio the KV450 cannot spin to on a 6S pack, and the motor that has
+the speed does not have the torque. So the radius is 110 mm because that is the smallest a
+named drive can hold, not because it is where the design wants to be. That points at a cheap
+unblock nobody had identified before the audit, and it is in the progress file.
