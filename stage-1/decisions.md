@@ -243,3 +243,138 @@ limit. A paper estimate built on a transferred thrust coefficient should not fre
 is 10 percent above the hard limit. A result between 2.5 and 2.75 is compliant but remains
 red and needs a human decision before geometry freezes. This is a judgment gate, not a
 replacement for the competition rule.
+
+## D18: the single rotor beats a redesigned cluster, so D2 stops being provisional
+
+2 September 2026, week 2.
+
+D2 said the module is one larger rotor and admitted it had only proved that copying
+Benedict's 96 g rotor five times does not close. That was never the same claim. Week 2 ran
+the comparison D2 asked for: one thrust model, one power model, one mass build-up, one module
+boundary, each layout swept over radius, best conservative thrust to weight kept.
+
+Every contested assumption was set in the cluster's favour. Non-overlapping wakes, no
+interaction penalty, one shared motor sized on total power, one shared controller, and the
+same thrust coefficient for all three even though splitting the thrust drops per-rotor
+Reynolds below the band that coefficient was measured in.
+
+Conservative thrust to weight came out at 2.389 for the single rotor, 1.795 for two rotors and
+1.434 for three. The single rotor is also the smallest, has the fewest parts, and is the only
+one whose Reynolds number stays inside Kellen's band. Splitting the thrust duplicates the
+spider, hub, pitch mechanism, shaft, bearings and belt stage while raising total blade area,
+because smaller rotors run slower for the same per-rotor thrust and need more area to make it
+up.
+
+D2 is confirmed on its own terms and the provisional label comes off.
+
+## D19: ESCs and mounting hardware sit inside the module boundary
+
+2 September 2026, week 2.
+
+Two allocations have been open since the Runco re-cut and both move the benchmark. They are
+settled here, before any candidate was scored, and both are settled against us.
+
+ESCs count as module hardware. The motor does not turn without one and the problem statement
+lists the motor. Mounting counts in full, so every fastener, insert, standoff, lug and bonded
+joint that holds the module together or attaches it to a vehicle.
+
+On Runco's numbers that moves the published benchmark from 2.13 down to roughly 1.78. The week
+2 documents still argue against 2.13, which is the harder comparison, so the choice costs us
+on our own side of the ledger and gains us nothing on theirs.
+
+## D20: the low coefficient is two named allowances, one sized against a real section
+
+2 September 2026, week 2.
+
+The repository has carried 0.516 as a low thrust coefficient since the external research
+round, always flagged as a caution rather than a published bound. Week 2 gives it a
+construction instead of a provenance.
+
+Nominal is 0.6055, recomputed from Benedict's quad rotor in this project's own blade-area
+convention rather than quoted. The low value takes two allowances off it, added rather than
+compounded because adding is harsher: 5 percent for blade flexibility and 10 percent for
+configuration transfer. That gives 0.5147, or 85 percent of nominal.
+
+The 5 percent is sized against the computed blade section. Bending stiffness is 66.8 Nm2 and
+the tip deflects 0.086 mm under peak load; torsional stiffness is 9.6 Nm2 and the blade twists
+0.054 degrees. Both are small, and Benedict found that bending and torsional flexibility both
+hurt, so the allowance is not zero. It is generous against a section this stiff and it stays
+generous until week 4 sizes the blade against centrifugal load.
+
+The 10 percent carries the part nothing de-risks. Blade count, airfoil and chord ratio all
+change at once in the transfer, and only the Reynolds half of it has published support.
+
+This is still an engineering downside scenario. Not a published lower bound, and the
+submission says so in those words.
+
+## D21: the thrust sensitivity table is frozen, choosing a row is not a geometry freeze
+
+2 September 2026, week 2.
+
+D10 requires week 2 to freeze what raising thrust costs so week 4 cannot treat thrust as a
+free knob under deadline. Four rows are frozen at 13, 16, 20 and 24 N, each carrying its mass
+ceiling, ideal power, rpm, rotor torque and drive consequence.
+
+20 N is the candidate row. Between 13 N and 20 N the mass ceiling grows 285 g while the drive
+grows about 75 g, so raising thrust pays. Above 20 N it stops: the drive shortlist runs out at
+555 W continuous and the next motor class costs more than the extra ceiling returns.
+
+Freezing the table is not freezing the geometry. Week 4 may select from these four rows. It
+may not invent a fifth.
+
+## D22: week 2 reports BLOCKED and geometry does not freeze
+
+2 September 2026, week 2.
+
+The conservative case, meaning the low coefficient and the high mass column together, gives a
+thrust to weight of 2.389 at the best point found. The hard limit is above 2.5 and D17 sets an
+internal target of 2.75. Both are missed.
+
+The plan's fallbacks were worked in the written order and none closed it. Higher thrust rows
+peak at 20 N. The radius sweep peaks at 115 mm. There is no duplicated hardware to reject,
+because the single rotor branch already won on its own. Revisiting the shape family reaches
+2.481 at a blade aspect ratio of 6, and that number is not bankable, since leaving the family
+the coefficient was measured in makes the transfer worse while chasing the target.
+
+The shortfall is 32 g of conservative mass to reach 2.5, and 95 g to reach 2.75. Nominal
+thrust to weight is 3.318, already 56 percent above the best published module on the same
+boundary. Reaching 2.75 conservative needs a nominal of 3.82, which is 79 percent above the
+published record, and nothing available supports it.
+
+So this is a design finding rather than a failed week. Trimming the conservative mass
+allowances to 10 percent across the board would give 2.564 and would clear the hard limit, and
+doing that to make a number appear is the exact failure mode the blocked trigger exists to
+prevent. That choice belongs to a person.
+
+## D23: Kellen 2019 is a hard dependency now, not supporting evidence
+
+2 September 2026, week 2.
+
+The loop config classes the three unread papers as supporting evidence, which is why week 2
+ran without them. Right at the start of the week, wrong by the end of it.
+
+The whole gap between 2.389 and the hard limit sits inside the coefficient haircut. If
+Kellen's measured blade-area coefficient for this shape family in this Reynolds band lands at
+or above the transferred value, the 10 percent configuration-transfer allowance retires, the
+haircut drops from 15 percent to 5, and conservative thrust to weight moves to roughly 2.68.
+That clears 2.5 with margin while still sitting under the 2.75 internal target, so it would
+turn a blocked week into a red one needing a margin decision rather than a design change.
+
+No other single input available moves the answer that far. Kellen stops being a nice to have
+and becomes the thing that decides whether this design closes. It is behind a Cloudflare
+JavaScript challenge and needs a person with a browser, roughly two minutes of work. Unblock
+steps are in `stage-1/progress/week-2.md`.
+
+## D24: this tick ran against the .claude config while the plan still points at .codex
+
+2 September 2026, week 2. Recorded as a deviation, not as a resolution.
+
+`stage-1/plan.md` says the Codex config at `.codex/weekly-loop.md` is the execution contract
+and that `.claude/weekly-loop.md` is history. The human who launched this tick designated
+`.claude/weekly-loop.md` as the config and it is the newer of the two files, so week 2 ran
+against it. Two differences mattered: the humanizer skill gets invoked before prose is written
+to a file, and the git-commits skill owns the commit procedure.
+
+The plan is not edited here. Two files each claiming to be the execution contract is a real
+problem for a repeatable loop, and it needs a person to say which one wins rather than an
+agent quietly picking. Carried as a debt.
