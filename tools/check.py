@@ -101,10 +101,15 @@ BANNED_ATTRIBUTION = ["co-authored-by", "generated with claude", "claude opus", 
 FAILURES = []
 
 
-def report(ok, label, detail=""):
-    print(("PASS  " if ok else "FAIL  ") + label + (("  " + detail) if detail else ""))
+def report(ok, label, detail="", fail_detail=None):
+    """`detail` is true on both branches. `fail_detail` describes the failure and is only
+    printed when the check fails: a passing line that reads "the chosen radius appears in
+    the sweep  0.11 not among [0.1, 0.11, ...]" is a contradiction sitting in exactly the
+    place a person reads gate output."""
+    shown = detail if ok or fail_detail is None else fail_detail
+    print(("PASS  " if ok else "FAIL  ") + label + (("  " + shown) if shown else ""))
     if not ok:
-        FAILURES.append(label + (("  " + detail) if detail else ""))
+        FAILURES.append(label + (("  " + shown) if shown else ""))
     return bool(ok)
 
 
@@ -653,7 +658,8 @@ def check_thrust_sensitivity(data, r):
     if design and thrusts:
         ok &= report(any(close(design, t, DISPLAY_TOL) for t in thrusts),
                      "week2: the design thrust is one of the prequalified rows",
-                     f"{design} N not among {sorted(thrusts)}")
+                     f"{design} N, rows {sorted(thrusts)}",
+                     fail_detail=f"{design} N not among {sorted(thrusts)}")
     return ok
 
 
@@ -995,7 +1001,8 @@ def week2(data):
             if chosen:
                 at_chosen = [p_ for r_, p_ in rows if abs(chosen - r_) <= 1e-6]
                 ok &= report(bool(at_chosen), "week2: the chosen radius appears in the sweep",
-                             f"{chosen} not among {[r_ for r_, _ in rows]}")
+                             f"{chosen} m, sweep {[r_ for r_, _ in rows]}",
+                             fail_detail=f"{chosen} not among {[r_ for r_, _ in rows]}")
                 # A sweep that is not anchored to the design point is a separate curve
                 # that happens to have the right shape. It has to pass through the
                 # aerodynamic power the rest of the week is built on.

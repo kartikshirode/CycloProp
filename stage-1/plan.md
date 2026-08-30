@@ -12,9 +12,12 @@ before the final four days.
 ## How this plan is executed
 
 Driven by the `weekly-loop` skill under `/loop`. One tick runs one week through a fresh
-week-agent, then the supervisor runs the gates in its own shell. The Codex config is at
-[../.codex/weekly-loop.md](../.codex/weekly-loop.md). It needs one human confirmation before
-the first tick. The old `.claude` config is history and is not the Codex execution contract.
+week-agent, then the supervisor runs the gates in its own shell. **The execution contract is
+[../.claude/weekly-loop.md](../.claude/weekly-loop.md), whichever runner executes the tick.**
+[../.codex/weekly-loop.md](../.codex/weekly-loop.md) defers to it and carries only its own
+sentinel path. It needs one human confirmation before the first tick.
+
+This file said the opposite until week 2 ran into it. See D24 and D28.
 
 Rules that make the weeks machine-checkable:
 

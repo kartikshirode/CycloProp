@@ -485,3 +485,37 @@ it: the torque wants a belt ratio the KV450 cannot spin to on a 6S pack, and the
 the speed does not have the torque. So the radius is 110 mm because that is the smallest a
 named drive can hold, not because it is where the design wants to be. That points at a cheap
 unblock nobody had identified before the audit, and it is in the progress file.
+
+## D28: one execution contract, and it is the Claude config
+
+2 September 2026, after the week 2 checkpoint. Resolves D24.
+
+Week 2 ran with the plan naming `.codex/weekly-loop.md` as the contract and the human naming
+`.claude/weekly-loop.md`. The week-agent recorded the conflict and refused to resolve it
+itself, which was the right call. Resolving it now.
+
+`.claude/weekly-loop.md` is the contract for every runner. It is the newer file, it is the
+stricter one, and it carries two rules the Codex copy had dropped: invoke the `humanizer`
+skill before writing prose, and invoke `git-commits` for the commit procedure. Both are
+binding from the global rules regardless of which runner executes a tick, so a config that
+omits them is wrong rather than merely different.
+
+`.codex/weekly-loop.md` is reduced to a pointer plus its own sentinel path. A runner needs a
+separate sentinel so a tick that dies under one runner is not read as partial work by the
+other. Everything else is inherited, so the two cannot drift again.
+
+The plan said the opposite and is corrected.
+
+## D29: gate output must not describe a failure that did not happen
+
+2 September 2026, after the week 2 checkpoint.
+
+The supervisor found `PASS  week2: the design thrust is one of the prequalified rows  18.0 N
+not among [13.0, 16.0, 18.0, 20.0]`. The predicate was right and 18.0 is in the list. The
+detail string was shared across both branches of `report()`, so a passing check printed the
+wording written for its failure.
+
+Cosmetic in the sense that nothing was mis-gated, and not cosmetic in the sense that this is
+the one artifact a human reads to decide whether a week is sound. `report()` now takes an
+optional `fail_detail` shown only when the check fails, and the two sites that were failure
+worded use it.
