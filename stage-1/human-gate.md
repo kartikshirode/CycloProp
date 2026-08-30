@@ -48,8 +48,8 @@ claims. This fifth marker does not block the start of week 5. It blocks final st
 
 ## Status
 
-Add each marker below on its own line as it is confirmed. Week 5 fails until all four are
-present.
+Add each marker below on its own line as it is confirmed. Week 5 fails until the first four
+are present, and final staging fails without the fifth.
 
 REGISTRATION-PENDING
 ELIGIBILITY-PENDING
