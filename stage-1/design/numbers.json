@@ -1,44 +1,49 @@
 {
   "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder, and a string in a numeric field fails too. Week 2 fills geometry, operating, performance, efficiency, the candidate and sensitivity tables, power_by_radius, mass_envelope_g and sources. Week 3 fills pitch, pitch_schedule, vector_map and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, so an optimistic headline number achieves nothing. mass_envelope_g lines are {item, nominal_g, conservative_g, basis, scaling_class} with distinct item names. mass_budget_g lines are {item, mass_g, basis, refines}, where refines names the mass_envelope_g item this line came from, so week 4 continuity is checked per component and not only on the total. Aerodynamic power is bounded below by momentum theory over the declared momentum_area_m2, which may not exceed 2R times span, and the figure of merit that falls out has to be credible for a cyclorotor. thrust_sensitivity freezes in week 2 what raising thrust costs, and week 4 may only choose a row from it. Structural demands are derived: per-blade mass from the blade budget and blade count, rotor shaft torque from shaft power and speed, blade root bending from thrust per blade, lever arm and load factor. Row shapes for the remaining lists, so nothing sits in the schema without one: configuration_candidates {config, rotors, module_mass_g, thrust_N, module_tw, selected}, 3 or more; coefficient_scenarios {name, blade_area_coeff, basis, evidence_class}, 3 or more, where evidence_class is measured, derived or downside and a transferred value is never called measured; aero_azimuthal_loads {azimuth_deg, normal_force_N}, 24 or more; drive_candidates {name, continuous_power_W, continuous_torque_Nm, mass_g, selected}, 2 or more; linkage_dimensions {link, length_mm}, 4 or more; pitch_schedule {azimuth_deg, pitch_deg}, 24 or more; vector_map {phase_command_deg, vertical_force_N, lateral_force_N}, 3 or more. Every mass_envelope_g line also carries scaling_class, one of geometry, power or fixed, because the drive is not a fixed mass.",
   "geometry": {
-    "radius_m": 0.115,
-    "chord_m": 0.0759,
-    "span_m": 0.3036,
+    "radius_m": 0.11,
+    "chord_m": 0.0726,
+    "span_m": 0.2904,
     "blades": 3,
     "airfoil": "NACA 0020",
     "pitch_amplitude_deg": 40.0,
     "pitch_axis_pct_chord": 30.0
   },
   "operating": {
-    "rpm": 2319.26,
-    "tip_speed_ms": 27.9303,
-    "reynolds": 141327.0
+    "rpm": 2404.79,
+    "tip_speed_ms": 27.7012,
+    "reynolds": 134074.0
   },
   "performance": {
-    "thrust_N": 20.0,
+    "thrust_N": 18.0,
     "blade_area_coeff": 0.6055,
     "blade_area_coeff_low": 0.5147,
-    "thrust_N_conservative": 17.0,
-    "aero_power_W": 360.409,
-    "tare_power_W": 40.045,
-    "electrical_power_W": 539.595,
+    "thrust_N_conservative": 15.3007,
+    "aero_power_W": 321.71,
+    "tare_power_W": 35.746,
+    "electrical_power_W": 481.655,
     "actuator_power_W": 6.0,
     "controller_power_W": 2.0,
-    "module_electrical_power_W": 547.595,
-    "momentum_area_m2": 0.069828,
-    "ideal_power_W": 216.246,
+    "module_electrical_power_W": 489.655,
+    "momentum_area_m2": 0.063888,
+    "ideal_power_W": 193.026,
     "figure_of_merit": 0.6,
     "power_loading_ref_N_per_W": 0.062,
-    "aero_power_W_published": 322.581,
-    "power_spread": 0.105,
+    "aero_power_W_published": 290.323,
+    "power_spread": 0.0976,
     "blade_deflection_thrust_loss": 0.05,
     "blade_load_peak_to_mean": 2.374,
-    "induced_velocity_ms": 10.8123,
+    "induced_velocity_ms": 10.7237,
     "inflow_ratio": 0.3871,
     "solidity": 0.3151,
-    "blade_area_m2": 0.06913,
-    "blade_tip_deflection_mm": 0.0863,
-    "blade_twist_deg": 0.0544
+    "blade_area_m2": 0.06325,
+    "blade_tip_deflection_mm": 0.0778,
+    "blade_twist_deg": 0.0512,
+    "motor_input_W": 457.573,
+    "belt_ratio": 3.5,
+    "motor_rpm": 8416.8,
+    "motor_torque_Nm": 0.4361,
+    "motor_input_current_A": 20.611
   },
   "efficiency": {
     "transmission": 0.93,
@@ -47,127 +52,180 @@
   },
   "power_by_radius": [
     {
-      "radius_m": 0.095,
-      "chord_m": 0.0627,
-      "span_m": 0.2508,
-      "rpm": 3398.6,
-      "tip_speed_ms": 33.81,
-      "reynolds": 141327.0,
-      "ideal_power_W": 261.771,
-      "aero_power_W": 436.285,
-      "rotor_torque_Nm": 1.3621,
-      "electrical_power_W": 653.19,
-      "largest_dimension_mm": 250.8
+      "radius_m": 0.1,
+      "chord_m": 0.066,
+      "span_m": 0.264,
+      "rpm": 2909.8,
+      "tip_speed_ms": 30.471,
+      "reynolds": 134074.0,
+      "ideal_power_W": 212.329,
+      "aero_power_W": 353.881,
+      "rotor_torque_Nm": 1.2904,
+      "electrical_power_W": 529.82,
+      "motor_input_W": 503.33,
+      "drive": "T-Motor Antigravity MN5006 KV450",
+      "belt_ratio": null,
+      "covered_by_shortlist": false,
+      "largest_dimension_mm": 264.0,
+      "module_mass_g": 550.21,
+      "module_mass_conservative_g": 656.47,
+      "thrust_to_weight_conservative": 2.3759
     },
     {
-      "radius_m": 0.105,
-      "chord_m": 0.0693,
-      "span_m": 0.2772,
-      "rpm": 2782.1,
-      "tip_speed_ms": 30.59,
-      "reynolds": 141327.0,
-      "ideal_power_W": 236.84,
-      "aero_power_W": 394.734,
-      "rotor_torque_Nm": 1.5055,
-      "electrical_power_W": 590.98,
-      "largest_dimension_mm": 277.2
+      "radius_m": 0.11,
+      "chord_m": 0.0726,
+      "span_m": 0.2904,
+      "rpm": 2404.8,
+      "tip_speed_ms": 27.701,
+      "reynolds": 134074.0,
+      "ideal_power_W": 193.026,
+      "aero_power_W": 321.71,
+      "rotor_torque_Nm": 1.4194,
+      "electrical_power_W": 481.66,
+      "motor_input_W": 457.57,
+      "drive": "T-Motor Antigravity MN5006 KV450",
+      "belt_ratio": 3.5,
+      "covered_by_shortlist": true,
+      "largest_dimension_mm": 290.4,
+      "module_mass_g": 580.05,
+      "module_mass_conservative_g": 692.43,
+      "thrust_to_weight_conservative": 2.2525
     },
     {
-      "radius_m": 0.115,
-      "chord_m": 0.0759,
-      "span_m": 0.3036,
-      "rpm": 2319.3,
-      "tip_speed_ms": 27.93,
-      "reynolds": 141327.0,
-      "ideal_power_W": 216.246,
-      "aero_power_W": 360.409,
-      "rotor_torque_Nm": 1.6488,
-      "electrical_power_W": 539.59,
-      "largest_dimension_mm": 303.6
+      "radius_m": 0.12,
+      "chord_m": 0.0792,
+      "span_m": 0.3168,
+      "rpm": 2020.7,
+      "tip_speed_ms": 25.393,
+      "reynolds": 134074.0,
+      "ideal_power_W": 176.941,
+      "aero_power_W": 294.901,
+      "rotor_torque_Nm": 1.5485,
+      "electrical_power_W": 441.52,
+      "motor_input_W": 419.44,
+      "drive": "T-Motor Antigravity MN5006 KV450",
+      "belt_ratio": 4.0,
+      "covered_by_shortlist": true,
+      "largest_dimension_mm": 316.8,
+      "module_mass_g": 612.12,
+      "module_mass_conservative_g": 731.03,
+      "thrust_to_weight_conservative": 2.1336
     },
     {
-      "radius_m": 0.125,
-      "chord_m": 0.0825,
-      "span_m": 0.33,
-      "rpm": 1963.0,
-      "tip_speed_ms": 25.696,
-      "reynolds": 141327.0,
-      "ideal_power_W": 198.946,
-      "aero_power_W": 331.576,
-      "rotor_torque_Nm": 1.7922,
-      "electrical_power_W": 496.43,
-      "largest_dimension_mm": 330.0
+      "radius_m": 0.13,
+      "chord_m": 0.0858,
+      "span_m": 0.3432,
+      "rpm": 1721.8,
+      "tip_speed_ms": 23.439,
+      "reynolds": 134074.0,
+      "ideal_power_W": 163.33,
+      "aero_power_W": 272.216,
+      "rotor_torque_Nm": 1.6775,
+      "electrical_power_W": 407.55,
+      "motor_input_W": 387.18,
+      "drive": "T-Motor Antigravity MN5006 KV450",
+      "belt_ratio": 4.5,
+      "covered_by_shortlist": true,
+      "largest_dimension_mm": 343.2,
+      "module_mass_g": 646.51,
+      "module_mass_conservative_g": 772.44,
+      "thrust_to_weight_conservative": 2.0192
     },
     {
-      "radius_m": 0.135,
-      "chord_m": 0.0891,
-      "span_m": 0.3564,
-      "rpm": 1683.0,
-      "tip_speed_ms": 23.792,
-      "reynolds": 141327.0,
-      "ideal_power_W": 184.209,
-      "aero_power_W": 307.015,
-      "rotor_torque_Nm": 1.9356,
-      "electrical_power_W": 459.65,
-      "largest_dimension_mm": 356.4
+      "radius_m": 0.14,
+      "chord_m": 0.0924,
+      "span_m": 0.3696,
+      "rpm": 1484.6,
+      "tip_speed_ms": 21.765,
+      "reynolds": 134074.0,
+      "ideal_power_W": 151.663,
+      "aero_power_W": 252.772,
+      "rotor_torque_Nm": 1.8066,
+      "electrical_power_W": 378.44,
+      "motor_input_W": 359.52,
+      "drive": "T-Motor Antigravity MN5006 KV450",
+      "belt_ratio": 4.5,
+      "covered_by_shortlist": true,
+      "largest_dimension_mm": 369.6,
+      "module_mass_g": 683.35,
+      "module_mass_conservative_g": 816.8,
+      "thrust_to_weight_conservative": 1.9095
     }
   ],
   "configuration_candidates": [
     {
-      "config": "single rotor, 3 blades, 115 mm radius",
+      "config": "single rotor, 3 blades, 110 mm radius",
       "rotors": 1,
-      "per_rotor_radius_m": 0.115,
-      "per_rotor_thrust_N": 20.0,
+      "per_rotor_radius_m": 0.11,
+      "per_rotor_thrust_N": 18.0,
       "blades_per_rotor": 3,
       "solidity": 0.3151,
-      "total_blade_area_m2": 0.06913,
-      "projected_area_m2": 0.06983,
-      "rpm": 2319.3,
-      "reynolds": 141327.0,
+      "total_blade_area_m2": 0.06325,
+      "projected_area_m2": 0.06389,
+      "rpm": 2404.8,
+      "reynolds": 134074.0,
+      "rotor_torque_Nm": 1.4194,
+      "aero_power_W": 321.71,
+      "electrical_power_W": 481.66,
       "hardware_count": 1,
-      "largest_dimension_mm": 303.6,
-      "module_mass_g": 614.4,
-      "thrust_N": 20.0,
-      "module_tw": 3.318,
-      "module_tw_conservative": 2.389,
+      "drive": "T-Motor Antigravity MN5006 KV450",
+      "drive_covers_design_point": true,
+      "largest_dimension_mm": 290.4,
+      "module_mass_g": 580.05,
+      "module_mass_conservative_g": 692.43,
+      "thrust_N": 18.0,
+      "module_tw": 3.1633,
+      "module_tw_conservative": 2.2525,
       "selected": true
     },
     {
-      "config": "two rotors, 3 blades each, 85 mm radius",
+      "config": "two rotors, 3 blades each, 80 mm radius",
       "rotors": 2,
-      "per_rotor_radius_m": 0.085,
-      "per_rotor_thrust_N": 10.0,
+      "per_rotor_radius_m": 0.08,
+      "per_rotor_thrust_N": 9.0,
       "blades_per_rotor": 3,
       "solidity": 0.3151,
-      "total_blade_area_m2": 0.07553,
-      "projected_area_m2": 0.0763,
-      "rpm": 2998.0,
-      "reynolds": 99809.0,
+      "total_blade_area_m2": 0.06691,
+      "projected_area_m2": 0.06758,
+      "rpm": 3214.9,
+      "reynolds": 94805.0,
+      "rotor_torque_Nm": 0.5162,
+      "aero_power_W": 312.79,
+      "electrical_power_W": 468.3,
       "hardware_count": 2,
-      "largest_dimension_mm": 420.0,
-      "module_mass_g": 815.2,
-      "thrust_N": 20.0,
-      "module_tw": 2.501,
-      "module_tw_conservative": 1.795,
+      "drive": "T-Motor Antigravity MN5006 KV450",
+      "drive_covers_design_point": true,
+      "largest_dimension_mm": 400.0,
+      "module_mass_g": 786.12,
+      "module_mass_conservative_g": 939.85,
+      "thrust_N": 18.0,
+      "module_tw": 2.3341,
+      "module_tw_conservative": 1.6595,
       "selected": false
     },
     {
-      "config": "three rotors, 3 blades each, 70 mm radius",
+      "config": "three rotors, 3 blades each, 65 mm radius",
       "rotors": 3,
-      "per_rotor_radius_m": 0.07,
-      "per_rotor_thrust_N": 6.667,
+      "per_rotor_radius_m": 0.065,
+      "per_rotor_thrust_N": 6.0,
       "blades_per_rotor": 3,
       "solidity": 0.3151,
-      "total_blade_area_m2": 0.07684,
-      "projected_area_m2": 0.07761,
-      "rpm": 3610.0,
-      "reynolds": 81494.0,
+      "total_blade_area_m2": 0.06625,
+      "projected_area_m2": 0.06692,
+      "rpm": 3976.3,
+      "reynolds": 77408.0,
+      "rotor_torque_Nm": 0.2796,
+      "aero_power_W": 314.328,
+      "electrical_power_W": 470.6,
       "hardware_count": 3,
-      "largest_dimension_mm": 520.0,
-      "module_mass_g": 1018.5,
-      "thrust_N": 20.0,
-      "module_tw": 2.002,
-      "module_tw_conservative": 1.434,
+      "drive": "T-Motor Antigravity MN5006 KV450",
+      "drive_covers_design_point": true,
+      "largest_dimension_mm": 490.0,
+      "module_mass_g": 984.94,
+      "module_mass_conservative_g": 1178.44,
+      "thrust_N": 18.0,
+      "module_tw": 1.8629,
+      "module_tw_conservative": 1.3235,
       "selected": false
     }
   ],
@@ -204,71 +262,71 @@
     },
     {
       "azimuth_deg": 10.0,
-      "normal_force_N": 0.8314
+      "normal_force_N": 0.7483
     },
     {
       "azimuth_deg": 20.0,
-      "normal_force_N": 3.1443
+      "normal_force_N": 2.8299
     },
     {
       "azimuth_deg": 30.0,
-      "normal_force_N": 6.4381
+      "normal_force_N": 5.7943
     },
     {
       "azimuth_deg": 40.0,
-      "normal_force_N": 10.0121
+      "normal_force_N": 9.0109
     },
     {
       "azimuth_deg": 50.0,
-      "normal_force_N": 13.1294
+      "normal_force_N": 11.8165
     },
     {
       "azimuth_deg": 60.0,
-      "normal_force_N": 15.1833
+      "normal_force_N": 13.6651
     },
     {
       "azimuth_deg": 70.0,
-      "normal_force_N": 15.8255
+      "normal_force_N": 14.243
     },
     {
       "azimuth_deg": 80.0,
-      "normal_force_N": 15.0233
+      "normal_force_N": 13.521
     },
     {
       "azimuth_deg": 90.0,
-      "normal_force_N": 13.0375
+      "normal_force_N": 11.7337
     },
     {
       "azimuth_deg": 100.0,
-      "normal_force_N": 10.3296
+      "normal_force_N": 9.2966
     },
     {
       "azimuth_deg": 110.0,
-      "normal_force_N": 7.4287
+      "normal_force_N": 6.6858
     },
     {
       "azimuth_deg": 120.0,
-      "normal_force_N": 4.7978
+      "normal_force_N": 4.318
     },
     {
       "azimuth_deg": 130.0,
-      "normal_force_N": 2.736
+      "normal_force_N": 2.4624
     },
     {
       "azimuth_deg": 140.0,
-      "normal_force_N": 1.3422
+      "normal_force_N": 1.208
     },
     {
       "azimuth_deg": 150.0,
-      "normal_force_N": 0.5432
+      "normal_force_N": 0.4889
     },
     {
       "azimuth_deg": 160.0,
-      "normal_force_N": 0.1674
+      "normal_force_N": 0.1506
     },
     {
       "azimuth_deg": 170.0,
-      "normal_force_N": 0.0302
+      "normal_force_N": 0.0272
     },
     {
       "azimuth_deg": 180.0,
@@ -276,106 +334,143 @@
     },
     {
       "azimuth_deg": 190.0,
-      "normal_force_N": 0.0302
+      "normal_force_N": 0.0272
     },
     {
       "azimuth_deg": 200.0,
-      "normal_force_N": 0.1674
+      "normal_force_N": 0.1506
     },
     {
       "azimuth_deg": 210.0,
-      "normal_force_N": 0.5432
+      "normal_force_N": 0.4889
     },
     {
       "azimuth_deg": 220.0,
-      "normal_force_N": 1.3422
+      "normal_force_N": 1.208
     },
     {
       "azimuth_deg": 230.0,
-      "normal_force_N": 2.736
+      "normal_force_N": 2.4624
     },
     {
       "azimuth_deg": 240.0,
-      "normal_force_N": 4.7978
+      "normal_force_N": 4.318
     },
     {
       "azimuth_deg": 250.0,
-      "normal_force_N": 7.4287
+      "normal_force_N": 6.6858
     },
     {
       "azimuth_deg": 260.0,
-      "normal_force_N": 10.3296
+      "normal_force_N": 9.2966
     },
     {
       "azimuth_deg": 270.0,
-      "normal_force_N": 13.0375
+      "normal_force_N": 11.7337
     },
     {
       "azimuth_deg": 280.0,
-      "normal_force_N": 15.0233
+      "normal_force_N": 13.521
     },
     {
       "azimuth_deg": 290.0,
-      "normal_force_N": 15.8255
+      "normal_force_N": 14.243
     },
     {
       "azimuth_deg": 300.0,
-      "normal_force_N": 15.1833
+      "normal_force_N": 13.6651
     },
     {
       "azimuth_deg": 310.0,
-      "normal_force_N": 13.1294
+      "normal_force_N": 11.8165
     },
     {
       "azimuth_deg": 320.0,
-      "normal_force_N": 10.0121
+      "normal_force_N": 9.0109
     },
     {
       "azimuth_deg": 330.0,
-      "normal_force_N": 6.4381
+      "normal_force_N": 5.7943
     },
     {
       "azimuth_deg": 340.0,
-      "normal_force_N": 3.1443
+      "normal_force_N": 2.8299
     },
     {
       "azimuth_deg": 350.0,
-      "normal_force_N": 0.8314
+      "normal_force_N": 0.7483
     }
   ],
   "drive_candidates": [
     {
       "name": "T-Motor Antigravity MN2806 KV650",
-      "continuous_power_W": 187.0,
-      "continuous_torque_Nm": 0.1807,
       "mass_g": 46.0,
+      "max_power_180s_W": 187.0,
+      "peak_current_180s_A": 12.3,
       "kv": 650,
-      "continuous_current_A": 12.3,
-      "basis": "supplier datasheet, 187 W and 12.3 A maximum continuous at 180 s; torque derived from 9.5493 over KV at the continuous current",
+      "internal_resistance_ohm": 0.645,
+      "continuous_power_W": 149.6,
+      "continuous_current_A": 9.84,
+      "continuous_torque_Nm": 0.1446,
       "selected": false,
-      "verdict": "short of the 513 W the design point needs at the motor terminals"
+      "basis": "supplier datasheet: 187 W and 12.3 A maximum for 180 s, 46 g. Continuous figures are those derated by 0.80, and continuous torque follows from 9.5493 over KV at the derated current",
+      "verdict": "149.6 W continuous after derating, far short of the 457.6 W the design point wants"
+    },
+    {
+      "name": "T-Motor Antigravity MN4006 KV380",
+      "mass_g": 57.0,
+      "max_power_180s_W": 380.0,
+      "peak_current_180s_A": 17.5,
+      "kv": 380,
+      "internal_resistance_ohm": 0.194,
+      "continuous_power_W": 304.0,
+      "continuous_current_A": 14.0,
+      "continuous_torque_Nm": 0.3518,
+      "selected": false,
+      "basis": "supplier datasheet: 380 W and 17.5 A maximum for 180 s, 57 g. Continuous figures are those derated by 0.80, and continuous torque follows from 9.5493 over KV at the derated current",
+      "verdict": "304.0 W continuous, still short of 457.6 W, and it is the lightest thing that covers the 13 N sensitivity row"
     },
     {
       "name": "T-Motor Navigator MN3110 KV470",
-      "continuous_power_W": 330.0,
-      "continuous_torque_Nm": 0.2987,
       "mass_g": 98.0,
+      "max_power_180s_W": 330.0,
+      "peak_current_180s_A": 15.0,
       "kv": 470,
-      "continuous_current_A": 15.0,
-      "basis": "supplier datasheet, 330 W and 15 A maximum continuous at 180 s, 98 g with leads; torque derived from 9.5493 over KV at the continuous current less the 0.3 A idle current",
+      "internal_resistance_ohm": 0.135,
+      "continuous_power_W": 264.0,
+      "continuous_current_A": 12.0,
+      "continuous_torque_Nm": 0.2438,
       "selected": false,
-      "verdict": "covers the 13 N sensitivity row at 4 to 1 but not the 20 N design point"
+      "basis": "supplier datasheet: 330 W and 15.0 A maximum for 180 s, 98 g. Continuous figures are those derated by 0.80, and continuous torque follows from 9.5493 over KV at the derated current",
+      "verdict": "264.0 W continuous and heavier than the MN4006 that beats it, so it is dominated"
+    },
+    {
+      "name": "T-Motor Antigravity MN5006 KV450",
+      "mass_g": 106.0,
+      "max_power_180s_W": 650.0,
+      "peak_current_180s_A": 26.0,
+      "kv": 450,
+      "internal_resistance_ohm": 0.06,
+      "continuous_power_W": 520.0,
+      "continuous_current_A": 20.8,
+      "continuous_torque_Nm": 0.4414,
+      "selected": true,
+      "basis": "supplier datasheet: 650 W and 26.0 A maximum for 180 s, 106 g. Continuous figures are those derated by 0.80, and continuous torque follows from 9.5493 over KV at the derated current",
+      "verdict": "selected. 457.6 W of its 520 W continuous, 20.61 A of 20.8 A, 0.4361 Nm of 0.4414 Nm at 3.5 to 1, and 8417 of 9435 motor rpm on 6S. Every one of those is the derated continuous figure, not the 180 s datasheet maximum"
     },
     {
       "name": "T-Motor Navigator MN3510 KV700",
-      "continuous_power_W": 555.0,
-      "continuous_torque_Nm": 0.341,
       "mass_g": 118.0,
+      "max_power_180s_W": 555.0,
+      "peak_current_180s_A": 25.0,
       "kv": 700,
-      "continuous_current_A": 25.0,
-      "basis": "supplier datasheet, 555 W and 25 A maximum continuous at 180 s, 118 g with leads; torque derived from 9.5493 over KV at the continuous current",
-      "selected": true,
-      "verdict": "513 W of the 555 W continuous rating and 21.7 A of the 25 A continuous current at 6 to 1, so it runs on its continuous rating and not its peak"
+      "internal_resistance_ohm": 0.05,
+      "continuous_power_W": 444.0,
+      "continuous_current_A": 20.0,
+      "continuous_torque_Nm": 0.2728,
+      "selected": false,
+      "basis": "supplier datasheet: 555 W and 25.0 A maximum for 180 s, 118 g. Continuous figures are those derated by 0.80, and continuous torque follows from 9.5493 over KV at the derated current",
+      "verdict": "444.0 W continuous, short of 457.6 W, and 12 g heavier than the MN5006 that carries more"
     }
   ],
   "pitch": {
@@ -420,80 +515,94 @@
   "mass_envelope_g": [
     {
       "item": "blades",
-      "nominal_g": 96.97,
-      "conservative_g": 111.51,
-      "basis": "PMI foam core at 52 kg/m3 filling 88 percent of the NACA 0020 section, two plies of 60 gsm carbon twill skin at 0.22 kg/m2 over a 2.05 chord perimeter, a CFRP spar tube of 0.12 chord diameter and 0.5 mm wall, bond line and two root fittings, times three blades",
+      "nominal_g": 88.33,
+      "conservative_g": 106.0,
+      "basis": "PMI foam core at 52 kg/m3 filling 88 percent of the NACA 0020 section, two plies of 60 gsm carbon twill skin at 0.22 kg/m2 over a 2.05 chord perimeter, a CFRP spar tube of 0.12 chord diameter and 0.5 mm wall, bond line and two root fittings, times three blades. Every dimension is assumed, so the conservative column takes the 20 percent structural rate",
       "scaling_class": "geometry"
     },
     {
       "item": "rotor frame and hubs",
-      "nominal_g": 50.46,
-      "conservative_g": 60.55,
-      "basis": "six CFRP spider arms of 14 by 1.5 mm section and radius length, two aluminium hub bosses and six blade attachment brackets",
+      "nominal_g": 49.48,
+      "conservative_g": 59.38,
+      "basis": "six CFRP spider arms of 14 by 1.5 mm section and radius length, two aluminium hub bosses and six blade attachment brackets. Assumed sections, 20 percent",
       "scaling_class": "geometry"
     },
     {
       "item": "pitch mechanism",
-      "nominal_g": 43.46,
-      "conservative_g": 52.15,
-      "basis": "two miniature pitch bearings and one CFRP pitch link with rod ends per blade, plus an aluminium offset ring of 6 by 3 mm section on the rotor radius with its two support bearings and three pivots",
+      "nominal_g": 42.69,
+      "conservative_g": 51.23,
+      "basis": "two miniature pitch bearings and one CFRP pitch link with rod ends per blade, plus an aluminium offset ring of 6 by 3 mm section on the rotor radius with its two support bearings and three pivots. Assumed sections, 20 percent",
       "scaling_class": "geometry"
     },
     {
-      "item": "main shaft and bearings",
-      "nominal_g": 78.7,
-      "conservative_g": 90.5,
-      "basis": "CFRP through shaft of 14 mm diameter and 1 mm wall over the span, two steel stub adapters, two main bearings, and a drive end allowance of 18 g per newton metre of rotor torque",
+      "item": "rotor shaft",
+      "nominal_g": 59.73,
+      "conservative_g": 71.68,
+      "basis": "CFRP through shaft of 14 mm diameter and 1 mm wall over the span, two steel stub adapters, and a drive end allowance of 18 g per newton metre of rotor torque. Length follows the span and diameter follows the torque, so the line is torque scaled and takes the 20 percent structural rate",
+      "scaling_class": "power"
+    },
+    {
+      "item": "main bearings",
+      "nominal_g": 14.0,
+      "conservative_g": 16.1,
+      "basis": "two deep groove main bearings at the rotor stations, catalogue mass, bore sized on the shaft the rotor torque sets. Catalogue rate, 15 percent",
       "scaling_class": "power"
     },
     {
       "item": "frame and mounting hardware",
-      "nominal_g": 79.54,
-      "conservative_g": 99.43,
-      "basis": "two bearing blocks, four CFRP frame tubes of 8 mm diameter and 1 mm wall spanning the rotor envelope, a motor mount plate and four airframe mount lugs",
+      "nominal_g": 78.18,
+      "conservative_g": 97.72,
+      "basis": "two bearing blocks, four CFRP frame tubes of 8 mm diameter and 1 mm wall spanning the rotor envelope, a motor mount plate and four airframe mount lugs. Assumed sections on the least developed part of the module, 25 percent",
       "scaling_class": "geometry"
     },
     {
       "item": "motor",
-      "nominal_g": 118.0,
-      "conservative_g": 135.7,
-      "basis": "T-Motor Navigator MN3510 KV700, 555 W maximum continuous electrical power and 25 A maximum continuous current from the supplier datasheet, 118 g including leads",
+      "nominal_g": 106.0,
+      "conservative_g": 121.9,
+      "basis": "T-Motor Antigravity MN5006 KV450, 650 W and 26 A maximum for 180 s from the supplier datasheet, derated by 0.80 for continuous duty to 520 W and 20.8 A, 106 g including leads. Catalogue rate, 15 percent",
       "scaling_class": "power"
     },
     {
       "item": "transmission",
-      "nominal_g": 55.27,
-      "conservative_g": 66.33,
-      "basis": "single stage HTD toothed belt reduction of 6 to 1: motor pulley, belt and tensioner hardware, with the rotor pulley rim mass following the torque it carries at 22 g per newton metre",
+      "nominal_g": 50.23,
+      "conservative_g": 60.27,
+      "basis": "single stage HTD toothed belt reduction of 6 to 1: motor pulley, belt and tensioner hardware, with the rotor pulley rim mass following the torque it carries at 22 g per newton metre. Part catalogue and part assumed, 20 percent",
       "scaling_class": "power"
     },
     {
       "item": "esc",
       "nominal_g": 20.0,
       "conservative_g": 23.0,
-      "basis": "one brushless controller rated above the motor 25 A continuous current, from the same catalogue class as the motor",
+      "basis": "one brushless controller rated above the motor 25 A continuous current, from the same catalogue class as the motor. Catalogue rate, 15 percent",
       "scaling_class": "power"
     },
     {
       "item": "vectoring actuator",
       "nominal_g": 25.0,
       "conservative_g": 28.75,
-      "basis": "two digital metal gear servos of the 12.5 g class driving the pitch offset direction against the residual pitch link load",
+      "basis": "two digital metal gear servos of the 12.5 g class driving the pitch offset direction. Servo torque follows the residual pitch link load, which follows thrust across the sensitivity table, so the line is power scaled and not fixed",
+      "scaling_class": "power"
+    },
+    {
+      "item": "pitch offset controller",
+      "nominal_g": 8.0,
+      "conservative_g": 9.2,
+      "basis": "one controller board driving the pitch offset servos. The only line in the envelope whose mass genuinely does not move with radius, thrust or torque",
       "scaling_class": "fixed"
     },
     {
-      "item": "actuator controller and wiring",
-      "nominal_g": 25.0,
-      "conservative_g": 30.0,
-      "basis": "pitch offset controller board at 8 g plus 17 g of silicone power and signal wiring routed over the module envelope",
-      "scaling_class": "fixed"
+      "item": "module wiring harness",
+      "nominal_g": 16.41,
+      "conservative_g": 19.7,
+      "basis": "silicone power and signal wiring routed over the module envelope, so its length follows the largest dimension and the line is geometry scaled rather than fixed",
+      "scaling_class": "geometry"
     },
     {
       "item": "fasteners and bonded joints",
       "nominal_g": 22.0,
       "conservative_g": 27.5,
-      "basis": "screws, threaded inserts, standoffs and structural adhesive at the frame, bearing and blade attachment joints",
-      "scaling_class": "fixed"
+      "basis": "screws, threaded inserts, standoffs and structural adhesive at the frame, bearing and blade attachment joints. Count and bond area follow the frame, so the line is geometry scaled. Assumed, 25 percent",
+      "scaling_class": "geometry"
     }
   ],
   "mass_budget_g": [],
@@ -503,54 +612,81 @@
       "blade_area_coeff_low": "Engineering downside scenario, not a published bound. Kellen 2019 holds the measured coefficient for this shape family and is still behind a browser challenge, so nothing here is a measured lower limit",
       "momentum_area_m2": "Projected frontal area 2R times span, the standard cyclorotor momentum closure and the cap the gate applies",
       "power_loading_ref_N_per_W": "Benedict 2010 (S2) twin-cyclorotor at its operating point, 0.062 N/W of blade aerodynamic power, the lower of the two measured routes available",
-      "blade_deflection_thrust_loss": "Sized against the computed blade section: EI from the spar tube and skin, GJ from the closed cell, giving the tip deflection and twist reported in 02-rotor-sizing.md"
+      "blade_deflection_thrust_loss": "Bounded from above by the computed blade section, not derived from it: EI 66.8 Nm2 gives 0.086 mm of tip deflection and GJ 9.6 Nm2 gives 0.054 degrees of twist, so the section alone supports well under 1 percent. The 5 percent is carried as a floor over build tolerance, bond line variation and unsteady effects the section does not model",
+      "figure_of_merit": "Kellen 2019 reports 0.6 at UAV scale for this shape family. Summary class, since the thesis body is unread, and it is the value that turns the momentum floor into the working aerodynamic power",
+      "reynolds": "134074 at the design point. Above the 100,000 top of the range over which non-dimensional thrust is published as Reynolds invariant, so the coefficient transfer is an extrapolation upward rather than an interpolation. See D25"
     },
     "structure": {
       "blade_root_bending_Nm": null,
       "shaft_torque_Nm": null,
       "pitch_link_load_N": null
+    },
+    "efficiency": {
+      "transmission": "Single stage toothed belt at 0.93. Assumed, not measured. Published belt drive efficiency runs 0.95 to 0.98 at these speeds, so this is on the pessimistic side of the range",
+      "motor": "Outrunner at 0.84. Assumed, not measured, and the sensitivity matters: at 0.78 the motor input rises to 552 W and the selected drive is at its rating",
+      "esc": "Brushless controller at 0.95. Assumed, not measured, and the least sensitive link in the chain"
+    },
+    "drive": {
+      "continuous_rating": "T-Motor publishes Max. Power (180s) and Peak Current (180s), which is a three minute maximum and not an indefinite hover rating. Week 2 derates both by 0.80 for continuous duty. The derate is a judgement, stated rather than hidden, because the problem statement gives no endurance requirement to size it against",
+      "belt_ratio": "Smallest ratio at which motor torque stays inside the derated continuous torque and motor speed stays under 90 percent of what the 6S pack can turn it at, allowing for the internal resistance drop at the working current"
     }
   },
   "results": {
     "total_mass_g": null,
     "weight_N": null,
     "thrust_to_weight": null,
-    "mass_envelope_g": 614.4,
-    "mass_g_conservative": 725.42,
-    "thrust_to_weight_conservative": 2.3889
+    "mass_envelope_g": 580.05,
+    "mass_g_conservative": 692.43,
+    "thrust_to_weight_conservative": 2.2525
   },
   "thrust_sensitivity": [
     {
       "thrust_N": 13.0,
       "mass_ceiling_g": 530,
-      "ideal_power_W": 113.323,
-      "rpm": 1869.8,
-      "rotor_torque_Nm": 1.0717,
-      "drive_consequence": "MN3110 KV470 at 330 W continuous covers it with the belt ratio dropped to 4 to 1"
+      "ideal_power_W": 118.474,
+      "rpm": 2043.7,
+      "rotor_torque_Nm": 1.0251,
+      "motor_input_W": 280.84,
+      "motor_input_current_A": 12.65,
+      "drive": "T-Motor Antigravity MN5006 KV450",
+      "belt_ratio": 2.5,
+      "drive_consequence": "MN5006 KV450 at 2.5 to 1 covers it with the most room of any row, 12.65 A of the 20.8 A continuous"
     },
     {
       "thrust_N": 16.0,
       "mass_ceiling_g": 652,
-      "ideal_power_W": 154.733,
-      "rpm": 2074.4,
-      "rotor_torque_Nm": 1.3191,
-      "drive_consequence": "MN3510 KV700 at 555 W continuous, belt ratio 5 to 1, 17 A of the 25 A allowed"
+      "ideal_power_W": 161.766,
+      "rpm": 2267.3,
+      "rotor_torque_Nm": 1.2617,
+      "motor_input_W": 383.47,
+      "motor_input_current_A": 17.27,
+      "drive": "T-Motor Antigravity MN5006 KV450",
+      "belt_ratio": 3.5,
+      "drive_consequence": "MN5006 KV450 at 3.5 to 1, 17.27 A of the 20.8 A continuous"
+    },
+    {
+      "thrust_N": 18.0,
+      "mass_ceiling_g": 733,
+      "ideal_power_W": 193.026,
+      "rpm": 2404.8,
+      "rotor_torque_Nm": 1.4194,
+      "motor_input_W": 457.57,
+      "motor_input_current_A": 20.61,
+      "drive": "T-Motor Antigravity MN5006 KV450",
+      "belt_ratio": 3.5,
+      "drive_consequence": "MN5006 KV450 at 3.5 to 1, 20.61 A of the 20.8 A continuous and 8417 of 9435 motor rpm. The design point, and the tightest row that still fits"
     },
     {
       "thrust_N": 20.0,
       "mass_ceiling_g": 815,
-      "ideal_power_W": 216.246,
-      "rpm": 2319.3,
-      "rotor_torque_Nm": 1.6488,
-      "drive_consequence": "MN3510 KV700 at 555 W continuous, belt ratio 6 to 1, 22 A of the 25 A allowed"
-    },
-    {
-      "thrust_N": 24.0,
-      "mass_ceiling_g": 978,
-      "ideal_power_W": 284.262,
-      "rpm": 2540.6,
-      "rotor_torque_Nm": 1.9786,
-      "drive_consequence": "beyond the shortlist: 555 W continuous is exceeded and a heavier motor class is needed, which is why raising thrust stops paying here"
+      "ideal_power_W": 226.075,
+      "rpm": 2534.9,
+      "rotor_torque_Nm": 1.5772,
+      "motor_input_W": 535.92,
+      "motor_input_current_A": 24.14,
+      "drive": "none in the shortlist",
+      "belt_ratio": null,
+      "drive_consequence": "no shortlist drive fits at this radius. The motor input of 512.6 W is inside the 520 W continuous, but the torque wants a belt ratio the KV450 cannot spin to on 6S, which is why raising thrust stops paying here"
     }
   ]
 }
