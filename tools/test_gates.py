@@ -115,6 +115,12 @@ def honest_numbers():
     link_dem, link_all = 42.0, 95.0
     att_all = fc * 2.2
 
+    # The azimuthal table is a distribution of the thrust, so its cycle mean has to
+    # reproduce thrust per blade. A shape alone used to satisfy the gate.
+    raw_az = [(a, abs(math.cos(math.radians(a))) + 0.12) for a in range(0, 360, 10)]
+    az_scale = (thrust / nb) / (sum(v for _, v in raw_az) / len(raw_az))
+    azimuthal = [(a, v * az_scale) for a, v in raw_az]
+
     amp, phase = 40, 9.0
     pts = schedule_points(amp, phase)
     model = [amp * math.cos(math.radians(a - 90.0 - phase)) for a, _ in pts]
@@ -148,12 +154,15 @@ def honest_numbers():
                             for r in (0.10, 0.12, 0.14, 0.16)],
         "thrust_sensitivity": sensitivity,
         "configuration_candidates": [
-            {"config": "single rotor", "rotors": 1, "module_mass_g": 400.0,
-             "thrust_N": thrust, "module_tw": thrust / (0.400 * G), "selected": True},
+            {"config": "single rotor", "rotors": 1, "module_mass_g": env_nom,
+             "thrust_N": thrust, "module_tw": thrust / (env_nom / 1000 * G),
+             "module_tw_conservative": t_cons / (m_cons / 1000 * G), "selected": True},
             {"config": "two rotor cluster", "rotors": 2, "module_mass_g": 470.0,
-             "thrust_N": thrust, "module_tw": thrust / (0.470 * G), "selected": False},
+             "thrust_N": thrust, "module_tw": thrust / (0.470 * G),
+             "module_tw_conservative": t_cons / (0.540 * G), "selected": False},
             {"config": "three rotor cluster", "rotors": 3, "module_mass_g": 540.0,
-             "thrust_N": thrust, "module_tw": thrust / (0.540 * G), "selected": False}],
+             "thrust_N": thrust, "module_tw": thrust / (0.540 * G),
+             "module_tw_conservative": t_cons / (0.620 * G), "selected": False}],
         "coefficient_scenarios": [
             {"name": "nominal", "blade_area_coeff": ct, "evidence_class": "derived",
              "basis": "Benedict 2010 quad rotor at its hover point, transferred"},
@@ -162,13 +171,14 @@ def honest_numbers():
             {"name": "upside", "blade_area_coeff": ct * 1.05, "evidence_class": "derived",
              "basis": "thicker section benefit reported at UAV scale"}],
         "aero_azimuthal_loads": [
-            {"azimuth_deg": a, "normal_force_N": abs(thrust / nb * math.cos(math.radians(a))) + 0.5}
-            for a in range(0, 360, 10)],
+            {"azimuth_deg": a, "normal_force_N": v} for a, v in azimuthal],
         "drive_candidates": [
-            {"name": "outrunner A", "continuous_power_W": 320.0,
-             "continuous_torque_Nm": 1.6, "mass_g": 62.0, "selected": True},
-            {"name": "outrunner B", "continuous_power_W": 400.0,
-             "continuous_torque_Nm": 2.1, "mass_g": 88.0, "selected": False}],
+            {"name": "outrunner A", "continuous_power_W": 320.0, "kv": 400,
+             "continuous_current_A": 67.0, "continuous_torque_Nm": 9.5493 / 400 * 67.0,
+             "mass_g": 62.0, "selected": True},
+            {"name": "outrunner B", "continuous_power_W": 400.0, "kv": 350,
+             "continuous_current_A": 77.0, "continuous_torque_Nm": 9.5493 / 350 * 77.0,
+             "mass_g": 88.0, "selected": False}],
         "linkage_dimensions": [
             {"link": "crank", "length_mm": 24.0}, {"link": "coupler", "length_mm": 61.0},
             {"link": "rocker", "length_mm": 33.0}, {"link": "ground", "length_mm": 70.0}],
@@ -852,6 +862,130 @@ def incomplete_drive_row(d):
 
 case("a drive candidate with no continuous torque is rejected", False,
      incomplete_drive_row, week=2)
+
+
+# ---- week 2 selection gates, added after the week 2 audit -------------------------
+# Before these, a 36 row table of arbitrary positive numbers satisfied the azimuthal
+# check identically to a calibrated one, and nothing asked whether the drive the design
+# names could actually hold the design point.
+
+
+def azimuthal_not_calibrated(d):
+    d["aero_azimuthal_loads"] = [{"azimuth_deg": r["azimuth_deg"], "normal_force_N": 1.0}
+                                 for r in d["aero_azimuthal_loads"]]
+    return d
+
+
+case("an azimuthal table that does not average to the design thrust is rejected", False,
+     azimuthal_not_calibrated, week=2)
+
+
+def azimuthal_ten_percent_high(d):
+    for r in d["aero_azimuthal_loads"]:
+        r["normal_force_N"] *= 1.10
+    return d
+
+
+case("an azimuthal table overstated by 10 percent is rejected", False,
+     azimuthal_ten_percent_high, week=2)
+
+
+def two_drives_selected(d):
+    for x in d["drive_candidates"]:
+        x["selected"] = True
+    return d
+
+
+case("two drive candidates marked selected is rejected", False, two_drives_selected,
+     week=2)
+
+
+def no_drive_selected(d):
+    for x in d["drive_candidates"]:
+        x["selected"] = False
+    return d
+
+
+case("a drive shortlist with nothing selected is rejected", False, no_drive_selected,
+     week=2)
+
+
+def drive_under_continuous_rating(d):
+    sel = [x for x in d["drive_candidates"] if x["selected"]][0]
+    sel["continuous_power_W"] = 90.0
+    return d
+
+
+case("a selected drive below the continuous power the design point needs is rejected",
+     False, drive_under_continuous_rating, week=2)
+
+
+def drive_torque_not_from_kv(d):
+    d["drive_candidates"][0]["continuous_torque_Nm"] *= 1.4
+    return d
+
+
+case("a continuous torque that does not follow from KV and current is rejected", False,
+     drive_torque_not_from_kv, week=2)
+
+
+def drive_without_kv(d):
+    d["drive_candidates"][0].pop("kv")
+    return d
+
+
+case("a drive candidate with no KV is rejected", False, drive_without_kv, week=2)
+
+
+def two_candidates_selected(d):
+    for x in d["configuration_candidates"]:
+        x["selected"] = True
+    return d
+
+
+case("two configuration candidates marked selected is rejected", False,
+     two_candidates_selected, week=2)
+
+
+def no_candidate_selected(d):
+    for x in d["configuration_candidates"]:
+        x["selected"] = False
+    return d
+
+
+case("a candidate comparison with nothing selected is rejected", False,
+     no_candidate_selected, week=2)
+
+
+def selected_candidate_loses(d):
+    d["configuration_candidates"][1]["module_tw_conservative"] = \
+        d["configuration_candidates"][0]["module_tw_conservative"] * 1.2
+    return d
+
+
+case("a selected candidate that loses on conservative T/W is rejected", False,
+     selected_candidate_loses, week=2)
+
+
+def candidate_mass_off_envelope(d):
+    sel = [x for x in d["configuration_candidates"] if x["selected"]][0]
+    sel["module_mass_g"] *= 0.85
+    return d
+
+
+case("a selected candidate whose mass is not the envelope total is rejected", False,
+     candidate_mass_off_envelope, week=2)
+
+
+def candidates_without_conservative_tw(d):
+    for x in d["configuration_candidates"]:
+        x.pop("module_tw_conservative", None)
+    return d
+
+
+case("a candidate table with no conservative T/W is rejected", False,
+     candidates_without_conservative_tw, week=2)
+
 
 
 def no_evidence_ledger(root, data):

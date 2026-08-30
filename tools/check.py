@@ -657,6 +657,90 @@ def check_thrust_sensitivity(data, r):
     return ok
 
 
+def check_week2_selection(data, r):
+    """Three of the lists week 2 fills carried numbers that no gate read. A drive that
+    cannot hold the design point continuously, a candidate table whose winner is not the
+    row the stated first metric picks, and an azimuthal distribution that does not average
+    to the thrust it claims to be distributing all passed a shape check and nothing else.
+
+    Added in week 2 after an audit pointed out that a 36 row table of arbitrary positive
+    numbers satisfied the azimuthal gate identically to a real one."""
+    ok = True
+    nb, thrust = num(data, "geometry.blades"), r.get("thrust_N")
+
+    # The azimuthal table distributes the thrust, so its cycle mean has to reproduce it.
+    rows = dotted(data, "aero_azimuthal_loads")
+    if isinstance(rows, list) and rows and nb and thrust:
+        vals = [x.get("normal_force_N") for x in rows if isinstance(x, dict)]
+        if vals and all(isinstance(v, (int, float)) and not isinstance(v, bool)
+                        for v in vals):
+            mean = sum(vals) / len(vals)
+            ok &= report(close(mean * nb, thrust, DISPLAY_TOL),
+                         "week2: the azimuthal loads average to the design thrust",
+                         f"{len(vals)} rows, mean {mean:.4f} N times {nb:.0f} blades gives "
+                         f"{mean * nb:.3f} N against a recomputed {thrust:.3f} N")
+
+    # Exactly one drive is selected, its continuous rating covers the recomputed motor
+    # input power, and its continuous torque follows from KV and continuous current
+    # rather than being asserted beside them.
+    drives = dotted(data, "drive_candidates")
+    if isinstance(drives, list) and drives:
+        sel = [x for x in drives if isinstance(x, dict) and x.get("selected") is True]
+        ok &= report(len(sel) == 1, "week2: exactly one drive candidate is selected",
+                     f"{len(sel)} of {len(drives)} rows marked selected")
+        bad = []
+        for x in drives:
+            if not isinstance(x, dict):
+                continue
+            kv, ia, tq = x.get("kv"), x.get("continuous_current_A"), x.get("continuous_torque_Nm")
+            if not all(isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0
+                       for v in (kv, ia, tq)):
+                bad.append(f"{x.get('name', '?')} has no KV and continuous current")
+            else:
+                want = 9.5493 / kv * ia
+                if abs(tq - want) > 0.05 * want:
+                    bad.append(f"{x.get('name', '?')} states {tq} Nm against {want:.4f} Nm "
+                               "from KV and continuous current")
+        ok &= report(not bad,
+                     "week2: continuous torque follows from KV and continuous current",
+                     "; ".join(bad[:3]) if bad else f"{len(drives)} candidates")
+        chain = [num(data, "efficiency.transmission"), num(data, "efficiency.motor")]
+        if len(sel) == 1 and "shaft_power_W" in r and all(chain):
+            need = r["shaft_power_W"] / (chain[0] * chain[1])
+            cp = sel[0].get("continuous_power_W")
+            ok &= report(isinstance(cp, (int, float)) and not isinstance(cp, bool)
+                         and cp >= need,
+                         "week2: the selected drive covers the design point on its "
+                         "continuous rating",
+                         f"{need:.1f} W wanted at the motor terminals against a rated {cp} W")
+
+    # The candidate comparison has to be won by the row the stated first metric picks,
+    # and the winner's mass has to be the envelope the rest of the week is built on.
+    cands = dotted(data, "configuration_candidates")
+    if isinstance(cands, list) and cands:
+        sel = [x for x in cands if isinstance(x, dict) and x.get("selected") is True]
+        ok &= report(len(sel) == 1,
+                     "week2: exactly one configuration candidate is selected",
+                     f"{len(sel)} of {len(cands)} rows marked selected")
+        tws = [x.get("module_tw_conservative") for x in cands if isinstance(x, dict)]
+        good = bool(tws) and all(isinstance(v, (int, float)) and not isinstance(v, bool)
+                                 and v > 0 for v in tws)
+        ok &= report(good, "week2: every configuration candidate carries a conservative "
+                           "thrust to weight", "" if good else f"{tws}")
+        if good and len(sel) == 1:
+            ok &= report(sel[0].get("module_tw_conservative") >= max(tws) - 1e-9,
+                         "week2: the selected candidate wins on conservative thrust to weight",
+                         f"selected {sel[0].get('module_tw_conservative')}, "
+                         f"best on the table {max(tws)}")
+        if len(sel) == 1:
+            env_total, mm = num(data, "results.mass_envelope_g"), sel[0].get("module_mass_g")
+            if env_total and isinstance(mm, (int, float)) and not isinstance(mm, bool):
+                ok &= report(close(mm, env_total, DISPLAY_TOL),
+                             "week2: the selected candidate mass is the envelope total",
+                             f"candidate row says {mm} g, the envelope lines give {env_total} g")
+    return ok
+
+
 def week2(data):
     ok = True
     ok &= require_positive(data, [
@@ -857,6 +941,7 @@ def week2(data):
     # Thrust is a free variable, so the sensitivity of everything to it gets frozen here.
     # Week 4 may only pick a row from this table, never invent a new thrust under deadline.
     ok &= check_thrust_sensitivity(data, r)
+    ok &= check_week2_selection(data, r)
 
     if "electrical_power_W" in r:
         ok &= report(close(num(data, "performance.electrical_power_W"), r["electrical_power_W"]),
