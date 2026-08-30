@@ -1,171 +1,196 @@
 # Thrust and power
 
 Required Stage 1 item 4. Thrust from the coefficient route, power closed three ways, the
-azimuthal load distribution, and what changing the design thrust costs.
+azimuthal load distribution, the named drive on its continuous rating, and what changing the
+design thrust costs.
 
 ## Thrust
 
-Design thrust is 20.0 N. The requirement is at or above 10 N, and D6 made design thrust a
-free variable above that limit because the two targets together set a mass ceiling that moves
-with thrust. Choosing 20 N is not an ambition, it is arithmetic: the geometry-scaled mass
-lines do not care what thrust the rotor is turning for, so every extra newton buys about 27 g
-of ceiling and spends about 11 g of drive. The section on sensitivity below shows where that
-trade stops paying, which is around 24 N.
+Design thrust is 18.0 N. The requirement is at or above 10 N, and D6 made design thrust a free
+variable above that because the two targets together set a mass ceiling that moves with thrust.
+Choosing 18 N is not ambition, it is arithmetic in two steps.
+
+First, a floor. The conservative case has to clear 10 N on its own, and the conservative case
+uses a coefficient 15 percent below nominal, so the nominal point cannot sit below 11.8 N.
+Second, a trade. The geometry-scaled mass lines do not care what thrust the rotor is turning
+for, so extra thrust buys mass ceiling while only the drive grows. That trade runs out at 18 N
+here, not because of the physics but because of the drive, and the sensitivity table below
+shows exactly where.
 
 Thrust comes from the blade-area coefficient route:
 
     T = Ct x 0.5 x rho x u^2 x N x c x s
 
-At 2319 rpm and 115 mm radius the tip speed is 27.93 m/s, blade area is 0.0691 m2, and a
-coefficient of 0.6055 gives 20.0 N. Chord Reynolds is 141,000.
+At 2405 rpm and 110 mm radius the tip speed is 27.70 m/s, blade area is 0.0632 m2, and a
+coefficient of 0.6055 gives 18.0 N. Chord Reynolds is 134,000.
 
-The conservative case uses 0.5147, which is the same geometry at 85 percent of the
-coefficient, and gives 17.00 N. Both numbers clear the 10 N requirement on their own, and
-that is the constraint that pushed the design thrust up in the first place: a 15 percent
-coefficient haircut means the nominal point has to sit above 11.8 N before the conservative
-point clears 10 N at all.
+The conservative case uses 0.5147, the same geometry at 85 percent of the coefficient, giving
+15.30 N. Both clear the 10 N requirement on their own.
 
 Where the coefficient comes from, how it was recomputed, and why the low value is a scenario
-rather than a bound is all in `evidence-ledger.md` and `02-rotor-sizing.md`. The short
-version: it is transferred from a 4-blade NACA 0010 rotor at Reynolds 35,000 onto a 3-blade
-NACA 0020 family at 141,000, and the Reynolds half of that transfer is defensible while the
-configuration half is not de-risked by anything.
+rather than a bound is in `evidence-ledger.md` and `02-rotor-sizing.md`. The short version: it
+is transferred from a 4-blade NACA 0010 rotor at Reynolds 35,000 onto a 3-blade NACA 0020
+family at 134,000, and both halves of that transfer are now extrapolations. The published
+Reynolds invariance runs to 100,000 and the design point is above it. The configuration half
+was never de-risked by anything.
 
 ### Azimuthal load distribution
 
 A cycle-averaged coefficient hides what the blade actually sees. The model here uses 36
 azimuths, a prescribed sinusoidal pitch of plus or minus 40 degrees, and a uniform induced
-inflow taken from momentum theory. Induced velocity is 10.81 m/s against a tip speed of
-27.93, so the inflow ratio is 0.387, which is large and is the single biggest reason a
-simple model should not be trusted for magnitude here.
+inflow from momentum theory. Induced velocity is 10.72 m/s against a tip speed of 27.70, so the
+inflow ratio is 0.387. That is large, and it is the single biggest reason a simple model should
+not be trusted for magnitude here.
 
 Angle of attack at each azimuth is the geometric pitch less the inflow angle, capped at 28
-degrees to stand in for dynamic stall delay. Lift uses a thin-airfoil slope. The resulting
-distribution is then scaled so its cycle mean equals the thrust per blade from the
-coefficient route, which is the point: this is a load distribution and a sanity check, not an
-independent thrust measurement.
+degrees to stand in for dynamic stall delay. Lift uses a thin-airfoil slope. The distribution
+is then scaled so its cycle mean equals the thrust per blade from the coefficient route, which
+is the point of it: a load distribution and a sanity check, not an independent thrust estimate.
 
 | Azimuth | Vertical force per blade |
 | --- | --- |
 | 0 deg | 0.00 N |
-| 30 deg | 6.44 N |
-| 60 deg | 15.18 N |
-| 90 deg | 13.04 N |
-| 120 deg | 4.80 N |
-| 150 deg | 0.54 N |
+| 30 deg | 5.79 N |
+| 60 deg | 13.67 N |
+| 90 deg | 11.73 N |
+| 120 deg | 4.32 N |
+| 150 deg | 0.49 N |
 | 180 deg | 0.00 N |
 
-The lower half mirrors the upper half, which follows from a symmetric prescribed schedule and
-a uniform inflow. Peak is 15.83 N against a cycle mean of 6.67 N, so peak to mean is 2.37.
+The lower half mirrors the upper half, which follows from a symmetric prescribed schedule and a
+uniform inflow. Peak is 14.24 N against a cycle mean of 6.00 N, so peak to mean is 2.37.
 
 That is below the published 3 to 4 range, and the honest reading is that the model
-under-predicts the peak rather than that the design is gentler than the literature. A
+under-predicts the peak rather than that this design is gentler than the literature. A
 prescribed sinusoid with uniform inflow has no wake return, no shed vorticity and no dynamic
 stall overshoot, and all three sharpen the peak. Week 4 uses 4.0 regardless, which is D16, and
-week 3 reruns this against the pitch schedule the solved linkage actually produces.
+week 3 reruns this against the pitch schedule the solved linkage produces.
 
-What sets what, since the plan asks: vertical force is set by the pitch amplitude and the
-inflow ratio together. Side force is set by the phase between the pitch schedule and the
-azimuth, which is zero in this model by construction and will not be zero in week 3. Peak
-blade load is set by the stall cap more than by anything else, which is exactly why the number
-is soft.
+What sets what, since the plan asks: vertical force is set by pitch amplitude and inflow ratio
+together. Side force is set by the phase between the pitch schedule and the azimuth, which is
+zero here by construction and will not be zero in week 3. Peak blade load is set by the stall
+cap more than by anything else, which is exactly why the number is soft.
 
 ## Power
 
 Three levels, in the order the plan gives them.
 
 **Level 1, the momentum floor.** Over the projected frontal area of 2R times span, which is
-0.0698 m2 and is the cap the gate applies, ideal induced power for 20 N is 216.2 W. No rotor
-beats this. It is a bound and not an estimate, because it is the same equation the induced
-velocity came from.
+0.0639 m2 and is the cap the gate applies, ideal induced power for 18 N is 193.0 W. No rotor
+beats this. It is a bound, not an estimate, because it is the same equation the induced velocity
+came from.
 
-**Level 2, figure of merit.** Kellen measured 0.6 at UAV scale on this shape family, so
-216.2 over 0.6 gives 360.4 W of blade aerodynamic power. That is the working number.
+**Level 2, figure of merit.** Kellen reports 0.6 at UAV scale for this shape family, so 193.0
+over 0.6 gives 321.7 W of blade aerodynamic power. That is the working number, and it is worth
+being clear that it is doing a lot of work on the strength of an abstract. The thesis body is
+unread, so the figure of merit is summary class in the evidence ledger, and every number
+downstream of it inherits that.
 
 **Level 3, the independent cross-check.** Benedict's twin rotor at its operating point gives
-0.062 N per watt of blade aerodynamic power, which puts 20 N at 322.6 W. The two routes are
-10.5 percent apart, comfortably inside the 35 percent the gate allows, and the figure of merit
-route is the more pessimistic of the two. This is the only genuinely independent closure in
-the chain, since the momentum floor and the figure of merit are the same equation twice.
+0.062 N per watt of blade aerodynamic power, putting 18 N at 290.3 W. The two routes are 9.8
+percent apart, inside the 35 percent the gate allows, and the figure of merit route is the more
+pessimistic of the two. This is the only genuinely independent closure in the chain, since the
+momentum floor and the figure of merit are the same equation twice.
 
 The full module power chain:
 
 | Term | Value | Where it comes from |
 | --- | --- | --- |
-| blade aerodynamic power | 360.4 W | ideal power over a figure of merit of 0.6 |
-| rotor tare | 40.0 W | 10 percent of shaft power, Benedict's flight-weight rotor |
-| rotor shaft power | 400.4 W | the two above |
-| rotor torque | 1.649 Nm | shaft power over rotor speed |
-| electrical power at the ESC input | 539.6 W | shaft power over 0.93 belt, 0.84 motor, 0.95 ESC |
+| blade aerodynamic power | 321.7 W | ideal power over a figure of merit of 0.6 |
+| rotor tare | 35.7 W | 10 percent of shaft power, Benedict's flight-weight rotor |
+| rotor shaft power | 357.5 W | the two above |
+| rotor torque | 1.419 Nm | shaft power over rotor speed |
+| motor input power | 457.6 W | shaft power over 0.93 belt and 0.84 motor |
+| electrical power at the ESC input | 481.7 W | motor input over 0.95 |
 | actuator draw | 6.0 W | two servos holding against residual link load |
 | controller draw | 2.0 W | offset controller board |
-| module electrical power | 547.6 W | the three above |
+| module electrical power | 489.7 W | the last three above |
 
 Tare sits at the rotor shaft, before the transmission, which is why it is added to aerodynamic
 power and not to electrical power. Actuator and controller draw sit outside the drive chain
-entirely and are added last.
+entirely and are added last. The three efficiencies are assumed, not measured, and they are the
+only unevidenced links in the chain. The motor figure is the sensitive one: at 0.78 instead of
+0.84 the motor input rises to 493 W and eats most of the drive margin below.
 
-### The drive, on its continuous rating
+### The drive, on a derated continuous rating
 
-| Motor | Continuous power | Continuous torque | Mass | Verdict |
-| --- | --- | --- | --- | --- |
-| MN2806 KV650 | 187 W | 0.181 Nm | 46 g | short of the 513 W the design point needs |
-| MN3110 KV470 | 330 W | 0.299 Nm | 98 g | covers the 13 N row at 4 to 1, not the design point |
-| MN3510 KV700 | 555 W | 0.341 Nm | 118 g | selected |
+T-Motor publishes "Max. Power (180s)" and "Peak Current (180s)". That is a three minute
+maximum, not an indefinite hover rating, and a hovering module runs longer than three minutes.
+Week 2 therefore derates both by 0.80 for continuous duty. Nothing justifies 0.80 rather than
+0.70 or 0.90 except ordinary practice, and the problem statement states no endurance
+requirement to size it against. The derate is an assumption and it is marked as one.
 
-Continuous torque is derived from 9.5493 over KV at the datasheet continuous current, so 25 A
-on a KV700 gives 0.341 Nm.
+Continuous torque follows from 9.5493 over KV at the derated current.
 
-At the design point the motor sees 513 W at its terminals, which is 92 percent of its 555 W
-continuous rating. Rotor torque of 1.649 Nm through a 6 to 1 belt at 93 percent gives 0.296 Nm
-at the motor, so 21.7 A of the 25 A allowed, and 13,900 rpm. On 6S the back EMF at that current
-leaves roughly 14,800 rpm available, so there is throttle margin. Every one of those is a
-continuous figure and none is a peak or burst rating.
+| Motor | Mass | 180 s max | Continuous after derate | Continuous torque | Verdict |
+| --- | --- | --- | --- | --- | --- |
+| MN2806 KV650 | 46 g | 187 W | 149.6 W | 0.145 Nm | far short of 457.6 W |
+| MN4006 KV380 | 57 g | 380 W | 304.0 W | 0.352 Nm | short, and the lightest thing that holds the 13 N row |
+| MN3110 KV470 | 98 g | 330 W | 264.0 W | 0.244 Nm | dominated by the MN4006, which is lighter and stronger |
+| MN5006 KV450 | 106 g | 650 W | 520.0 W | 0.441 Nm | **selected** |
+| MN3510 KV700 | 118 g | 555 W | 444.0 W | 0.273 Nm | short of 457.6 W and 12 g heavier than the one that is not |
 
-Two honest caveats. The catalogue figures came from supplier listings this week rather than
-from the manufacturer's datasheet PDF, and week 4 has to confirm them. And a 6 to 1 single
-stage means a rotor pulley of about 86 mm pitch diameter, which fits inside a 230 mm rotor but
-is not a small part.
+A drive is only accepted if three things hold at once, not one. Power: the motor input of 457.6
+W is 88 percent of the MN5006's 520 W continuous. Torque: at 3.5 to 1 through a 93 percent belt
+the motor sees 0.436 Nm, which is 99 percent of its 0.441 Nm continuous, and that is the tight
+one. Speed: the rotor turns 2405 rpm so the motor turns 8417, and a 6S pack driving a KV450
+against 60 mOhm at the working current can reach 9435, so the motor sits at 89 percent of
+available with throttle headroom left. Input current is 20.6 A of the 20.8 A the derate allows.
+
+3.5 to 1 is the only ratio that works at this radius. A lower ratio puts the motor over its
+continuous torque and a higher one puts it past the speed a 6S pack can reach. That narrowness
+is the reason the radius is where it is.
+
+Two caveats. The MN5006 figures were read off the manufacturer's datasheet PDF; the other four
+came from supplier listings and week 4 confirms them. And a 3.5 to 1 belt means a rotor pulley
+of roughly 50 mm pitch diameter, which packages easily inside a 220 mm rotor.
 
 ## Sensitivity
 
-Frozen here so week 4 can pick a row and cannot invent an operating point under deadline.
-That is D10. Ideal power on every row is computed over the same projected area, so the table
-answers "at this radius, what does changing thrust cost".
+Frozen here so week 4 can pick a row and cannot invent an operating point under deadline. That
+is D10. Ideal power on every row is computed over the same projected area, so the table answers
+"at this radius, what does changing thrust cost".
 
 | Design thrust | Mass ceiling at T/W 2.5 | Ideal power | rpm | Rotor torque | Drive consequence |
 | --- | --- | --- | --- | --- | --- |
-| 13 N | 530 g | 113.3 W | 1870 | 1.072 Nm | MN3110 KV470 covers it at 4 to 1 |
-| 16 N | 652 g | 154.7 W | 2074 | 1.319 Nm | MN3510 at 5 to 1, 17 A of 25 A |
-| 20 N | 815 g | 216.2 W | 2319 | 1.649 Nm | MN3510 at 6 to 1, 22 A of 25 A |
-| 24 N | 978 g | 284.3 W | 2541 | 1.979 Nm | past the shortlist, a heavier motor class is needed |
+| 13 N | 530 g | 118.5 W | 2044 | 1.024 Nm | MN5006 at 2.5 to 1, 12.65 A of 20.8 A, the roomiest row |
+| 16 N | 652 g | 161.8 W | 2267 | 1.261 Nm | MN5006 at 3.5 to 1, 17.27 A of 20.8 A |
+| 18 N | 733 g | 193.0 W | 2405 | 1.419 Nm | MN5006 at 3.5 to 1, 20.61 A of 20.8 A. The design point |
+| 20 N | 815 g | 226.1 W | 2535 | 1.577 Nm | nothing in the shortlist fits |
 
 Ceilings are floors rounded down, because the inequality is strict.
 
-The shape of this table is the whole argument for a design thrust of 20 N. Between 13 N and 20
-N the ceiling grows 285 g while the drive grows about 75 g, so the trade pays. Above 20 N it
-stops: the shortlist runs out at 555 W continuous, the next motor class costs more mass than
-the extra ceiling buys back, and rpm and centrifugal load keep climbing. Conservative thrust to
-weight measured across the sweep peaks at 20 N and 115 mm, at 2.389.
+The shape of that table is the whole argument for 18 N, and for stopping there. Between 13 N
+and 18 N the ceiling grows 203 g while the drive grows about 30 g, so raising thrust pays and
+pays well. At 20 N it stops, and the reason is worth being precise about: the motor input of
+512.6 W is still inside the 520 W continuous rating, so it is not a power limit. It is torque
+and speed together. The rotor wants 1.577 Nm, which needs a ratio above 4, and a KV450 on 6S
+cannot spin to the motor speed that ratio implies. No other shortlist motor covers it either,
+because the ones with the speed do not have the torque.
 
-Which is below 2.5, so nothing here freezes. `stage-1/progress/week-2.md` carries the fallbacks
-that were worked and the report.
+Conservative thrust to weight measured across the whole sweep peaks at 18 N and 110 mm, at
+2.252. Which is below 2.5, so nothing here freezes. `stage-1/progress/week-2.md` carries the
+fallbacks that were worked and the report.
 
 ## Numbers used
 
-- performance.thrust_N = 20.0
-- performance.thrust_N_conservative = 17.0
-- performance.aero_power_W = 360.409
-- performance.ideal_power_W = 216.246
+- performance.thrust_N = 18.0
+- performance.thrust_N_conservative = 15.3007
+- performance.aero_power_W = 321.71
+- performance.ideal_power_W = 193.026
 - performance.figure_of_merit = 0.6
-- performance.aero_power_W_published = 322.581
-- performance.power_spread = 0.105
-- performance.tare_power_W = 40.045
-- performance.electrical_power_W = 539.595
-- performance.module_electrical_power_W = 547.595
-- performance.momentum_area_m2 = 0.069828
-- performance.induced_velocity_ms = 10.8123
+- performance.aero_power_W_published = 290.323
+- performance.power_spread = 0.0976
+- performance.tare_power_W = 35.746
+- performance.electrical_power_W = 481.655
+- performance.module_electrical_power_W = 489.655
+- performance.momentum_area_m2 = 0.063888
+- performance.induced_velocity_ms = 10.7237
 - performance.inflow_ratio = 0.3871
 - performance.blade_load_peak_to_mean = 2.374
-- operating.tip_speed_ms = 27.9303
+- performance.motor_input_W = 457.573
+- performance.motor_rpm = 8417.0
+- performance.motor_torque_Nm = 0.4361
+- performance.motor_input_current_A = 20.611
+- operating.tip_speed_ms = 27.7012
 - efficiency.motor = 0.84
