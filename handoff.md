@@ -1,121 +1,149 @@
 # CycloProp handoff
 
-Updated 29 August 2026. Stage 1 is due **27 September 2026** and we submit on 26 September. This file is where a fresh session starts.
+Updated 2 September 2026. Stage 1 is due **27 September 2026** and we submit on 26 September.
+This file is where a fresh session starts.
 
 NEXT-WEEK: 2
 
+**That marker still says 2 on purpose.** Week 2 ran, produced everything it was asked for, and
+reported BLOCKED on the one thing that decides the project. Geometry did not freeze, so week 2
+is not done and the marker does not move. Full account in
+[stage-1/progress/week-2.md](stage-1/progress/week-2.md).
+
 ## Read these first, in order
 
-1. **[context.md](context.md)** is the authority on what the competition requires. It was built from the official problem statement PDF and it outranks everything else in the repo, including this file
-2. **[stage-1/plan.md](stage-1/plan.md)** is the week by week execution plan
-3. **[stage-1/literature.md](stage-1/literature.md)** is the technical input: verified parameter table, published mass breakdowns, power loading, first-cut sizing
-4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why
+1. **[context.md](context.md)** is the authority on what the competition requires. Built from
+   the official problem statement PDF, and it outranks everything else here including this file
+2. **[stage-1/progress/week-2.md](stage-1/progress/week-2.md)** is the current state and the
+   blocked report
+3. **[stage-1/plan.md](stage-1/plan.md)** is the week by week execution plan
+4. **[stage-1/design/evidence-ledger.md](stage-1/design/evidence-ledger.md)** is what every
+   number rests on and how strong it is
+5. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 24 entries
 
-`brief.md`, `_shared-timeline.md` and `_plan-review-round1.md` are earlier work kept as history. They were written from page summaries and contradict `context.md` in several places. When they disagree, context.md wins.
-
-## To start the next week
-
-Prompts are in [_run-prompts.md](_run-prompts.md), one per tick, each for a fresh session.
-Run the pre-flight block at the top first. The loop halts after every week.
+`brief.md`, `_shared-timeline.md` and `_plan-review-round1.md` are earlier work kept as
+history. They were written from page summaries and contradict `context.md` in several places.
+When they disagree, context.md wins.
 
 ## Where we are
 
-Week 1 of 5 is done. Week 2 is next and starts 2 September.
+Week 1 is done. Week 2 has run once and is blocked.
 
-Week 1 delivered the requirements document and the literature rebuild. It also found the official problem statement, which nobody had located before, and that moved several things enough that the plan was restructured around it. Full account in [stage-1/progress/week-1.md](stage-1/progress/week-1.md).
+Everything week 2 was asked to produce exists: the evidence ledger, three design documents,
+the full numbers block, the candidate comparison, the coupled radius sweep, the mass envelope
+and the frozen thrust sensitivity table. What does not exist is a frozen geometry, because the
+conservative case came out at a thrust to weight of **2.389** against a hard limit of 2.5 and
+an internal target of 2.75.
 
-Nothing is sized yet. Week 2 does that, and it is no longer blocked.
+That is a miss of 32 g of module mass against the hard limit. It is close, and being close is
+why the decision goes to a person rather than getting rounded.
 
-## What the problem statement settled
+## The decision waiting for you
 
-**The thrust-to-weight basis is settled.** The PDF says the ratio is measured on "the complete cyclorotor module, including rotor blades, frame, pitch mechanism, motor, actuator, and associated mounting hardware". That was the one question holding up sizing. Nothing on that list can be pushed onto an airframe to make the number work.
+Three ways forward. The first is cheap and the third is honest.
 
-408 g follows from it, but only at exactly 10 N, and the requirement is at least 10 N. See the ceiling table below.
+**1. Pull Kellen 2019.** Two minutes in a browser. If the measured blade-area thrust
+coefficient for this shape family lands at or above 0.6055, the 10 percent
+configuration-transfer allowance retires, the coefficient haircut drops from 15 percent to 5,
+and the conservative case moves to roughly 2.68. That clears the hard limit while still
+sitting under 2.75, so it turns a blocked week into a red one needing a margin call. This is
+the highest-leverage thing available and it costs almost nothing. Details in D23.
 
-**Stage 1 wants 7 items, not 5.** Every document here said five. The three that were wrong or missing: power as a named deliverable, thrust-to-weight as a stated result separate from the mass budget, and a team capability and execution plan.
+Handle 1969.1/184958, item `a4c62d38-3778-44f4-b398-cdcba283fa06` on the Texas A&M repository.
+Open the item page, click Download, drop the PDF in `reference/`. The 403 is a Cloudflare
+JavaScript challenge, not a permissions gate, and a real browser passes it in about two
+seconds.
 
-**Thrust vectoring is required and carries 15%.** It had never been mentioned in this repo. At Stage 1 it has to be demonstrated through kinematic and performance analysis, so an argument and a number, not hardware.
+**2. Rule on the conservative mass allowance.** Week 2 used 15 percent growth on catalogue
+parts and 20 to 25 percent on structure computed from assumed sections, which averages 18
+percent. At a uniform 10 percent the conservative case reaches 2.564 and clears the limit. The
+agent did not make that change, because moving an allowance until the number appears is the
+failure mode the blocked trigger exists to catch. It is a legitimate engineering judgement and
+it is yours to make.
 
-**Eight evaluation criteria, not nine**, summing to 100. Five of them carry 15% each and four of those five are engineering analysis.
+**3. Accept the finding.** Nominal thrust to weight is 3.318, already 56 percent above the best
+published module on the same boundary. Reaching 2.75 conservative needs 3.82, which is 79
+percent above the record. If neither 1 nor 2 moves, the honest position is that this design
+does not close with 10 percent paper margin, and Stage 2 gets told so.
 
-## How this gets executed
+## What week 2 established that does not depend on the freeze
 
-Under `/loop` with the `weekly-loop` skill, one tick per plan week, config at
-[.codex/weekly-loop.md](.codex/weekly-loop.md). The config is drafted and needs its one-time
-human confirmation before the first Codex tick. The `.claude` config is historical. Gates
-are run by the supervisor, not taken from the week-agent's report:
-`python tools/check.py --week N`.
+- **The single rotor beats a redesigned cluster.** 2.389 against 1.795 for two rotors and
+  1.434 for three, on one common model with every contested assumption set in the cluster's
+  favour. D2 was provisional since week 1 and is now settled. See D18
+- **The 0.607 coefficient reproduces.** Recomputing it from Benedict's quad rotor figures gives
+  0.6055, so the number the repo has carried since week 1 is right to a quarter of a percent
+  and is now derivable in one line rather than quoted
+- **Design thrust is a real lever and it has a top.** Between 13 N and 20 N the mass ceiling
+  grows 285 g while the drive grows about 75 g. Above 20 N the drive shortlist runs out at 555
+  W continuous and it stops paying. Four rows frozen at 13, 16, 20 and 24 N. See D21
+- **The named drive works on its continuous rating.** MN3510 KV700 at 6 to 1 sits at 92 percent
+  of continuous power and 87 percent of continuous torque. Not a peak figure
+- **Both allocation questions are closed.** ESCs are module hardware, mounting counts in full,
+  both against us and both fixed before scoring. See D19
 
-The gates are not decorative. Every number in the submission is defined once in `stage-1/design/numbers.json`, prose cites it through a `## Numbers used` block, and the gate recomputes thrust from the geometry, weight from the mass lines and T/W from both. Writing a flattering number into prose fails the week.
+## Week 3, when it starts
 
-They are also not sufficient on their own, which took a goal-based review to establish. Agreement between stored numbers is not feasibility: the gates once certified 13.5 N of thrust from 1 W of aerodynamic power, and a structural model with 1 g blades sitting beside a 108 g blade budget. Week 2 now has a momentum floor under its power estimate and week 4 derives its structural loads from the design. Decisions D9 and D10 carry the reasoning.
+Configuration, sizing, thrust and power are all in place, so week 3 has what it needs on
+geometry as long as somebody accepts a candidate radius. Linkage topology and loop closure, the
+solved pitch schedule, the vectoring actuator and force-vector map, packaging, and the item 7
+structure.
 
-Human checkpoint every 2 weeks. **The submission email is never sent by an agent**, nor is the team registered or real names written into the capability section. Those are blocked triggers in the config.
+Two things week 3 inherits from week 2:
 
-Never run a loop longer than 7 to 8 hours. Past that the increment per cycle collapses.
+- The azimuthal load model uses a prescribed sinusoid with no phase offset, so side force is
+  zero by construction. Week 3 reruns it against the schedule the solved linkage actually
+  produces, and side force is where the real risk is. Benedict measured a resultant 30 degrees
+  off vertical, Adams 15 to 35 degrees depending on amplitude and rpm
+- The candidate radius is 115 mm with 125 mm carried as insurance. Switching after week 3 costs
+  a week 3 rerun, because link lengths, offset geometry, the pitch schedule and gearing all
+  move with radius
 
-## Before week 2: the human gate
+## The human gate
 
-Week H in the plan, with the task list and the status markers in [stage-1/human-gate.md](stage-1/human-gate.md). Not a loop tick.
+All five markers in [stage-1/human-gate.md](stage-1/human-gate.md) are still pending. They were
+advisory before week 2 and the engineering did not depend on them, so week 2 ran. They are a
+hard block on week 5, which cannot write a real capability section or stage a submission
+without them.
 
-Registration, the eligibility check, the roster and naming who sends are a **hard block on week 5**, which cannot write a real capability section or stage a submission without them. They are advisory before week 2, because the engineering does not depend on the roster. The faculty supervisor and the weekly-hours figure are wanted early but block nothing; they change what Stage 2 can promise and how much the schedule can be trusted.
+Do the eligibility check first regardless. The clause disqualifies a whole team at any stage,
+including after results are announced, so an ineligible roster makes every other week wasted
+effort.
 
-Do the eligibility check first regardless. An ineligible roster makes every other week wasted effort, and the clause bites at any stage, including after results.
+The two organiser questions, page limit and registration reference format, were due by 2
+September and are unsent. If no answer arrives by 8 September, use a 15 page main body plus
+cited appendices.
 
-## Week 2, next up
+## Standing constraints
 
-Configuration, rotor sizing, thrust, power, and the feasibility envelope that decides whether this closes at all.
+**The submission email is never sent by an agent.** Nor is the team registered, nor are real
+names written into the capability section. Those are blocked triggers in the loop config and
+they do not move.
 
-- **Design thrust is a choice, not 10 N by default.** The mass ceiling moves with thrust: 407 g at 10 N, 489 g at 12 N, 530 g at 13 N. Every earlier document here treated 408 g as fixed, which it is not, and 408 g fails the strict inequality anyway
-- Default to the Texas A&M UAV-scale optimum, meaning 3 blades at c/R 0.66, blade aspect ratio 4, NACA 0020, plus or minus 40 degrees, because solving that shape family pins Reynolds near 100,000 and that sits inside the band they studied
-- Build the evidence ledger first. The exact Kellen coefficient is still unavailable, so a low coefficient remains a labelled engineering scenario unless the paper is pulled
-- Compare single, 2 rotor and 3 rotor layouts only after a common thrust, power, mass and boundary model exists. D2 proved that copying five old rotors fails, nothing more
-- Radius trades rpm, envelope, structural mass, power and torque. The week runs a coupled geometry, drive and mass table rather than choosing radius from power alone
-- The preliminary blade section and named motor, ESC, transmission and vectoring actuator must support the mass envelope. Motor and drive mass are not treated as fixed
-- Hard compliance remains T/W above 2.5. Geometry targets a conservative 2.75 and needs a human margin decision if it lands between the two
-
-**Geometry freezes only if the conservative case closes.** If a low coefficient and a high mass together miss T/W 2.5, that is a finding, not a reason to trim an assumption.
-
-## The number that decides this project
-
-Re-cut onto the competition's module boundary, the best published design gives a module
-thrust to weight of **2.13**, and we need 2.5. That is a gap of about 17 percent, not the 39
-to 48 percent this file carried until 29 August.
-
-The 1.69 and 1.80 figures from Benedict 2010 and Sirohi 2007 are still correct for those
-designs. They were simply not the best available point. Runco's 70 g quad-cyclocopter re-cuts
-to 2.13 on the same optimistic boundary, and to 1.53 on the harshest allocation of ESCs and
-mounting share. It is also the **least** optimistic of the three, because its 8.2 g already
-includes the servo that the module boundary requires and that Sirohi's number leaves out.
-
-So the case reads: a mass-optimised micro module at Reynolds 18,600, built from flat plate
-blades with no T/W target in mind, already sits near 2.1 on our boundary. Scaling it to 10 N
-is neutral on blade mass per newton and favourable on aerodynamic power. Some hardware may
-amortise, but the motor and transmission still scale with power and torque. A result above
-2.1 is plausible, not established by the benchmark.
-
-One piece of the old argument is gone for good. Blade mass per newton is scale invariant and
-blade stress climbs regardless of blade design, so **scale buys aerodynamic efficiency and
-nothing on blade mass**. The remaining margin has to come from the physical blade section,
-an efficient named drive and only the hardware that is genuinely fixed or duplicated.
-Decisions D8, D11, D13 and D15 carry the working.
-
-Week 2 starts from the full 1.53 to 2.13 allocation band and closes every component against
-geometry, rating or supplier evidence. It does not fit a mass law or rely on a fixed-mass
-percentage to declare success.
+Gates are run by the supervisor in its own shell and never taken from the week-agent's report:
+`python tools/check.py --week N`, `--global`, and `python tools/test_gates.py`. Week 2 leaves
+exactly one gate failing and it is the thrust to weight decision line. Nothing in
+`tools/check.py` was modified.
 
 ## Open items
 
-- **Working solo.** Confirmed 27 August. More people are available if the work needs them, but the plan should assume one person until that changes. Weekly hours are still unstated, which now matters more than it did, because there is nobody to absorb a slipped week
-- **Three papers to pull in a browser, all open access, all on the same repository.** The 403 is a Cloudflare **JavaScript challenge**, not an IP block or a permissions gate, confirmed from two machines. A user-agent string cannot pass it; a real browser passes it in about two seconds. Open the item page, click Download, drop the PDF in `reference/`. In priority order:
-  - **Kellen 2019**, handle 1969.1/184958, item `a4c62d38-3778-44f4-b398-cdcba283fa06`. The thesis behind our baseline geometry. Wanted from the body: the measured blade-area thrust coefficient, power loading in N/W, per-rotor thrust and rpm at the optimum. The coefficient would retire most of the project's second-biggest risk
-  - **Heimerl, Halder, Benedict et al., "Experimental and Computational Investigation of a UAV-Scale Cycloidal Rotor in Forward Flight", VFS 77th Forum.** Measured instantaneous blade forces across Re 30,000 to 100,000, sweeping pitch amplitude and pitch offset from hover upward. Converts two gated numbers from simulated to measured, the blade load factor and the side force angle, and feeds the vectoring section as well
-  - **Ramsey 2022**, handle 1969.1/198531, item `692efcdd-c56a-4c7a-b507-f3e673986b51`. 25 kg quad-cyclocopter, foam core with carbon fibre skin blades. Wanted: the subsystem mass table, and any blade mass or deflection figures, which answer the deflection gate directly
-- **Registration, team confirmation and the eligibility check** are human tasks and none are done. The eligibility clause disqualifies a whole team at any stage, including after results, so check every member before the team is fixed
-- **A faculty supervisor** is still needed, both for the Stage 2 CAE tool access and because the problem statement's preference list reads like a spec for the team capability section
-- [stage-1/organiser-email.md](stage-1/organiser-email.md) is mostly answered by the problem statement now and should be cut down or dropped
-- The 29 August execution review is done. It reordered week 2, added a solved-linkage and force-vector standard, moved the PDF smoke build to week 3 and added an 84 hour capacity check. The active prompt is [_codex-prompt.md](_codex-prompt.md)
+- **Two files claim to be the loop execution contract.** `stage-1/plan.md` names
+  `.codex/weekly-loop.md`; this tick ran against `.claude/weekly-loop.md` because the launching
+  human said so, and it is the newer file. The plan was deliberately not edited. Somebody has
+  to say which wins. See D24
+- **Working solo**, confirmed 27 August. Weekly hours still unstated, which matters more now
+  than it did, because there is nobody to absorb a slipped week
+- **Motor and ESC figures are supplier listings, not datasheet PDFs.** Week 4 confirms them
+- **Ramsey 2022 and Heimerl** are still unpulled. Ramsey would give a second structural mass
+  anchor; there is currently exactly one, Runco, four orders of magnitude smaller. Heimerl
+  would replace the stated 28 degree stall cap and the peak to mean blade load with measured
+  figures
+- [stage-1/organiser-email.md](stage-1/organiser-email.md) is mostly answered by the problem
+  statement now and should be cut down or dropped
 
 ## Standing risk
 
-Week 3 collides with the UAV-X comms layer, which is the highest-risk piece across both projects. If something has to slip, slip this one. Week 5 is only 4 days and carries the deadline, so weeks 2 to 4 do not get to overrun into it. Each has a written fallback in the plan.
+Week 3 collides with the UAV-X comms layer, the highest-risk piece across both projects. If
+something has to slip, slip this one. Week 5 is 4 days and carries the deadline, so weeks 2 to
+4 do not get to overrun into it. Week 2 has now used one of its slots and produced a decision
+rather than a design, which eats calendar. The cheapest recovery is option 1 above.
