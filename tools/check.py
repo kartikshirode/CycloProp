@@ -84,6 +84,15 @@ MAX_POWER_SPREAD = 0.35   # primary estimate against the published power-loading
 MIN_BLADES = 2
 MIN_MOUNT_POINTS = 2
 
+# Setting pitch.vector_range_deg equal to pitch.phase_authority_deg is a claim that thrust
+# direction follows the phase command one to one. Comparing those two scalars only checks
+# that the same number was written twice, so the force table is asked as well: how far the
+# commands reach, whether they sit inside what the mechanism can drive, and whether the
+# direction the forces imply turns with the command instead of sitting still.
+VECTOR_TRACKING_TOL_DEG = 15.0
+VECTOR_EVIDENCE_FRACTION = 0.5   # commands must cover half the claimed range
+LATERAL_TRIM_FRACTION = 0.05     # cycle mean lateral against cycle mean vertical
+
 # A "conservative" case has to actually be conservative. Shaving 0.01 percent off the
 # coefficient and calling it a lower bound satisfies an inequality and nothing else.
 CONSERVATIVE_COEFF_MAX_RATIO = 0.90   # low coefficient at most 90 percent of nominal
@@ -180,6 +189,16 @@ def dotted(data, path):
         else:
             return None
     return cur
+
+
+def snum(data, path):
+    """Return any finite number, or None. The same guards as `num` without the sign rule,
+    for quantities that are legitimately zero or negative: phase commands, lateral forces,
+    phase angles. Using `num` on those silently drops half the table."""
+    v = dotted(data, path)
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return None
+    return v if math.isfinite(v) else None
 
 
 def num(data, path):
@@ -1200,6 +1219,77 @@ def check_pitch_motion(data, az, pitches):
     return ok
 
 
+def check_vector_map(data):
+    """Does the force table support the vectoring claim, or only sit next to it?
+
+    A design can pass the scalar comparison with three commands clustered at zero and a
+    360 degree claim beside them, or with a table whose lateral column never moves. Both
+    are answered here, and neither costs an honest design anything.
+    """
+    rows = [r for r in (dotted(data, "vector_map") or []) if isinstance(r, dict)]
+    rng, auth = num(data, "pitch.vector_range_deg"), num(data, "pitch.phase_authority_deg")
+    if not (rows and rng and auth):
+        return True
+    pts = []
+    for r in rows:
+        cmd, v, lat = (snum(r, "phase_command_deg"), snum(r, "vertical_force_N"),
+                       snum(r, "lateral_force_N"))
+        if cmd is None or v is None or lat is None:
+            return True                  # require_rows already reported the row shape
+        pts.append((cmd, v, lat))
+    pts.sort()
+
+    half = auth / 2.0
+    outside = [f"{c:.0f}" for c, _, _ in pts if abs(c) > half * (1 + DISPLAY_TOL)]
+    ok = report(not outside,
+                "week3: every mapped phase command sits inside the mechanism's authority",
+                f"{len(pts)} commands inside plus or minus {half:.0f} deg",
+                fail_detail=f"outside plus or minus {half:.0f} deg: " + ", ".join(outside[:5]))
+
+    span = pts[-1][0] - pts[0][0]
+    ok &= report(span >= VECTOR_EVIDENCE_FRACTION * rng,
+                 "week3: the force map covers enough of the claimed range to evidence it",
+                 f"commands span {span:.0f} deg against a claimed {rng:.0f} deg")
+
+    dead = [f"{c:.0f}" for c, v, lat in pts if math.hypot(v, lat) <= 0]
+    if not report(not dead, "week3: every mapped command produces a force",
+                  f"{len(pts)} commands carry force",
+                  fail_detail="no force at commands " + ", ".join(dead[:5])):
+        return False
+
+    dirs = [math.degrees(math.atan2(lat, v)) for _, v, lat in pts]
+    bad = []
+    for (c0, _, _), (c1, _, _), d0, d1 in zip(pts, pts[1:], dirs, dirs[1:]):
+        turn = (d1 - d0 + 180.0) % 360.0 - 180.0
+        if abs(turn - (c1 - c0)) > VECTOR_TRACKING_TOL_DEG:
+            bad.append(f"{c0:.0f} to {c1:.0f} deg of command turned the force {turn:.1f} deg")
+    return ok & report(not bad, "week3: the force direction turns with the phase command",
+                       "; ".join(bad[:3]) if bad else f"{len(pts)} commands tracked")
+
+
+def check_lateral_loads(data):
+    """Week 3 reruns the azimuthal model against the solved schedule, and that is where the
+    side force stops being zero by construction. Once the table carries a lateral column,
+    the stated peak has to come out of it and the cycle mean has to be the trimmed one the
+    design claims. A week 2 table without the column is left alone."""
+    rows = [r for r in (dotted(data, "aero_azimuthal_loads") or []) if isinstance(r, dict)]
+    lat = [snum(r, "lateral_force_N") for r in rows]
+    vert = [snum(r, "normal_force_N") for r in rows]
+    if not rows or any(v is None for v in lat) or any(v is None for v in vert):
+        return True
+    mean_lat, mean_v = sum(lat) / len(lat), sum(vert) / len(vert)
+    ok = report(abs(mean_lat) <= LATERAL_TRIM_FRACTION * abs(mean_v),
+                "week3: the cycle mean lateral force is trimmed out",
+                f"mean lateral {mean_lat:.4f} N against a mean vertical {mean_v:.4f} N")
+    stated = snum(data, "pitch.peak_lateral_force_N")
+    if stated is not None:
+        peak = max(abs(v) for v in lat)
+        ok &= report(close(stated, peak, DISPLAY_TOL),
+                     "week3: the stated peak lateral force reproduces from the table",
+                     f"the table gives {peak:.4f} N, stated {stated}")
+    return ok
+
+
 def week3(data):
     ok = True
     ok &= require_positive(data, [
@@ -1216,6 +1306,8 @@ def week3(data):
     ok &= require_integer(data, ["packaging.mount_points"],
                           "week3: mount points come in whole units", MIN_MOUNT_POINTS)
     ok &= require_text(data, ["pitch.mechanism"], "week3: pitch mechanism is named", 6)
+    ok &= check_vector_map(data)
+    ok &= check_lateral_loads(data)
 
     rel = "stage-1/design/03-pitch-and-vectoring.md"
     ok &= require_headings(rel, ["Pitch mechanism", "Kinematics", "Pitch schedule",

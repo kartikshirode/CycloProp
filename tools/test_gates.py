@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
-"""Self-test for tools/check.py.
+"""Self-test for tools/check.py, plus a read-only pass over the stored linkage.
 
-Builds throwaway repo trees in a temp directory and asserts that the gates pass an
-honest design and reject specific attacks. Never touches the real repo.
+Most of this builds throwaway repo trees in a temp directory and asserts that the gates
+pass an honest design and reject specific attacks. Nothing in that part writes to the real
+repo.
+
+`linkage_selftests` is the exception and it reads the real `numbers.json`. It exists
+because `check.py` deliberately does not recompute the four-bar, so without it the claim
+that every published pitch row comes from the stated loop closure would rest on the weekly
+audit alone. It reads and never writes.
 
     python tools/test_gates.py
 
@@ -18,6 +24,8 @@ import tempfile
 from pathlib import Path
 
 CHECK = Path(__file__).resolve().parent / "check.py"
+REPO = CHECK.parent.parent
+REPO_NUMBERS = REPO / "stage-1" / "design" / "numbers.json"
 REAL_PDF = CHECK.parent.parent / "reference" / "cycloprop-problem-statement.pdf"
 RHO, NU, G = 1.225, 1.5e-5, 9.81
 
@@ -124,6 +132,10 @@ def honest_numbers():
     raw_az = [(a, abs(math.cos(math.radians(a))) + 0.12) for a in range(0, 360, 10)]
     az_scale = (thrust / nb) / (sum(v for _, v in raw_az) / len(raw_az))
     azimuthal = [(a, v * az_scale) for a, v in raw_az]
+    # A lateral column with the cycle mean trimmed out, the way week 3 leaves it once the
+    # solved schedule replaces the phase-free sinusoid. Peak is what the gate reads back.
+    lateral = [(a, 0.9 * v * az_scale * math.sin(math.radians(2.0 * a))) for a, v in raw_az]
+    peak_lat = max(abs(v) for _, v in lateral)
 
     amp, phase = 40, 9.0
     pts = schedule_points(amp, phase)
@@ -175,7 +187,8 @@ def honest_numbers():
             {"name": "upside", "blade_area_coeff": ct * 1.05, "evidence_class": "derived",
              "basis": "thicker section benefit reported at UAV scale"}],
         "aero_azimuthal_loads": [
-            {"azimuth_deg": a, "normal_force_N": v} for a, v in azimuthal],
+            {"azimuth_deg": a, "normal_force_N": v, "lateral_force_N": lv}
+            for (a, v), (_, lv) in zip(azimuthal, lateral)],
         "drive_candidates": [
             {"name": "outrunner A", "continuous_power_W": 320.0, "kv": 400,
              "continuous_current_A": 67.0, "continuous_torque_Nm": 9.5493 / 400 * 67.0,
@@ -190,12 +203,12 @@ def honest_numbers():
         "vector_map": [
             {"phase_command_deg": ph, "vertical_force_N": thrust * math.cos(math.radians(ph)),
              "lateral_force_N": thrust * math.sin(math.radians(ph))}
-            for ph in (0.0, 30.0, 60.0)],
+            for ph in (-150.0, -75.0, 0.0, 75.0, 150.0)],
         "pitch": {"mechanism": "passive four-bar", "offset_m": 0.024,
                   "phase_delay_deg": phase, "vector_range_deg": 360.0,
                   "phase_authority_deg": 360.0, "schedule_rms_residual_deg": rms,
                   "actuator_count": 2, "actuator_mass_g": 18.0,
-                  "side_force_tilt_deg": 28.0},
+                  "side_force_tilt_deg": 28.0, "peak_lateral_force_N": peak_lat},
         "packaging": {"envelope_length_mm": 400, "envelope_width_mm": 300,
                       "envelope_height_mm": 300, "mount_points": 4},
         "structure": {"blade_mass_kg": blade_mass, "centrifugal_load_N": fc,
@@ -998,6 +1011,74 @@ case("a vectoring range wider than the mechanism allows is rejected", False,
      vectoring_beyond_authority, week=3)
 
 
+def force_map_that_never_turns(d):
+    """Same claimed range, same commands, and a force that points the same way at all of
+    them. Comparing vector_range_deg with phase_authority_deg cannot see this."""
+    for r in d["vector_map"]:
+        r["vertical_force_N"] = d["performance"]["thrust_N"]
+        r["lateral_force_N"] = 0.0
+    return d
+
+
+case("a force map whose direction never turns is rejected", False,
+     force_map_that_never_turns, week=3)
+
+
+def force_map_clustered_at_zero(d):
+    """Three commands within 10 degrees of each other, offered as evidence for 360."""
+    thrust = d["performance"]["thrust_N"]
+    d["vector_map"] = [
+        {"phase_command_deg": ph,
+         "vertical_force_N": thrust * math.cos(math.radians(ph)),
+         "lateral_force_N": thrust * math.sin(math.radians(ph))}
+        for ph in (0.0, 5.0, 10.0)]
+    return d
+
+
+case("a force map clustered at one command cannot evidence the claimed range", False,
+     force_map_clustered_at_zero, week=3)
+
+
+def command_outside_the_authority(d):
+    """Commands the mechanism cannot reach, mapped as though it could."""
+    thrust = d["performance"]["thrust_N"]
+    d["vector_map"] = [
+        {"phase_command_deg": ph,
+         "vertical_force_N": thrust * math.cos(math.radians(ph)),
+         "lateral_force_N": thrust * math.sin(math.radians(ph))}
+        for ph in (-200.0, 0.0, 200.0)]
+    return d
+
+
+case("a mapped phase command outside the mechanism's authority is rejected", False,
+     command_outside_the_authority, week=3)
+
+
+def overstated_peak_lateral(d):
+    d["pitch"]["peak_lateral_force_N"] *= 1.5
+    return d
+
+
+case("a peak lateral force the load table does not show is rejected", False,
+     overstated_peak_lateral, week=3)
+
+
+def untrimmed_lateral_column(d):
+    """A side force left where it fell, with the stated peak moved to match so only the
+    trim gate can catch it."""
+    bias = 0.3 * sum(r["normal_force_N"] for r in d["aero_azimuthal_loads"]) / len(
+        d["aero_azimuthal_loads"])
+    for r in d["aero_azimuthal_loads"]:
+        r["lateral_force_N"] += bias
+    d["pitch"]["peak_lateral_force_N"] = max(
+        abs(r["lateral_force_N"]) for r in d["aero_azimuthal_loads"])
+    return d
+
+
+case("a lateral load column that does not average out is rejected", False,
+     untrimmed_lateral_column, week=3)
+
+
 def thrust_not_prequalified(d):
     d["thrust_sensitivity"] = [r for r in d["thrust_sensitivity"] if r["thrust_N"] != 13.5]
     d["thrust_sensitivity"].append({"thrust_N": 11.0,
@@ -1349,6 +1430,81 @@ case("criteria named beside the table instead of in it is rejected", False,
      upto=5, week=5, tweak=criteria_named_only_in_prose)
 
 
+def loop_residual(rows, R, e, a, l, alpha0, phi_deg=90.0):
+    """Worst distance by which the pitch link fails to reach the offset pivot.
+
+    Deliberately independent of `linkage.py`: it puts the horn where the published pitch
+    angle says it is, then asks whether the link still spans the gap. A hand-written table
+    does not survive it. One degree of edit on one row shows up as 0.37 mm.
+    """
+    ex, ey = e * math.cos(math.radians(phi_deg)), e * math.sin(math.radians(phi_deg))
+    worst = 0.0
+    for r in rows:
+        az = r["azimuth_deg"]
+        psi, alpha = math.radians(az), math.radians(r["pitch_deg"] + az + alpha0)
+        hx = R * math.cos(psi) + a * math.cos(alpha)
+        hy = R * math.sin(psi) + a * math.sin(alpha)
+        worst = max(worst, abs(math.hypot(hx - ex, hy - ey) - l))
+    return worst
+
+
+def linkage_selftests():
+    """Read-only checks that the stored week 3 numbers still come from the mechanism.
+
+    Returns a list of (name, ok, detail). Skipped with an empty list if the repo does not
+    carry a solved linkage yet, so the suite still runs on a tree from before week 3.
+    """
+    if not REPO_NUMBERS.is_file():
+        return []
+    d = json.loads(REPO_NUMBERS.read_text(encoding="utf-8"))
+    p, g = d.get("pitch") or {}, d.get("geometry") or {}
+    rows = d.get("pitch_schedule") or []
+    need = ("offset_m", "horn_m", "pitch_link_m", "construction_angle_deg",
+            "phase_delay_deg")
+    if not rows or any(p.get(k) is None for k in need):
+        return []
+
+    args = (g["radius_m"], p["offset_m"], p["horn_m"], p["pitch_link_m"],
+            p["construction_angle_deg"])
+    out = []
+    res = loop_residual(rows, *args)
+    out.append(("every published pitch row closes the four-bar loop", res < 1e-6,
+                f"worst {res:.2e} m"))
+
+    edited = [dict(r) for r in rows]
+    edited[len(edited) // 3]["pitch_deg"] += 1.0
+    bad = loop_residual(edited, *args)
+    out.append(("one degree of hand editing breaks that closure", bad > 1e-5,
+                f"worst {bad:.2e} m"))
+
+    amp = g.get("pitch_amplitude_deg")
+    cosine = [{"azimuth_deg": r["azimuth_deg"],
+               "pitch_deg": amp * math.cos(math.radians(
+                   r["azimuth_deg"] - 90.0 - p["phase_delay_deg"]))} for r in rows]
+    cos_res = loop_residual(cosine, *args)
+    out.append(("a target cosine is not a linkage solution", cos_res > 1e-5,
+                f"worst {cos_res:.2e} m"))
+
+    if p.get("servo_travel_deg") and p.get("gear_step_up"):
+        want = p["servo_travel_deg"] * p["gear_step_up"]
+        out.append(("phase authority is servo travel times the gear ratio",
+                    abs(p["phase_authority_deg"] - want) < 1e-6,
+                    f"{p['phase_authority_deg']} deg against {want:.1f}"))
+    if p.get("actuator_mass_g") is not None:
+        env = [x for x in d.get("mass_envelope_g") or []
+               if x.get("item") == "vectoring actuator"]
+        if env:
+            out.append(("the actuator mass matches the week 2 envelope line",
+                        abs(p["actuator_mass_g"] - env[0]["nominal_g"]) < 1e-6,
+                        f"{p['actuator_mass_g']} g against {env[0]['nominal_g']} g"))
+    if p.get("carrier_torque_Nm") and p.get("servo_torque_Nm"):
+        want = p["carrier_torque_Nm"] / p["gear_step_up"] / p["actuator_count"]
+        out.append(("servo torque follows from the carrier torque it holds",
+                    abs(want - p["servo_torque_Nm"]) < 5e-4,
+                    f"{p['servo_torque_Nm']} Nm against {want:.4f}"))
+    return out
+
+
 def main():
     failures = []
     for name, expect_pass, mutate, upto, week, tweak in CASES:
@@ -1557,13 +1713,19 @@ def main():
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
+    extra = linkage_selftests()
+    for name, ok, detail in extra:
+        print(("ok    " if ok else "BROKE ") + name + f"   [{detail}]")
+        if not ok:
+            failures.append((name, detail))
+
     print()
     if failures:
         print(f"{len(failures)} case(s) behaved wrongly")
         for name, out in failures:
             print(f"\n===== {name} =====\n{out}")
         return 1
-    print(f"All {len(CASES) + 22} gate self-tests behaved as expected.")
+    print(f"All {len(CASES) + 22 + len(extra)} gate self-tests behaved as expected.")
     return 0
 
 
