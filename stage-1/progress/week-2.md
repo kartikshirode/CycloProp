@@ -3,12 +3,16 @@
 **STATUS: WEEK-COMPLETE.** Geometry is frozen at 18 N of design thrust and a 110 mm radius,
 with 120 mm carried as insurance. All three gate commands exit 0.
 
-Week 2 ran twice. The first run, 2 September 2026, produced everything the plan asked for and
-then reported BLOCKED, because the stacked conservative case came in at a thrust to weight of
-2.252 against a hard limit of 2.5. A person made the call and recorded it as D30. The second
-run, 31 August 2026, froze the geometry, wrote the mass target that D30 asked for, and closed
-the week. Both runs used the config at `.claude/weekly-loop.md`, which D28 settled as the only
-execution contract.
+Week 2 ran twice. The first run produced everything the plan asked for and then reported
+BLOCKED, because the stacked conservative case came in at a thrust to weight of 2.252 against a
+hard limit of 2.5. A person made the call and recorded it as D30. The second run froze the
+geometry, wrote the mass target D30 asked for, and closed the week. Both used the config at
+`.claude/weekly-loop.md`, which D28 settled as the only execution contract.
+
+**On dates.** The first run's prose dates itself 2 September 2026 and its commits are dated 30
+August; the second run is 31 August in both. The commit dates are the real ones. The first
+run's prose was left as written rather than rewritten across a dozen files, so anything reading
+"2 September" in week 2 material means the first run.
 
 ## What the week was meant to produce
 
@@ -19,7 +23,7 @@ the coupled comparison, a frozen design point, and the audit.
 
 ## What it produced
 
-- `stage-1/design/evidence-ledger.md`, 16 numbered evidence rows with class, source, exact
+- `stage-1/design/evidence-ledger.md`, 17 numbered evidence rows with class, source, exact
   basis, area convention, source geometry, source Reynolds number and use, plus the selection
   rules written before any candidate was scored
 - `stage-1/design/01-configuration.md`, the single rotor against redesigned 2 and 3 rotor
@@ -30,13 +34,15 @@ the coupled comparison, a frozen design point, and the audit.
 - `stage-1/design/04-thrust-and-power.md`, thrust, the 36 point azimuthal load distribution,
   power closed three ways, the named drive on a derated continuous rating, and the sensitivity
   table
-- `stage-1/design/numbers.json`, the full week 2 block: 24 performance scalars, 7 geometry, 3
+- `stage-1/design/numbers.json`, the full week 2 block: 29 performance scalars, 7 geometry, 3
   operating, 3 efficiency, plus `power_by_radius` at 5 radii, 3 configuration candidates, 4
   coefficient scenarios, 36 azimuthal load rows, 5 drive candidates, 13 mass envelope lines, 4
   sensitivity rows and the week 4 mass target
-- Four new gates in `tools/check.py` from the audit, the one stacked thrust to weight gate
-  replaced by six, and three document gates for D32, with 22 self-tests behind them
-- D18 to D27 in `stage-1/decisions.md` from the first run, D31 and D32 from the second
+- New gates in `tools/check.py`: four the first audit asked for, the one stacked thrust to
+  weight gate replaced by six, a narrow measured-family exception on the coefficient floor,
+  three document gates for D32 and four on the week 4 conservative column for D33. The week 2
+  block reports 71 checks now
+- D18 to D27 in `stage-1/decisions.md` from the first run, D31 to D34 from the second
 - `stage-1/audit/week-2.md`, two independent passes, the first 18 findings and the second on
   the freeze
 
@@ -77,10 +83,14 @@ published module on the same boundary is Runco at 2.13. This design reaches 3.16
 already 49 percent above the record.
 
 What the second run changed is not that number. It is what the number is allowed to decide.
-Nine of the thirteen envelope lines say assumed in their basis and carry a blanket 20 or 25
-percent growth rate, so the stacked figure tests those rates about as hard as it tests the
-rotor. Week 4 replaces them with real sections and catalogue parts and gets tested against the
-same limit. Full reasoning in D30, target in D31.
+Eight of the thirteen envelope lines carry a blanket 20 or 25 percent growth rate, six of them
+on a basis that says the section is assumed rather than weighed or quoted, so the stacked figure
+tests those rates about as hard as it tests the rotor. Week 4 replaces them with real sections
+and catalogue parts, rebuilds the conservative column line by line under D33, and gets tested
+against the same limit. Full reasoning in D30, target in D31.
+
+D30 says nine lines rather than eight. Eight is what `mass_envelope_g` gives, and every gram
+quoted here comes from the correct eight.
 
 ## The fallbacks, worked in the plan's order
 
@@ -131,8 +141,9 @@ Ranked by leverage. The full argument is D31; this is the short form.
 at or above 0.6055 for this shape family, the 10 point configuration-transfer allowance goes,
 the haircut drops from 15 percent to 5, conservative thrust becomes 17.1 N and the mass that
 clears 2.5 becomes 697.2 g. The module already weighs 692.4 g in the conservative column, so
-there would be no shortfall left for week 4 to find. It also settles D25, because Kellen
-measured across 100,000 to 300,000 and this design sits at 134,074, inside that band. Two
+there would be no shortfall left for week 4 to find. It would also settle D25, because Kellen's test range is reported as
+100,000 to 300,000 and this design sits at 134,074, inside it. That band is E17 in the ledger
+and it is summary class like everything else from that thesis, since nobody has opened it. Two
 minutes in a browser.
 
 **2. Real sections in the week 4 budget.** The eight assumed lines carry 86.4 g of the 112.4 g
@@ -191,8 +202,13 @@ structural lines. There is currently one, Runco, four orders of magnitude smalle
 | 9 | The blade spar is sized geometrically at 0.12 chord diameter with a 0.5 mm wall. Week 4 sizes it against centrifugal load, which at 2405 rpm is the load that governs | week 4 |
 | 10 | The 2.75 internal margin target from D17 is not met on the stacked case and the freeze went ahead anyway. That is a deliberate call, not an oversight, and D30 carries the reasoning | closed by D30 |
 | 11 | `stage-1/organiser-email.md` is still mostly answered by the problem statement and should be cut down or dropped | human |
+| 12 | When week 4 moves the conservative mass, the recomputed stacked figure moves with it and the three week 2 design documents fail the D32 gate on the old number. Week 4 restates it in all three. See D34 | week 4 |
+| 13 | `.claude/weekly-loop.md` still describes the week 2 thrust to weight gate in its pre-D30 form, one nominal case and one conservative case. The blocked triggers in the same file were updated and are correct. The config is a human's file, so this is reported rather than edited | human |
+| 14 | The first run's prose dates itself 2 September 2026 against commits dated 30 August. Left as written across a dozen files rather than rewritten. The commit dates are authoritative | none, recorded |
 
 Debt 1 from the first run, two files claiming to be the execution contract, was closed by D28.
+The plan's week 2 section carries a supersession note now, so the pre-D30 rule is still readable
+but no longer reads as current.
 
 ## Week H gap
 
@@ -227,32 +243,43 @@ evidence.
 ```
 python tools/check.py --week 2   pass
 python tools/check.py --global   pass
-python tools/test_gates.py       98 of 98 self-tests behaved as expected
+python tools/test_gates.py       104 of 104 self-tests behaved as expected
 ```
 
-**`tools/check.py` was changed twice and never loosened.** The first run added four gates after
-the audit found that three of the lists week 2 fills carried numbers nothing read: a 36 row
-table of arbitrary positive values satisfied the azimuthal check identically to a calibrated
-one, and nothing asked whether the named drive could hold the design point. The D30 restructure
-then took the one stacked T/W gate out and put six in: three cases each hard against 2.5, one
-requiring the stacked figure to be stated and reproduce, one recomputing the week 4 mass target
-and one on how it retires. The second run added three more, one per week 2 document, which are
-D32 made mechanical. Twenty two self-tests came with the three rounds, roughly one per attack,
-and the suite went from 77 to 98. No tolerance, bound or
+**`tools/check.py` was changed through the week and never loosened.** The first run added four
+gates after the audit found that three of the lists week 2 fills carried numbers nothing read: a
+36 row table of arbitrary positive values satisfied the azimuthal check identically to a
+calibrated one, and nothing asked whether the named drive could hold the design point. The D30
+restructure then took the one stacked T/W gate out and put six in: three cases each hard against
+2.5, one requiring the stacked figure to be stated and reproduce, one recomputing the week 4
+mass target and one on how it retires. The coefficient haircut floor gained a narrow exception,
+so a scenario classed measured on this design's own solidity and chord to radius drops the floor
+from 10 percent to 5 and nothing else does. No scenario in `numbers.json` is classed measured, so
+the floor in force is still 10 percent and no number in this week rests on that exception. It is
+there for the day somebody reads Kellen, which is the test D23 set. The second run added three document gates for D32
+and four for D33, which is the week 4 conservative column. The suite went from 77 self-tests to
+104. No tolerance, bound or
 limit moved in either direction.
 
 The mass target gate is the one worth describing, because it is the only gate in the file whose
 requirement depends on a result. When the stacked case clears 2.5 it reports and asks for
 nothing. When it misses, `results.mass_target_week4_g` has to be present and reproduce from the
 conservative thrust to half a percent, and `sources.results.mass_target_week4_g` has to say in
-at least 40 characters how the shortfall retires. A stated target 15 percent above the computed one
-fails, so does one 15 percent below it, and so does a target with the word "week 4" as its
-whole explanation. Five self-tests cover those cases.
+at least 40 characters how the shortfall retires. A stated target 15 percent off the computed
+one fails, and so does a target with the word "week 4" as its whole explanation.
 
-The three document gates are simpler. Each of the week 2 design documents has to quote a number
-within half a percent of the recomputed stacked figure somewhere in its text, at any rounding,
-so 2.25 and 2.2525 both count. Stripping the number out of one document while leaving every
-stored value untouched is a self-test of its own, because nothing else in the file would notice.
+The three document gates are simpler. Each week 2 design document has to quote a number within
+half a percent of the recomputed stacked figure in its narrative, at any rounding, so 2.25 and
+2.2525 both count. The `## Numbers used` block is cut off before the gate looks, because a
+declaration is machine-readable and a reader skimming the prose never sees it. Taking the
+sentence out of one document while every stored number still reproduces is a self-test of its
+own.
+
+The four D33 gates close the hole the second audit found under D30. The week 4 stacked test
+reads `results.mass_g_conservative`, and until now that was one stored scalar: week 4 could
+have passed by choosing a growth rate that lands under 623.9 g. Now every budget line carries
+its own conservative figure, no line may shrink under growth, and the stated total has to be
+their sum at 105 percent of nominal or more.
 
 ## What week 3 needs to know
 
@@ -272,3 +299,8 @@ Two things it inherits, and both are real work rather than notes:
 
 Week 3's own scope is unchanged: linkage topology and loop closure, the solved pitch schedule,
 the vectoring actuator and the force-vector map, packaging, and the item 7 structure.
+
+One gate to know about before it surprises somebody. Each week 2 design document has to quote
+the stacked conservative thrust to weight in its narrative, and the gate compares against the
+recomputed value. Week 3 does not touch the mass, so nothing moves. Week 4 does, and when it
+does it restates the figure in all three documents. That is D34 and debt 12.

@@ -143,3 +143,11 @@ One thing I did not do: reopen anything. The coefficient, the derate, the speed 
 growth rates, the drive and the two frozen tables are all exactly where the first run left
 them. D30 says so explicitly and it is the part of the entry worth taking seriously, because
 the easy version of this week was to shave two percent off a growth rate and call it a design.
+
+Late addition, same day. A gate landed while this was running: a coefficient scenario classed
+measured, taken on this design's own solidity and chord to radius and not undercutting the
+nominal, now drops the transfer haircut floor from 10 percent to 5. Nothing in `numbers.json` is
+classed measured, so the floor in force is still 10 and not one number here moved. It is the
+mechanism D23 described, sitting ready. Whoever gets Kellen open pays for the reading and gets
+the retirement, and the gate will not accept a measurement on somebody else's shape family in
+its place.

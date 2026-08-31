@@ -26,23 +26,26 @@ gates deliberately cannot check.
 ### tools/check.py
 The gate script. Recomputes tip speed, Reynolds, thrust, power chain, mass totals, thrust to
 weight and structural demands from stored geometry and mass lines, then applies the hard limits
-to what it recomputed. Week 2 added `check_week2_selection`, split the one stacked T/W gate into
-six including the conditional `results.mass_target_week4_g` pair, and added `states_value` over
-`WEEK2_DOCS` for D32.
+to what it recomputed. Week 2 added `check_week2_selection`, `measured_shape_family`,
+`check_conservative_budget`, split the one stacked T/W gate into six including the conditional
+`results.mass_target_week4_g` pair, and added `states_value` over `WEEK2_DOCS`.
 Used by: the supervisor after every week tick, and tools/test_gates.py
-Gotcha: hard limits never touch stored headline values, and the mass target gate is the only
-one whose requirement depends on a result: it asks for nothing when the stacked case clears 2.5
-and recomputes the target when it misses. Week 2's momentum floor is the one gate that asks
-whether the design could physically exist rather than whether it agrees with itself.
+Gotcha: hard limits never touch stored headline values. Two gates are conditional on a result
+rather than fixed: the mass target, which asks for nothing when the stacked case clears 2.5,
+and the coefficient floor, which drops from 10 percent to 5 only for a scenario classed measured
+on this design's own solidity and chord to radius. `states_value` reads the narrative only,
+cutting the Numbers used block off first.
 
 ### tools/test_gates.py
 Self-tests for check.py. Builds throwaway trees and checks an honest design passes while
-specific attacks fail. 98 checks after week 2 added 12, then 7, then 3.
+specific attacks fail. 104 checks, which is `len(CASES) + 22` for the probes main() runs
+directly. Week 2 took it from 77.
 Used by: run by hand after any change to check.py
 Gotcha: `honest_numbers()` is the fixture every case mutates, so a new required field in
 check.py has to be added there first or every case fails at once. `_rescale_mass` moves the
 envelope, the stated totals and every candidate row together, because one T/W case cannot be
-moved on its own without tripping a gate the test was not aiming at.
+moved on its own without tripping a gate the test was not aiming at. `doc(..., says=)` is what
+puts the stacked T/W in a fixture document's narrative, where the D32 gate looks.
 
 ### stage-1/design/numbers.json
 Single definition point for every number the submission states.
@@ -55,10 +58,11 @@ Used by: every stage-1/design/*.md through its Numbers used block, tools/check.p
 Gotcha: prose never restates a number, it cites the dotted key. Every mass_envelope_g line
 carries a scaling_class of geometry, power or fixed, because the drive is not a fixed mass.
 `results.mass_target_week4_g` exists only because the stacked case misses 2.5, and the gate
-recomputes it rather than trusting it.
+recomputes it. Week 4's mass_budget_g rows carry conservative_g as well as mass_g, and their
+sum is what results.mass_g_conservative has to equal. See D33.
 
 ### stage-1/design/evidence-ledger.md
-Week 2 deliverable. 16 numbered evidence rows with class, source, exact basis, area convention,
+Week 2 deliverable. 17 numbered evidence rows with class, source, exact basis, area convention,
 source geometry, source Reynolds and use, followed by the selection rules and the packaging
 assumption, all fixed before any candidate was scored. The freeze rule it published sits next
 to the D30 rule that replaced it rather than being edited in place.
@@ -96,13 +100,14 @@ here has zero side force by construction, so week 3 reruns it rather than citing
 
 ### stage-1/progress/week-2.md
 Week 2 progress record across both runs: what was produced, the four T/W cases, the fallbacks
-that were worked, the debts and what week 3 inherits.
+that were worked, 14 debts and what week 3 inherits.
 Used by: check.py counts a week as done only if this file carries STATUS: WEEK-COMPLETE
-Gotcha: it carries that marker as of the second run. Debt 1 is the 68.5 g mass target and week
-4 owns it.
+Gotcha: it carries that marker as of the second run. Debt 1 is the 68.5 g mass target and debt
+12 is week 4 restating the stacked figure in the three design documents when the mass moves.
+Dates in first-run prose read 2 September; the commits say 30 August.
 
 ### stage-1/decisions.md
-Numbered append-only decision log, D1 to D32. Reopening an earlier entry means a new entry
+Numbered append-only decision log, D1 to D34. Reopening an earlier entry means a new entry
 saying which one it supersedes.
 Used by: every week agent as settled ground
 Gotcha: D27 supersedes the figures in D18, D20, D21 and D22, and D30 supersedes the freeze rule
@@ -149,8 +154,9 @@ The week by week execution plan: scope files, tasks, done-when gates and decisio
 section per week.
 Used by: every week agent as the definition of its week, and by the audit, which checks
 delivered work against it
-Gotcha: it named the Codex config as the contract until D28 reversed that. Its week 2 decision
-gate is the pre-D30 rule, and D30 is what actually governs the freeze.
+Gotcha: it named the Codex config as the contract until D28 reversed that, and its week 2
+decision gate is the pre-D30 rule with a supersession note under it. The week 2 "Done when"
+list is stale in the same way and check.py is what governs.
 
 ### stage-1/audit/week-2.md
 The week 2 audit: two fresh-context read-only passes, 18 findings from the blocked run and a

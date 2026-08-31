@@ -15,12 +15,12 @@ Weeks 1 and 2 are done. Geometry is frozen at 18 N of design thrust and a 110 mm
 2. **[stage-1/plan.md](stage-1/plan.md)** is the week by week execution plan
 3. **[stage-1/progress/week-2.md](stage-1/progress/week-2.md)** is where the design stands and
    what week 3 inherits
-4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 32 entries,
+4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 34 entries,
    and D30 is the one that unblocked week 2
 5. **[stage-1/design/evidence-ledger.md](stage-1/design/evidence-ledger.md)** is what every
    number rests on and how strong it is
-6. **[stage-1/audit/week-2.md](stage-1/audit/week-2.md)** is two independent audit passes over
-   week 2 and what was done about each finding
+6. **[stage-1/audit/week-2.md](stage-1/audit/week-2.md)** is the two fresh-context audit
+   passes over week 2, verbatim, and what was done about each finding
 
 `brief.md`, `_shared-timeline.md` and `_plan-review-round1.md` are earlier work kept as history.
 They were written from page summaries and contradict `context.md` in several places. When they
@@ -83,8 +83,10 @@ announced.
 coefficient at or above 0.6055 retires the configuration-transfer allowance, which takes
 conservative thrust to 17.1 N and makes the mass that clears 2.5 into 697.2 g. The module
 already weighs 692.4 g conservative, so week 4's mass target would disappear rather than
-shrink. It also settles D25, because Kellen measured across a Reynolds band of 100,000 to
-300,000 and this design sits at 134,074, inside it.
+shrink. `check.py` is ready for it: a coefficient scenario classed measured, on this design's
+own solidity and chord to radius, drops the haircut floor from 10 percent to 5. It would also
+settle D25, because Kellen's test range is reported as 100,000 to 300,000 and this design sits
+at 134,074, inside it.
 
 Handle 1969.1/184958, item `a4c62d38-3778-44f4-b398-cdcba283fa06` on the Texas A&M repository.
 The item page, the bitstream and the handle URL all return 403 to a script, because it is a
@@ -141,14 +143,20 @@ they do not move.
 
 Gates are run by the supervisor in its own shell and never taken from the week-agent's report:
 `python tools/check.py --week N`, `--global`, and `python tools/test_gates.py`. Week 2 leaves
-all three green. `tools/check.py` was changed twice during week 2 and never loosened: four
-gates added after the first audit, then the single stacked thrust to weight gate replaced by
-six and three document gates added for D32. 98 self-tests.
+all three green. `tools/check.py` was changed through week 2 and never loosened: four gates
+after the first audit, the single stacked thrust to weight gate replaced by six, a narrow
+measured-family exception on the coefficient floor, three document gates for D32 and four for
+the week 4 conservative column. 104 self-tests.
 
 ## Open items
 
 - **Week 4 owns a 68.5 g mass target.** If the refined budget cannot reach 623.9 g on the
-  stacked case, that is a blocked trigger and a human decision, not a trimmed allowance
+  stacked case, that is a blocked trigger and a human decision, not a trimmed allowance. Week 4
+  also builds its conservative column line by line under D33, and restates the stacked figure in
+  the three week 2 design documents when the mass moves, under D34
+- **`.claude/weekly-loop.md` describes the week 2 thrust to weight gate in its pre-D30 form**,
+  at the paragraph about what the arithmetic gate checks. Its blocked triggers are current and
+  correct. The config belongs to a person, so week 2 reported this rather than editing it
 - **Working solo**, confirmed 27 August. Weekly hours still unstated, which matters because
   there is nobody to absorb a slipped week and week 2 already used two of its slots
 - **The 0.80 continuous derate has no source.** T-Motor publishes a 180 second maximum and the
