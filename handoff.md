@@ -1,27 +1,26 @@
 # CycloProp handoff
 
-Updated 2 September 2026. Stage 1 is due **27 September 2026** and we submit on 26 September.
+Updated 31 August 2026. Stage 1 is due **27 September 2026** and we submit on 26 September.
 This file is where a fresh session starts.
 
-NEXT-WEEK: 2
+NEXT-WEEK: 3
 
-**That marker still says 2 on purpose.** Week 2 ran and produced everything it was asked for,
-then reported BLOCKED on the thrust to weight call. That call is now made and recorded as D30,
-so week 2 reruns to freeze the geometry and finish. The marker moves when it does. Full account
-in [stage-1/progress/week-2.md](stage-1/progress/week-2.md).
+Weeks 1 and 2 are done. Geometry is frozen at 18 N of design thrust and a 110 mm radius, with
+120 mm carried as insurance. Week 3 is next and it has everything it needs.
 
 ## Read these first, in order
 
 1. **[context.md](context.md)** is the authority on what the competition requires. Built from
    the official problem statement PDF, and it outranks everything else here including this file
-2. **[stage-1/progress/week-2.md](stage-1/progress/week-2.md)** is the current state and the
-   blocked report
-3. **[stage-1/audit/week-2.md](stage-1/audit/week-2.md)** is the 18 findings the week 2 audit
-   returned and what was done about each
-4. **[stage-1/plan.md](stage-1/plan.md)** is the week by week execution plan
+2. **[stage-1/plan.md](stage-1/plan.md)** is the week by week execution plan
+3. **[stage-1/progress/week-2.md](stage-1/progress/week-2.md)** is where the design stands and
+   what week 3 inherits
+4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 32 entries,
+   and D30 is the one that unblocked week 2
 5. **[stage-1/design/evidence-ledger.md](stage-1/design/evidence-ledger.md)** is what every
    number rests on and how strong it is
-6. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 27 entries
+6. **[stage-1/audit/week-2.md](stage-1/audit/week-2.md)** is two independent audit passes over
+   week 2 and what was done about each finding
 
 `brief.md`, `_shared-timeline.md` and `_plan-review-round1.md` are earlier work kept as history.
 They were written from page summaries and contradict `context.md` in several places. When they
@@ -31,64 +30,76 @@ in two places by week 2; both are marked in the file. See D26.
 ## To start a week
 
 Prompts are in [_run-prompts.md](_run-prompts.md), one per tick, each for a fresh session. Run
-the pre-flight block at the top first. The loop halts after every week. The week 2 prompt gets
-reused, because week 2 has to run again once a person has made the call below.
+the pre-flight block at the top first. The loop halts after every week. The execution contract
+is `.claude/weekly-loop.md` and only that file, per D28.
 
-## Where we are
+## Where the design stands
 
-Week 1 is done. Week 2 has run once and is blocked.
+One cyclorotor. 110 mm radius, 72.6 mm chord, 290.4 mm span, 3 blades, NACA 0020, pitching plus
+or minus 40 degrees about the 30 percent chord axis, turning at 2405 rpm, driven by one T-Motor
+MN5006 KV450 through a 3.5 to 1 toothed belt. 18 N of design thrust against a 10 N requirement.
 
-Everything week 2 was asked to produce exists: the evidence ledger, three design documents, the
-full numbers block, the candidate comparison, the coupled radius sweep, the mass envelope, the
-frozen thrust sensitivity table, and four new gates the audit asked for. What does not exist is
-a frozen geometry, because the conservative case came out at a thrust to weight of **2.252**
-against a hard limit of 2.5 and an internal target of 2.75.
+Four thrust to weight cases, and all four are reported everywhere because reporting one of them
+is how week 2 confused itself for a fortnight:
 
-That is a miss of 69 g of module mass against the hard limit, on a 692 g conservative estimate.
+| Case | Thrust | Mass | T/W |
+| --- | --- | --- | --- |
+| design point | 18.00 N | 580.1 g | 3.163 |
+| mass downside alone | 18.00 N | 692.4 g | 2.650 |
+| coefficient downside alone | 15.30 N | 580.1 g | 2.689 |
+| both stacked | 15.30 N | 692.4 g | 2.252 |
 
-## The decision has been made, see D30
+The first three clear the hard limit of 2.5 and the geometry froze on them. The stacked case
+misses by 68.5 g and that shortfall is now a number week 4 owns: `results.mass_target_week4_g`
+is 623.9 g, the conservative mass that would put the stacked case exactly on 2.5. The gate
+recomputes it. See D30 for the call and D31 for the target.
 
-Week 2 halted correctly and the call it stopped for is recorded as D30 in
-[stage-1/decisions.md](stage-1/decisions.md). Read that entry before touching anything.
+The internal 2.75 margin target from D17 is not met on the stacked case and nobody is claiming
+it is.
 
-The short version. Four thrust to weight cases exist, not one. The design point is 3.1633.
-The mass downside alone gives 2.6499 and the coefficient downside alone gives 2.6889, so each
-clears the limit on its own. Only stacking both misses, at 2.2525. Nine of the thirteen
-envelope lines are assumed sections carrying a blanket 20 or 25 percent growth rate, so the
-stacked figure tests those rates as much as the design.
+## What week 3 does, and the two things it inherits
 
-Geometry therefore freezes at 18 N and 110 mm, with 120 mm carried as insurance. The stacked
-test moves to week 4, where `week4: conservative T/W clears 2.5` already applies the same
-limit to a budget built from real sections and catalogue parts. Week 2 gains three new hard
-gates in its place, one per single case, and a miss on the stacked case now has to hand week 4
-a mass target of 623.9 g that the gate recomputes.
+Linkage topology and loop closure, the solved pitch schedule, the vectoring actuator and the
+force-vector map, packaging, and the item 7 structure. Configuration, sizing, thrust and power
+are all frozen underneath it.
 
-Every fallback was rechecked by hand before deciding and none of them closes. 20 N fails on
-power at 110 mm and on an empty belt window at 120 mm. The 100 mm row has an empty belt window
-too, for any pulley pair rather than only the half integer ones week 2 tried. No shortlist
-drive reaches 503 W under 78 g. A uniform 10 percent growth rate still leaves 2.44.
+**1. The azimuthal load model has zero side force by construction.** It uses a prescribed
+sinusoid with no phase offset, so the lateral components cancel exactly over the cycle. That is
+the input, not a result. Week 3 reruns the model against the schedule the solved linkage
+actually produces, and side force is where the real risk sits. Benedict measured a resultant 30
+degrees off vertical and Adams 15 to 35 degrees depending on amplitude and rpm.
+
+**2. The radius is 110 mm and it is frozen.** 120 mm is carried as insurance against a week 2
+mistake, not as a free option. Switching after week 3 costs a week 3 rerun, because link
+lengths, offset geometry, the pitch schedule and gearing all move with radius.
 
 ## Still worth a human doing, in this order
 
-**1. Pull Kellen 2019.** No longer a blocker, still the cheapest win available. It moves the
-stacked case to 2.5173 on its own, and it settles D25, because Kellen measured across a
-Reynolds band of 100,000 to 300,000 and this design sits at 134,074, inside it.
+**1. Week H.** All five markers pending. It hard blocks week 5 and nothing else. Eligibility
+first, because the clause disqualifies a whole team at any stage, including after results are
+announced.
+
+**2. Pull Kellen 2019.** Not a blocker any more, still the cheapest win on the list. A measured
+coefficient at or above 0.6055 retires the configuration-transfer allowance, which takes
+conservative thrust to 17.1 N and makes the mass that clears 2.5 into 697.2 g. The module
+already weighs 692.4 g conservative, so week 4's mass target would disappear rather than
+shrink. It also settles D25, because Kellen measured across a Reynolds band of 100,000 to
+300,000 and this design sits at 134,074, inside it.
 
 Handle 1969.1/184958, item `a4c62d38-3778-44f4-b398-cdcba283fa06` on the Texas A&M repository.
 The item page, the bitstream and the handle URL all return 403 to a script, because it is a
-Cloudflare JavaScript challenge rather than a permissions gate. A real browser passes it in
-about two seconds. Open the item page, click Download, drop the PDF in `reference/`.
+Cloudflare JavaScript challenge rather than a permissions gate. core.ac.uk and oatd.org were
+tried on 31 August and neither has it. A real browser passes in about two seconds. Open the
+item page, click Download, drop the PDF in `reference/`.
 
-**2. Week H.** All five markers pending. It hard blocks week 5 and nothing else. Eligibility
-first, because the clause disqualifies a whole team at any stage.
+**3. The drive, at week 4.** Pack voltage sits outside the module boundary, so cell count costs
+the module nothing. Motor torque ceiling goes as current over KV and speed ceiling as KV times
+voltage, so their product is power and has no KV in it. Week 2 fixed KV450 on 6S and then
+searched only the belt ratio, which imposed a constraint the motor's power rating does not. A
+lower KV variant on more cells would reopen the 100 mm row, which is the best point on the
+sweep at 2.376. It needs a datasheet.
 
-**3. The drive, at week 4.** Pack voltage sits outside the module boundary, so cell count
-costs the module nothing. Motor torque ceiling goes as current over KV and speed ceiling as
-KV times voltage, so their product is power and has no KV in it. Week 2 fixed KV450 on 6S and
-then searched only the belt ratio, which imposed a constraint the motor's power rating does
-not. A lower KV variant on more cells would reopen the 100 mm row. It needs a datasheet.
-
-## What week 2 established that does not depend on the freeze
+## What week 2 established, beyond the freeze
 
 - **The single rotor beats a redesigned cluster.** 2.252 against 1.659 for two rotors and 1.323
   for three, on one common model with every contested assumption set in the cluster's favour.
@@ -106,23 +117,6 @@ not. A lower KV variant on more cells would reopen the 100 mm row. It needs a da
   13, 16, 18 and 20 N. See D21
 - **Both allocation questions are closed.** ESCs are module hardware, mounting counts in full,
   both against us and both fixed before scoring. See D19
-
-## Week 3, when it starts
-
-Configuration, sizing, thrust and power are all in place, so week 3 has what it needs on
-geometry as long as somebody accepts a candidate radius. Linkage topology and loop closure, the
-solved pitch schedule, the vectoring actuator and force-vector map, packaging, and the item 7
-structure.
-
-Two things week 3 inherits:
-
-- The azimuthal load model uses a prescribed sinusoid with no phase offset, so side force is zero
-  by construction. Week 3 reruns it against the schedule the solved linkage actually produces,
-  and side force is where the real risk is. Benedict measured a resultant 30 degrees off
-  vertical, Adams 15 to 35 degrees depending on amplitude and rpm
-- The candidate radius is 110 mm with 120 mm carried as insurance. Switching after week 3 costs
-  a week 3 rerun, because link lengths, offset geometry, the pitch schedule and gearing all move
-  with radius
 
 ## The human gate
 
@@ -147,18 +141,16 @@ they do not move.
 
 Gates are run by the supervisor in its own shell and never taken from the week-agent's report:
 `python tools/check.py --week N`, `--global`, and `python tools/test_gates.py`. Week 2 leaves
-exactly one gate failing and it is the thrust to weight decision line. `tools/check.py` was
-changed this week, only to add four gates and never to loosen one, with 12 self-tests added
-alongside them. The suite is 89 checks now.
+all three green. `tools/check.py` was changed twice during week 2 and never loosened: four
+gates added after the first audit, then the single stacked thrust to weight gate replaced by
+six and three document gates added for D32. 98 self-tests.
 
 ## Open items
 
-- **Two files claim to be the loop execution contract.** `stage-1/plan.md` names
-  `.codex/weekly-loop.md`; this tick ran against `.claude/weekly-loop.md` because the launching
-  human said so, and it is the newer file. The plan was deliberately not edited. Somebody has to
-  say which wins. See D24
-- **Working solo**, confirmed 27 August. Weekly hours still unstated, which matters more now
-  than it did, because there is nobody to absorb a slipped week and week 2 has to run twice
+- **Week 4 owns a 68.5 g mass target.** If the refined budget cannot reach 623.9 g on the
+  stacked case, that is a blocked trigger and a human decision, not a trimmed allowance
+- **Working solo**, confirmed 27 August. Weekly hours still unstated, which matters because
+  there is nobody to absorb a slipped week and week 2 already used two of its slots
 - **The 0.80 continuous derate has no source.** T-Motor publishes a 180 second maximum and the
   problem statement states no endurance requirement, so the derate is a judgement. A stated
   hover duration would turn it into a calculation
@@ -173,6 +165,6 @@ alongside them. The suite is 89 checks now.
 ## Standing risk
 
 Week 3 collides with the UAV-X comms layer, the highest-risk piece across both projects. If
-something has to slip, slip this one. Week 5 is 4 days and carries the deadline, so weeks 2 to 4
-do not get to overrun into it. Week 2 has now used one of its slots and produced a decision
-rather than a design, which eats calendar. The cheapest recovery is option 1 above.
+something has to slip, slip this one. Week 5 is 4 days and carries the deadline, so weeks 3 and
+4 do not get to overrun into it. Week 2 has already spent two ticks on one week, so the
+calendar has no slack left in it.
