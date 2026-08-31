@@ -4,9 +4,10 @@ Required Stage 1 item 2. Geometry, the radius trade, the blade section, and the 
 envelope that decides whether any of it closes.
 
 Read the last section first if you only have a minute. The sizing works, the geometry is
-frozen, and the stacked conservative case now clears thrust to weight 2.5 at 2.517. It clears
-by 4.8 g of conservative mass, which is not much. The internal 2.75 target from D17 is still
-unmet and week 4 inherits a 58.6 g gap against it. See D30 and D35.
+frozen, and the stacked conservative case clears thrust to weight 2.5 at 2.5457 on the week 4
+refined budget. It clears by 12.5 g of conservative mass, which is thin but no longer a knife
+edge. The internal 2.75 target from D17 is still unmet and the gap is 50.9 g. See D30, D35 and
+D47, which is where the conservative column stopped being the week 2 estimate.
 
 ## Shape family
 
@@ -88,22 +89,29 @@ fittings close it out.
 
 At the design chord of 72.6 mm and span of 290.4 mm that is 9.60 g of foam, 9.51 g of skin,
 5.81 g of spar and 4.53 g of bond and fittings, so 29.4 g per blade and 88.3 g for the set.
+Those are the week 2 figures and week 4 moved two of them. Integrating the section rather
+than assuming a perimeter takes the skin to 9.69 g, and drawing the root close-out as two
+fittings and a bond line takes 4.53 g to 6.65 g, so the blade is 31.75 g and the set is
+95.24 g. `05-mass-and-tw.md` carries both columns.
 
 The stiffness check **bounds the flexibility allowance from above, and does not derive it.**
-That distinction matters and the first draft of this document got it wrong. Bending stiffness
-works out at 58.4 Nm2, dominated by the skin rather than the spar because the skin sits at the
-section extremes. Under a peak blade load of 14.2 N spread over the span, simply supported at
-both spiders, tip deflection is 0.078 mm, which is 0.11 percent of chord. Torsional stiffness
-from the closed cell is 8.4 Nm2 and the twist under the aerodynamic pitching moment about a 30
-percent axis is 0.051 degrees, against a pitch amplitude of 40 degrees.
+That distinction matters and the first draft of this document got it wrong. Week 4 rebuilt the
+section with named material allowables in `tools/structure.py`, and the figures below are that
+rebuild rather than the week 2 estimate it replaced. Bending stiffness works out at 51.1 Nm2,
+dominated by the skin rather than the spar because the skin sits at the section extremes. Under
+a peak blade load of 15.01 N spread over the span, simply supported at both spiders, tip
+deflection is 0.0936 mm, which is 0.13 percent of chord. Torsional stiffness from the closed
+cell is 7.81 Nm2 and the twist under the aerodynamic pitching moment about a 30 percent axis is
+0.0145 degrees, against a pitch amplitude of 40 degrees.
 
-So the geometric pitch error the section actually allows is under a fifth of a percent, and a
-thrust loss proportional to it would be far below 1 percent. The 5 percent in the low
-coefficient is therefore a floor rather than a calculation: it covers build tolerance, bond
-line variation, a spar that week 4 has not yet sized against centrifugal load, and unsteady
-effects a static beam model does not see. Benedict's finding is that bending and torsional
-flexibility both hurt, so the allowance is not zero, and the section says it should not be 5
-percent either. It is kept at 5 because the section is preliminary.
+Bending and aerodynamic torsion are both negligible, then. Blade torsion under the centrifugal
+pitching moment is not, and week 4 is where that showed up: the blade is driven in pitch from
+one end, so 2.2058 Nm winds it up by 2.35 degrees at the far end and about 1.6 degrees on span
+average, which is 4 percent of the pitch amplitude. That is most of the 5 percent the low
+coefficient carries, and it turns the allowance from a floor into something with a calculation
+under it. The rest still covers build tolerance, bond line variation and unsteady effects a
+static beam model does not see. Benedict's finding is that bending and torsional flexibility
+both hurt, and the wind up is the torsional half of it. See `08-structure-and-loads.md`.
 
 ## Radius
 
@@ -150,6 +158,11 @@ line is made of, so catalogue parts take 15 percent, anything computed from an a
 takes 20 percent, and the module frame takes 25 percent because it is the least developed part
 of the design.
 
+This is the week 2 estimate and it is left as it was written. Week 4 replaced it line by
+line with real sections and catalogue parts, and the budget that came out is in
+`05-mass-and-tw.md`: 608.0 g nominal and 684.7 g conservative. The comparison below is kept
+because every later table in this document is built on it.
+
 | Line | Class | Nominal | Conservative | Rate |
 | --- | --- | --- | --- | --- |
 | blades | geometry | 88.3 g | 106.0 g | 20 |
@@ -191,30 +204,37 @@ most of week 2.
 | Case | Thrust | Mass | T/W | Against 2.5 |
 | --- | --- | --- | --- | --- |
 | design point | 18.00 N | 580.1 g | 3.163 | clears by 27 percent |
-| mass downside alone | 18.00 N | 692.4 g | 2.650 | clears by 6 percent |
+| mass downside alone | 18.00 N | 684.7 g | 2.680 | clears by 7 percent |
 | coefficient downside alone | 17.10 N | 580.1 g | 3.005 | clears by 20 percent |
-| both stacked | 17.10 N | 692.4 g | 2.517 | clears by 4.8 g |
+| both stacked | 17.10 N | 684.7 g | 2.5457 | clears by 12.5 g |
+
+The nominal mass in rows 1 and 3 is still the week 2 envelope, because those two rows are what
+geometry froze on. The conservative mass in rows 2 and 4 is the week 4 refined budget, which is
+where `results.mass_g_conservative` now comes from. Week 4's own nominal is 608.0 g, so the
+design case on the refined budget is 3.018 rather than 3.163.
 
 All four clear 2.5, and geometry freezes on the first three regardless, which is D30. The
-stacked case moved because the coefficient did: the low value is 0.5752 rather than 0.5147
+stacked case moved twice. First the coefficient: the low value is 0.5752 rather than 0.5147
 since D35 retired the configuration-transfer allowance, so conservative thrust is 17.10 N
-rather than 15.30 N.
+rather than 15.30 N. Then the mass, once week 4 refined it.
 
-Read the fourth row carefully. It clears by 4.8 g of conservative mass, meaning the column
-could reach 697.2 g before the stacked case fell under 2.5, and it currently sits at 692.4 g.
-That is a real pass and a thin one. The hard stacked test still lives in week 4 under D30, on a
-budget where eight of these thirteen lines stop carrying a blanket 20 or 25 percent growth rate
-on an assumed section, and `week4: conservative T/W clears 2.5` applies the same limit to what
-comes out. Week 4 rebuilds the conservative column line by line under D33.
+Read the fourth row carefully. It clears by 12.5 g of conservative mass, meaning the column
+could reach 697.2 g before the stacked case fell under 2.5, and it sits at 684.7 g. That is a
+real pass and still a thin one. The hard stacked test lives in week 4 under D30, on a budget
+where eight of these thirteen lines stopped carrying a blanket 20 or 25 percent growth rate on
+an assumed section, and `week4: conservative T/W clears 2.5` applies the same limit to what
+came out. Week 4 rebuilt the conservative column line by line under D33.
 
 D30 counts those lines as nine. Eight is what `mass_envelope_g` gives, and the 86.4 g of growth
 allowance quoted everywhere else comes from the correct eight.
 
-Nominal thrust to weight is 3.163, already 49 percent above the best published module on the
-same boundary. The internal 2.75 target from D17 is still not met on the stacked case and is
-still not claimed. What it needs is 58.6 g: the conservative column would have to reach 633.8 g
-against the 692.4 g it holds now. That is the number week 4 inherits, and it is a target rather
-than the hard limit, which the stacked case already clears.
+Nominal thrust to weight is 3.163 on the envelope and 3.018 on the refined budget, either way
+well above the best published module on the same boundary. The internal 2.75 target from D17 is
+still not met on the stacked case and is still not claimed. What it needs is 50.9 g: the
+conservative column would have to reach 633.8 g against the 684.7 g it holds. Week 4 took 7.7 g
+off it and stopped, because every remaining line is a drawn section or a catalogue part and
+trimming one to reach a number is what D33 exists to prevent. It is a target rather than the
+hard limit, which the stacked case clears.
 
 ## Numbers used
 
@@ -225,10 +245,10 @@ than the hard limit, which the stacked case already clears.
 - performance.blade_area_coeff_low = 0.5752
 - performance.blade_deflection_thrust_loss = 0.05
 - performance.solidity = 0.3151
-- performance.blade_tip_deflection_mm = 0.0778
-- performance.blade_twist_deg = 0.0512
+- performance.blade_tip_deflection_mm = 0.0936
+- performance.blade_twist_deg = 0.0145
 - performance.thrust_N_conservative = 17.0992
 - performance.motor_input_W = 457.573
 - results.mass_envelope_g = 580.05
-- results.mass_g_conservative = 692.43
-- results.thrust_to_weight_conservative = 2.5173
+- results.mass_g_conservative = 684.7
+- results.thrust_to_weight_conservative = 2.5457

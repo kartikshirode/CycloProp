@@ -184,10 +184,12 @@ degrees, and quoting 360 because the offset direction is an angle would be an as
 circle rather than about hardware.
 
 **Holding torque.** The three pitch links load the offset pin, and their moment about the rotor
-axis is what the carrier holds. It peaks at 0.1371 Nm and its cycle mean is under 0.001 Nm,
+axis is what the carrier holds. It peaks at 0.1389 Nm and its cycle mean is under 0.001 Nm,
 because the once per revolution content cancels across three blades at 120 degree spacing and
 what survives is a three per revolution ripple at 120 Hz. Through the 1.5 step up and across two
-servos that is 0.0457 Nm each, against half of a 0.216 Nm stall figure, so the margin is 2.36.
+servos that is 0.0463 Nm each, against half of a 0.216 Nm stall figure, so the margin is 2.33.
+Those figures moved by about 1 percent in week 4, when the blade the loads are taken on stopped
+being the week 2 estimate and became the drawn section. See D48.
 
 **Travel, slew and draw.** Mechanical stops sit at the ends of the 120 degree carrier range.
 End to end takes 0.147 s at the published 0.11 s per 60 degrees, which is a vector command and
@@ -273,19 +275,21 @@ it.
 
 ## Open items this hands on
 
-- The blade centre of mass sits at 39.92 percent chord on the week 2 build-up, aft of the 30
-  percent pitch axis. That unbalance doubles the peak blade pitching moment to 2.1201 Nm and
-  puts 101.82 N in the pitch link. Running `--balanced` shows a chordwise balance would take
-  those to 1.0139 Nm and 69.38 N. The stored numbers are the unbalanced ones, because that is
-  the blade week 2 describes. Balancing it costs mass, so it is a week 4 trade and not a week 3
-  edit
+- The blade centre of mass sits at 39.31 percent chord on the week 4 drawn section, aft of the
+  30 percent pitch axis. That unbalance roughly doubles the peak blade pitching moment, to
+  2.2058 Nm, and puts 105.93 N in the pitch link. Running `--balanced` shows a chordwise balance
+  would take those to about 1.06 Nm and 69.4 N. The stored numbers are the unbalanced ones.
+  Week 4 priced the balance at 35.5 g across three blades and declined it, because that mass
+  takes the stacked conservative case to 2.406 and under the limit, while the pitch link path
+  carries the unbalanced load on a margin of 3.30. See D46
 - The three per revolution carrier ripple at 120 Hz is above any servo's control bandwidth. The
-  torque margin covers it statically, and the phase jitter it produces needs the real servo
-  gearbox ratio and rotor inertia to bound. Week 4
+  torque margin covers it statically. Week 4 bounded the phase jitter it produces by gear
+  backlash instead of by the servo, at 0.14 degrees of carrier on 0.05 mm of backlash across the
+  40 mm carrier gear, which is inside the 25 degrees of authority the side force uncertainty
+  already reserves
 - The servo and controller figures are supplier listings rather than manufacturer datasheets,
   the same evidence class as four of the five week 2 drive rows, and they carry the same debt.
-  The named controller is 0.5 g over the week 2 nominal line and inside its conservative figure,
-  so week 4 either finds a lighter board or grows the line
+  Week 4 grew the controller line to the 8.5 g board rather than looking for a lighter one
 
 ## Numbers used
 
@@ -309,18 +313,18 @@ it.
 - pitch.carrier_gear_mm = 40.0
 - pitch.servo_gear_mm = 60.0
 - pitch.servo_mass_g = 12.5
-- pitch.carrier_torque_Nm = 0.1371
-- pitch.servo_torque_Nm = 0.0457
+- pitch.carrier_torque_Nm = 0.1389
+- pitch.servo_torque_Nm = 0.0463
 - pitch.servo_stall_torque_Nm = 0.216
-- pitch.servo_torque_margin = 2.363
+- pitch.servo_torque_margin = 2.332
 - pitch.slew_time_s = 0.1467
 - pitch.actuator_draw_W = 2.88
-- pitch.carrier_radial_force_N = 47.48
+- pitch.carrier_radial_force_N = 53.22
 - pitch.side_force_tilt_deg = 11.978
 - pitch.peak_lateral_force_N = 10.0987
-- pitch.peak_blade_moment_Nm = 2.1201
-- pitch.peak_link_force_N = 101.82
-- pitch.blade_cg_pct_chord = 39.92
+- pitch.peak_blade_moment_Nm = 2.2058
+- pitch.peak_link_force_N = 105.93
+- pitch.blade_cg_pct_chord = 39.31
 - geometry.pitch_amplitude_deg = 40.0
 - geometry.radius_m = 0.11
 - performance.thrust_N = 18.0

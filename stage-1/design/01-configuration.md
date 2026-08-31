@@ -3,9 +3,8 @@
 Required Stage 1 item 1. This is the frozen configuration for Stage 1, frozen at 18 N of design
 thrust and a 110 mm radius by D30, with 120 mm carried as the insurance radius. The design case
 clears thrust to weight 2.5 at 3.163 and each downside taken on its own clears it too. Since
-D35 the stacked downside clears it as well, at 2.517, because a measured coefficient for this
-shape family retired the configuration-transfer allowance. What follows is the layout the
-comparison chose and the reasoning behind it.
+D35 the stacked downside clears it as well, and on the week 4 refined mass budget it stands at
+2.5457. What follows is the layout the comparison chose and the reasoning behind it.
 
 The module is one cyclorotor. Three blades, NACA 0020, chord at 0.66 of the radius, blade
 aspect ratio 4, pitching plus or minus 40 degrees about an axis at 30 percent of chord. The
@@ -41,7 +40,7 @@ mm. Largest dimension is that width or the span, whichever wins.
 
 | Layout | Per rotor radius | Per rotor thrust | rpm | Reynolds | Blade area | Largest dimension | Module mass | Nominal T/W | Conservative T/W |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| single, 3 blades | 110 mm | 18.0 N | 2405 | 134,000 | 0.0632 m2 | 290 mm | 580 g | 3.163 | 2.517 |
+| single, 3 blades | 110 mm | 18.0 N | 2405 | 134,000 | 0.0632 m2 | 290 mm | 580 g | 3.163 | 2.5457 |
 | two rotors | 80 mm | 9.0 N | 3141 | 94,800 | 0.0669 m2 | 400 mm | 786 g | 2.334 | 1.855 |
 | three rotors | 65 mm | 6.0 N | 3891 | 77,400 | 0.0663 m2 | 490 mm | 985 g | 1.863 | 1.479 |
 
@@ -119,4 +118,4 @@ claim.
 - performance.blade_area_m2 = 0.06325
 - performance.belt_ratio = 3.5
 - results.mass_envelope_g = 580.05
-- results.thrust_to_weight_conservative = 2.5173
+- results.thrust_to_weight_conservative = 2.5457
