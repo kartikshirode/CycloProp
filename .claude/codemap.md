@@ -28,23 +28,37 @@ The gate script. Recomputes tip speed, Reynolds, thrust, power chain, mass total
 weight and structural demands from stored geometry and mass lines, then applies the hard limits
 to what it recomputed. Week 3 added `check_vector_map`, `check_lateral_loads` and the `snum`
 reader for signed values, and week 2 added `check_week2_selection`, `measured_shape_family`,
-`check_conservative_budget` and `states_value` over `WEEK2_DOCS`.
+`check_conservative_budget` and `states_value` over `WEEK2_DOCS`. Week 4 added
+`budget_conservative_total`, two combined blade margins, an overspeed attachment margin, a
+recomputed centrifugal bending term, `MIN_OVERSPEED` and a 25 percent band on the conservative
+budget.
 Used by: the supervisor after every week tick, and tools/test_gates.py
 Gotcha: hard limits never touch stored headline values. `num` returns None for zero and for
 negatives, so any signed quantity has to go through `snum` or half the table vanishes silently.
 Two gates are conditional on a result rather than fixed: the week 4 mass target, and the
 coefficient floor, which drops from 10 percent to 5 only for a scenario classed measured on this
-design's own solidity and chord to radius. It does not recompute the four-bar; test_gates does.
+design's own solidity and chord to radius. `budget_conservative_total` is a third: while
+`mass_budget_g` has 8 or more complete lines, `results.mass_g_conservative` is checked against
+the budget, and against the week 2 envelope only before that. See D47. `blade_margin` is
+aerodynamic bending alone and is deliberately not the gating one, because centrifugal bending is
+9.2 times larger here; `blade_combined_margin` and the two overspeed margins are. It does not
+recompute the four-bar; test_gates does.
 
 
 ### tools/test_gates.py
 Self-tests for check.py. Builds throwaway trees and checks an honest design passes while
-specific attacks fail, then runs `linkage_selftests` read-only over the real numbers.json. 117
-checks, which is `len(CASES) + 22 + len(extra)`. Week 2 took it from 77, week 3 from 104.
-Used by: run by hand after any change to check.py or linkage.py
+specific attacks fail, then runs `linkage_selftests` read-only over the real numbers.json. 123
+checks, which is `len(CASES) + PROBE_CHECKS + len(extra)`. Week 2 took it from 77, week 3 from
+104, week 4 from 117.
+Used by: run by hand after any change to check.py, linkage.py or structure.py
 Gotcha: `honest_numbers()` is the fixture every case mutates, so a new required field in
-check.py has to be added there first or every case fails at once. Its vector_map spans 300
-degrees on purpose, because the week 3 evidence gate rejects commands clustered near zero. Two
+check.py has to be added there first or every case fails at once. That is exactly how week 4
+broke 4 cases. Its blade allowable is derived from the combined overspeed case, not from
+aerodynamic bending, so the combined margins clear their floor the way the real design's do. Its
+vector_map spans 300 degrees on purpose, because the week 3 evidence gate rejects commands
+clustered near zero. `_rescale_mass` moves the budget's conservative column with the envelope's
+by default, since D47 binds the stated scalar to whichever list is live;
+`chosen_conservative_mass` passes `scale_budget=False` because it wants them to disagree. Two
 things read the real repository: `linkage_selftests`, which reads numbers.json and never writes,
 and `REAL_PDF`, which copies the problem statement into throwaway trees. `linkage_selftests`
 returns an empty list on a tree from before week 3 so the suite still runs there.
@@ -55,15 +69,20 @@ Single definition point for every number the submission states.
 Holds: geometry, operating point, performance and power chain, efficiency chain, power by
 radius, the candidate and scenario tables, azimuthal loads, mass envelope, sources, thrust
 sensitivity, and since week 3 the pitch block, linkage_dimensions, pitch_schedule, vector_map
-and packaging. Week 4 fills structure, the mass budget and the three remaining results.
-Used by: every stage-1/design/*.md through its Numbers used block, tools/check.py, tools/linkage.py
+and packaging. Week 4 filled structure, mass_budget_g at 33 lines, bom at 25 lines and the
+remaining results including the four bom totals.
+Used by: every stage-1/design/*.md through its Numbers used block, tools/check.py,
+tools/linkage.py, tools/structure.py
 Gotcha: prose never restates a number, it cites the dotted key. The pitch, schedule, vector map,
-linkage, packaging and azimuthal blocks are written wholesale by `tools/linkage.py --write`, so a
+linkage, packaging and azimuthal blocks are written wholesale by `tools/linkage.py --write`, and
+structure, mass_budget_g, bom and the results block by `tools/structure.py --write`, so a
 hand-added key inside any of them is deleted by the next run. Only `pitch_schedule` is protected
 against hand editing, by the loop closure test in test_gates.py. `aero_azimuthal_loads` rows
 carry `lateral_force_N` since week 3 and both its cycle mean and its peak are gated. Every
-mass_envelope_g line carries a scaling_class; week 4's mass_budget_g rows carry conservative_g
-and `refines`. See D33 and D41.
+mass_envelope_g line carries a scaling_class; mass_budget_g rows carry conservative_g and
+`refines`. bom rows carry `priced_date`, not quote_date, because nothing was quoted, and no bom
+field name ends in a unit suffix, so the week 5 coverage gate does not read a rupee figure as a
+force. See D33, D41, D47 and D52.
 
 
 ### stage-1/design/evidence-ledger.md
@@ -85,9 +104,10 @@ and drive topology choices.
 Used by: week 3 packaging and the week 5 submission
 Gotcha: needs the headings Configuration, Why this configuration and Numbers used, at least 400
 words of body, and 3 or more distinct declared numbers matching numbers.json to 2 percent. D32
-also requires the stacked 2.517 wherever it states the 3.163 design case, and `states_value`
-ignores the Numbers used block. Its packaging rule uses 2R and understates the module, which D44
-corrects without reopening the comparison.
+also requires the stacked figure wherever it states the 3.163 design case, and `states_value`
+ignores the Numbers used block. That figure is 2.5457 since week 4 refined the budget, not the
+2.517 week 2 wrote. Its packaging rule uses 2R and understates the module, which D44 corrects
+without reopening the comparison.
 
 
 ### stage-1/design/02-rotor-sizing.md
@@ -96,8 +116,11 @@ closure, the radius sweep, the mass envelope, and the four case verdict that fre
 Since D35 all four cases clear 2.5 and the week 4 mass target is gone.
 Used by: week 4's mass budget, which refines every mass_envelope_g line by name
 Gotcha: needs the headings Rotor sizing, Shape family, Radius and Numbers used. The mass
-envelope line names here are what week 4's `refines` fields have to match, spelled the same
-way.
+envelope line names here are what week 4's `refines` fields have to match, spelled the same way.
+Its blade section figures are week 4's rebuild and its blade build-up paragraph keeps the week 2
+estimate beside them, on purpose; the stiffness closure now rests on torsional wind up rather
+than on bending, per D50. The four case table mixes columns since D47: nominal from the week 2
+envelope, conservative from the refined budget, and it says so under the table.
 
 ### stage-1/design/04-thrust-and-power.md
 Required Stage 1 item 4. Thrust from the coefficient route, the 36 point azimuthal load
@@ -106,9 +129,11 @@ the drive on a derated continuous rating, and the frozen thrust sensitivity tabl
 Used by: week 4's structural loads, and tools/linkage.py reconstructs its load model from the
 prose in the Azimuthal load distribution section
 Gotcha: needs the headings Thrust, Power, Sensitivity and Numbers used. Week 4 may select a row
-from the sensitivity table and may not invent a new design thrust. The azimuthal section was
-rewritten in week 3 against the solved schedule, so it now tabulates the full revolution and
-carries a lateral column. One load model lives here, not two. See D41.
+from the sensitivity table and may not invent a new design thrust; it selected none and kept 18
+N. The azimuthal section was rewritten in week 3 against the solved schedule, so it now tabulates
+the full revolution and carries a lateral column. One load model lives here, not two. Its radius
+sweep column still reads 2.517 for the chosen row, because the sweep is built on the week 2
+envelope applied to all five radii, and the text says why. See D41 and D47.
 
 
 ### stage-1/progress/week-2.md
@@ -120,30 +145,34 @@ Gotcha: it carries that marker as of the second run. Debt 1 is the 68.5 g mass t
 Dates in first-run prose read 2 September; the commits say 30 August.
 
 ### stage-1/decisions.md
-Numbered append-only decision log, D1 to D44. Reopening an earlier entry means a new entry saying
+Numbered append-only decision log, D1 to D52. Reopening an earlier entry means a new entry saying
 which one it supersedes.
 Used by: every week agent as settled ground
 Gotcha: D27 supersedes figures in D18, D20, D21 and D22, and D30 supersedes the freeze rule in
-D17. D30 is the entry to read before touching week 2 or any week 4 mass work. D35 to D37 are the
+D17. D30 is the entry to read before touching week 2 or any mass work. D35 to D37 are the
 evidence pass. D38 to D44 are week 3: D40 constrains the shaft, D41 supersedes week 2's azimuthal
-table, D42 records the gate change, and D43 hands week 4 a mass trade it has to make.
+table, D42 records the gate change, and D43 hands week 4 a mass trade. D46 to D52 are week 4:
+D46 closes D43 against balancing, D47 moves the conservative mass onto the refined budget and is
+the one to read before touching a mass number, D48 retires the duplicated blade constant, D49
+declares the overspeed case, D50 keeps the 5 percent allowance while giving it a calculation, D51
+records the gate change and D52 says the BOM is priced and not quoted.
 
 
 ### stage-1/journal.md
-Short narrative note per working session, newest last. Six entries, the last one being the week 3
-linkage.
+Short narrative note per working session, newest last. Seven entries, the last one being week 4's
+structure and mass work and the API failure it was recovered from.
 Used by: nothing mechanical, it is the record of what actually happened
 Gotcha: no gate reads it, so it is the one place that can say a model was wrong the first time.
 
 
 ### handoff.md
-Where a fresh session starts. Current state, the frozen geometry and mechanism, what week 4
-inherits, the human list and open items.
+Where a fresh session starts. Current state, the frozen geometry and mechanism, the eight
+structural margins, what week 5 inherits, the human list and open items.
 Used by: check.py greps it for the NEXT-WEEK marker, which is the external witness for how many
 weeks are finished
-Gotcha: exactly one NEXT-WEEK line and it now reads 4. Two markers fail the gate, so the number
+Gotcha: exactly one NEXT-WEEK line and it now reads 5. Two markers fail the gate, so the number
 never appears twice at the start of a line. Its four-case T/W table is the one a reader meets
-first, so it moves whenever the coefficient or the mass does.
+first, so it moves whenever the coefficient or the mass does, and week 4 moved the mass.
 
 
 ### tools/linkage.py
@@ -157,8 +186,9 @@ Gotcha: `--write` refuses the balanced case, because that blade does not exist y
 LF because the default here is CRLF against a repo that declares eol=lf. It reconstructs week 2's
 load model first, against the `WEEK2_PUBLISHED_LOADS` constant and never against the live table,
 because `--write` replaces that table and an earlier version compared the reconstruction with its
-own output. `BLADE_PARTS_G` duplicates the blade build-up that lives as prose in
-02-rotor-sizing.md; a week 4 change to the blade has to change it here too.
+own output. `BLADE_PARTS_G` is gone since week 4: the blade build-up is imported from
+tools/structure.py, so run this script first and structure.py second whenever the blade section
+moves. Nothing enforces that order. See D48.
 
 ### stage-1/design/03-pitch-and-vectoring.md
 Required Stage 1 item 3 and the whole 15 percent kinematics and vectoring criterion. Topology,
@@ -167,7 +197,9 @@ authority arithmetic, the force vector map and the side force argument.
 Used by: the week 5 submission, and week 4 for the pitch link and blade balance loads
 Gotcha: needs the headings Pitch mechanism, Kinematics, Pitch schedule, Thrust vectoring, Side
 force and Numbers used, and 500 words of body. The Pitch schedule section must hold exactly one
-markdown table: check.py parses every pipe row in it as schedule data.
+markdown table: check.py parses every pipe row in it as schedule data. Its mechanism loads moved
+about 1 percent in week 4 when the blade stopped being an estimate, and three of its open items
+are answered rather than handed forward. See D48.
 
 ### stage-1/design/09-packaging-and-integration.md
 Week 3 deliverable, the integration half of the 5 percent packaging criterion. Swept envelope,
@@ -182,8 +214,13 @@ The submission source. Seven top-level headings matching the required items, the
 table and a Numbers used block. Items 1 to 4 carry frozen week 2 and week 3 work; 5 and 6 name
 week 4 and 7 names week 5.
 Used by: pandoc, and check.py at week 5 for headings, criteria rows, substance and numeric coverage
-Gotcha: this is a week 3 smoke build and the week 5 numeric coverage gate has never been run on
-it. The heading text has to keep matching REQUIRED_ITEMS in check.py word for word.
+Gotcha: this is still the week 3 smoke build and it is stale. Its Numbers used block declares
+`results.mass_g_conservative = 692.43` and `results.thrust_to_weight_conservative = 2.5173`,
+both of which moved in week 4, and its item 5 narrative carries the week 2 mass case. No week 4
+gate reads this file, so nothing catches that until week 5. The numeric coverage gate has been
+run on it by hand twice: 10 untraced numbers in week 3, 2 after the week 4 qualifier fix, and
+those 2 are `margin=25mm` in the pandoc front matter and 125.4 mm at line 66. The heading text
+has to keep matching REQUIRED_ITEMS in check.py word for word.
 
 ### stage-1/submission/cycloprop-stage1.pdf
 The built PDF, committed because check.py reads it at week 5 and the attachment is what gets
@@ -193,6 +230,70 @@ Gotcha: rebuild it whenever the source changes, with
 `pandoc stage-1/submission/cycloprop-stage1.md --from=markdown --pdf-engine=xelatex --toc
 --number-sections -o stage-1/submission/cycloprop-stage1.pdf`. A stale PDF passes the page count
 and fails the string check.
+
+### tools/structure.py
+Week 4 solver. Integrates the NACA 0020 section from its ordinate polynomial, builds the blade
+from foam, skin, spar and root fittings, sizes the shaft, the pitch load path, the attachment and
+the frame, computes all 8 margins, and builds the 33 line mass budget and the 25 line BOM.
+`--write` puts structure, mass_budget_g, bom and the results block into numbers.json, `--bom`
+prints the costed table and `--balance` prices the chordwise balance D43 left open.
+Used by: run by hand; tools/linkage.py imports `blade_parts_g` from it for the pitch loads
+Gotcha: geometry, speed and thrust are read back out of numbers.json and no week 4 number is
+ever read back in, so a rerun cannot confirm its own output. Run tools/linkage.py --write first
+when the blade section moves, then this, which reads the pitch link load back; nothing enforces
+that order. `MATERIALS` at the top is the only place a material allowable is defined and
+06-materials-and-manufacturing.md cites it rather than restating it. Budget line names carry the
+word "blade" only when they are blade mass, because check.py derives per-blade mass by summing
+every line whose item name contains it, so "pitch bearings" may not become "blade pitch
+bearings". BOM prices are indicative, which is why the field is `priced_date`. See D52.
+
+### stage-1/design/05-mass-and-tw.md
+Required Stage 1 item 5. The 33 line refined budget with its growth classes, the per group
+continuity table against the week 2 envelope with a reason for every group over 10 percent, the
+four thrust to weight cases, the 2.75 gap and the balance trade that was declined.
+Used by: the week 5 submission, and 02-rotor-sizing.md points at it for the refined budget
+Gotcha: needs the headings Mass budget, Thrust-to-weight, Margin and Numbers used, and 400 words.
+Its budget table is a copy of `mass_budget_g` for a human reader; the gate reads the JSON, so a
+hand edit here changes nothing and is a lie by the next run of tools/structure.py.
+
+### stage-1/design/06-materials-and-manufacturing.md
+Required Stage 1 item 6 and the manufacturing half of the 10 percent cost criterion. Six load
+carrying materials each tied to the margin it decides, a per part process and tolerance table,
+the assembly order, the 6 pre-spin measurements, the costed BOM and the mass reserve.
+Used by: the week 5 submission
+Gotcha: needs the headings Material selection, Manufacturing, Cost and Numbers used, and 400
+words. The material properties are quoted from `MATERIALS` in tools/structure.py and are not in
+numbers.json, which is deliberate: they are inputs to the calculation rather than results of it,
+and 08-structure-and-loads.md does the same. Its cost table states in bold that the prices are
+indicative and not quotations, and that sentence is load bearing. See D52.
+
+### stage-1/design/08-structure-and-loads.md
+The 15 percent structural criterion, which had no section before week 4. Two load cases,
+operating and a declared 1.20 overspeed, the blade section and its three demands, the shaft and
+its combined case, the pitch load path with the element that governs it, the frame and mount
+path, all 8 margins and the analyses Stage 2 owes.
+Used by: the week 5 submission, and 06-materials-and-manufacturing.md works backwards from its
+margins to the properties they rest on
+Gotcha: needs the headings Load cases, Blade, Shaft, Margins and Numbers used, and 400 words. It
+declares 35 numbers, the largest block in the repository, and every one is recomputed by the gate
+or derived by tools/structure.py. The offset post, the mount lug and the second moment figures in
+its prose are worked in the document and are not in numbers.json, so the week 5 coverage gate
+will not trace them if they are copied into the submission verbatim.
+
+### stage-1/progress/week-4.md
+Week 4 progress record: the 7 tasks, the structural results, the refined budget, what the
+recovery corrected, 10 debts and the 7 week 3 debts this week retired.
+Used by: check.py counts a week as done only if this file carries STATUS: WEEK-COMPLETE
+Gotcha: it carries that marker, which is why check.py then demands stage-1/audit/week-4.md. It is
+the only file that records the API failure the week was interrupted by, alongside the journal.
+
+### stage-1/audit/week-4.md
+The week 4 audit: one fresh-context read-only pass, verbatim, followed by what was done about
+each finding.
+Used by: check.py at every later week, which requires an audit file with its marker for each week
+already marked done
+Gotcha: must contain the literal line AUDIT-COMPLETE and end with the "Findings: N" line, which
+is grepped. Findings are reproduced word for word rather than summarised.
 
 ### stage-1/progress/week-3.md
 Week 3 progress record: the eight tasks, the solved mechanism, the load model rerun, the PDF
