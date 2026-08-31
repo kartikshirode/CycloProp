@@ -32,7 +32,7 @@
     "aero_power_W_published": 290.323,
     "power_spread": 0.0976,
     "blade_deflection_thrust_loss": 0.05,
-    "blade_load_peak_to_mean": 2.374,
+    "blade_load_peak_to_mean": 2.501,
     "induced_velocity_ms": 10.7237,
     "inflow_ratio": 0.3871,
     "solidity": 0.3151,
@@ -272,147 +272,183 @@
   "aero_azimuthal_loads": [
     {
       "azimuth_deg": 0.0,
-      "normal_force_N": 0.0
+      "normal_force_N": 1.0771,
+      "lateral_force_N": 5.0771
     },
     {
       "azimuth_deg": 10.0,
-      "normal_force_N": 0.7483
+      "normal_force_N": 0.054,
+      "lateral_force_N": 1.5635
     },
     {
       "azimuth_deg": 20.0,
-      "normal_force_N": 2.8299
+      "normal_force_N": 0.3205,
+      "lateral_force_N": -2.2737
     },
     {
       "azimuth_deg": 30.0,
-      "normal_force_N": 5.7943
+      "normal_force_N": 1.9068,
+      "lateral_force_N": -5.8609
     },
     {
       "azimuth_deg": 40.0,
-      "normal_force_N": 9.0109
+      "normal_force_N": 4.5892,
+      "lateral_force_N": -8.6229
     },
     {
       "azimuth_deg": 50.0,
-      "normal_force_N": 11.8165
+      "normal_force_N": 7.8963,
+      "lateral_force_N": -10.0987
     },
     {
       "azimuth_deg": 60.0,
-      "normal_force_N": 13.6651
+      "normal_force_N": 11.1773,
+      "lateral_force_N": -10.0562
     },
     {
       "azimuth_deg": 70.0,
-      "normal_force_N": 14.243
+      "normal_force_N": 13.7352,
+      "lateral_force_N": -8.5752
     },
     {
       "azimuth_deg": 80.0,
-      "normal_force_N": 13.521
+      "normal_force_N": 15.0061,
+      "lateral_force_N": -6.0561
     },
     {
       "azimuth_deg": 90.0,
-      "normal_force_N": 11.7337
+      "normal_force_N": 14.7315,
+      "lateral_force_N": -3.1253
     },
     {
       "azimuth_deg": 100.0,
-      "normal_force_N": 9.2966
+      "normal_force_N": 13.0435,
+      "lateral_force_N": -0.4504
     },
     {
       "azimuth_deg": 110.0,
-      "normal_force_N": 6.6858
+      "normal_force_N": 10.4086,
+      "lateral_force_N": 1.467
     },
     {
       "azimuth_deg": 120.0,
-      "normal_force_N": 4.318
+      "normal_force_N": 7.4496,
+      "lateral_force_N": 2.4237
     },
     {
       "azimuth_deg": 130.0,
-      "normal_force_N": 2.4624
+      "normal_force_N": 4.7335,
+      "lateral_force_N": 2.5192
     },
     {
       "azimuth_deg": 140.0,
-      "normal_force_N": 1.208
+      "normal_force_N": 2.6222,
+      "lateral_force_N": 2.0504
     },
     {
       "azimuth_deg": 150.0,
-      "normal_force_N": 0.4889
+      "normal_force_N": 1.2286,
+      "lateral_force_N": 1.3655
     },
     {
       "azimuth_deg": 160.0,
-      "normal_force_N": 0.1506
+      "normal_force_N": 0.4629,
+      "lateral_force_N": 0.7414
     },
     {
       "azimuth_deg": 170.0,
-      "normal_force_N": 0.0272
+      "normal_force_N": 0.1296,
+      "lateral_force_N": 0.3211
     },
     {
       "azimuth_deg": 180.0,
-      "normal_force_N": 0.0
+      "normal_force_N": 0.0245,
+      "lateral_force_N": 0.1154
     },
     {
       "azimuth_deg": 190.0,
-      "normal_force_N": 0.0272
+      "normal_force_N": 0.0016,
+      "lateral_force_N": 0.0449
     },
     {
       "azimuth_deg": 200.0,
-      "normal_force_N": 0.1506
+      "normal_force_N": 0.0017,
+      "lateral_force_N": -0.0123
     },
     {
       "azimuth_deg": 210.0,
-      "normal_force_N": 0.4889
+      "normal_force_N": 0.0604,
+      "lateral_force_N": -0.1855
     },
     {
       "azimuth_deg": 220.0,
-      "normal_force_N": 1.208
+      "normal_force_N": 0.3069,
+      "lateral_force_N": -0.5767
     },
     {
       "azimuth_deg": 230.0,
-      "normal_force_N": 2.4624
+      "normal_force_N": 0.9458,
+      "lateral_force_N": -1.2096
     },
     {
       "azimuth_deg": 240.0,
-      "normal_force_N": 4.318
+      "normal_force_N": 2.1918,
+      "lateral_force_N": -1.972
     },
     {
       "azimuth_deg": 250.0,
-      "normal_force_N": 6.6858
+      "normal_force_N": 4.157,
+      "lateral_force_N": -2.5953
     },
     {
       "azimuth_deg": 260.0,
-      "normal_force_N": 9.2966
+      "normal_force_N": 6.725,
+      "lateral_force_N": -2.714
     },
     {
       "azimuth_deg": 270.0,
-      "normal_force_N": 11.7337
+      "normal_force_N": 9.5034,
+      "lateral_force_N": -2.0161
     },
     {
       "azimuth_deg": 280.0,
-      "normal_force_N": 13.521
+      "normal_force_N": 11.9318,
+      "lateral_force_N": -0.412
     },
     {
       "azimuth_deg": 290.0,
-      "normal_force_N": 14.243
+      "normal_force_N": 13.5013,
+      "lateral_force_N": 1.9029
     },
     {
       "azimuth_deg": 300.0,
-      "normal_force_N": 13.6651
+      "normal_force_N": 13.9175,
+      "lateral_force_N": 4.5281
     },
     {
       "azimuth_deg": 310.0,
-      "normal_force_N": 11.8165
+      "normal_force_N": 13.1314,
+      "lateral_force_N": 6.9886
     },
     {
       "azimuth_deg": 320.0,
-      "normal_force_N": 9.0109
+      "normal_force_N": 11.2988,
+      "lateral_force_N": 8.8347
     },
     {
       "azimuth_deg": 330.0,
-      "normal_force_N": 5.7943
+      "normal_force_N": 8.7321,
+      "lateral_force_N": 9.7056
     },
     {
       "azimuth_deg": 340.0,
-      "normal_force_N": 2.8299
+      "normal_force_N": 5.8534,
+      "lateral_force_N": 9.3755
     },
     {
       "azimuth_deg": 350.0,
-      "normal_force_N": 0.7483
+      "normal_force_N": 3.1431,
+      "lateral_force_N": 7.7882
     }
   ],
   "drive_candidates": [
@@ -488,24 +524,270 @@
     }
   ],
   "pitch": {
-    "mechanism": null,
-    "offset_m": null,
-    "phase_delay_deg": null,
-    "vector_range_deg": null,
-    "actuator_count": null,
-    "actuator_mass_g": null,
-    "side_force_tilt_deg": null,
-    "phase_authority_deg": null,
-    "schedule_rms_residual_deg": null
+    "mechanism": "passive cyclic four-bar, one per blade, sharing a common offset pivot",
+    "offset_m": 0.0154,
+    "phase_delay_deg": 11.0,
+    "vector_range_deg": 120.0,
+    "actuator_count": 2,
+    "actuator_mass_g": 25.0,
+    "side_force_tilt_deg": 11.978,
+    "phase_authority_deg": 120.0,
+    "schedule_rms_residual_deg": 1.1951,
+    "horn_m": 0.0244,
+    "pitch_link_m": 0.105,
+    "construction_angle_deg": -110.524,
+    "transmission_angle_min_deg": 58.58,
+    "transmission_angle_max_deg": 143.23,
+    "axis_keepout_mm": 0.004,
+    "neighbour_clearance_mm": 94.6,
+    "pitch_bearing_travel_deg": 80.0,
+    "blade_pitch_inertia_kgm2": 1.1176e-05,
+    "blade_cg_pct_chord": 39.92,
+    "peak_blade_moment_Nm": 2.1201,
+    "peak_link_force_N": 101.82,
+    "carrier_torque_Nm": 0.1371,
+    "gear_step_up": 1.5,
+    "servo_torque_Nm": 0.0457,
+    "servo_stall_torque_Nm": 0.216,
+    "servo_travel_deg": 80.0,
+    "servo_torque_margin": 2.363,
+    "slew_time_s": 0.1467,
+    "actuator_draw_W": 2.88,
+    "carrier_radial_force_N": 47.48,
+    "peak_lateral_force_N": 10.0987,
+    "swept_outer_radius_mm": 148.03,
+    "swept_inner_radius_mm": 86.54
   },
-  "linkage_dimensions": [],
-  "pitch_schedule": [],
-  "vector_map": [],
+  "linkage_dimensions": [
+    {
+      "link": "L1 rotor arm, rotor axis to blade pitch axis",
+      "length_mm": 110.0,
+      "role": "input crank, frozen by the week 2 radius"
+    },
+    {
+      "link": "L2 offset link, rotor axis to offset pivot",
+      "length_mm": 15.4,
+      "role": "ground link, its length sets the amplitude and its direction the phase"
+    },
+    {
+      "link": "L3 pitch link, offset pivot to horn tip",
+      "length_mm": 105.0,
+      "role": "output crank, scaled 9.133/9 off Kellen's built vehicle"
+    },
+    {
+      "link": "L4 pitch horn, blade pitch axis to link pin",
+      "length_mm": 24.4,
+      "role": "coupler, scaled 2/9 off Kellen's built vehicle"
+    },
+    {
+      "link": "pitch link closest approach to the rotor axis",
+      "length_mm": 0.004,
+      "role": "keep-out, nothing on the axis may sit in the pitch plane"
+    },
+    {
+      "link": "pitch link closest approach to a neighbouring pitch axis",
+      "length_mm": 94.6,
+      "role": "clearance against the next blade's root fitting"
+    }
+  ],
+  "pitch_schedule": [
+    {
+      "azimuth_deg": 0.0,
+      "pitch_deg": -8.0504
+    },
+    {
+      "azimuth_deg": 10.0,
+      "pitch_deg": -1.9611
+    },
+    {
+      "azimuth_deg": 20.0,
+      "pitch_deg": 4.3127
+    },
+    {
+      "azimuth_deg": 30.0,
+      "pitch_deg": 10.6654
+    },
+    {
+      "azimuth_deg": 40.0,
+      "pitch_deg": 16.952
+    },
+    {
+      "azimuth_deg": 50.0,
+      "pitch_deg": 22.9781
+    },
+    {
+      "azimuth_deg": 60.0,
+      "pitch_deg": 28.4987
+    },
+    {
+      "azimuth_deg": 70.0,
+      "pitch_deg": 33.2307
+    },
+    {
+      "azimuth_deg": 80.0,
+      "pitch_deg": 36.8871
+    },
+    {
+      "azimuth_deg": 90.0,
+      "pitch_deg": 39.2288
+    },
+    {
+      "azimuth_deg": 100.0,
+      "pitch_deg": 40.1175
+    },
+    {
+      "azimuth_deg": 110.0,
+      "pitch_deg": 39.5424
+    },
+    {
+      "azimuth_deg": 120.0,
+      "pitch_deg": 37.6076
+    },
+    {
+      "azimuth_deg": 130.0,
+      "pitch_deg": 34.4902
+    },
+    {
+      "azimuth_deg": 140.0,
+      "pitch_deg": 30.3948
+    },
+    {
+      "azimuth_deg": 150.0,
+      "pitch_deg": 25.5209
+    },
+    {
+      "azimuth_deg": 160.0,
+      "pitch_deg": 20.0465
+    },
+    {
+      "azimuth_deg": 170.0,
+      "pitch_deg": 14.1251
+    },
+    {
+      "azimuth_deg": 180.0,
+      "pitch_deg": 7.8888
+    },
+    {
+      "azimuth_deg": 190.0,
+      "pitch_deg": 1.4554
+    },
+    {
+      "azimuth_deg": 200.0,
+      "pitch_deg": -5.0631
+    },
+    {
+      "azimuth_deg": 210.0,
+      "pitch_deg": -11.5502
+    },
+    {
+      "azimuth_deg": 220.0,
+      "pitch_deg": -17.8725
+    },
+    {
+      "azimuth_deg": 230.0,
+      "pitch_deg": -23.8637
+    },
+    {
+      "azimuth_deg": 240.0,
+      "pitch_deg": -29.3066
+    },
+    {
+      "azimuth_deg": 250.0,
+      "pitch_deg": -33.9216
+    },
+    {
+      "azimuth_deg": 260.0,
+      "pitch_deg": -37.3833
+    },
+    {
+      "azimuth_deg": 270.0,
+      "pitch_deg": -39.3987
+    },
+    {
+      "azimuth_deg": 280.0,
+      "pitch_deg": -39.8312
+    },
+    {
+      "azimuth_deg": 290.0,
+      "pitch_deg": -38.7677
+    },
+    {
+      "azimuth_deg": 300.0,
+      "pitch_deg": -36.4514
+    },
+    {
+      "azimuth_deg": 310.0,
+      "pitch_deg": -33.1566
+    },
+    {
+      "azimuth_deg": 320.0,
+      "pitch_deg": -29.1113
+    },
+    {
+      "azimuth_deg": 330.0,
+      "pitch_deg": -24.4797
+    },
+    {
+      "azimuth_deg": 340.0,
+      "pitch_deg": -19.3747
+    },
+    {
+      "azimuth_deg": 350.0,
+      "pitch_deg": -13.8766
+    },
+    {
+      "azimuth_deg": 360.0,
+      "pitch_deg": -8.0504
+    }
+  ],
+  "vector_map": [
+    {
+      "phase_command_deg": -60.0,
+      "servo_angle_deg": -40.0,
+      "vertical_force_N": 9.0,
+      "lateral_force_N": -15.5885,
+      "resultant_N": 18.0,
+      "resultant_direction_deg": -60.0
+    },
+    {
+      "phase_command_deg": -30.0,
+      "servo_angle_deg": -20.0,
+      "vertical_force_N": 15.5885,
+      "lateral_force_N": -9.0,
+      "resultant_N": 18.0,
+      "resultant_direction_deg": -30.0
+    },
+    {
+      "phase_command_deg": 0.0,
+      "servo_angle_deg": 0.0,
+      "vertical_force_N": 18.0,
+      "lateral_force_N": 0.0,
+      "resultant_N": 18.0,
+      "resultant_direction_deg": 0.0
+    },
+    {
+      "phase_command_deg": 30.0,
+      "servo_angle_deg": 20.0,
+      "vertical_force_N": 15.5885,
+      "lateral_force_N": 9.0,
+      "resultant_N": 18.0,
+      "resultant_direction_deg": 30.0
+    },
+    {
+      "phase_command_deg": 60.0,
+      "servo_angle_deg": 40.0,
+      "vertical_force_N": 9.0,
+      "lateral_force_N": 15.5885,
+      "resultant_N": 18.0,
+      "resultant_direction_deg": 60.0
+    }
+  ],
   "packaging": {
-    "envelope_length_mm": null,
-    "envelope_width_mm": null,
-    "envelope_height_mm": null,
-    "mount_points": null
+    "envelope_length_mm": 364.4,
+    "envelope_width_mm": 316.1,
+    "envelope_height_mm": 362.1,
+    "mount_points": 4,
+    "swept_diameter_mm": 296.1
   },
   "structure": {
     "blade_mass_kg": null,
