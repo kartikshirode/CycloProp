@@ -3,9 +3,10 @@
 Required Stage 1 item 2. Geometry, the radius trade, the blade section, and the coarse mass
 envelope that decides whether any of it closes.
 
-Read the last section first if you only have a minute. The sizing works and the geometry is
-frozen. The stacked conservative case is still 68.5 g short of thrust to weight 2.5, and that
-shortfall now travels to week 4 as a mass target instead of holding the freeze. See D30.
+Read the last section first if you only have a minute. The sizing works, the geometry is
+frozen, and the stacked conservative case now clears thrust to weight 2.5 at 2.517. It clears
+by 4.8 g of conservative mass, which is not much. The internal 2.75 target from D17 is still
+unmet and week 4 inherits a 58.6 g gap against it. See D30 and D35.
 
 ## Shape family
 
@@ -16,35 +17,44 @@ both scale with radius and the size cancels out of the product of tip speed and 
 
 At 18 N of design thrust the family gives a chord Reynolds number of 134,000.
 
-**That number is a problem and this document is the place to say so.** The published support
-for carrying a thrust coefficient across a change of Reynolds number is Shrestha and Benedict,
-who show non-dimensional thrust holding while torque and power fall, over 10,000 to 100,000.
-134,000 is above that. Kellen studied 100,000 to 300,000 and reports this shape family as the
-optimum there, which is why the family was chosen, but Kellen is not the source of the
-coefficient. So the transfer is an extrapolation upward, out of the range that supports it and
-into a range that has been studied for the shape but not for this quantity.
+**That number was a problem and this is where the correction goes.** The published support for
+carrying a thrust coefficient across a change of Reynolds number was Shrestha and Benedict, who
+show non-dimensional thrust holding while torque and power fall, over 10,000 to 100,000.
+134,000 sits above that, and D25 recorded the design point as an extrapolation on those grounds.
 
-It is also not avoidable inside this family. The conservative thrust has to clear 10 N on its
-own, the coefficient haircut is 15 percent, so design thrust cannot go below 11.76 N, and
-Reynolds goes with the square root of thrust. The lowest compliant point in this family already
-sits at 108,000. There is no design here that stays inside the documented band. Recorded as
-D25, and it is the largest piece of unretired risk the freeze carries.
+Kellen 2019 is in hand now and it changes what that sentence can claim. Kellen measured this
+exact shape family across a chord Reynolds range of 100,000 to 300,000, and his 3-bladed
+optimum sits at 186,000 on a 5.5 in chord at 20 m/s. The design point is inside that range, so
+the geometry and the coefficient it carries are bracketed by a measurement on their own shape
+instead of sitting past the end of an invariance claim made about something else. D37 narrows
+D25 to the part that survives.
 
-The direction of the extrapolation is at least the benign one. Shrestha's result is that
-non-dimensional thrust barely moves while power falls, so pushing Reynolds up should not cost
-thrust and should help power. That is an argument, not evidence.
+What survives is worth naming. The nominal coefficient still comes from a Benedict rotor at a
+chord Reynolds of 31,600, and Shrestha is still the only support for carrying a value across
+that gap. Kellen bounds the shape family and the low case, and he is not the provenance of the
+nominal. Raising thrust is no longer the trap it was either: with the haircut at 5 percent
+rather than 15, design thrust can fall to 10.53 N before the conservative case fails, and
+Reynolds there is 102,500, still inside Kellen's band.
 
 Solidity comes out at 0.3151 on the definition the gate uses, blades times chord over the
-circumference. Kellen's reported optimum band is 0.30 to 0.40, so the coefficient is being used
-inside the solidity range it was reported for, which is what D12 requires. The rotor the
+circumference. Kellen's measured optimum band is 0.30 to 0.40, read off the thesis rather than
+a summary of it, so the coefficient is used inside the solidity range it was measured for,
+which is what D12 requires. The rotor the
 coefficient came from has a solidity of 0.276 and is outside that band itself, so the transfer
 runs into the band from outside on this axis too.
 
-**The coefficient, recomputed rather than quoted.** Benedict's quad-cyclocopter rotor makes
-1.98 N per rotor at 2000 rpm on 4 blades of 33.0 mm chord and 158.8 mm span at 76.2 mm radius.
-Tip speed is 15.96 m/s, blade area is 0.02096 m2, and dividing gives 0.6055 in this project's
-own blade-area convention. The repository has been carrying 0.607, so the recompute agrees to
-0.25 percent and the small difference is now the stored value.
+**The coefficient, and where it actually came from.** The repository built 0.6055 from 1.98 N
+per rotor at 2000 rpm on Benedict's quad-cyclocopter, 4 blades of 33.0 mm chord and 158.8 mm
+span at 76.2 mm radius. Reading the dissertation shows that pair is not in it. 1.98 N is the
+809 gram all-up vehicle weight of Table 5.1 divided by four, and 2000 rpm belongs to the twin
+rotor. The quad's measured hover point is 1.91 N at 1800 rpm on printed p.236, repeated as 195
+grams at 1800 rpm on p.225, and in this project's blade-area convention that is 0.7211.
+
+0.6055 is kept anyway. It is deliberate margin now rather than a transferred estimate: the
+corrected quad point is 0.7211, Kellen's measurement on this shape family is 0.6648, and the
+twin is 0.8114, so every measured or corrected value available sits above the number the design
+is built on. Raising it would raise thrust everywhere and spend a margin nothing needs spent.
+D36 records the call and the correction together.
 
 The same recompute on Benedict's twin rotor, which has 3 blades like ours at the same radius
 and the same 2000 rpm on a 25.4 mm chord and a 152.4 mm span, gives 0.8114. That is 34 percent
@@ -57,12 +67,17 @@ on it.
 because adding is the harsher of the two:
 
 - 5 percent for blade flexibility
-- 10 percent for configuration transfer, since blade count, airfoil and chord ratio all move at
-  once and only the Reynolds half of the transfer has any published support at all
+- 10 percent for configuration transfer, since blade count, airfoil and chord ratio all moved at
+  once with nothing measured to de-risk it
 
-That gives 0.5147, or 85 percent of nominal. It is an engineering downside scenario. Kellen
-2019 holds the measured coefficient for this exact family and it is not in hand, so nothing
-here is a published lower bound and the submission has to say so.
+The second one is retired. D23 set the test: a measured coefficient for this shape family, in
+this Reynolds band, at or above the transferred value. Kellen 2019 gives 0.6648 on a rotor
+whose solidity and chord-to-radius sit within 1.1 percent of ours, which passes it. So the low
+coefficient is 0.5752, the nominal less blade flexibility alone.
+
+It is still an engineering downside scenario and not a published lower bound. What changed is
+that the half of the haircut covering an unmeasured configuration change now has a measurement
+under it. See D35.
 
 ## Blade section and stiffness
 
@@ -99,11 +114,11 @@ lower-power rotor with heavier blades and a heavier shaft, and power alone canno
 
 | Radius | rpm | Ideal power | Aero power | Rotor torque | Motor input | Belt | Module mass | Conservative T/W |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 100 mm | 2645 | 212.3 W | 353.9 W | 1.291 Nm | 503.3 W | none fits | 550 g | 2.376 |
-| 110 mm | 2405 | 193.0 W | 321.7 W | 1.419 Nm | 457.6 W | 3.5 to 1 | 580 g | 2.252 |
-| 120 mm | 2021 | 176.9 W | 294.9 W | 1.548 Nm | 419.4 W | 4.0 to 1 | 612 g | 2.134 |
-| 130 mm | 1722 | 163.3 W | 272.1 W | 1.677 Nm | 387.2 W | 4.5 to 1 | 646 g | 2.019 |
-| 140 mm | 1565 | 151.6 W | 252.7 W | 1.806 Nm | 359.5 W | 4.5 to 1 | 683 g | 1.909 |
+| 100 mm | 2645 | 212.3 W | 353.9 W | 1.291 Nm | 503.3 W | none fits | 550 g | 2.655 |
+| 110 mm | 2405 | 193.0 W | 321.7 W | 1.419 Nm | 457.6 W | 3.5 to 1 | 580 g | 2.517 |
+| 120 mm | 2021 | 176.9 W | 294.9 W | 1.548 Nm | 419.4 W | 4.0 to 1 | 612 g | 2.384 |
+| 130 mm | 1722 | 163.3 W | 272.1 W | 1.677 Nm | 387.2 W | 4.5 to 1 | 646 g | 2.257 |
+| 140 mm | 1565 | 151.6 W | 252.7 W | 1.806 Nm | 359.5 W | 4.5 to 1 | 683 g | 2.134 |
 
 Power times radius is constant across the sweep, which is the 1 over R behaviour the family
 predicts, and Reynolds is 134,000 on every row because it depends on thrust and not on size.
@@ -177,28 +192,29 @@ most of week 2.
 | --- | --- | --- | --- | --- |
 | design point | 18.00 N | 580.1 g | 3.163 | clears by 27 percent |
 | mass downside alone | 18.00 N | 692.4 g | 2.650 | clears by 6 percent |
-| coefficient downside alone | 15.30 N | 580.1 g | 2.689 | clears by 8 percent |
-| both stacked | 15.30 N | 692.4 g | 2.252 | misses by 68.5 g |
+| coefficient downside alone | 17.10 N | 580.1 g | 3.005 | clears by 20 percent |
+| both stacked | 17.10 N | 692.4 g | 2.517 | clears by 4.8 g |
 
-Geometry freezes on the first three. 18 N, 110 mm, with 120 mm carried as insurance. The
-stacked case is the one that misses and it is stated rather than buried: to reach 2.5 the
-conservative column has to come down to 623.9 g, which is 68.5 g or 9.9 percent.
+All four clear 2.5, and geometry freezes on the first three regardless, which is D30. The
+stacked case moved because the coefficient did: the low value is 0.5752 rather than 0.5147
+since D35 retired the configuration-transfer allowance, so conservative thrust is 17.10 N
+rather than 15.30 N.
 
-That target is now week 4's, and D30 gives the reasoning in full. The short version is what the
-conservative column is made of. Eight of these thirteen lines carry a blanket 20 or 25 percent
-growth rate, six of them on a basis that says the section is assumed rather than weighed or
-quoted, so the stacked number tests those rates about as hard as it tests the rotor. Week 4
-replaces them with real sections, catalogue parts and a BOM, rebuilds the conservative column
-line by line under D33, and `week4: conservative T/W clears 2.5` applies the same limit to what
-comes out. The hard test did not go away. It moved to the week where the mass is real.
+Read the fourth row carefully. It clears by 4.8 g of conservative mass, meaning the column
+could reach 697.2 g before the stacked case fell under 2.5, and it currently sits at 692.4 g.
+That is a real pass and a thin one. The hard stacked test still lives in week 4 under D30, on a
+budget where eight of these thirteen lines stop carrying a blanket 20 or 25 percent growth rate
+on an assumed section, and `week4: conservative T/W clears 2.5` applies the same limit to what
+comes out. Week 4 rebuilds the conservative column line by line under D33.
 
 D30 counts those lines as nine. Eight is what `mass_envelope_g` gives, and the 86.4 g of growth
 allowance quoted everywhere else comes from the correct eight.
 
 Nominal thrust to weight is 3.163, already 49 percent above the best published module on the
-same boundary. Reaching 2.75 on the stacked case would need a nominal of 3.86, which is 81
-percent above the published record, and nothing available supports that. So the internal 2.75
-target from D17 is not met on the stacked case and is not claimed.
+same boundary. The internal 2.75 target from D17 is still not met on the stacked case and is
+still not claimed. What it needs is 58.6 g: the conservative column would have to reach 633.8 g
+against the 692.4 g it holds now. That is the number week 4 inherits, and it is a target rather
+than the hard limit, which the stacked case already clears.
 
 ## Numbers used
 
@@ -206,14 +222,13 @@ target from D17 is not met on the stacked case and is not claimed.
 - geometry.chord_m = 0.0726
 - geometry.span_m = 0.2904
 - performance.blade_area_coeff = 0.6055
-- performance.blade_area_coeff_low = 0.5147
+- performance.blade_area_coeff_low = 0.5752
 - performance.blade_deflection_thrust_loss = 0.05
 - performance.solidity = 0.3151
 - performance.blade_tip_deflection_mm = 0.0778
 - performance.blade_twist_deg = 0.0512
-- performance.thrust_N_conservative = 15.3007
+- performance.thrust_N_conservative = 17.0992
 - performance.motor_input_W = 457.573
 - results.mass_envelope_g = 580.05
 - results.mass_g_conservative = 692.43
-- results.thrust_to_weight_conservative = 2.2525
-- results.mass_target_week4_g = 623.8818
+- results.thrust_to_weight_conservative = 2.5173

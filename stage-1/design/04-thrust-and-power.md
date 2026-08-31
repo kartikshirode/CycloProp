@@ -24,15 +24,17 @@ Thrust comes from the blade-area coefficient route:
 At 2405 rpm and 110 mm radius the tip speed is 27.70 m/s, blade area is 0.0632 m2, and a
 coefficient of 0.6055 gives 18.0 N. Chord Reynolds is 134,000.
 
-The conservative case uses 0.5147, the same geometry at 85 percent of the coefficient, giving
-15.30 N. Both clear the 10 N requirement on their own.
+The conservative case uses 0.5752, the same geometry at 95 percent of the coefficient, giving
+17.10 N. Both clear the 10 N requirement on their own.
 
-Where the coefficient comes from, how it was recomputed, and why the low value is a scenario
-rather than a bound is in `evidence-ledger.md` and `02-rotor-sizing.md`. The short version: it
-is transferred from a 4-blade NACA 0010 rotor at Reynolds 35,000 onto a 3-blade NACA 0020
-family at 134,000, and both halves of that transfer are now extrapolations. The published
-Reynolds invariance runs to 100,000 and the design point is above it. The configuration half
-was never de-risked by anything.
+Where the coefficient comes from, why the low value is a scenario rather than a bound, and what
+the two primary sources actually say is in `evidence-ledger.md` and `02-rotor-sizing.md`. The
+short version has changed twice over. The nominal is transferred from a 4-blade NACA 0010 rotor
+at a chord Reynolds of 31,600, not the 35,000 this document used to quote, and the correct
+reading of that rotor gives 0.7211 rather than the 0.6055 stored here. 0.6055 stands as
+deliberate margin under D36. The configuration half of the transfer is no longer undefended
+either: Kellen measured this shape family at 0.6648, which is what took the haircut from 15
+percent to 5 and is recorded as D35.
 
 ### Azimuthal load distribution
 
@@ -168,16 +170,18 @@ and speed together. The rotor wants 1.577 Nm, which needs a ratio above 4, and a
 cannot spin to the motor speed that ratio implies. No other shortlist motor covers it either,
 because the ones with the speed do not have the torque.
 
-Stacked conservative thrust to weight across the whole sweep peaks at 18 N and 110 mm, at
-2.252. That is the row the design freezes on, per D30, because the design case is 3.163 there
-and each downside on its own clears 2.5. The stacked miss goes to week 4 as a 623.9 g mass
-target. `stage-1/progress/week-2.md` carries the fallbacks that were worked before the freeze,
-and none of them closed the stacked case.
+Stacked conservative thrust to weight rises all the way down the radius range and peaks at 100
+mm, at 2.655, where no belt ratio fits. The best row a drive actually covers is 18 N at 110 mm,
+at 2.517, and that is the row the design freezes on per D30. All four cases now clear 2.5:
+3.163 at the design point, 2.650 and 3.005 on each downside alone, 2.517 stacked. The stacked
+row clears by 4.8 g of conservative mass, so it is a pass with very little in hand, and the
+hard version of that test still runs in week 4 against a refined budget.
+`stage-1/progress/week-2.md` carries the fallbacks that were worked before the freeze.
 
 ## Numbers used
 
 - performance.thrust_N = 18.0
-- performance.thrust_N_conservative = 15.3007
+- performance.thrust_N_conservative = 17.0992
 - performance.aero_power_W = 321.71
 - performance.ideal_power_W = 193.026
 - performance.figure_of_merit = 0.6

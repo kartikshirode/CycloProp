@@ -2,10 +2,10 @@
 
 Required Stage 1 item 1. This is the frozen configuration for Stage 1, frozen at 18 N of design
 thrust and a 110 mm radius by D30, with 120 mm carried as the insurance radius. The design case
-clears thrust to weight 2.5 at 3.163 and each downside taken on its own clears it too. Only the
-stacked downside misses, at 2.252, and that number is now a mass target handed to week 4 rather
-than a hold on the freeze. What follows is the layout the comparison chose and the reasoning
-behind it.
+clears thrust to weight 2.5 at 3.163 and each downside taken on its own clears it too. Since
+D35 the stacked downside clears it as well, at 2.517, because a measured coefficient for this
+shape family retired the configuration-transfer allowance. What follows is the layout the
+comparison chose and the reasoning behind it.
 
 The module is one cyclorotor. Three blades, NACA 0020, chord at 0.66 of the radius, blade
 aspect ratio 4, pitching plus or minus 40 degrees about an axis at 30 percent of chord. The
@@ -41,9 +41,9 @@ mm. Largest dimension is that width or the span, whichever wins.
 
 | Layout | Per rotor radius | Per rotor thrust | rpm | Reynolds | Blade area | Largest dimension | Module mass | Nominal T/W | Conservative T/W |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| single, 3 blades | 110 mm | 18.0 N | 2405 | 134,000 | 0.0632 m2 | 290 mm | 580 g | 3.163 | 2.252 |
-| two rotors | 80 mm | 9.0 N | 3141 | 94,800 | 0.0669 m2 | 400 mm | 786 g | 2.334 | 1.659 |
-| three rotors | 65 mm | 6.0 N | 3891 | 77,400 | 0.0663 m2 | 490 mm | 985 g | 1.863 | 1.323 |
+| single, 3 blades | 110 mm | 18.0 N | 2405 | 134,000 | 0.0632 m2 | 290 mm | 580 g | 3.163 | 2.517 |
+| two rotors | 80 mm | 9.0 N | 3141 | 94,800 | 0.0669 m2 | 400 mm | 786 g | 2.334 | 1.855 |
+| three rotors | 65 mm | 6.0 N | 3891 | 77,400 | 0.0663 m2 | 490 mm | 985 g | 1.863 | 1.479 |
 
 The single rotor wins the first metric by 36 percent and every other metric as well. It is
 smallest, and it has a third of the rotor hardware.
@@ -63,10 +63,12 @@ to make it up. So the cluster pays twice and gets a shorter span back.
 
 One thing points the other way and is worth stating, because the audit caught this document
 claiming the opposite. Per-rotor Reynolds falls as the thrust is split: 134,000 single, 94,800
-at two rotors, 77,400 at three. The transferred coefficient's published Reynolds support runs
-to 100,000, so the cluster rows sit closer to the range that supports the coefficient than the
-single rotor does. That is a point in the cluster's favour, it is included in the comparison
-as one, and it does not come close to covering a 36 percent gap in the decision metric.
+at two rotors, 77,400 at three. Read against Shrestha's invariance range, which stops at
+100,000, the cluster rows sit closer to the support than the single rotor does. Read against
+Kellen, who measured this shape family from 100,000 to 300,000, the single rotor is the one
+inside and both cluster rows fall below. D37 says why the second reading governs now. On
+either reading the point is small, it is included in the comparison anyway, and it does not
+come close to covering a 36 percent gap in the decision metric.
 
 D2 is therefore confirmed, this time on a like-for-like comparison rather than on a rejected
 copy. Recorded as D18.
@@ -117,4 +119,4 @@ claim.
 - performance.blade_area_m2 = 0.06325
 - performance.belt_ratio = 3.5
 - results.mass_envelope_g = 580.05
-- results.thrust_to_weight_conservative = 2.2525
+- results.thrust_to_weight_conservative = 2.5173
