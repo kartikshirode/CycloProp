@@ -17,9 +17,9 @@ it carries the deadline, and it is hard blocked by week H.
 3. **[stage-1/progress/week-4.md](stage-1/progress/week-4.md)** is where the design stands and
    what week 5 inherits. [week-3.md](stage-1/progress/week-3.md) is the mechanism record and
    [week-2.md](stage-1/progress/week-2.md) the feasibility one
-4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 52 entries.
-   D30 unblocked week 2, D35 closed the stacked case, D38 to D45 are week 3, and D46 to D52 are
-   week 4. D47 is the one to read before touching any mass number
+4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 53 entries.
+   D30 unblocked week 2, D35 closed the stacked case, D38 to D45 are week 3, and D46 to D53 are
+   week 4, with D53 the audit response. D47 is the one to read before touching any mass number
 5. **[stage-1/design/evidence-ledger.md](stage-1/design/evidence-ledger.md)** is what every
    number rests on and how strong it is
 6. **[stage-1/audit/week-4.md](stage-1/audit/week-4.md)** is the week 4 fresh-context audit,
@@ -71,7 +71,9 @@ over the budget closes it.
 
 ## Structural state
 
-Eight margins, all recomputed from the design, all floored at 1.5.
+Eight margins, all floored at 1.5. Seven are recomputed by the gate from the allowable and the
+demand beside them. The shaft's combined case is floored but not recomputed, because it needs
+section properties that live in `tools/structure.py` and not in `numbers.json`.
 
 | Case | Demand | Margin |
 | --- | --- | --- |
@@ -104,10 +106,13 @@ week 4, and the draft's own numbers block declares `results.mass_g_conservative 
 four case table, then rebuild the PDF. A stale PDF passes the page count and fails the string
 check.
 
-**3. The numeric coverage gate is nearly clean already.** It failed on 10 numbers when week 3 ran
-it on the draft. It now fails on 2: `margin=25mm` in the pandoc front matter, which is the gate
-reading YAML as narrative, and 125.4 mm at line 66. The `dim_of_key` qualifier fix in D51 took
-out the other 8. The front matter one is a gate defect and week 5 owns the fix.
+**3. The numeric coverage gate is nearly clean already.** Run against the draft it now reports 2
+untraced numbers: `margin=25mm` in the pandoc front matter, which is the gate reading YAML as
+narrative, and 125.4 mm at line 66. The week 3 gate on the week 3 numbers reported 7, and week
+3's own debt of 10 was a manual tally that counted exempt-region numbers the gate does not. Of
+the 5 that went, the `dim_of_key` qualifier fix in D51 accounts for 3 and the rest traced once
+`numbers.json` carried the week 4 budget. The front matter one is a gate defect and week 5 owns
+the fix.
 
 **4. Neither script should need running.** If one does, the order is `tools/linkage.py --write`
 then `tools/structure.py --write`. `numbers.json` reproduces byte for byte from that pair.

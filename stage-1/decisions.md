@@ -1234,3 +1234,58 @@ stockist, and that finding does not depend on the price at all.
 Five lines above 4500 INR carry 52 percent of the 65770 INR total, and those are the ones Stage
 2 has to replace with written quotes. Gear cutting is the one most likely to move, because a
 quantity of one is priced by setup.
+## D53: the week 4 audit corrects the balance figures in D46 and one claim in D51
+
+31 August 2026, week 4, after the audit. Corrects D46 and D51 without reopening either decision.
+The log is append only, so the corrections live here.
+
+The audit is in `stage-1/audit/week-4.md`, verbatim, with 13 findings and what was done about
+each. Two of them landed on numbers or claims already written into a frozen entry.
+
+**D46's balanced pitch link figures were computed from a stale ratio.** `balance_report` in
+`tools/structure.py` priced the balanced link load by multiplying the unbalanced one by 0.655,
+which is week 3's balanced over unbalanced ratio, 69.38 over 101.82, taken on the week 2 blade.
+It was hardcoded and it survived the blade changing underneath it in the same week. The solver
+gives **74.62 N** and a margin of **4.69**, not 69.4 N and 5.04, and the balanced blade pitching
+moment is **1.0904 Nm** rather than about 1.06. `--balance` calls `linkage.solve` for that number
+now instead of scaling.
+
+The decision stands and it is not close. Balancing still costs 35.47 g, still takes the stacked
+conservative case to 2.4061 and still puts it under the hard limit of 2.5. What changed is that
+the margin the mass would have bought is 4.69 rather than 5.04, so the trade is 35.47 g to move a
+pitch link margin from 3.30 to 4.69. That is a worse trade than D46 described, not a better one.
+
+The wrong pair had reached `03-pitch-and-vectoring.md`, `05-mass-and-tw.md`,
+`08-structure-and-loads.md`, the progress file and the journal. All five carry the solver's
+figures now.
+
+**D51's "Nothing was loosened" overreaches, and the sentence is withdrawn.** Three of the four
+week 4 gates are new checks on things nothing checked before, and the `dim_of_key` fix only ever
+widens what can trace. The fourth is different. Week 2 used to test
+`results.mass_g_conservative` against the sum of the week 2 conservative envelope lines, exactly.
+Since D47 it tests it against the refined budget's own lines instead, and the week 2 envelope is
+held only by the new 25 percent band in `check_conservative_budget` and by the 105 percent floor
+it always had. An exact sum rule became a band.
+
+That is what D47 argues for and it is deliberate, because binding the refined column to the
+estimate it replaces defeats the refinement. Calling it "nothing was loosened" was the error. The
+accurate sentence is that one exact rule was replaced by a wider one on purpose, and three new
+rules went in beside it.
+
+**And one thing the audit found that no decision had covered.** `tools/structure.py` wrote
+`numbers.json` with the platform newline, so it put CRLF back into a file `tools/linkage.py` had
+just written as LF, against a repository that declares eol=lf. Git normalises on the way in, so
+`git status` stayed clean and the working tree file was 1520 bytes larger than the committed
+blob. The claim that the file reproduces byte for byte was true only after git had touched it.
+`tools/linkage.py` carries a three line comment about that exact trap, written in week 3, and the
+sibling script was written without it. Both scripts now write with `newline="\n"` and the same
+`ensure_ascii`, and the file reproduces byte for byte with no normalisation in between.
+
+**What went into the gates as a result.** `structure.shaft_combined_margin` was stated in an
+eight row margin table that claimed every row was gated, and `check.py` had nothing to say about
+it at all. It is floored at 1.5 now. It is still not recomputed, because it needs shaft section
+properties that live in the solver rather than in `numbers.json`, and both the handoff and
+`08-structure-and-loads.md` say so instead of claiming otherwise. One attack case went in with
+it. The self test total is counted at the point every line is printed now, rather than kept as a
+constant beside the loops, which is what D51 claimed and had not actually done. 123 self-tests to
+124.

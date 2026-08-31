@@ -75,8 +75,8 @@ Nm over the span at 7.81 Nm2 gives 2.35 degrees at the far end and about 1.6 on 
 which is 4 percent of the amplitude. The 5 percent does not move, per D36 and D50.
 
 **The balance trade closed against the blade.** 35.47 g of nose ballast takes the stacked case
-to 2.406, under the limit, and buys a pitch link margin of 5.04 in place of 3.30. Declined. See
-D46.
+to 2.406, under the limit, and buys a pitch link margin of 4.69 in place of 3.30. Declined. See
+D46 and D53.
 
 **Materials, processes and a costed BOM.** `06-materials-and-manufacturing.md` ties each of the
 6 load carrying materials to the margin it decides, gives every part its stock form, process,
@@ -107,8 +107,8 @@ the first debt below.
   switched from the envelope to the budget when a budget exists, and the `dim_of_key` qualifier
   fix. Nothing was loosened. See D51
 - `tools/test_gates.py`: the fixture's structure block carries the 6 new fields, `_rescale_mass`
-  moves the budget's conservative column with the envelope's, and 5 attack cases went in. 117
-  self-tests to 123
+  moves the budget's conservative column with the envelope's, and 6 attack cases went in. 117
+  self-tests to 124
 
 ## Gate state at the end of the week
 
@@ -116,7 +116,7 @@ the first debt below.
 | --- | --- |
 | `python tools/check.py --week 4` | exit 0, cumulative over weeks 1 to 4 |
 | `python tools/check.py --global` | exit 0 |
-| `python tools/test_gates.py` | exit 0, 123 self-tests |
+| `python tools/test_gates.py` | exit 0, 124 self-tests |
 
 ## What the recovery corrected
 
@@ -139,7 +139,33 @@ Four things in the inherited work, none of them a rewrite.
    `priced_date`, and the document says so above the table. D52
 
 The self-test count also had a hand kept constant that had drifted one behind what the run
-actually prints. It is computed now.
+actually prints. It is counted at the point every line is printed now, which took two goes;
+the audit caught the first attempt renaming the constant rather than removing it.
+
+## The audit
+
+One fresh-context read-only pass, run after the eleven week 4 commits landed. 13 findings,
+reproduced verbatim in `stage-1/audit/week-4.md` with what was done about each. Twelve were
+fixed and one is a declared deviation.
+
+The two worth naming here. The balance trade was priced by multiplying the pitch link load by
+0.655, which is week 3's balanced over unbalanced ratio taken on the week 2 blade, hardcoded,
+and it survived the blade changing underneath it in the same week. The solver gives 74.62 N and
+a margin of 4.69, not 69.4 N and 5.04, and the wrong pair had reached five documents including
+D46. The decision does not move: 2.4061 is under 2.5 either way, and the trade is worse than D46
+described rather than better. And `tools/structure.py` wrote `numbers.json` with the platform
+newline, putting CRLF back into a file `tools/linkage.py` had just written as LF, which git
+normalises on the way in, so the working tree file was 1520 bytes larger than the blob and
+nothing showed in `git status`. `tools/linkage.py` carries a three line comment about that exact
+trap, written in week 3.
+
+The rest: two claims that overreached, one margin in an eight row table that no gate was
+reading, an arithmetic slip in the mass decomposition that did not sum to its own stated net, a
+week 4 figure sitting in a week 2 comparison row, a superseded 47.48 N hardcoded into a shipped
+basis string, a material row crediting the adhesive with a margin nothing computes, and a
+self-test count that was renamed rather than computed. The gate gained a floor on
+`shaft_combined_margin` and one attack case, 123 self-tests to 124. D53 carries the corrections
+that land inside frozen entries.
 
 ## Debts carried forward
 
@@ -167,7 +193,8 @@ actually prints. It is computed now.
    which is about 3.5 N of once per revolution bearing force at 110 mm. The residual unbalance
    limit that ought to back that up is a Stage 2 calculation
 7. **The 2.75 internal target from D17 is unmet, by 50.9 g.** Refinement paid back 7.7 g of the
-   58.6 g week 2 left, because growth rates fell 40.7 g and real parts added 27.9 back. No
+   58.6 g week 2 left, because the growth allowance fell 35.65 g and real parts added 27.92
+   back. No
    further pass over the budget closes it: every remaining line is a drawn section or a catalogue
    part. The two routes that would are a lower KV motor on more cells, reopening the 100 mm row
    at 2.655, and a measured blade area coefficient. Both are outside week 4
@@ -215,9 +242,11 @@ project.
 - Items 5 and 6 are done and the numbers for them are frozen in `numbers.json`. The submission
   draft's item 5 and item 6 sections are the week 2 figures and have to be rewritten from
   `05-mass-and-tw.md`, `06-materials-and-manufacturing.md` and `08-structure-and-loads.md`
-- The numeric coverage gate on the submission draft now fails on 2 numbers, not the 10 week 3
-  recorded. The `dim_of_key` qualifier fix took out 8 of them. What is left is `margin=25mm` in
-  the pandoc front matter, which is the gate reading YAML as narrative, and 125.4 mm at line 66
+- The numeric coverage gate on the submission draft now reports 2 untraced numbers:
+  `margin=25mm` in the pandoc front matter, which is the gate reading YAML as narrative, and
+  125.4 mm at line 66. The week 3 gate on the week 3 numbers reported 7, and week 3's own debt
+  of 10 was a manual tally counting exempt-region numbers the gate does not. The `dim_of_key`
+  qualifier fix accounts for 3 of the 5 that went and the week 4 budget for the other 2
 - The PDF has to be rebuilt after any submission edit. The committed one is the week 3 draft
 - Nothing in week 5 should need to run either script. If it does, the order is
   `tools/linkage.py --write` then `tools/structure.py --write`

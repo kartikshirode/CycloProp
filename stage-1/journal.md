@@ -315,14 +315,15 @@ Everything else in the module is over 3.
 
 The mass closed and it closed without a fallback. 607.97 g nominal, 684.70 conservative, stacked
 conservative T/W 2.5457 against a hard 2.5. Week 2 handed this week a case clearing by 4.8 g and
-it now clears by 12.5. That reads like a win and it is a modest one: refinement bought 40.7 g in
-growth rates and gave 27.9 g of it straight back in real parts, because the gear pair week 3
-found missing is 12.4 g and the drawn brackets and close-outs are most of the rest. Net 7.7 g.
+it now clears by 12.5. That reads like a win and it is a modest one: refinement bought 35.65 g of
+growth allowance and gave 27.92 g of it straight back in real parts, because the gear pair week
+3 found missing is 12.4 g and the drawn brackets and close-outs are most of the rest. Net 7.73
+g.
 The 2.75 target is still 50.9 g away and I am not going to reach it by trimming.
 
 The balance decision was the one I expected to agonise over and it took ten minutes once the
 number existed. Balancing the blade chordwise costs 35.47 g and takes the stacked case to 2.406,
-under the limit. It buys a pitch link margin of 5.04 in place of 3.30. You do not spend a
+under the limit. It buys a pitch link margin of 4.69 in place of 3.30. You do not spend a
 requirement to improve a margin that already passes twice over. D46, and the three things that
 could reopen it are named in the entry.
 
@@ -331,3 +332,25 @@ linkage imports the blade build-up from structure and structure reads the pitch 
 out. That is a cycle and it is resolved by hand, which I do not love. It is honest at least: the
 alternative was leaving `BLADE_PARTS_G` as a hand copy that no gate could see going stale, which
 is exactly the debt week 3 wrote down. Week 5 should not need to touch either script.
+
+The audit found thirteen things and two of them stung. The balance trade, which I had just
+finished calling an easy decision, was priced by multiplying the link load by 0.655. That is
+the week 3 balanced-to-unbalanced ratio, on the week 2 blade, hardcoded, and it sat one line
+under a docstring explaining that the blade had changed. The real balanced link load is 74.62
+N and the margin 4.69, not 69.4 N and 5.04, and the wrong pair had reached five documents
+including the decision entry. The decision itself survives, since 2.406 is under 2.5 either
+way, but I wrote a number I had not computed and then repeated it everywhere. It comes from
+the solver now.
+
+The other one: `structure.py` wrote `numbers.json` with the platform newline, so it put CRLF
+back into a file `linkage.py` had just written LF, in a repository that declares eol=lf. Git
+normalises on the way in, so `git status` was clean and `git diff` was clean and the working
+tree file was 1520 bytes bigger than the blob. My own claim that the file reproduces byte for
+byte was only true after git had touched it. `linkage.py` carries a comment about that exact
+trap, three lines long, written in week 3. I read that file this week and still wrote the bug
+into its sibling.
+
+Eleven more, all fair, all fixed or recorded. Two claims that overreached, one margin in an
+eight row table that no gate was reading, an arithmetic slip in the mass decomposition that
+did not sum to its own stated net, and a material row crediting the epoxy with a margin
+nothing computes. D53 carries the corrections that land inside frozen entries.

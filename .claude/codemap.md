@@ -30,8 +30,8 @@ to what it recomputed. Week 3 added `check_vector_map`, `check_lateral_loads` an
 reader for signed values, and week 2 added `check_week2_selection`, `measured_shape_family`,
 `check_conservative_budget` and `states_value` over `WEEK2_DOCS`. Week 4 added
 `budget_conservative_total`, two combined blade margins, an overspeed attachment margin, a
-recomputed centrifugal bending term, `MIN_OVERSPEED` and a 25 percent band on the conservative
-budget.
+recomputed centrifugal bending term, `MIN_OVERSPEED`, a 25 percent band on the conservative
+budget and a floor on `shaft_combined_margin`.
 Used by: the supervisor after every week tick, and tools/test_gates.py
 Gotcha: hard limits never touch stored headline values. `num` returns None for zero and for
 negatives, so any signed quantity has to go through `snum` or half the table vanishes silently.
@@ -41,15 +41,18 @@ design's own solidity and chord to radius. `budget_conservative_total` is a thir
 `mass_budget_g` has 8 or more complete lines, `results.mass_g_conservative` is checked against
 the budget, and against the week 2 envelope only before that. See D47. `blade_margin` is
 aerodynamic bending alone and is deliberately not the gating one, because centrifugal bending is
-9.2 times larger here; `blade_combined_margin` and the two overspeed margins are. It does not
-recompute the four-bar; test_gates does.
+9.2 times larger here; `blade_combined_margin` and the two overspeed margins are.
+`shaft_combined_margin` is the one margin it floors without recomputing, because that needs shaft
+section properties which live in tools/structure.py. It does not recompute the four-bar;
+test_gates does.
 
 
 ### tools/test_gates.py
 Self-tests for check.py. Builds throwaway trees and checks an honest design passes while
-specific attacks fail, then runs `linkage_selftests` read-only over the real numbers.json. 123
-checks, which is `len(CASES) + PROBE_CHECKS + len(extra)`. Week 2 took it from 77, week 3 from
-104, week 4 from 117.
+specific attacks fail, then runs `linkage_selftests` read-only over the real numbers.json. 124
+checks, and that total is `len(ANNOUNCED)`, counted at the one print prefix every self-test line
+goes out through, not kept beside the loops. Week 2 took it from 77, week 3 from 104, week 4
+from 117.
 Used by: run by hand after any change to check.py, linkage.py or structure.py
 Gotcha: `honest_numbers()` is the fixture every case mutates, so a new required field in
 check.py has to be added there first or every case fails at once. That is exactly how week 4
@@ -145,17 +148,18 @@ Gotcha: it carries that marker as of the second run. Debt 1 is the 68.5 g mass t
 Dates in first-run prose read 2 September; the commits say 30 August.
 
 ### stage-1/decisions.md
-Numbered append-only decision log, D1 to D52. Reopening an earlier entry means a new entry saying
+Numbered append-only decision log, D1 to D53. Reopening an earlier entry means a new entry saying
 which one it supersedes.
 Used by: every week agent as settled ground
 Gotcha: D27 supersedes figures in D18, D20, D21 and D22, and D30 supersedes the freeze rule in
 D17. D30 is the entry to read before touching week 2 or any mass work. D35 to D37 are the
 evidence pass. D38 to D44 are week 3: D40 constrains the shaft, D41 supersedes week 2's azimuthal
-table, D42 records the gate change, and D43 hands week 4 a mass trade. D46 to D52 are week 4:
+table, D42 records the gate change, and D43 hands week 4 a mass trade. D46 to D53 are week 4:
 D46 closes D43 against balancing, D47 moves the conservative mass onto the refined budget and is
 the one to read before touching a mass number, D48 retires the duplicated blade constant, D49
 declares the overspeed case, D50 keeps the 5 percent allowance while giving it a calculation, D51
-records the gate change and D52 says the BOM is priced and not quoted.
+records the gate change and D52 says the BOM is priced and not quoted. D53 is the audit response
+and it corrects the balanced pitch link figures inside D46 and withdraws one sentence of D51.
 
 
 ### stage-1/journal.md
@@ -241,7 +245,11 @@ Used by: run by hand; tools/linkage.py imports `blade_parts_g` from it for the p
 Gotcha: geometry, speed and thrust are read back out of numbers.json and no week 4 number is
 ever read back in, so a rerun cannot confirm its own output. Run tools/linkage.py --write first
 when the blade section moves, then this, which reads the pitch link load back; nothing enforces
-that order. `MATERIALS` at the top is the only place a material allowable is defined and
+that order. It writes with `newline="\n"` and `ensure_ascii=False` to match linkage.py, and it
+must: it writes the same file second, so the platform default here put CRLF back into a file
+linkage.py had just written LF and git normalised the evidence away. `--balance` calls
+`linkage.solve` through a deferred import, because linkage imports this module at load time, and
+because the ratio it used to scale by went stale the moment the blade changed. `MATERIALS` at the top is the only place a material allowable is defined and
 06-materials-and-manufacturing.md cites it rather than restating it. Budget line names carry the
 word "blade" only when they are blade mass, because check.py derives per-blade mass by summing
 every line whose item name contains it, so "pitch bearings" may not become "blade pitch
