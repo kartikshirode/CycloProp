@@ -278,7 +278,7 @@ it.
 - The blade centre of mass sits at 39.31 percent chord on the week 4 drawn section, aft of the
   30 percent pitch axis. That unbalance roughly doubles the peak blade pitching moment, to
   2.2058 Nm, and puts 105.93 N in the pitch link. Running `--balanced` shows a chordwise balance
-  would take those to about 1.06 Nm and 69.4 N. The stored numbers are the unbalanced ones.
+  would take those to 1.0904 Nm and 74.62 N. The stored numbers are the unbalanced ones.
   Week 4 priced the balance at 35.5 g across three blades and declined it, because that mass
   takes the stacked conservative case to 2.406 and under the limit, while the pitch link path
   carries the unbalanced load on a margin of 3.30. See D46

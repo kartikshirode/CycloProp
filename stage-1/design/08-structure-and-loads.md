@@ -119,8 +119,9 @@ Three elements are in that path and the weakest one sets the allowable.
 | CFRP link tube, 4 mm by 0.5 mm wall, Euler at 105 mm | 999.7 N | 9.44 |
 
 The horn governs at 349.7 N and the margin is 3.30. That is the number behind the decision not
-to balance the blade: a chordwise balance would take the link to about 69 N and cost 35.5 g
-across three blades, which is more than the thrust to weight case can pay. See D46.
+to balance the blade: a chordwise balance would take the link to 74.62 N and the margin to
+4.69, and it costs 35.5 g across three blades, which is more than the thrust to weight case
+can pay. See D46 and D53.
 
 The offset post takes 53.22 N of radial pull from the three links converging on it. As an 8 mm
 7075-T6 cantilever reaching 40 mm from the phasing carrier that is 2.13 Nm of bending against
@@ -147,7 +148,11 @@ interface nobody has specified, and that stays open.
 
 ## Margins
 
-All against recomputed demands, all at a floor of 1.5.
+All at a floor of 1.5. Seven of the eight are recomputed by the gate from the
+allowable and the demand stored beside them. The eighth, the shaft's combined case, is
+computed in `tools/structure.py` and floored by the gate but not recomputed by it, because it
+needs the shaft section properties and those live in the script rather than in
+`numbers.json`.
 
 | Case | Demand | Allowable | Margin |
 | --- | --- | --- | --- |

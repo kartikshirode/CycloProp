@@ -13,7 +13,12 @@ below.
 ## Material selection
 
 Six materials carry load. The right hand column is the margin each one decides, so a reader can
-work backwards from any number in the structures document to the property it rests on.
+work backwards from any number in the structures document to the property it rests on. Five of
+the six have one. The adhesive does not, and that is the honest state of it: no bond line
+demand, allowable or margin is computed anywhere in week 4, and the structures document lists
+continuous bond lines among its stated assumptions. The 8 MPa is quoted here because the joint
+list is what sizes the bonds at Stage 2 and the allowable it will be sized against ought to be
+on the record now.
 
 | Material | Where | Density | Modulus | Allowable | The margin it sets |
 | --- | --- | --- | --- | --- | --- |
@@ -22,7 +27,7 @@ work backwards from any number in the structures document to the property it res
 | roll wrapped CFRP tube | spar, pitch links, rotor shaft, frame | 1550 kg/m3 | 130 GPa | 700 MPa, 55 MPa shear | shaft torsion 17.58, combined 9.44 |
 | 7075-T6 aluminium | horns, root fittings, brackets, blocks, lugs | 2810 kg/m3 | 71.7 GPa | 400 MPa | pitch link path, 3.30 |
 | 6061-T6 aluminium | pulleys, carrier ring gear, sector gear | 2700 kg/m3 | 68.9 GPa | 240 MPa | none, these are stiffness parts |
-| Araldite 2011 class epoxy paste | shaft plugs, root fittings, block bonds | 1050 kg/m3 | | 8 MPa shear | bond lines, sized on area |
+| Araldite 2011 class epoxy paste | shaft plugs, root fittings, block bonds | 1050 kg/m3 | | 8 MPa shear | none yet, see below |
 
 **The foam is a structural material here and not a filler.** Skin wrinkling over a soft core is
 what limits the blade, at 215.3 MPa, and that stress is half the cube root of the product of

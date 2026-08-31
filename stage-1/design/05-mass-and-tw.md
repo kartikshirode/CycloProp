@@ -148,10 +148,11 @@ D17 wants the conservative column at 2.75, which needs 633.83 g. It holds 684.70
 g of it, or 13 percent.
 
 That is a smaller return than D31 expected, and the reason is that refinement pushed in both
-directions at once. Growth rates fell from 19.4 percent to 12.6, worth 40.7 g. Against that, the
-gear pair arrived at 12.40 g, the controller at 0.50 g, the blade close-out at 6.36 g and the
-bearings, brackets and reserve at most of the rest, so the nominal column rose 27.9 g. The net
-is 7.7 g.
+directions at once. The growth allowance fell from 112.38 g to 76.73 g, which is 19.4 percent
+of the nominal column down to 12.6, and it is worth 35.65 g. Against that, the gear pair
+arrived at 12.40 g, the controller at 0.50 g, the blade close-out at 6.36 g and the bearings,
+brackets and reserve most of the rest, so the nominal column rose 27.92 g. 35.65 less 27.92 is
+the 7.73 g the conservative column actually moved.
 
 **The target is not met and it is not claimed.** It is a judgment target from D17, not the
 competition limit, and this document does not treat a 2.5457 as if it were 2.75. What would
@@ -162,9 +163,10 @@ radius row at 2.655 and needs a datasheet nobody has opened, or a measured blade
 coefficient that retires the last 5 percent of the haircut. Both are outside week 4.
 
 One thing week 4 could have spent and did not. Balancing the blade chordwise would have taken
-the pitch link from 105.93 N to about 69 N, and it costs 35.47 g of nose ballast across three
+the pitch link from 105.93 N to 74.62 N, and it costs 35.47 g of nose ballast across three
 blades. That drops the stacked case to 2.406, under the hard limit. The pitch load path carries
-the unbalanced blade on a margin of 3.30, so the mass buys nothing that is needed. See D46.
+the unbalanced blade on a margin of 3.30 against a balanced 4.69, so the mass buys nothing that
+is needed. Both link loads come from the solver under `--balanced`. See D46 and D53.
 
 ## Numbers used
 

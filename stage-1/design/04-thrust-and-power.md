@@ -193,7 +193,9 @@ mm, at 2.655, where no belt ratio fits. The best row a drive actually covers is 
 and that is the row the design freezes on per D30. The sweep column for it reads 2.517 because
 the sweep is built on the week 2 envelope, the one estimate applied to all five radii. On the
 week 4 refined budget the same row is 2.5457. All four cases clear 2.5: 3.163 at the design
-point, 2.680 and 3.005 on each downside alone, 2.5457 stacked. The stacked row clears by 12.5 g
+point, 2.680 and 3.005 on each downside alone, 2.5457 stacked. Two of those four are on the
+week 2 nominal envelope and two on the week 4 conservative budget, which is what D47 moved and
+what `05-mass-and-tw.md` sets out row by row. The stacked row clears by 12.5 g
 of conservative mass, so it is a pass without much in hand, and the hard version of that test
 ran in week 4 against a budget built from drawn sections and catalogue parts.
 `stage-1/progress/week-2.md` carries the fallbacks that were worked before the freeze, and
