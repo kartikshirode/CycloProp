@@ -1079,6 +1079,26 @@ case("a lateral load column that does not average out is rejected", False,
      untrimmed_lateral_column, week=3)
 
 
+def lateral_column_deleted(d):
+    """Week 3 added the column and week 4 inherits the load off it. Dropping it used to
+    leave every gate green, because the check that reads it skipped a table without it."""
+    for r in d["aero_azimuthal_loads"]:
+        del r["lateral_force_N"]
+    del d["pitch"]["peak_lateral_force_N"]
+    return d
+
+
+case("deleting the lateral load column is rejected", False, lateral_column_deleted, week=3)
+
+
+def peak_lateral_deleted(d):
+    del d["pitch"]["peak_lateral_force_N"]
+    return d
+
+
+case("a missing peak lateral force is rejected", False, peak_lateral_deleted, week=3)
+
+
 def thrust_not_prequalified(d):
     d["thrust_sensitivity"] = [r for r in d["thrust_sensitivity"] if r["thrust_N"] != 13.5]
     d["thrust_sensitivity"].append({"thrust_N": 11.0,

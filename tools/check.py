@@ -612,7 +612,8 @@ ROW_SPECS = {
     # gets into a submission.
     "configuration_candidates": (3, ("config", "module_mass_g", "thrust_N"), 2),
     "coefficient_scenarios": (3, ("name", "blade_area_coeff", "basis", "evidence_class"), 2),
-    "aero_azimuthal_loads": (24, ("azimuth_deg", "normal_force_N"), 2),
+    "aero_azimuthal_loads": (24, ("azimuth_deg", "normal_force_N",
+                              "lateral_force_N"), 2),
     "drive_candidates": (2, ("name", "continuous_power_W", "continuous_torque_Nm", "mass_g"), 2),
     "linkage_dimensions": (4, ("link", "length_mm"), 3),
     "pitch_schedule": (24, ("azimuth_deg", "pitch_deg"), 3),
@@ -1295,6 +1296,7 @@ def week3(data):
     ok &= require_positive(data, [
         "pitch.offset_m", "pitch.phase_delay_deg", "pitch.vector_range_deg",
         "pitch.actuator_count", "pitch.actuator_mass_g", "pitch.side_force_tilt_deg",
+        "pitch.peak_lateral_force_N",
         "packaging.envelope_length_mm", "packaging.envelope_width_mm",
         "packaging.envelope_height_mm", "packaging.mount_points",
         "pitch.phase_authority_deg", "pitch.schedule_rms_residual_deg",

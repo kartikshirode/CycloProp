@@ -32,7 +32,7 @@ pitch peak, and it leaves the aerodynamic tilt as a separate number instead of f
 two together. Module vertical sits at 90 plus that tilt.
 
 The aero model is week 2's, reconstructed from `04-thrust-and-power.md` and checked against
-the stored table to 5.3e-5 N per row on every one of the 36 rows. Quasi-steady, uniform
+the stored table to 5.2e-5 N per row on every one of the 36 rows. Quasi-steady, uniform
 inflow, thin airfoil slope, blade force taken normal to the local tangent. Week 3 changes
 two things: the schedule it is fed, and the inflow direction, which now follows the
 resultant instead of being pinned to the module vertical.
@@ -57,6 +57,20 @@ LINK_OVER_RADIUS = 105.0 / 110.0
 SWEEP_HORN_MM = (18.0, 20.0, 22.0, 24.4, 26.0, 30.0, 36.0)
 SWEEP_LINK_MM = (100.0, 105.0, 108.0, 111.6, 118.0)
 TRANSMISSION_FLOOR_DEG = 40.0     # standard four-bar practice, and the sweep's constraint
+
+# The azimuthal load table week 2 published, frozen here at commit 1e1e15f. It is the
+# reference the model reconstruction is checked against, and it is carried as a constant
+# rather than read from numbers.json because --write replaces that table with the week 3
+# one. Reading the live table made the script pass once and then disable itself.
+WEEK2_PUBLISHED_LOADS = [
+    (0, 0.0), (10, 0.7483), (20, 2.8299), (30, 5.7943), (40, 9.0109), (50, 11.8165),
+    (60, 13.6651), (70, 14.243), (80, 13.521), (90, 11.7337), (100, 9.2966), (110,
+    6.6858), (120, 4.318), (130, 2.4624), (140, 1.208), (150, 0.4889), (160, 0.1506),
+    (170, 0.0272), (180, 0.0), (190, 0.0272), (200, 0.1506), (210, 0.4889), (220,
+    1.208), (230, 2.4624), (240, 4.318), (250, 6.6858), (260, 9.2966), (270, 11.7337),
+    (280, 13.521), (290, 14.243), (300, 13.6651), (310, 11.8165), (320, 9.0109), (330,
+    5.7943), (340, 2.8299), (350, 0.7483),
+]
 
 SCHEDULE_STEP_DEG = 10.0          # 36 rows, the same azimuths week 2 used
 FINE_STEP_DEG = 0.25              # what the extrema, clearances and derivatives use
@@ -648,10 +662,15 @@ def sweep(data):
 
 
 def check_week2_model(data):
-    """The reconstruction is only worth anything if it reproduces the stored table."""
+    """The reconstruction is only worth anything if it reproduces week 2's own table.
+
+    Checked against `WEEK2_PUBLISHED_LOADS` and never against the live table, because
+    `--write` replaces the live one and an earlier version of this function compared the
+    reconstruction with its own output. That made the script run exactly once.
+    """
     o, p, g = data["operating"], data["performance"], data["geometry"]
-    az = [r["azimuth_deg"] for r in data["aero_azimuthal_loads"]]
-    stored = [r["normal_force_N"] for r in data["aero_azimuthal_loads"]]
+    az = [a for a, _ in WEEK2_PUBLISHED_LOADS]
+    stored = [v for _, v in WEEK2_PUBLISHED_LOADS]
     sched = [g["pitch_amplitude_deg"] * math.sin(math.radians(x)) for x in az]
     _, fy, raw = cycle_resultant(sched, az, o["tip_speed_ms"],
                                  p["induced_velocity_ms"], 90.0)
@@ -681,6 +700,9 @@ def write_numbers(data, s):
         "peak_link_force_N": round(s["peak_link_force_N"], 2),
         "carrier_torque_Nm": round(s["carrier_torque_Nm"], 4),
         "gear_step_up": round(s["gear_step_up"], 4),
+        "carrier_gear_mm": CARRIER_GEAR_MM,
+        "servo_gear_mm": SERVO_GEAR_MM,
+        "servo_mass_g": SERVO_MASS_G,
         "servo_torque_Nm": round(s["servo_torque_Nm"], 4),
         "servo_stall_torque_Nm": SERVO_STALL_TORQUE_NM,
         "servo_travel_deg": SERVO_TRAVEL_DEG,
@@ -725,8 +747,11 @@ def write_numbers(data, s):
         "mount_points": MOUNT_POINTS,
         "swept_diameter_mm": round(2.0 * s["swept_outer_mm"], 1),
     }
+    # newline="\n" on purpose. .gitattributes declares eol=lf, and the default here is the
+    # platform newline, which puts CRLF into a file every sibling document writes as LF.
+    # Git normalises it on the way in, so the damage does not show up in git status.
     NUMBERS.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n",
-                       encoding="utf-8")
+                       encoding="utf-8", newline="\n")
 
 
 def main():
