@@ -454,6 +454,78 @@ def thin_conservative(d):
 case("conservative coefficient equal to nominal is rejected", False, thin_conservative, week=2)
 
 
+def _measured(d, sigma=0.3151, c_over_r=0.66, coeff=None, drop=()):
+    """Append a measured coefficient scenario for this design's own shape family. The
+    fixture geometry is sigma 0.3151 and c/R 0.66, so the defaults match it."""
+    row = {"name": "Kellen 2019 config 8", "evidence_class": "measured",
+           "blade_area_coeff": d["performance"]["blade_area_coeff"] * 1.1
+           if coeff is None else coeff,
+           "solidity": sigma, "chord_to_radius": c_over_r,
+           "basis": "measured on a three bladed NACA 0020 rotor at the same solidity "
+                    "and chord to radius, read off the published sweep"}
+    for k in drop:
+        row.pop(k, None)
+    d["coefficient_scenarios"].append(row)
+    return d
+
+
+def _haircut_5pct(d):
+    """Only the deflection allowance left, so the low coefficient sits at 95 percent of
+    nominal. The deflection loss and every number downstream of the conservative thrust
+    move with it, or the case fails on a gate it was not aiming at."""
+    d["performance"]["blade_area_coeff_low"] = round(d["performance"]["blade_area_coeff"] * 0.95, 6)
+    d["performance"]["blade_deflection_thrust_loss"] = 0.05
+    t_cons = d["performance"]["thrust_N"] * 0.95
+    d["performance"]["thrust_N_conservative"] = t_cons
+    d["results"]["thrust_to_weight_conservative"] = (
+        t_cons / (d["results"]["mass_g_conservative"] / 1000 * G))
+    return d
+
+
+def five_pct_no_measurement(d):
+    return _haircut_5pct(d)
+
+
+case("a 5 percent haircut with nothing measured is rejected",
+     False, five_pct_no_measurement, upto=2, week=2)
+
+
+def five_pct_measured_family(d):
+    return _measured(_haircut_5pct(d))
+
+
+case("a 5 percent haircut passes once this shape family is measured",
+     True, five_pct_measured_family, upto=2, week=2)
+
+
+def five_pct_other_family(d):
+    """Measured, but on a rotor at half the solidity. It buys nothing."""
+    return _measured(_haircut_5pct(d), sigma=0.159, c_over_r=0.333)
+
+
+case("a measurement on a different shape family does not buy the 5 percent floor",
+     False, five_pct_other_family, upto=2, week=2)
+
+
+def five_pct_undercuts_nominal(d):
+    """Measured on the right family, but below the nominal coefficient it is meant to
+    support, so it cannot retire the transfer allowance."""
+    return _measured(_haircut_5pct(d), coeff=d["performance"]["blade_area_coeff"] * 0.9)
+
+
+case("a measurement under the nominal coefficient does not buy the 5 percent floor",
+     False, five_pct_undercuts_nominal, upto=2, week=2)
+
+
+def five_pct_undeclared_geometry(d):
+    """Measured and favourable, but it never says what was measured, so it fails closed."""
+    return _measured(_haircut_5pct(d), drop=("solidity", "chord_to_radius"))
+
+
+case("a measured scenario with no declared geometry fails closed",
+     False, five_pct_undeclared_geometry, upto=2, week=2)
+
+
 def heavy(d):
     for b in d["mass_budget_g"]:
         b["mass_g"] *= 1.9

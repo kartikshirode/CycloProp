@@ -87,6 +87,8 @@ MIN_MOUNT_POINTS = 2
 # A "conservative" case has to actually be conservative. Shaving 0.01 percent off the
 # coefficient and calling it a lower bound satisfies an inequality and nothing else.
 CONSERVATIVE_COEFF_MAX_RATIO = 0.90   # low coefficient at most 90 percent of nominal
+MEASURED_COEFF_MAX_RATIO = 0.95       # floor once this shape family has been measured
+SHAPE_FAMILY_TOL = 0.10               # how close a measured rotor sits to this one
 CONSERVATIVE_MASS_MIN_RATIO = 1.05    # conservative mass at least 5 percent heavier
 
 MODULE_COMPONENTS = ["blade", "frame", "pitch", "motor", "actuator", "mount"]
@@ -677,6 +679,27 @@ def check_thrust_sensitivity(data, r):
     return ok
 
 
+def measured_shape_family(data, sigma, c_over_r, nominal):
+    """The measured coefficient scenario, if any, that was taken on this design's own shape
+    family. Returns the scenario or None. Fails closed: a scenario that does not declare its
+    solidity and chord to radius cannot match, so the narrow floor stays out of reach unless
+    somebody wrote down what was actually measured."""
+    if not sigma or not c_over_r or not nominal:
+        return None
+    for s in data.get("coefficient_scenarios") or []:
+        if not isinstance(s, dict) or s.get("evidence_class") != "measured":
+            continue
+        sg, cr, co = s.get("solidity"), s.get("chord_to_radius"), s.get("blade_area_coeff")
+        if not all(isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0
+                   for v in (sg, cr, co)):
+            continue
+        if (abs(sg - sigma) <= SHAPE_FAMILY_TOL * sigma
+                and abs(cr - c_over_r) <= SHAPE_FAMILY_TOL * c_over_r
+                and co >= nominal):
+            return s
+    return None
+
+
 def check_week2_selection(data, r):
     """Three of the lists week 2 fills carried numbers that no gate read. A drive that
     cannot hold the design point continuously, a candidate table whose winner is not the
@@ -879,9 +902,20 @@ def week2(data):
 
     cl, cn = num(data, "performance.blade_area_coeff_low"), num(data, "performance.blade_area_coeff")
     if cl and cn:
-        ok &= report(cl <= cn * CONSERVATIVE_COEFF_MAX_RATIO,
-                     f"week2: the low coefficient is at most {CONSERVATIVE_COEFF_MAX_RATIO:.0%} of nominal",
-                     f"low {cl} vs nominal {cn}, ratio {cl / cn:.3f}")
+        # The 10 percent floor exists because a transferred coefficient carries an
+        # unmeasured configuration change. A measurement on this design's own shape family
+        # retires that part of the haircut and nothing else, so the floor drops to 5 and
+        # the deflection allowance below still has to be answered. The match is deliberately
+        # narrow: same solidity, same chord to radius, and a measured value that does not
+        # undercut the nominal one. A measurement on a different rotor buys nothing.
+        match = measured_shape_family(data, sigma if R_ and c_ and nb_ else None,
+                                      c_ / R_ if R_ and c_ else None, cn)
+        floor = MEASURED_COEFF_MAX_RATIO if match else CONSERVATIVE_COEFF_MAX_RATIO
+        detail = f"low {cl} vs nominal {cn}, ratio {cl / cn:.3f}"
+        if match:
+            detail += f", floor {floor:.0%} because {match.get('name')} measured this family"
+        ok &= report(cl <= cn * floor * (1 + TOL),
+                     f"week2: the low coefficient is at most {floor:.0%} of nominal", detail)
         # Blade deflection is the one published mechanism for losing thrust against the
         # coefficient, and Benedict and Chopra put it as high as 40 percent. A haircut
         # picked for comfort is not a bound; the low value has to answer a stated loss.
