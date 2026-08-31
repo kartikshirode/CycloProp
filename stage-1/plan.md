@@ -303,6 +303,13 @@ the low coefficient and high mass miss either hard target, geometry does not fre
 case clears 2.5 but misses the 2.75 internal target, stop for a human margin decision rather
 than describing the result as safe.
 
+**Superseded by D30, 31 August 2026.** The rule above is what week 2 ran under and it is kept
+here as written. What replaced it: geometry freezes on three hard cases, the design point and
+each downside taken alone, all against 2.5. The stacked case has to be stated and reproduce,
+and a miss hands week 4 a computed mass target instead of holding the freeze. The hard stacked
+test now lives in week 4 against the refined budget. `tools/check.py` follows D30 rather than
+this paragraph, and the week 2 "Done when" list above is stale in the same way.
+
 **Fallback, in order:** pick a higher precomputed thrust row; move along the coupled radius
 table; reject duplicated hardware and return to the single-rotor branch; revisit the shape
 family. If none closes, stop and report. A result that reaches 2.51 by paper rounding is not

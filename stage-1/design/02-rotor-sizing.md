@@ -185,11 +185,15 @@ stacked case is the one that misses and it is stated rather than buried: to reac
 conservative column has to come down to 623.9 g, which is 68.5 g or 9.9 percent.
 
 That target is now week 4's, and D30 gives the reasoning in full. The short version is what the
-conservative column is made of. Nine of these thirteen lines say assumed in their basis and
-carry a blanket 20 or 25 percent growth rate, so the stacked number tests those rates about as
-hard as it tests the rotor. Week 4 replaces them with real sections, catalogue parts and a BOM,
-and `week4: conservative T/W clears 2.5` applies the same limit to that budget. The hard test
-did not go away. It moved to the week where the mass is real.
+conservative column is made of. Eight of these thirteen lines carry a blanket 20 or 25 percent
+growth rate, six of them on a basis that says the section is assumed rather than weighed or
+quoted, so the stacked number tests those rates about as hard as it tests the rotor. Week 4
+replaces them with real sections, catalogue parts and a BOM, rebuilds the conservative column
+line by line under D33, and `week4: conservative T/W clears 2.5` applies the same limit to what
+comes out. The hard test did not go away. It moved to the week where the mass is real.
+
+D30 counts those lines as nine. Eight is what `mass_envelope_g` gives, and the 86.4 g of growth
+allowance quoted everywhere else comes from the correct eight.
 
 Nominal thrust to weight is 3.163, already 49 percent above the best published module on the
 same boundary. Reaching 2.75 on the stacked case would need a nominal of 3.86, which is 81

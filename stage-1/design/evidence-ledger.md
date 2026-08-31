@@ -41,12 +41,13 @@ measurement here is a figure measured on a different rotor and carried across.
 | E13 | MN3510 KV700 555 W / 25 A / 118 g; MN4006 KV380 380 W / 17.5 A / 57 g; MN3110 KV470 330 W / 15 A / 98 g; MN2806 KV650 187 W / 12.3 A / 46 g, all at 180 s | catalogue | Supplier listings, 2 September 2026. Not read off datasheet PDFs like E12 | not applicable | not applicable | not applicable | the rest of the drive shortlist and the sensitivity rows |
 | E14 | densities: PMI foam 52, CFRP 1550, aluminium 2700 kg/m3, skin 0.22 kg/m2 | catalogue | Rohacell 51 IG class, cured carbon epoxy, 6061, two plies of 60 gsm twill at 45 percent resin | not applicable | not applicable | not applicable | every geometry-scaled mass line |
 | E15 | continuous duty is 0.80 of the 180 s rating | assumed | No source. T-Motor publishes a three minute maximum and the problem statement states no endurance requirement, so there is nothing to size a derate against | not applicable | not applicable | not applicable | turns every catalogue rating into the continuous figure the drive is selected on |
+| E17 | Kellen's test range, chord Reynolds 100,000 to 300,000 | summary | Kellen 2019, the band the thesis is reported to cover. Same unread thesis as E4 and E5, so the band is reported and not read | not applicable | as E4 | the range itself | why a coefficient measured in that thesis would apply at this design point, which sits at 134,074. See D25 and D31 |
 | E16 | efficiencies: belt 0.93, motor 0.84, ESC 0.95 | assumed | No source. Belt drive is published at 0.95 to 0.98 at these speeds so 0.93 is pessimistic; the motor figure is the sensitive one and at 0.78 the motor input rises from 458 W to 493 W | not applicable | not applicable | not applicable | the whole electrical power chain and the drive selection |
 
 Six rows deserve sentences rather than cells.
 
 **E1 is the highest risk value in the project and it is now an extrapolation in two
-directions at once.** Our family gives a solidity of 0.3151, inside Kellen's measured 0.30 to
+directions at once.** Our family gives a solidity of 0.3151, inside Kellen's reported 0.30 to
 0.40, which is what D12 asks. The rotor the coefficient came from has a solidity of 0.276, so
 the transfer runs into the measured band from outside it. And the design point sits at a chord
 Reynolds number of 134,000, above the 100,000 top of E11, the range over which non-dimensional
@@ -138,7 +139,9 @@ recorded rather than quietly applied. Geometry now freezes on three hard cases: 
 point, the mass downside alone and the coefficient downside alone, each above 2.5. The stacked
 case has to be stated and reproduce, and a miss hands week 4 a computed mass target of 623.9 g.
 The hard stacked test moved to week 4, where the mass lines are real sections and catalogue
-parts instead of nine assumed ones carrying a blanket growth rate. The 2.75 internal target
+parts instead of eight lines carrying a blanket 20 or 25 percent growth rate, six of them on an
+assumed section. Week 4 also has to build its conservative column line by line rather than
+state a total, which is D33. The 2.75 internal target
 from D17 stands as a target and is not met on the stacked case.
 
 ## Disclosed gaps
