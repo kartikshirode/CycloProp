@@ -1046,3 +1046,191 @@ run before `--write` or in the same breath as it.
 `aero_azimuthal_loads` and `pitch.peak_lateral_force_N` joined week 3's positive list, because
 deleting the column and its stated peak left every gate green while removing the load week 4
 inherits. Two attack cases went in with them. 115 self-tests to 117.
+## D46: the blade stays unbalanced, because balancing it costs the thrust to weight case
+
+31 August 2026, week 4. Closes the trade D43 handed over. D43 is not superseded and the stored
+pitch loads are still the unbalanced ones.
+
+The blade centre of mass sits at 39.31 percent of chord against a pitch axis at 30, so 6.759 mm
+of chordwise offset. Centrifugal force on that offset is a steady pitching moment on every
+blade, and it is most of the 2.2058 Nm peak and most of the 105.93 N in the pitch link.
+
+Moving the centre onto the axis means lead at the nose. A slug at 5 percent chord needs 11.82 g
+per blade and 35.47 g for the set. That takes the module from 607.97 to 643.44 g nominal and
+from 684.70 to 724.42 g conservative, and the stacked conservative case falls from 2.5457 to
+2.4061, under the hard limit of 2.5. Buying it would break the requirement the whole week exists
+to test.
+
+**What the mass would have bought is a margin that is already adequate.** The pitch link path is
+governed by the horn at 349.727 N, so the unbalanced 105.93 N sits on a margin of 3.30 against a
+floor of 1.5. Balancing takes the link to about 69.4 N and the margin to 5.04. Paying 35.47 g to
+move a margin from 3.30 to 5.04 is not a trade this module can make.
+
+Three things ride on this and they are named so a Stage 2 reader can find them. The pitch
+bearings carry a steady 110 N each while swinging through 80 degrees, which is an oscillating
+fretting duty a static rating does not describe. The blade winds up 2.35 degrees in torsion
+under the same moment. And the link load is fully reversed at 40 Hz. If any of the three fails
+its Stage 2 check, balancing is the first move, and by then the mass may have somewhere to come
+from.
+
+## D47: the conservative module mass is the refined budget's own column
+
+31 August 2026, week 4. Extends D33 and answers what D31 expected. Supersedes nothing.
+
+`results.mass_g_conservative` was the sum of the week 2 envelope's conservative lines, 692.43 g.
+It is now the sum of the refined budget's conservative lines, 684.70 g, and `check.py` reads the
+budget whenever a budget of 8 or more complete lines exists, the envelope only while it does
+not.
+
+Binding the scalar to the envelope for ever would have pinned the refined column to the estimate
+it exists to replace, to half a percent. D31 expected the assumed growth rates to retire against
+real sections, and D34 warned the week 2 documents that the stacked figure would move under them
+when they did. This is that move, and it is the only week where it can happen without breaking
+an earlier gate.
+
+Nothing is unbound by it. Whichever column is live, the stated scalar has to equal a sum of per
+line figures, no line may shrink under growth, and the total must clear 105 percent of its own
+nominal. The refined column carries a further rule the envelope never had: it has to stay within
+25 percent of the week 2 conservative envelope, so a week 4 budget cannot describe a module its
+own estimate never described. 684.70 against 692.43 is 1.1 percent.
+
+The four case table in `02-rotor-sizing.md` now mixes columns and says so. Rows 1 and 3 keep the
+week 2 nominal envelope, because those are the rows geometry froze on. Rows 2 and 4 carry the
+refined conservative mass. The stacked case moved from 2.5173 to 2.5457 and the clearance from
+4.8 g to 12.5 g.
+
+## D48: the pitch loads follow the drawn blade, so week 3's mechanism numbers move about 1 percent
+
+31 August 2026, week 4. Retires debt 11 of week 3. D38 and D42 stand: the geometry did not move
+and neither did the claim.
+
+`tools/linkage.py` carried `BLADE_PARTS_G` as a hand copy of the week 2 blade build-up, and week
+3 recorded that nothing would make it follow a change to the blade. Week 4 changed the blade.
+The constant is gone and the build-up now comes from `tools/structure.py`, the same integration
+that writes the blade budget lines, so the pitch loads and the mass budget cannot disagree about
+what a blade weighs.
+
+Two things moved inside the blade. Integrating the NACA 0020 perimeter gives 2.090 chords rather
+than the assumed 2.05, so the skin is 9.69 g instead of 9.51. Drawing the root close-out as two
+7075-T6 fittings over the spar plus a bond line gives 6.65 g instead of a lumped 4.53 g
+allowance. Per blade the mass is 31.75 g instead of 29.4 g.
+
+Everything downstream moved with it, by about 1 percent in each case except the last:
+
+| Quantity | Week 3 | Week 4 |
+| --- | --- | --- |
+| blade centre of mass | 39.92 pct chord | 39.31 pct chord |
+| peak blade pitching moment | 2.1201 Nm | 2.2058 Nm |
+| peak pitch link force | 101.82 N | 105.93 N |
+| carrier torque | 0.1371 Nm | 0.1389 Nm |
+| servo holding torque, each | 0.0457 Nm | 0.0463 Nm |
+| servo margin on half stall | 2.363 | 2.332 |
+| offset post radial pull | 47.48 N | 53.22 N |
+
+The offset post moved 12 percent, not 1, because the radial pull is a vector sum over three
+links whose phasing shifts with the heavier blade. It is still a long way inside the post's 20.1
+Nm of bending capacity, at 2.13 Nm.
+
+Run order matters now and it is written at the top of both scripts. `tools/linkage.py --write`
+first when the blade section moves, then `tools/structure.py --write`, which reads the pitch
+link load back out.
+
+## D49: the structure is signed off at a declared 1.20 overspeed, on combined bending
+
+31 August 2026, week 4.
+
+Centrifugal load goes as the square of rotor speed, so a structure signed off at exactly the
+design rpm has no answer for control overshoot. The declared case is 1.20 times design speed,
+2885.7 rpm, which makes centrifugal load 44 percent worse instead of 20. It covers ESC control
+overshoot and a gust transient on a rotor whose speed loop has no published bandwidth. The
+problem statement sets no flight envelope for the module, so this is a declared case and not a
+derived one.
+
+`check.py` requires the declared factor to be at least 1.10, because 1.001 satisfies an
+inequality and covers nothing.
+
+**The gated blade margin was measuring the wrong load.** `blade_margin` compares the section
+against aerodynamic bending alone, and on a cyclorotor that is the smaller of the two spanwise
+loads by a factor of 9.2. It reads 28.99 and it always would have. The margins that decide the
+blade are the combined ones, 2.83 at the design point and 1.97 at overspeed, and the attachment
+margins, 2.44 and 1.69. All four are gated at 1.5 and the two overspeed cases have the least in
+hand.
+
+`blade_margin` stays in the schema. Removing it would hide which half of the load the section
+carries easily, and the spread between 28.99 and 1.97 is the clearest statement in the document
+that this rotor is a centrifugal machine first.
+
+## D50: the 5 percent blade flexibility allowance stays at 5 percent, and now has a calculation under it
+
+31 August 2026, week 4. Answers the closure task week 2 left open. It does not reopen D35 or D36.
+
+Week 2 could only bound the allowance from above. Bending deflection is 0.0936 mm at the peak
+blade load and aerodynamic twist is 0.0145 degrees, both negligible against a 40 degree
+amplitude, so the document said plainly that the section did not support 5 percent and kept the
+number because the section was preliminary.
+
+Week 4 found the term week 2 was missing. The blade is driven in pitch from one end through a
+single horn, so the centrifugal pitching moment has to travel through the blade's own torsional
+stiffness. 2.2058 Nm over 290.4 mm of span at 7.81 Nm2 winds the far end up by 2.35 degrees and
+about 1.6 degrees averaged along the span, which is 4 percent of the pitch amplitude. That is
+most of the 5 percent. The rest still covers build tolerance, bond line variation and unsteady
+effects a static beam model does not see.
+
+**The number does not move.** D36 says the coefficient reserve is deliberate and stays unspent,
+and finding a mechanism that justifies an allowance is not a reason to spend it. What changed is
+that the allowance is defensible in a viva now, instead of being a floor with an apology
+attached.
+
+Driving the blade from both ends would roughly quarter the wind up. That is a Stage 2 option and
+it costs a second horn, a second link and a second offset path per blade, which the mass budget
+has no room for.
+
+## D51: four gates and one reader fix went into check.py this week
+
+31 August 2026, week 4. Records a gate change, the way D42 did for week 3. Nothing was loosened.
+
+The week 4 gate was checking that a blade survives aerodynamic bending, which it does by a
+factor of 29, and it had nothing to say about the load that actually sizes the blade. Four gates
+went in:
+
+- `blade_combined_margin` and `blade_combined_margin_overspeed`, allowable over aerodynamic plus
+  centrifugal bending, both floored at 1.5
+- `blade_attachment_margin_overspeed`, with the overspeed centrifugal load recomputed from the
+  declared factor squared
+- `blade_centrifugal_bending_Nm` recomputed from the centrifugal load and the same lever the
+  aerodynamic case uses, so it cannot be written down
+- the conservative budget held within 25 percent of the week 2 conservative envelope, which is
+  the band the nominal columns already carried per component and in total
+
+Plus one reader fix. `dim_of_key` matched a unit only at the very end of a key, so
+`thrust_N_conservative` was not a force and `mass_g_conservative` was not a mass, and the
+submission's own conservative thrust of 17.10 N could not trace to the number that produced it.
+Week 3 found that on the draft and recorded it as a gate defect. Qualifiers are peeled off
+before matching now, from a closed list, which is narrower than widening the match: widening it
+would let `power_loading_ref_N_per_W` read as two dimensions at once.
+
+Five attack cases went in with them, one per gate plus a coverage probe for the qualifier fix.
+Each of the four structural cases stores a self-consistent structure block, so every one of them
+would have passed every margin gate that existed before this week. 117 self-tests to 123, and
+the closing count is computed now, because the constant it replaced had drifted one behind what
+the run actually prints.
+
+## D52: the BOM is priced, and priced is not quoted
+
+31 August 2026, week 4.
+
+Every unit cost in the BOM is an indicative distributor list level price. No supplier was
+contacted, no listing was fetched during the week, and the source column names the distributor a
+part would be bought from and not one that has quoted for it. The field is `priced_date` in
+`numbers.json` for that reason, and `06-materials-and-manufacturing.md` says it in bold above
+the table.
+
+The alternative was leaving the BOM out until real quotes exist, and that loses more than it
+saves. Cost realism carries 10 percent with manufacturability, and the make against buy split
+and the lead times are the parts a reviewer actually uses. Both are sound whether the rupee
+figures move 20 percent or not. The critical path is a 4 week foam import with no Indian
+stockist, and that finding does not depend on the price at all.
+
+Five lines above 4500 INR carry 52 percent of the 65770 INR total, and those are the ones Stage
+2 has to replace with written quotes. Gear cutting is the one most likely to move, because a
+quantity of one is priced by setup.

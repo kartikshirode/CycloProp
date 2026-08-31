@@ -271,3 +271,63 @@ times. And I had quoted a band of 10 to 45 degrees for the side force off an axi
 than off a plotted value. That one is the least excusable, because the wider band made my own
 uncertainty argument sound worse than the sources support, and I did not notice because it was
 arguing against me. D45 carries all of it.
+## 31 August 2026, week 4, structure and mass
+
+This week died in the middle and got picked back up. The session running it hit an API failure
+partway through and stopped, having written the solver, the numbers, three design documents and
+a pile of gate changes, and having committed exactly none of it. Nothing was lost, because it
+was all sitting in the working tree, but nothing was recorded either: no decisions, no progress
+file, no handoff, no audit. The recovery was reading 786 lines of somebody else's uncommitted
+work before touching any of it, then finishing the week from there. I did not restart it and I
+did not rewrite what was already right.
+
+What I did change in the inherited work was small and I want it written down. Three fixtures in
+`test_gates.py` had gone stale against a gate the same session added, and one gate the session
+added was arguably too clever, so the fix was to teach the fixture what a structure block now
+contains rather than to soften the gate. The `02` blade build-up paragraph still said 29.4 g per
+blade three paragraphs above a section explaining that week 4 had rebuilt the blade. The
+`03` numbers block still declared the old servo torque, 1.3 percent out, which is inside the
+gate's 2 percent display tolerance and therefore invisible. And the BOM called its date field
+`quote_date`, which claims something that did not happen.
+
+That last one is the thing I would defend hardest. Every price in the BOM is a guess at a
+distributor list price. It is a decent guess, and the make against buy split and the lead times
+are worth more to a reviewer than the rupee figures are, but a field called `quote_date` says a
+supplier was asked and no supplier was asked. It is `priced_date` now, and the document says so
+above the table in bold. D52.
+
+The engineering itself came out better than I expected in one place and worse in another.
+
+Better: the blade. Integrating the NACA 0020 section instead of assuming a shape factor gave a
+perimeter of 2.090 chords against the 2.05 week 2 used, so the skin is heavier, and drawing the
+root close-out as real fittings took a 4.53 g allowance to 6.65 g. That is only 2.3 g a blade,
+but it is the kind of drift that turns into a failed budget if you find it in week 5. The
+section itself is stiff: 51.1 Nm2 of EI, and skin wrinkling over the foam sets the allowable at
+25.25 Nm, not the fibre.
+
+Worse, or at least more interesting: the blade margin the gate had been checking since week 2 is
+the wrong margin. Aerodynamic bending is 0.87 Nm and the section takes 25.25, so it reads 28.99
+and it reads that whatever you do to the blade. Centrifugal bending is 8.04 Nm. Runco measured
+centrifugal beating aerodynamic by 4.4 times on a much smaller rotor and this design is at 9.2,
+which is the whole reason D16 exists, and the gate still could not see it. Combined and at a 1.2
+overspeed, the blade margin is 1.97 and the attachment is 1.69. Those two are the design now.
+Everything else in the module is over 3.
+
+The mass closed and it closed without a fallback. 607.97 g nominal, 684.70 conservative, stacked
+conservative T/W 2.5457 against a hard 2.5. Week 2 handed this week a case clearing by 4.8 g and
+it now clears by 12.5. That reads like a win and it is a modest one: refinement bought 40.7 g in
+growth rates and gave 27.9 g of it straight back in real parts, because the gear pair week 3
+found missing is 12.4 g and the drawn brackets and close-outs are most of the rest. Net 7.7 g.
+The 2.75 target is still 50.9 g away and I am not going to reach it by trimming.
+
+The balance decision was the one I expected to agonise over and it took ten minutes once the
+number existed. Balancing the blade chordwise costs 35.47 g and takes the stacked case to 2.406,
+under the limit. It buys a pitch link margin of 5.04 in place of 3.30. You do not spend a
+requirement to improve a margin that already passes twice over. D46, and the three things that
+could reopen it are named in the entry.
+
+One process note. The two scripts now have a run order, linkage first then structure, because
+linkage imports the blade build-up from structure and structure reads the pitch link load back
+out. That is a cycle and it is resolved by hand, which I do not love. It is honest at least: the
+alternative was leaving `BLADE_PARTS_G` as a hand copy that no gate could see going stale, which
+is exactly the debt week 3 wrote down. Week 5 should not need to touch either script.
