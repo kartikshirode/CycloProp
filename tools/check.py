@@ -541,6 +541,26 @@ def dim_of_key(key):
     return None
 
 
+def front_matter_lines(text):
+    """How many leading lines belong to a pandoc YAML front matter block. 0 when there is
+    none.
+
+    That block is build configuration: a page margin, a font size, a title, a toc flag. It
+    is not a claim about the design, so the coverage audit has no business reading
+    `margin=25mm` as a length somebody has to justify from `numbers.json`. Skipping it is
+    positional and not a string exemption, so the same text in the body still fails.
+
+    An opening `---` with no closing delimiter counts as no front matter. Otherwise a stray
+    horizontal rule on line 1 would hide an entire document from the audit."""
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return 0
+    for i, line in enumerate(lines[1:], 2):
+        if line.strip() in ("---", "..."):
+            return i
+    return 0
+
+
 def collect_dimensioned(node, out, key=""):
     if isinstance(node, dict):
         for k, v in node.items():
@@ -559,6 +579,9 @@ def check_numeric_coverage(rel, data):
     a computed value in the same dimension, be the 10 N requirement, or sit inside an
     exempt region: a blockquote, an allow-line, or an allow-table.
 
+    The YAML front matter block is not narrative at all and is skipped before any of that,
+    per `front_matter_lines`.
+
     Exempt does not mean free. A number inside an exempt region that still fails to trace
     counts against a hard ceiling, because the promise being kept here is that at most a
     handful of numbers in the submission are unchecked by anything. Counting markers let
@@ -575,8 +598,11 @@ def check_numeric_coverage(rel, data):
     ok = report(not bare, f"{rel} every audit escape states a reason",
                 "; ".join(bare[:3]) if bare else "")
 
+    front_matter = front_matter_lines(text)
     unmatched, unchecked, table_exempt = [], [], False
     for i, line in enumerate(text.splitlines(), 1):
+        if i <= front_matter:
+            continue                       # build configuration, not a technical claim
         stripped = line.strip()
         if allow_reason(line, table=True):
             table_exempt = True
