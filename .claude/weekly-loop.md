@@ -40,11 +40,13 @@ Two properties matter more than the list.
 
 **Hard limits are applied to recomputed values, never stored ones.** An earlier version compared stored headline numbers against the limits while only checking consistency to 2 percent, which let a 1.9 percent overstatement of thrust and a 1.9 percent understatement of mass compound into a design that missed both targets and passed every gate. Internal arithmetic now has to reproduce to 0.5 percent, and the limits are tested against what the geometry and the mass lines actually give.
 
-**There is no 408 g gate.** 408 g is only the ceiling when thrust is exactly 10 N, and the requirement is at least 10 N. The gate tests the real requirement: recomputed thrust at or above 10 N, and recomputed T/W above 2.5, for both a nominal and a conservative case.
+**There is no 408 g gate.** 408 g is only the ceiling when thrust is exactly 10 N, and the requirement is at least 10 N. The gate tests the real requirement: recomputed thrust at or above 10 N, and recomputed T/W above 2.5.
+
+Since D30 that limit is applied to four cases rather than one. Week 2 gates the design case, the mass downside on its own and the coefficient downside on its own, and it states the stacked case where both apply together. The stacked case is gated hard in week 4 instead, against a budget built from real sections. D33 then found that the week 4 test was reading a single stored scalar and rebuilt it: every `mass_budget_g` line carries its own `conservative_g`, no line may shrink under growth, and `results.mass_g_conservative` has to equal their sum. Read D30 and D33 before touching any of it.
 
 **One gate asks whether the design is physically possible, and the rest only check that the arithmetic agrees with itself.** That one is the momentum bound in week 2. Aerodynamic power must sit at or above the ideal induced power over a declared area no larger than 2R times span, and the resulting figure of merit must land between 0.20 and 0.75. Before it existed the gate certified 13.5 N produced by 1 W, with every stored number in perfect agreement. Week 4 carries the structural half of the same idea: per-blade mass, shaft torque and blade root bending are recomputed from the design rather than read back from where they were asserted.
 
-Weeks are cumulative, so `--week 4` reruns 1 through 3 and a later week cannot pass by breaking an earlier one. The gates have their own test suite at `tools/test_gates.py`, which builds throwaway trees and checks that an honest design passes and eleven specific attacks fail. Run it after changing `check.py`.
+Weeks are cumulative, so `--week 4` reruns 1 through 3 and a later week cannot pass by breaking an earlier one. The gates have their own test suite at `tools/test_gates.py`, which builds throwaway trees and checks that an honest design passes while a long list of specific attacks fail. Run it after changing `check.py`, and add cases when you add a gate.
 
 ## Markers
 
