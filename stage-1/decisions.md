@@ -519,3 +519,69 @@ Cosmetic in the sense that nothing was mis-gated, and not cosmetic in the sense 
 the one artifact a human reads to decide whether a week is sound. `report()` now takes an
 optional `fail_detail` shown only when the check fails, and the two sites that were failure
 worded use it.
+
+## D30: geometry freezes on the design case, and the stacked downside becomes a week 4 gate
+
+31 August 2026, after week 2 reported BLOCKED. Supersedes the freeze rule in D17 and answers
+the decision D22 stopped for.
+
+Week 2 came back at a stacked conservative thrust to weight of 2.2525 and halted, which is
+what the loop config told it to do. The call it was waiting for is made here.
+
+**What the four cases say.** The design point is 18 N on a 580.05 g module, giving 3.1633.
+The mass downside on its own, meaning the 692.43 g conservative column at full thrust, gives
+2.6499. The coefficient downside on its own, meaning 15.3007 N on the nominal mass, gives
+2.6889. Only stacking both misses, at 2.2525. All four reproduce from the geometry.
+
+So the design clears the competition limit by 27 percent and each downside alone clears it by
+about 6. The miss appears when two independent allowances multiply.
+
+**Why the stacked case is the wrong thing to freeze on in week 2.** Nine of the thirteen
+envelope lines say "assumed" in their basis and carry a blanket 20 or 25 percent growth rate.
+The stacked number tests those growth rates as much as it tests the design. Week 4 replaces
+the assumed sections with real ones, catalogue parts and a BOM, and
+`week4: conservative T/W clears 2.5` already applies the same limit to that refined budget.
+The hard test exists. It sits one week later, where the mass is real.
+
+**What was rechecked before deciding**, by hand rather than read back from the week 2 report:
+
+- Higher thrust. 20 N wants 535.92 W at 110 mm against 520 W continuous, so it fails on power
+  before anything else. At 120 mm the power fits at roughly 491 W, but the belt ratio has to
+  clear 4.191 for torque and stay under 3.986 for speed, so the window is empty
+- Smaller radius. The 100 mm row gives 2.3759 and is the best point on the sweep. Its window
+  is empty too: torque wants a ratio above 3.143 and the speed rule caps it at 2.918. That
+  holds for any pulley pair, not only the half integer ones week 2 searched, so the row is
+  properly closed and not closed by rounding
+- A lighter drive. Nothing in the shortlist reaches 503 W under 78 g. Best power density on
+  the table is the MN4006 at 6.7 W per gram, which at 78 g would give 416 W continuous
+- Trimming the growth rates. A uniform 10 percent gives 2.44 and still misses, and trimming
+  an allowance until the number appears is the failure mode the blocked trigger exists for
+
+None of it closes. The gap sits inside the coefficient haircut, where D23 put it.
+
+**Kellen stays unobtained and the decision no longer waits for it.** The OAKTrust item, its
+bitstream and the handle URL all return 403 behind a Cloudflare JavaScript challenge. A real
+browser passes it in seconds, so it stays a human task, and it is still the cheapest thing
+available, because it moves the stacked case to 2.5173 on its own. Nothing here depends on it.
+
+**What changes.** Geometry freezes at 18 N and 110 mm, 120 mm carried as insurance. Week 2's
+copy of the stacked gate is replaced by four: the design case, the mass downside alone and the
+coefficient downside alone each have to clear 2.5, and the stacked figure has to be stated and
+reproduce. A stacked miss now hands week 4 a computed mass target that the gate recomputes,
+rather than a paragraph. That target is 623.9 g, which is 68.5 g below the conservative column
+and 9.9 percent of it.
+
+**The direction of this change, stated plainly.** It unblocks a week that was blocked, and
+that is worth saying rather than burying. What makes it a restructure and not a trim is the
+ledger. Week 2 goes from one thrust to weight gate to four plus a conditional target gate,
+week 4 keeps the hard stacked test on refined mass, and no assumption moved. The coefficient
+haircut, the 0.80 derate, the 90 percent speed rule, the growth rates and the 2.5 limit all
+stand exactly where week 2 left them.
+
+**One lead nobody has priced.** Pack voltage sits outside the module boundary, so cell count
+is free on module mass. Motor torque ceiling goes as current over KV and speed ceiling as KV
+times voltage, so their product is electrical power and carries no KV term at all. Fixing
+KV450 on 6S and then searching only the belt ratio imposed a constraint the motor's power
+rating does not impose. A lower KV variant on a higher cell count would reopen the 100 mm row.
+Week 4 confirms the drive anyway and should price this properly. It is not used here because
+overvolting a 6S rated motor needs a datasheet nobody has opened.
