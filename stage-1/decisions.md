@@ -585,3 +585,63 @@ KV450 on 6S and then searching only the belt ratio imposed a constraint the moto
 rating does not impose. A lower KV variant on a higher cell count would reopen the 100 mm row.
 Week 4 confirms the drive anyway and should price this properly. It is not used here because
 overvolting a 6S rated motor needs a datasheet nobody has opened.
+
+## D31: the stacked shortfall is a 623.9 g mass target, and it can retire from either side
+
+31 August 2026, week 2 second run. Implements the target D30 asked for.
+
+D30 moved the hard stacked test to week 4 and said a week 2 miss has to hand week 4 an
+arithmetic target rather than a paragraph. This is that target and the reasoning behind the
+number.
+
+**The value.** 623.8818 g, stored as `results.mass_target_week4_g`. It is the conservative mass
+that puts the stacked case exactly on 2.5 at the conservative thrust of 15.3007 N, so it is
+15.3007 over 2.5 times 9.81, in grams. The gate recomputes it from the stored thrust and
+rejects a stated value that misses by more than half a percent, which is why nothing here is a
+round number chosen for comfort. Against the 692.43 g conservative column that is 68.5 g, or
+9.9 percent.
+
+**Where the 68.5 g is expected to come from.** Eight envelope lines carry a 20 or 25 percent
+growth rate on an assumed basis: blades, rotor frame and hubs, pitch mechanism, rotor shaft,
+frame and mounting hardware, transmission, wiring harness, fasteners and bonded joints. Between
+them they hold 86.4 g of the 112.4 g total allowance. Week 4 draws real sections and quotes
+catalogue parts, so those rates fall to what a weighed estimate deserves rather than what an
+assumed one does. Retiring those eight to a uniform 10 percent gives back 45.7 g on its own,
+which is two thirds of the gap and not all of it. The rest has to come out of the nominal
+lines, and the softest of those are already named in the week 2 progress file: the shaft torque
+allowance at 18 g per Nm, the fastener and bonded joint line at 22 g, and the 16 g harness.
+
+**Trimming a growth rate to make the number appear is not a retirement path.** The rate falls
+because a line stopped being assumed, or it does not fall. That distinction is the whole reason
+the blocked trigger exists and D30 left it standing.
+
+**The target can also retire from the thrust side, and that is worth knowing before week 4
+spends effort on mass.** The 15 percent coefficient haircut is 10 points of configuration
+transfer plus 5 of blade deflection. If Kellen's measured coefficient comes in at or above
+0.6055 for this shape family, the transfer allowance retires, conservative thrust goes to 17.1
+N, and the mass that clears 2.5 becomes 697.2 g. That is above the 692.43 g the module already
+weighs in the conservative column, so the target disappears entirely and week 4 inherits no
+shortfall. One browser session decides which of the two problems week 4 is actually solving.
+
+## D32: every document that quotes the design case also carries the stacked one
+
+31 August 2026, week 2 second run.
+
+Week 2 spent most of its length reporting one conservative thrust to weight and D30 showed
+there were four cases in the data the whole time. The design case at 3.163 is the honest
+headline and 2.252 is the honest caveat, and a document that carries the first without the
+second is selling the reader a number.
+
+So the rule for weeks 3 to 5: any document stating the design thrust to weight also states the
+stacked conservative figure, what it misses by, and where the test now lives. That is four
+cases in the design documents and in the submission, not one. The evidence ledger says the same
+thing about the freeze rule it originally published, because that rule changed after the
+numbers arrived and a ledger that quietly shows the new rule is worse than useless.
+
+The week 2 half of this is mechanical rather than a promise. Each of the three week 2 design
+documents has to quote a number within half a percent of the recomputed stacked figure, at any
+rounding, and a document that drops it fails the week. Weeks 3 to 5 are on the audit, because a
+gate cannot tell which numeric token in a document is meant to be a thrust to weight.
+
+The cost of this is a paragraph per document and some repetition across five of them. The
+alternative is a Stage 2 team reading 3.163, building to it, and finding out from a scale.

@@ -108,3 +108,38 @@ identically to a calibrated one. Twelve self-tests went in with them and the sui
 
 Final answer 2.252 against a hard limit of 2.5. Every audit fix moved it down except the motor
 work, which is the right direction for a week that started by finding the number it wanted.
+
+## 31 August 2026, week 2, second run and the freeze
+
+Came back to a week that had already done its work and stopped one number short. The call it
+stopped for arrived as D30, so this run was small: compute the mass target, freeze the geometry
+in the documents, close the week.
+
+The target itself is one line of arithmetic. Conservative thrust over 2.5 times gravity, 623.88
+g, and the gate recomputes it and rejects anything that misses by half a percent. What took the
+time was working out what to say about it. A target that says "week 4 finds 68.5 g" is a
+paragraph pretending to be a plan, so I went through the envelope line by line to see where the
+grams could plausibly come from. Eight lines carry a 20 or 25 percent growth rate on an assumed
+basis and hold 86.4 g between them. Retire those to a uniform 10 percent and you get 45.7 g
+back, which is two thirds of the gap and not the whole thing. Worth writing down, because the
+first honest answer is that the mass route alone probably does not close it.
+
+Then I noticed the other direction and it changed the entry. If Kellen's coefficient comes in
+at or above 0.6055, the transfer allowance retires, conservative thrust goes to 17.1 N, and the
+mass that clears 2.5 becomes 697.2 g. The module already weighs 692.4 g in the conservative
+column. So the whole target disappears rather than shrinks, and week 4 might be solving a
+problem that a browser session deletes. That is now the first line of D31 and the second item
+on the human list.
+
+The documents needed more editing than the numbers did. Four files described the freeze as
+pending and one of them, the evidence ledger, published the freeze rule that D30 then changed.
+I left the original rule visible and wrote the change underneath it rather than editing the
+rule in place, because a ledger that quietly shows the new rule is worse than no ledger. Same
+reasoning behind D32: every document that quotes 3.163 also carries 2.252 from here on. Five
+documents will repeat themselves a bit. Better than a Stage 2 team building to the headline and
+finding out from a scale.
+
+One thing I did not do: reopen anything. The coefficient, the derate, the speed rule, the
+growth rates, the drive and the two frozen tables are all exactly where the first run left
+them. D30 says so explicitly and it is the part of the entry worth taking seriously, because
+the easy version of this week was to shave two percent off a growth rate and call it a design.
