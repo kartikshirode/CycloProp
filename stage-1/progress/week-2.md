@@ -3,6 +3,13 @@
 **STATUS: WEEK-COMPLETE.** Geometry is frozen at 18 N of design thrust and a 110 mm radius,
 with 120 mm carried as insurance. All three gate commands exit 0.
 
+**Superseded on the stacked case, 31 August 2026, by D35.** Everything below is the week as it
+ran and it is not rewritten. What changed afterwards: Kellen 2019 was retrieved and read, its
+measured coefficient for this shape family retired the configuration-transfer allowance, and the
+stacked conservative case went from 2.252 to 2.517. It clears 2.5 now, by 4.8 g of conservative
+mass. `results.mass_target_week4_g` was deleted with the shortfall it described. Debt 1 below is
+struck through for the same reason.
+
 Week 2 ran twice. The first run produced everything the plan asked for and then reported
 BLOCKED, because the stacked conservative case came in at a thrust to weight of 2.252 against a
 hard limit of 2.5. A person made the call and recorded it as D30. The second run froze the
@@ -191,7 +198,7 @@ structural lines. There is currently one, Runco, four orders of magnitude smalle
 
 | # | Debt | Owner |
 | --- | --- | --- |
-| 1 | The stacked conservative case is 68.5 g short of T/W 2.5, carried as `results.mass_target_week4_g` = 623.9 g. Week 4 closes it against a refined budget or reports BLOCKED. See D30 and D31 | week 4 |
+| 1 | ~~The stacked conservative case is 68.5 g short of T/W 2.5, carried as `results.mass_target_week4_g` = 623.9 g. Week 4 closes it against a refined budget or reports BLOCKED. See D30 and D31~~ **Retired 31 August 2026 by D35.** Kellen's measured coefficient took the stacked case to 2.517, so it clears 2.5 by 4.8 g and the target was deleted. What week 4 inherits instead is the D17 internal target of 2.75, still unmet, wanting the conservative column at 633.8 g against 692.4 g, a 58.6 g gap. That is a margin target, not a blocked trigger | week 4 |
 | 2 | Four of the five motor rows and the ESC came from supplier listings rather than datasheet PDFs. Only the MN5006 was read off the manufacturer's sheet. Week 4 confirms the rest, and prices the lower KV on more cells idea D30 raised | week 4 |
 | 3 | The 0.80 continuous derate on a 180 s rating has no source, because the problem statement states no endurance requirement to size it against. A stated hover duration would turn a judgement into a calculation | human |
 | 4 | The three efficiencies, 0.93 belt, 0.84 motor, 0.95 ESC, are assumed. The motor figure is the sensitive one: at 0.78 the motor input rises to 493 W and eats most of the drive margin | week 4 |

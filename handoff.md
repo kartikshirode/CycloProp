@@ -15,8 +15,8 @@ Weeks 1 and 2 are done. Geometry is frozen at 18 N of design thrust and a 110 mm
 2. **[stage-1/plan.md](stage-1/plan.md)** is the week by week execution plan
 3. **[stage-1/progress/week-2.md](stage-1/progress/week-2.md)** is where the design stands and
    what week 3 inherits
-4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 34 entries,
-   and D30 is the one that unblocked week 2
+4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 37 entries.
+   D30 unblocked week 2 and D35 is the one that closed the stacked case
 5. **[stage-1/design/evidence-ledger.md](stage-1/design/evidence-ledger.md)** is what every
    number rests on and how strong it is
 6. **[stage-1/audit/week-2.md](stage-1/audit/week-2.md)** is the two fresh-context audit
@@ -46,16 +46,25 @@ is how week 2 confused itself for a fortnight:
 | --- | --- | --- | --- |
 | design point | 18.00 N | 580.1 g | 3.163 |
 | mass downside alone | 18.00 N | 692.4 g | 2.650 |
-| coefficient downside alone | 15.30 N | 580.1 g | 2.689 |
-| both stacked | 15.30 N | 692.4 g | 2.252 |
+| coefficient downside alone | 17.10 N | 580.1 g | 3.005 |
+| both stacked | 17.10 N | 692.4 g | 2.517 |
 
-The first three clear the hard limit of 2.5 and the geometry froze on them. The stacked case
-misses by 68.5 g and that shortfall is now a number week 4 owns: `results.mass_target_week4_g`
-is 623.9 g, the conservative mass that would put the stacked case exactly on 2.5. The gate
-recomputes it. See D30 for the call and D31 for the target.
+All four now clear the hard limit of 2.5. Geometry froze on the first three under D30, and the
+stacked case joined them on 31 August when Kellen 2019 arrived: a measured coefficient of 0.6648
+for this shape family retired the configuration-transfer allowance, so the low coefficient went
+from 0.5147 to 0.5752 and conservative thrust from 15.30 N to 17.10 N. That is D35.
 
-The internal 2.75 margin target from D17 is not met on the stacked case and nobody is claiming
-it is.
+Read the stacked row as a thin pass rather than a comfortable one. It clears by 4.8 g: the
+conservative column would have to stay under 697.2 g and it sits at 692.4 g. The hard version of
+that test still runs in week 4 against a refined budget, under D30 and D33.
+
+`results.mass_target_week4_g` is gone. It described a shortfall that no longer exists, and the
+gate stops checking that field once the stacked case clears, so leaving it would have parked an
+unchecked number in the schema.
+
+What week 4 inherits instead is the internal 2.75 target from D17, which is still not met and
+still not claimed. Reaching it wants the conservative column at 633.8 g against the 692.4 g it
+holds now, so the gap is 58.6 g. That is a target and not a limit.
 
 ## What week 3 does, and the two things it inherits
 
@@ -79,20 +88,16 @@ lengths, offset geometry, the pitch schedule and gearing all move with radius.
 first, because the clause disqualifies a whole team at any stage, including after results are
 announced.
 
-**2. Pull Kellen 2019.** Not a blocker any more, still the cheapest win on the list. A measured
-coefficient at or above 0.6055 retires the configuration-transfer allowance, which takes
-conservative thrust to 17.1 N and makes the mass that clears 2.5 into 697.2 g. The module
-already weighs 692.4 g conservative, so week 4's mass target would disappear rather than
-shrink. `check.py` is ready for it: a coefficient scenario classed measured, on this design's
-own solidity and chord to radius, drops the haircut floor from 10 percent to 5. It would also
-settle D25, because Kellen's test range is reported as 100,000 to 300,000 and this design sits
-at 134,074, inside it.
+**2. Done. Kellen 2019 and Benedict 2010 are both read**, retrieved from the Wayback Machine on
+31 August after the live OAKTrust route stayed behind its Cloudflare challenge and DRUM served a
+maintenance page. `reference/README.md` has the two URLs that worked and a curl line for each.
+The PDFs are 52 MB together so they are not committed; the text extracts and the sha256 of each
+PDF are.
 
-Handle 1969.1/184958, item `a4c62d38-3778-44f4-b398-cdcba283fa06` on the Texas A&M repository.
-The item page, the bitstream and the handle URL all return 403 to a script, because it is a
-Cloudflare JavaScript challenge rather than a permissions gate. core.ac.uk and oatd.org were
-tried on 31 August and neither has it. A real browser passes in about two seconds. Open the
-item page, click Download, drop the PDF in `reference/`.
+What came out of them: D35 retired the configuration-transfer allowance and closed the stacked
+case, D36 corrected the provenance of the nominal coefficient and held it at 0.6055 anyway, and
+D37 narrowed D25 on the Reynolds axis. E4, E5 and E17 in the evidence ledger moved from summary
+to measured, and E18 and E19 are new.
 
 **3. The drive, at week 4.** Pack voltage sits outside the module boundary, so cell count costs
 the module nothing. Motor torque ceiling goes as current over KV and speed ceiling as KV times
@@ -103,11 +108,13 @@ sweep at 2.376. It needs a datasheet.
 
 ## What week 2 established, beyond the freeze
 
-- **The single rotor beats a redesigned cluster.** 2.252 against 1.659 for two rotors and 1.323
+- **The single rotor beats a redesigned cluster.** 2.517 against 1.855 for two rotors and 1.479
   for three, on one common model with every contested assumption set in the cluster's favour.
   D2 was provisional since week 1 and is now settled. See D18
-- **The 0.607 coefficient reproduces.** Recomputing it from Benedict's quad rotor figures gives
-  0.6055, so the number the repo has carried since week 1 is right to a quarter of a percent
+- **The 0.6055 coefficient reproduced, and its basis did not.** The arithmetic behind it checks
+  out every time. The inputs it used are not in Benedict: 1.98 N is a vehicle weight over four
+  and 2000 rpm belongs to the twin. The real quad point gives 0.7211. 0.6055 is held anyway as
+  deliberate reserve. See D36
 - **The Reynolds transfer is an extrapolation and cannot be made otherwise.** The conservative
   thrust gate forces design thrust above 11.76 N, which puts chord Reynolds above 108,000, above
   the 100,000 top of the range the transfer has published support over. See D25
@@ -150,10 +157,13 @@ the week 4 conservative column. 104 self-tests.
 
 ## Open items
 
-- **Week 4 owns a 68.5 g mass target.** If the refined budget cannot reach 623.9 g on the
-  stacked case, that is a blocked trigger and a human decision, not a trimmed allowance. Week 4
-  also builds its conservative column line by line under D33, and restates the stacked figure in
-  the three week 2 design documents when the mass moves, under D34
+- **Week 4 owns a 58.6 g margin gap, not a compliance gap.** The stacked case clears 2.5 at
+  2.517 and clears it by 4.8 g, so the hard limit is met and the internal 2.75 target from D17
+  is not. Closing that wants the conservative column at 633.8 g. Failing to close it is a margin
+  decision rather than a blocked trigger; falling under 2.5 on the refined budget is still the
+  blocked trigger. Week 4 also builds its conservative column line by line under D33, and
+  restates the stacked figure in the three week 2 design documents when the mass moves, under
+  D34
 - **`.claude/weekly-loop.md` describes the week 2 thrust to weight gate in its pre-D30 form**,
   at the paragraph about what the arithmetic gate checks. Its blocked triggers are current and
   correct. The config belongs to a person, so week 2 reported this rather than editing it
@@ -164,6 +174,10 @@ the week 4 conservative column. 104 self-tests.
   hover duration would turn it into a calculation
 - **Four of the five motor rows came from supplier listings**, not datasheet PDFs. Only the
   MN5006 was read off the manufacturer's sheet. Week 4 confirms the rest
+- **The coefficient reserve is deliberate and must stay unspent.** 0.6055 sits below all three
+  measured or corrected values available: Kellen at 0.6648, the corrected Benedict quad at
+  0.7211, the twin at 0.8114. No later week may recompute thrust upward off those without a new
+  decision entry. See D36
 - **Ramsey 2022 and Heimerl** are still unpulled. Ramsey would give a second structural mass
   anchor; there is currently one, Runco, four orders of magnitude smaller. Heimerl would replace
   the stated 28 degree stall cap and the peak to mean blade load with measured figures
