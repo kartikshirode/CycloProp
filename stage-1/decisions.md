@@ -645,3 +645,47 @@ gate cannot tell which numeric token in a document is meant to be a thrust to we
 
 The cost of this is a paragraph per document and some repetition across five of them. The
 alternative is a Stage 2 team reading 3.163, building to it, and finding out from a scale.
+
+## D33: week 4 builds its conservative column line by line, it does not state a total
+
+31 August 2026, week 2 second run, after the audit.
+
+D30 moved the hard stacked thrust to weight test into week 4 and called that a restructure
+rather than a trim, on the grounds that the test still exists and only the mass under it gets
+better. The audit went and read the week 4 gate. The test reads `results.mass_g_conservative`,
+which was a single stored scalar with nothing behind it: `check_budget_continuity` groups the
+refined budget against the nominal column only, and the sole constraint on the conservative
+number was that it not be lighter than the nominal budget total.
+
+So week 4 could have cleared the gate by picking a growth rate that lands the total under 623.9
+g. That is the move the blocked trigger forbids, and it was reachable through the gate D30 named
+as its mitigation. The mitigation was thinner than four documents said it was.
+
+**What changes.** Every `mass_budget_g` line carries a `conservative_g` alongside its `mass_g`.
+No line is allowed to be lighter in the conservative column. `results.mass_g_conservative` has
+to equal the sum of those lines to half a percent, and the sum has to be at least 105 percent of
+the nominal budget, which is the rule week 2 already applies to its envelope. Three self-tests:
+a conservative total the lines do not give, a line that shrinks under growth while its neighbour
+pays for it, and the honest budget that has to keep passing.
+
+The growth rate can still be argued line by line, and it should be. What it cannot be any more
+is one number chosen after seeing the target.
+
+## D34: the week 2 documents follow the number, not the other way round
+
+31 August 2026, week 2 second run, after the audit.
+
+D32 put the stacked figure into all three week 2 design documents and a gate makes sure it stays
+there. The gate compares against the recomputed stacked thrust to weight, and week 2's gates run
+again on every later week, so the moment week 4 refines the conservative mass the recomputed
+figure moves and the three frozen documents fail on the old one.
+
+That reads like a trap and it is the right behavior. Those three documents are Stage 1 items 1,
+2 and 4, and week 5 builds the submission out of them. A document that still says 2.252 while
+the refined budget says 2.55 is wrong, and finding out at week 4 is much cheaper than finding
+out from a reader.
+
+So: geometry is frozen, the documents are not. Week 4 restates the stacked figure in
+`01-configuration.md`, `02-rotor-sizing.md` and `04-thrust-and-power.md` when the mass moves,
+and the gate's failure message says so. Frozen means the design stops moving, not that the prose
+stops tracking it.
