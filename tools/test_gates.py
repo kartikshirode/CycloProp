@@ -343,16 +343,21 @@ def build(root, data, upto=4):
     g = d / "stage-1" / "design"
     if upto >= 2:
         geo, perf = data["geometry"], data["performance"]
+        # Every week 2 document declares the stacked conservative T/W, which is what D32
+        # asks for and what `states_value` looks for.
+        stacked = ("results.thrust_to_weight_conservative",
+                   rnd(data["results"].get("thrust_to_weight_conservative"), 4))
         doc(g / "01-configuration.md", ["Configuration", "Why this configuration"],
             [("geometry.blades", geo["blades"]), ("geometry.radius_m", geo["radius_m"]),
-             ("geometry.span_m", rnd(geo["span_m"], 4))])
+             ("geometry.span_m", rnd(geo["span_m"], 4)), stacked])
         doc(g / "02-rotor-sizing.md", ["Rotor sizing", "Shape family", "Radius"],
             [("geometry.radius_m", geo["radius_m"]), ("geometry.chord_m", rnd(geo["chord_m"], 4)),
-             ("operating.rpm", rnd(data["operating"]["rpm"], 1))])
+             ("operating.rpm", rnd(data["operating"]["rpm"], 1)), stacked])
         doc(g / "04-thrust-and-power.md", ["Thrust", "Power", "Sensitivity"],
             [("performance.thrust_N", rnd(perf["thrust_N"], 2)),
              ("performance.aero_power_W", perf["aero_power_W"]),
-             ("performance.module_electrical_power_W", rnd(perf["module_electrical_power_W"], 1))])
+             ("performance.module_electrical_power_W", rnd(perf["module_electrical_power_W"], 1)),
+             stacked])
     if upto >= 3:
         pit, pack = data["pitch"], data["packaging"]
         pitch_doc(g / "03-pitch-and-vectoring.md",
@@ -532,6 +537,29 @@ def stacked_miss_bare_target(d):
 
 case("a mass target with no retirement path is rejected",
      False, stacked_miss_bare_target, upto=2, week=2)
+
+
+def stacked_miss_deflated_target(d):
+    """A target below the computed one looks conservative and is still wrong: it sends
+    week 4 after grams it does not need and hides how much of the gap is real."""
+    return _rescale_mass(d, 1.0, 500.0 / 448.0, target=_target(d) * 0.85)
+
+
+case("a stacked downside miss with a deflated mass target is rejected",
+     False, stacked_miss_deflated_target, upto=2, week=2)
+
+
+def drop_stacked_tw(root, data):
+    """D32: strip the stacked figure out of one week 2 document and leave everything else
+    alone. The design case still reproduces, so only the document rule can catch this."""
+    p = root / "stage-1" / "design" / "02-rotor-sizing.md"
+    keep = [l for l in p.read_text(encoding="utf-8").splitlines()
+            if "thrust_to_weight_conservative" not in l]
+    p.write_text(chr(10).join(keep), encoding="utf-8")
+
+
+case("a week 2 document that drops the stacked T/W is rejected",
+     False, upto=2, week=2, tweak=drop_stacked_tw)
 
 
 def design_case_short(d):

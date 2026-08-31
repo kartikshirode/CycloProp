@@ -260,6 +260,20 @@ def require_substance(rel, min_words=400):
 
 
 NUM_DECL = re.compile(r"^\s*-\s*([A-Za-z0-9_.]+)\s*=\s*([-+0-9.eE]+)\s*$")
+NUM_TOKEN = re.compile(r"\d+\.\d+")
+
+
+def states_value(rel, value, tol=TOL):
+    """True when the document quotes this value somewhere, at any rounding inside `tol`.
+    Matching numeric tokens rather than one formatted string means 2.25, 2.252 and 2.2525
+    all count, which is what a document written by a person actually looks like."""
+    p = ROOT / rel
+    if not p.is_file() or value is None:
+        return False
+    for m in NUM_TOKEN.finditer(p.read_text(encoding="utf-8")):
+        if close(float(m.group()), value, tol):
+            return True
+    return False
 
 
 def check_declared_numbers(rel, data):
@@ -747,6 +761,15 @@ def check_week2_selection(data, r):
     return ok
 
 
+WEEK2_DOCS = [
+    ("stage-1/design/01-configuration.md",
+     ["Configuration", "Why this configuration", "Numbers used"]),
+    ("stage-1/design/02-rotor-sizing.md",
+     ["Rotor sizing", "Shape family", "Radius", "Numbers used"]),
+    ("stage-1/design/04-thrust-and-power.md",
+     ["Thrust", "Power", "Sensitivity", "Numbers used"]),
+]
+
 def week2(data):
     ok = True
     ok &= require_positive(data, [
@@ -915,6 +938,18 @@ def week2(data):
                      "week2: the stacked downside T/W is stated and reproduces",
                      f"T/W {tw:.3f} at {tc:.2f} N and {mc:.0f} g")
 
+        # D32. Week 2 spent most of its length reporting one thrust to weight when the
+        # data held four, and the design case is the flattering one. Every week 2 document
+        # has to carry the stacked figure, so a reader cannot meet 3.163 without meeting
+        # 2.252 on the same page. Presence, not a conditional on the design number: which
+        # numeric token in a document is a thrust to weight is not something a regex knows.
+        for rel, _heads in WEEK2_DOCS:
+            ok &= report(states_value(rel, tw),
+                         f"week2: {rel} states the stacked conservative T/W",
+                         f"T/W {tw:.3f}",
+                         fail_detail=f"no number within {TOL:.1%} of {tw:.4f} anywhere in "
+                                     f"the file, so it states the design case alone")
+
         # A miss is allowed to pass week 2 only if it hands week 4 an arithmetic target
         # rather than a paragraph. The target is the conservative mass that would clear the
         # limit at this conservative thrust, and the gate recomputes it.
@@ -1053,14 +1088,7 @@ def week2(data):
                                  f"sweep {at_chosen[0]:.2f} W, "
                                  f"stored {dotted(data, 'performance.aero_power_W')}")
 
-    for rel, heads in [
-        ("stage-1/design/01-configuration.md",
-         ["Configuration", "Why this configuration", "Numbers used"]),
-        ("stage-1/design/02-rotor-sizing.md",
-         ["Rotor sizing", "Shape family", "Radius", "Numbers used"]),
-        ("stage-1/design/04-thrust-and-power.md",
-         ["Thrust", "Power", "Sensitivity", "Numbers used"]),
-    ]:
+    for rel, heads in WEEK2_DOCS:
         ok &= require_headings(rel, heads)
         ok &= require_substance(rel)
         ok &= check_declared_numbers(rel, data)
