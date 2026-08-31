@@ -57,6 +57,13 @@ MIN_MASS_LINE_G = 0.5    # no vanishing components
 MIN_MARGIN = 1.5
 MIN_DECLARED_NUMBERS = 3
 GROUP_DRIFT_MAX = 0.25   # week 4 refines week 2's envelope, per component and in total
+MIN_BUDGET_LINES = 8     # below this the refined budget is not a budget
+
+# The rotor is speed controlled and centrifugal load goes as the square of speed, so a
+# structure signed off at exactly the design rpm has no answer for control overshoot. The
+# overspeed case has to be declared and it has to be worth declaring: 1.001 satisfies an
+# inequality and nothing else.
+MIN_OVERSPEED = 1.10
 
 # Momentum theory gives the power no rotor can beat. Applied to a cyclorotor the standard
 # closure is the projected frontal area, 2R times span, so the area may not be inflated
@@ -408,16 +415,39 @@ def recompute(data):
         if blade_g > 0:
             out["blade_mass_kg_derived"] = blade_g / 1000.0 / nb
 
+    over = num(data, "structure.overspeed_factor")
     if None not in (R, rpm, mb_stored := num(data, "structure.blade_mass_kg")):
         fc = mb_stored * (rpm * 2 * math.pi / 60) ** 2 * R
         out["centrifugal_load_N_derived"] = fc
         att = num(data, "structure.blade_attachment_allowable_N")
         if att:
             out["blade_attachment_margin"] = att / fc
+        if over:
+            # Centrifugal load goes as the square of speed, so the overspeed case is not a
+            # rounding on the design one. Runco measured centrifugal beating aerodynamic by
+            # 4.4 times at the design point; the declared overspeed is where the blade
+            # attachment is actually decided.
+            out["centrifugal_load_overspeed_N_derived"] = fc * over ** 2
+            if att:
+                out["blade_attachment_margin_overspeed"] = att / (fc * over ** 2)
 
     lever, lf = num(data, "structure.blade_load_lever_m"), num(data, "structure.blade_load_factor")
     if lever and lf and nb and "thrust_N" in out:
         out["blade_root_bending_Nm_derived"] = out["thrust_N"] / nb * lever * lf
+    fc_stored = num(data, "structure.centrifugal_load_N")
+    if lever and fc_stored:
+        out["blade_centrifugal_bending_Nm_derived"] = fc_stored * lever
+
+    # The gated blade margin is aerodynamic bending alone, and on a cyclorotor that is the
+    # smaller of the two spanwise loads. The section has to carry both at once, so the
+    # combined case gets its own margin and its own overspeed version.
+    b_all = num(data, "structure.blade_allowable_Nm")
+    b_aero = num(data, "structure.blade_root_bending_Nm")
+    b_cf = num(data, "structure.blade_centrifugal_bending_Nm")
+    if b_all and b_aero and b_cf:
+        out["blade_combined_margin"] = b_all / (b_aero + b_cf)
+        if over:
+            out["blade_combined_margin_overspeed"] = b_all / ((b_aero + b_cf) * over ** 2)
 
     env = dotted(data, "mass_envelope_g")
     if isinstance(env, list) and env:
@@ -487,11 +517,26 @@ def allow_reason(line, table=False):
     return False
 
 
+# A unit suffix is often followed by a qualifier: thrust_N_conservative is a force,
+# mass_g_conservative is a mass, aero_power_W_published is a power. Matching the unit only
+# at the very end of the key meant none of those registered as a computed value, so the
+# submission's own conservative thrust of 17.10 N could not trace to the number that
+# produced it. Week 3 found this on the draft and recorded it; the fix is to peel the
+# qualifiers off before matching, not to widen the match, which would let
+# power_loading_ref_N_per_W be read as two different dimensions.
+KEY_QUALIFIERS = {"conservative", "low", "high", "published", "derived", "nominal",
+                  "min", "max", "total", "design", "stated", "corrected"}
+
+
 def dim_of_key(key):
     if key == "rpm":
         return ("rot", 1.0)
+    parts = key.split("_")
+    while len(parts) > 1 and parts[-1].lower() in KEY_QUALIFIERS:
+        parts.pop()
+    trimmed = "_".join(parts)
     for suffix, du in KEY_UNITS:
-        if key.endswith(suffix):
+        if trimmed.endswith(suffix):
             return du
     return None
 
@@ -968,9 +1013,13 @@ def week2(data):
                      f"week2: conservative lines total at least {CONSERVATIVE_MASS_MIN_RATIO:.0%} of nominal",
                      f"{cons:.1f} g vs {nom:.1f} g, ratio {cons / nom:.3f}" if nom else "")
         if mc:
-            ok &= report(close(mc, cons),
-                         "week2: conservative mass matches the conservative envelope lines",
-                         f"lines give {cons:.1f} g, stated {mc:.1f} g")
+            refined = budget_conservative_total(data)
+            want = cons if refined is None else refined
+            basis = ("the conservative envelope lines" if refined is None
+                     else "the refined budget lines")
+            ok &= report(close(mc, want),
+                         f"week2: conservative mass matches {basis}",
+                         f"lines give {want:.1f} g, stated {mc:.1f} g")
     if mc and tc:
         tw = tc / (mc / 1000.0 * G)
         mn_tot, tn = num(data, "results.mass_envelope_g"), r.get("thrust_N")
@@ -1360,6 +1409,29 @@ def week3(data):
     return ok
 
 
+def budget_conservative_total(data):
+    """The refined week 4 budget's conservative column, or None while it does not exist.
+
+    Week 2's conservative module mass comes from the envelope, because the envelope is the
+    only component list it has. The moment week 4 refines the budget line by line, the same
+    scalar comes from there instead, which is what D31 and D34 both say happens: D31 expects
+    the assumed growth rates to retire against real sections, and D34 warns the week 2
+    documents that the stacked figure will move under them when they do.
+
+    Binding `results.mass_g_conservative` to the envelope for ever pinned the refined column
+    to the estimate it exists to replace, to half a percent. Nothing is unbound by moving it:
+    whichever column is live, the scalar has to equal a sum of per-line figures, and the week
+    4 gates apply the stricter set of rules to the budget. An incomplete column returns None
+    so the week 4 shape gates report it rather than this one falling over."""
+    rows = dotted(data, "mass_budget_g")
+    if not (isinstance(rows, list) and len(rows) >= MIN_BUDGET_LINES):
+        return None
+    vals = [num(r, "conservative_g") for r in rows if isinstance(r, dict)]
+    if len(vals) != len(rows) or any(v is None for v in vals):
+        return None
+    return sum(vals)
+
+
 def check_conservative_budget(data, budget_total):
     """The hard stacked thrust to weight test lives in week 4, on the refined budget. It
     reads `results.mass_g_conservative`, so while that stays one stored scalar the test can
@@ -1400,6 +1472,23 @@ def check_conservative_budget(data, budget_total):
                      f"{CONSERVATIVE_MASS_MIN_RATIO:.0%} of nominal",
                      f"{total:.1f} g vs {budget_total:.1f} g, "
                      f"ratio {total / budget_total:.3f}")
+
+    # The refined column is allowed to move off the week 2 envelope's, which is the whole
+    # point of refining it, but not to walk away from it. The nominal columns are already
+    # held to this band per component and in total, and leaving the conservative one free
+    # would let a week 4 budget claim a module its own estimate never described.
+    env_cons = None
+    env = dotted(data, "mass_envelope_g")
+    if isinstance(env, list) and env:
+        vals = [num(e, "conservative_g") for e in env if isinstance(e, dict)]
+        if vals and all(v is not None for v in vals):
+            env_cons = sum(vals)
+    if env_cons:
+        drift = abs(total - env_cons) / env_cons
+        ok &= report(drift <= GROUP_DRIFT_MAX,
+                     f"week4: the conservative budget is within {GROUP_DRIFT_MAX:.0%} of "
+                     f"the week 2 conservative envelope",
+                     f"budget {total:.1f} g vs envelope {env_cons:.1f} g, drift {drift:.1%}")
     return ok
 
 
@@ -1516,7 +1605,16 @@ def week4(data):
         "structure.blade_load_factor", "structure.pitch_link_load_N",
         "structure.pitch_link_allowable_N", "structure.pitch_link_margin",
         "structure.blade_attachment_allowable_N", "structure.blade_attachment_margin",
+        "structure.blade_centrifugal_bending_Nm", "structure.blade_combined_margin",
+        "structure.overspeed_factor", "structure.centrifugal_load_overspeed_N",
+        "structure.blade_attachment_margin_overspeed",
+        "structure.blade_combined_margin_overspeed",
     ], "week4: numbers.json carries the structural schema")
+    ov = num(data, "structure.overspeed_factor")
+    if ov:
+        ok &= report(ov >= MIN_OVERSPEED,
+                     f"week4: the declared overspeed is at least {MIN_OVERSPEED}",
+                     f"{ov}, and centrifugal load goes as the square of it")
     lf_ = num(data, "structure.blade_load_factor")
     if lf_:
         ok &= report(lf_ >= MIN_BLADE_LOAD_FACTOR,
@@ -1537,6 +1635,10 @@ def week4(data):
          "rotor shaft torque follows from shaft power and rotor speed"),
         ("structure.blade_root_bending_Nm", "blade_root_bending_Nm_derived",
          "blade root bending follows from thrust per blade, lever arm and load factor"),
+        ("structure.blade_centrifugal_bending_Nm", "blade_centrifugal_bending_Nm_derived",
+         "blade centrifugal bending follows from the centrifugal load and the same lever"),
+        ("structure.centrifugal_load_overspeed_N", "centrifugal_load_overspeed_N_derived",
+         "the overspeed centrifugal load follows from the declared overspeed squared"),
     ]:
         if computed in r:
             ok &= report(close(num(data, stated), r[computed], DISPLAY_TOL),
@@ -1545,7 +1647,8 @@ def week4(data):
 
     # Margins are derived from allowable over demand, never asserted.
     for tag in ("blade_margin", "shaft_margin", "pitch_link_margin",
-                "blade_attachment_margin"):
+                "blade_attachment_margin", "blade_combined_margin",
+                "blade_combined_margin_overspeed", "blade_attachment_margin_overspeed"):
         v, computed = num(data, f"structure.{tag}"), r.get(tag)
         if computed is not None:
             ok &= report(close(v, computed),
