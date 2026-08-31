@@ -266,13 +266,19 @@ NUM_TOKEN = re.compile(r"\d+\.\d+")
 
 
 def states_value(rel, value, tol=TOL):
-    """True when the document quotes this value somewhere, at any rounding inside `tol`.
+    """True when the document's narrative quotes this value, at any rounding inside `tol`.
     Matching numeric tokens rather than one formatted string means 2.25, 2.252 and 2.2525
-    all count, which is what a document written by a person actually looks like."""
+    all count, which is what a document written by a person actually looks like.
+
+    The `## Numbers used` block is cut off first. A declaration is machine-readable and a
+    reader skimming the prose never sees it, so a document whose only copy of the number
+    sits in that block has not said the thing this gate exists to make it say."""
     p = ROOT / rel
     if not p.is_file() or value is None:
         return False
-    for m in NUM_TOKEN.finditer(p.read_text(encoding="utf-8")):
+    narrative = re.split(r"##\s*Numbers used", p.read_text(encoding="utf-8"),
+                         maxsplit=1, flags=re.I)[0]
+    for m in NUM_TOKEN.finditer(narrative):
         if close(float(m.group()), value, tol):
             return True
     return False
@@ -952,8 +958,9 @@ def week2(data):
         # Four T/W cases, not one. The design case and each downside taken on its own are
         # hard gates here. The stacked case, meaning the low coefficient and the high mass
         # column together, is stated here and gated hard in week 4 instead. The reason is
-        # what the week 2 mass column is made of: nine of its thirteen lines say "assumed"
-        # in their basis and carry a blanket 20 to 25 percent growth rate. Freezing or
+        # what the week 2 mass column is made of: eight of its thirteen lines carry a
+        # blanket 20 or 25 percent growth rate, six of those on a basis that says the
+        # section is assumed rather than weighed or quoted. Freezing or
         # refusing to freeze geometry on a number built that way tests the growth rates
         # rather than the design. Week 4 replaces those lines with real sections and
         # catalogue parts, and `week4: conservative T/W clears 2.5` already applies the
@@ -981,8 +988,10 @@ def week2(data):
             ok &= report(states_value(rel, tw),
                          f"week2: {rel} states the stacked conservative T/W",
                          f"T/W {tw:.3f}",
-                         fail_detail=f"no number within {TOL:.1%} of {tw:.4f} anywhere in "
-                                     f"the file, so it states the design case alone")
+                         fail_detail=f"no number within {TOL:.1%} of {tw:.4f} in the "
+                                     f"narrative. Either it states the design case alone, "
+                                     f"or a later week moved the conservative mass and "
+                                     f"this document still quotes the old figure. See D34")
 
         # A miss is allowed to pass week 2 only if it hands week 4 an arithmetic target
         # rather than a paragraph. The target is the conservative mass that would clear the
@@ -1257,6 +1266,49 @@ def week3(data):
     return ok
 
 
+def check_conservative_budget(data, budget_total):
+    """The hard stacked thrust to weight test lives in week 4, on the refined budget. It
+    reads `results.mass_g_conservative`, so while that stays one stored scalar the test can
+    be passed by choosing a growth rate rather than by refining a mass, which is the exact
+    move the blocked trigger forbids and the reason D30 gave for moving the test here.
+
+    So the conservative column is built the way the nominal one is. Every budget line
+    carries its own conservative figure, no line gets lighter under growth, the stated
+    total is their sum, and the aggregate growth is at least what week 2 required of the
+    envelope. See D33."""
+    budget = dotted(data, "mass_budget_g")
+    if not (isinstance(budget, list) and budget):
+        return True                     # the shape gates above already reported this
+    rows = [b for b in budget if isinstance(b, dict)]
+    missing = [str(b.get("item", "?")) for b in rows if num(b, "conservative_g") is None]
+    if not report(not missing, "week4: every budget line carries a conservative figure",
+                  "; ".join(missing[:5]) if missing else f"{len(rows)} lines"):
+        return False
+
+    shrunk = [f"{b.get('item', '?')}: {b['conservative_g']} g against {b.get('mass_g')} g"
+              for b in rows
+              if num(b, "mass_g") is not None
+              and float(b["conservative_g"]) < float(b["mass_g"]) * (1 - TOL)]
+    ok = report(not shrunk, "week4: no budget line is lighter in the conservative column",
+                "; ".join(shrunk[:4]) if shrunk else "")
+
+    total = sum(float(b["conservative_g"]) for b in rows)
+    stated = num(data, "results.mass_g_conservative")
+    ok &= report(close(stated, total),
+                 "week4: the conservative mass is the sum of the budget lines",
+                 f"lines give {total:.1f} g",
+                 fail_detail=f"lines give {total:.1f} g, results.mass_g_conservative says "
+                             f"{stated}, so the conservative column was chosen rather "
+                             f"than built")
+    if budget_total:
+        ok &= report(total >= budget_total * CONSERVATIVE_MASS_MIN_RATIO,
+                     f"week4: the conservative budget is at least "
+                     f"{CONSERVATIVE_MASS_MIN_RATIO:.0%} of nominal",
+                     f"{total:.1f} g vs {budget_total:.1f} g, "
+                     f"ratio {total / budget_total:.3f}")
+    return ok
+
+
 def check_budget_continuity(data):
     """Week 4 refines week 2's envelope. Comparing only the totals let the whole budget
     move into the blades while every other component collapsed to the minimum legal line,
@@ -1348,6 +1400,7 @@ def week4(data):
         ok &= report(mc >= r["total_mass_g"],
                      "week4: the conservative mass is not lighter than the budget",
                      f"conservative {mc:.1f} g vs budget {r['total_mass_g']:.1f} g")
+        ok &= check_conservative_budget(data, r["total_mass_g"])
 
     # The competition requirement, applied to recomputed values only.
     for key, label in [("thrust_to_weight", "nominal"),

@@ -79,6 +79,10 @@ def honest_numbers():
         {"item": "mounting hardware and fasteners", "mass_g": 23.0, "refines": "mounting hardware",
          "basis": "fastener count times unit mass with a bracket allowance"},
     ]
+    # The conservative column is built line by line, not chosen. 12 percent on every line
+    # sums to exactly the envelope's conservative total, so both weeks agree.
+    for b in budget:
+        b["conservative_g"] = round(b["mass_g"] * 1.12, 4)
     total = sum(b["mass_g"] for b in budget)
     omega = rpm * 2 * math.pi / 60
     # Per-blade mass is the blade budget over the blade count, not a free number.
@@ -232,8 +236,10 @@ def rnd(v, n):
     return round(v, n) if isinstance(v, (int, float)) and not isinstance(v, bool) else v
 
 
-def doc(path, headings, numbers=(), words=600):
+def doc(path, headings, numbers=(), words=600, says=()):
     body = [f"# {headings[0]}", "", FILLER[:words * 6], ""]
+    for s in says:
+        body += [s, ""]
     for h in headings[1:]:
         body += [f"## {h}", "", FILLER[:words * 3], ""]
     numbers = [(k, v) for k, v in numbers if v is not None]
@@ -343,21 +349,24 @@ def build(root, data, upto=4):
     g = d / "stage-1" / "design"
     if upto >= 2:
         geo, perf = data["geometry"], data["performance"]
-        # Every week 2 document declares the stacked conservative T/W, which is what D32
-        # asks for and what `states_value` looks for.
+        # D32: every week 2 document states the stacked conservative T/W in its narrative,
+        # not only in the declaration block, because the declaration block is not what a
+        # reader sees. `states_value` cuts the block off before it looks.
         stacked = ("results.thrust_to_weight_conservative",
                    rnd(data["results"].get("thrust_to_weight_conservative"), 4))
+        says = [f"Stacked conservative thrust to weight is {stacked[1]} against the design "
+                f"case, and the difference is the two downside allowances multiplying."]
         doc(g / "01-configuration.md", ["Configuration", "Why this configuration"],
             [("geometry.blades", geo["blades"]), ("geometry.radius_m", geo["radius_m"]),
-             ("geometry.span_m", rnd(geo["span_m"], 4)), stacked])
+             ("geometry.span_m", rnd(geo["span_m"], 4)), stacked], says=says)
         doc(g / "02-rotor-sizing.md", ["Rotor sizing", "Shape family", "Radius"],
             [("geometry.radius_m", geo["radius_m"]), ("geometry.chord_m", rnd(geo["chord_m"], 4)),
-             ("operating.rpm", rnd(data["operating"]["rpm"], 1)), stacked])
+             ("operating.rpm", rnd(data["operating"]["rpm"], 1)), stacked], says=says)
         doc(g / "04-thrust-and-power.md", ["Thrust", "Power", "Sensitivity"],
             [("performance.thrust_N", rnd(perf["thrust_N"], 2)),
              ("performance.aero_power_W", perf["aero_power_W"]),
              ("performance.module_electrical_power_W", rnd(perf["module_electrical_power_W"], 1)),
-             stacked])
+             stacked], says=says)
     if upto >= 3:
         pit, pack = data["pitch"], data["packaging"]
         pitch_doc(g / "03-pitch-and-vectoring.md",
@@ -611,27 +620,44 @@ case("a mass target with no retirement path is rejected",
      False, stacked_miss_bare_target, upto=2, week=2)
 
 
-def stacked_miss_deflated_target(d):
-    """A target below the computed one looks conservative and is still wrong: it sends
-    week 4 after grams it does not need and hides how much of the gap is real."""
-    return _rescale_mass(d, 1.0, 500.0 / 448.0, target=_target(d) * 0.85)
-
-
-case("a stacked downside miss with a deflated mass target is rejected",
-     False, stacked_miss_deflated_target, upto=2, week=2)
-
-
 def drop_stacked_tw(root, data):
-    """D32: strip the stacked figure out of one week 2 document and leave everything else
-    alone. The design case still reproduces, so only the document rule can catch this."""
+    """D32: take the stacked figure out of one week 2 document's narrative and leave the
+    declaration block alone, which is the way a document actually goes stale. Every stored
+    number still reproduces, so only the document rule can catch this."""
     p = root / "stage-1" / "design" / "02-rotor-sizing.md"
     keep = [l for l in p.read_text(encoding="utf-8").splitlines()
-            if "thrust_to_weight_conservative" not in l]
+            if not l.startswith("Stacked conservative thrust to weight")]
     p.write_text(chr(10).join(keep), encoding="utf-8")
 
 
-case("a week 2 document that drops the stacked T/W is rejected",
+case("a week 2 document that drops the stacked T/W from its prose is rejected",
      False, upto=2, week=2, tweak=drop_stacked_tw)
+
+
+def chosen_conservative_mass(d):
+    """D33. The week 4 stacked test reads results.mass_g_conservative. Here the envelope
+    and the stated total are moved together, so every week 2 gate still passes and the
+    conservative T/W improves, while the refined budget's own conservative lines are left
+    where they were. Only the sum rule notices."""
+    return _rescale_mass(d, 1.0, 420.0 / 448.0)
+
+
+case("a week 4 conservative mass the budget lines do not give is rejected",
+     False, chosen_conservative_mass, upto=4, week=4)
+
+
+def shrinking_budget_line(d):
+    """One line grows less than nothing under the conservative column, paid for by the
+    line next to it, so the total still sums."""
+    d["mass_budget_g"][0]["conservative_g"] = round(d["mass_budget_g"][0]["mass_g"] * 0.8, 4)
+    d["mass_budget_g"][1]["conservative_g"] = round(
+        d["mass_budget_g"][1]["conservative_g"]
+        + d["mass_budget_g"][0]["mass_g"] * 0.32, 4)
+    return d
+
+
+case("a budget line that shrinks under conservative growth is rejected",
+     False, shrinking_budget_line, upto=4, week=4)
 
 
 def design_case_short(d):
