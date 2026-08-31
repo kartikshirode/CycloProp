@@ -1657,6 +1657,17 @@ def week4(data):
             ok &= report(computed >= MIN_MARGIN,
                          f"week4: {tag} is at least {MIN_MARGIN}", f"{computed:.3f}")
 
+    # The shaft's combined bending and torsion margin is the one margin the design states
+    # that this file cannot recompute, because it needs the shaft section properties and
+    # those live in tools/structure.py rather than in numbers.json. The floor still
+    # applies. Stating a margin the gate had nothing at all to say about is how an
+    # eight-row margin table ends up with seven gated rows and one decorative one.
+    sc = num(data, "structure.shaft_combined_margin")
+    if sc is not None:
+        ok &= report(sc >= MIN_MARGIN,
+                     f"week4: shaft_combined_margin is at least {MIN_MARGIN}",
+                     f"{sc:.3f}, floored but not recomputed here")
+
     # Centrifugal load is the one structural number checkable from first principles.
     R, rpm = num(data, "geometry.radius_m"), num(data, "operating.rpm")
     mb = num(data, "structure.blade_mass_kg")
