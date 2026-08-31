@@ -237,7 +237,11 @@ def honest_numbers():
                       "blade_attachment_margin_overspeed": att_all / fc_over,
                       "blade_centrifugal_bending_Nm": cf_dem,
                       "blade_combined_margin": blade_all / (blade_dem + cf_dem),
-                      "blade_combined_margin_overspeed": blade_all / combined_over},
+                      "blade_combined_margin_overspeed": blade_all / combined_over,
+                      # Combined bending and torsion is always worse than torsion alone.
+                      # check.py floors this one without recomputing it, because the shaft
+                      # section properties are not in numbers.json.
+                      "shaft_combined_margin": shaft_all / shaft_dem * 0.8},
         "mass_envelope_g": envelope,
         "mass_budget_g": budget,
         "sources": {
@@ -457,10 +461,10 @@ def run(root, week):
     return r.returncode, r.stdout
 
 
-# Checks that are printed outside CASES: 13 coverage probes, 6 unit awareness probes
-# and 5 --all probes. Counted here because the closing line reports a total, and the
-# hand kept constant it replaced had drifted one behind what the run actually prints.
-PROBE_CHECKS = 24
+# Every self-test line printed by this file, cases and probes alike, appends here first.
+# The closing total is len(ANNOUNCED), so it is counted and not kept by hand. The constant
+# it replaced had drifted one behind what the run actually printed and nothing noticed.
+ANNOUNCED = []
 
 CASES = []
 
@@ -909,6 +913,19 @@ def conservative_column_off_the_envelope(d):
 
 case("a conservative budget that walks away from the week 2 envelope is rejected",
      False, conservative_column_off_the_envelope)
+
+
+def weak_shaft_combined_margin(d):
+    """The one stated margin check.py cannot recompute, because the shaft section
+    properties live in the solver and not in numbers.json. It still has a floor, and a
+    margin the gate has nothing at all to say about is a decorative row in a table that
+    claims every row is gated."""
+    d["structure"]["shaft_combined_margin"] = 1.2
+    return d
+
+
+case("a shaft combined margin below the floor is rejected", False,
+     weak_shaft_combined_margin)
 
 
 def lighter_conservative_line(d):
@@ -1651,6 +1668,7 @@ def main():
             code, out = run(tmp, week)
             got_pass = code == 0
             ok = got_pass == expect_pass
+            ANNOUNCED.append(1)
             print(("ok    " if ok else "BROKE ") + name +
                   f"   [expected {'pass' if expect_pass else 'fail'}, got "
                   f"{'pass' if got_pass else 'fail'}]")
@@ -1671,6 +1689,7 @@ def main():
             p.write_text("\n".join(head), encoding="utf-8")
         code, out = run(tmp, 2)
         ok = code != 0
+        ANNOUNCED.append(1)
         print(("ok    " if ok else "BROKE ") + "heading-only stub files are rejected"
               f"   [expected fail, got {'pass' if code == 0 else 'fail'}]")
         if not ok:
@@ -1685,6 +1704,7 @@ def main():
         (Path(tmp) / "stage-1" / "design" / "numbers.json").unlink()
         code, out = run(tmp, 4)
         ok = code != 0
+        ANNOUNCED.append(1)
         print(("ok    " if ok else "BROKE ") + "deleting numbers.json is rejected"
               f"   [expected fail, got {'pass' if code == 0 else 'fail'}]")
         if not ok:
@@ -1715,6 +1735,7 @@ def main():
         chk.FAILURES.clear()
         chk.check_numeric_coverage("stage-1/submission/cycloprop-stage1.md", data)
         ok = bool(chk.FAILURES)
+        ANNOUNCED.append(1)
         print(("ok    " if ok else "BROKE ") + "a number invented in the narrative is rejected"
               f"   [expected fail, got {'fail' if ok else 'pass'}]")
         if not ok:
@@ -1740,6 +1761,7 @@ def main():
             chk.check_pdf(path, min_pages=4 if want_pass or "text" in name else 99)
             got = not chk.FAILURES
             ok = got == want_pass
+            ANNOUNCED.append(1)
             print(("ok    " if ok else "BROKE ") + name +
                   f"   [expected {'pass' if want_pass else 'fail'}, got {'pass' if got else 'fail'}]")
             if not ok:
@@ -1775,6 +1797,7 @@ def main():
             chk.check_numeric_coverage("t.md", data)
             got = not chk.FAILURES
             ok = got == want_pass
+            ANNOUNCED.append(1)
             print(("ok    " if ok else "BROKE ") + name +
                   f"   [expected {'pass' if want_pass else 'fail'}, got {'pass' if got else 'fail'}]")
             if not ok:
@@ -1802,6 +1825,7 @@ def main():
             chk.check_numeric_coverage("t.md", data)
             got = not chk.FAILURES
             ok = got == want_pass
+            ANNOUNCED.append(1)
             print(("ok    " if ok else "BROKE ") + f"coverage: {text!r}" +
                   f"   [expected {'pass' if want_pass else 'fail'}, got {'pass' if got else 'fail'}]")
             if not ok:
@@ -1843,6 +1867,7 @@ def main():
                         f"# Week {w} audit\n\nAUDIT-COMPLETE\n", encoding="utf-8")
             got_pass, out = run_all(tmp)
             ok = got_pass == want_pass
+            ANNOUNCED.append(1)
             print(("ok    " if ok else "BROKE ") + name +
                   f"   [expected {'pass' if want_pass else 'fail'}, "
                   f"got {'pass' if got_pass else 'fail'}]")
@@ -1853,6 +1878,7 @@ def main():
 
     extra = linkage_selftests()
     for name, ok, detail in extra:
+        ANNOUNCED.append(1)
         print(("ok    " if ok else "BROKE ") + name + f"   [{detail}]")
         if not ok:
             failures.append((name, detail))
@@ -1863,7 +1889,7 @@ def main():
         for name, out in failures:
             print(f"\n===== {name} =====\n{out}")
         return 1
-    print(f"All {len(CASES) + PROBE_CHECKS + len(extra)} gate self-tests behaved as expected.")
+    print(f"All {len(ANNOUNCED)} gate self-tests behaved as expected.")
     return 0
 
 
