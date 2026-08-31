@@ -20,11 +20,12 @@ The plan lists eight tasks. All eight ran.
 3. Produce the pitch schedule from that solution and feed it back into week 2's azimuthal load
    model
 4. Size the vectoring input: travel, stop range, holding torque, slew time, electrical draw, on
-   a named actuator
+   a named actuator and controller
 5. Map command to force at three or more phase commands
 6. Handle the side force against the measured literature range
-7. Package the moving mechanism, with the swept envelope, interfaces and the reaction torque
-   path
+7. Draw the swept linkage envelope, blade clearance, shaft supports, bearings, motor and
+   transmission, actuator, ESC, controller, wiring and mounting points, with the reaction
+   torque path and the interface table. Dimensioned sketches, no CAD
 8. Start final assembly: seven submission headings and one real pandoc and xelatex build
 
 ## What it produced
@@ -65,8 +66,9 @@ gearing, and the margin on half stall is 2.36. Slew 0.147 s end to end, draw 2.8
 362.1 mm as a sum of named parts. Four mount points, reaction torque path and both interface
 tables in `09-packaging-and-integration.md`.
 
-**Two documents and a draft submission.** `03-pitch-and-vectoring.md` at 3147 words and
-`09-packaging-and-integration.md` at 1291. `stage-1/submission/cycloprop-stage1.md` carries all
+**Two documents and a draft submission.** `03-pitch-and-vectoring.md` at 3347 words and
+`09-packaging-and-integration.md` at 1656, the second carrying two dimensioned text layouts,
+one along the rotor axis and one in the rotor plane. `stage-1/submission/cycloprop-stage1.md` carries all
 seven required headings with items 1 to 4 filled from frozen work and items 5 to 7 marked for
 the weeks that own them.
 
@@ -77,11 +79,11 @@ pandoc stage-1/submission/cycloprop-stage1.md --from=markdown --pdf-engine=xelat
   --toc --number-sections -o stage-1/submission/cycloprop-stage1.pdf
 ```
 
-pandoc 3.9 with MiKTeX-XeTeX 4.18, exit 0, 45,054 bytes, 6.9 seconds. Read back with pypdf
-6.10.0: 5 pages, 9,806 characters of extractable text. All seven required item headings are
-present in the extracted text, and spot probes for 0.6055, 2.5173, 11.98, 58.58, 364.4 and the
-phrase "120 degrees of phase authority" all resolve. This is the 15 September smoke build,
-delivered early.
+pandoc 3.9 with MiKTeX-XeTeX 4.18, exit 0. Built twice, before and after the audit corrections.
+The build that stands is 45,135 bytes. Read back with pypdf 6.10.0: 5 pages, 9,894 characters of
+extractable text. All seven required item headings are present in the extracted text, and spot
+probes for 0.6055, 2.5173, 11.98, 58.58, 364.4 and the corrected "25 degrees of the 120" all
+resolve. This is the 15 September smoke build, delivered early.
 
 ## What changed outside week 3's own files
 
@@ -89,10 +91,11 @@ delivered early.
   schedule, with the full revolution tabulated because the halves no longer mirror.
   `performance.blade_load_peak_to_mean` moved from 2.374 to 2.501 in `numbers.json` and in the
   document's Numbers used block
-- `tools/check.py` gained five checks and one helper. Nothing was loosened. See D42
-- `tools/test_gates.py` gained five attack cases, a lateral column and a wider force map in the
+- `tools/check.py` gained six checks, two required fields and one helper. Nothing was loosened.
+  See D42 and D45
+- `tools/test_gates.py` gained seven attack cases, a lateral column and a wider force map in the
   fixture, and a read-only `linkage_selftests` pass over the stored four-bar. 104 self-tests to
-  115
+  117
 - `tools/linkage.py` is new. It is the solver, and it writes `numbers.json` under `--write` so
   the schedule is reproducible instead of asserted
 
@@ -102,13 +105,25 @@ delivered early.
 | --- | --- |
 | `python tools/check.py --week 3` | exit 0, cumulative over weeks 1 to 3 |
 | `python tools/check.py --global` | exit 0 |
-| `python tools/test_gates.py` | exit 0, 115 self-tests |
+| `python tools/test_gates.py` | exit 0, 117 self-tests |
 
 ## Decisions
 
-D38 to D44. Linkage geometry frozen, the azimuth convention, the single ended drive, the load
-model rerun, the vectoring claim and its gate, the unbalanced blade, and the packaging rule
-correction.
+D38 to D45. Linkage geometry frozen, the azimuth convention, the single ended drive, the load
+model rerun, the vectoring claim and its gate, the unbalanced blade, the packaging rule
+correction, and D45 for the four figures the audit corrected inside the first four.
+
+## The audit
+
+One fresh-context read-only pass, run after the seven week 3 commits landed. 16 findings,
+reproduced verbatim in `stage-1/audit/week-3.md` with what was done about each. Twelve were
+fixed, one was accepted with the overclaim corrected, and three became debts below.
+
+The one worth naming here: `tools/linkage.py` checked its reconstruction of the week 2 load
+model against the live `aero_azimuthal_loads`, which `--write` had already replaced. The script
+ran once and then refused to run at all, which defeats the reason for keeping it. Invisible from
+inside the session, because the script was only ever run before `--write` or in the same breath
+as it. The week 2 table is a constant in the script now.
 
 ## Debts carried forward
 
@@ -130,9 +145,9 @@ correction.
    a part exists in the design that its own basis does not list. Week 4 either finds it inside
    the line or grows the line
 5. **The aerodynamic side force is under-predicted and the design knows it.** The model gives
-   0.98 degrees of aerodynamic tilt on top of the mechanism's 11.00. Measurement gives 10 to 45
-   for the whole tilt. The design carries an indexed mechanical bias plus bench trim, and the
-   uncertainty costs up to 35 degrees of the 120 degree authority. Heimerl would replace the
+   0.98 degrees of aerodynamic tilt on top of the mechanism's 11.00. Measurement gives 10 to 35
+   for the whole tilt, from Sirohi, Adams and Benedict's twin. The design carries an indexed mechanical bias plus bench trim, and the
+   uncertainty costs up to 25 degrees of the 120 degree authority. Heimerl would replace the
    estimate with a measurement and is still unpulled
 6. **Transmission angle reaches 143.23 degrees**, which is 3.23 degrees outside the conventional
    40 to 140 band on the obtuse side. Reported as a worst sine of 0.599 rather than hidden. Not
@@ -143,10 +158,32 @@ correction.
 8. **`largest_dimension_mm` in the week 2 tables is 290 mm and the packaged module is 364.4 mm.**
    The comparison the week 2 table made is unaffected and the ordering is unchanged. See D44
 9. **The submission draft is a skeleton.** Items 5 and 6 name what week 4 fills, item 7 names
-   week 5 and week H. Its numeric coverage has not been run against the week 5 gate
+   week 5 and week H. The audit ran the week 5 numeric coverage gate on it and it fails on 10
+   numbers, so the count and the root cause are recorded here rather than left for week 5 to
+   discover. Two of the ten are gate defects rather than writing defects: the check reads the
+   pandoc YAML front matter as narrative and flags `margin=25mm`, and `dim_of_key` matches units
+   only as a key suffix, so `performance.thrust_N_conservative` never registers as a newton
+   value and the design's own 17.10 N cannot trace. The rest are ordinary: 4.8 g, 125.4 mm,
+   29.4 g. Week 5 owns the fix and the gate bug
+10. **The named controller is 0.5 g over its week 2 nominal.** A Matek Systems F411-WSE class
+    board is 8.5 g against an 8.0 g line, inside that line's 9.2 g conservative figure. Week 4
+    either finds a lighter board or grows the line, and it lands on the same 4.8 g of room as
+    debts 1 and 4
+11. **The blade build-up is duplicated in `tools/linkage.py`.** `BLADE_PARTS_G` carries the
+    foam, skin, spar and fittings masses that exist as prose in `02-rotor-sizing.md`, and it
+    alone sets `blade_cg_pct_chord` and therefore the 2.1201 Nm moment and the 101.82 N link
+    load. It will not follow a week 4 change to the blade and no gate can see the drift. If week
+    4 changes the blade section, it has to change that constant and rerun `tools/linkage.py
+    --write`
+12. **`check.py` demands the current week's audit while `.claude/weekly-loop.md` says the
+    current week is exempt.** `check_audits_exist` counts a week done as soon as its progress
+    file carries the marker, so `--week 3` fails until the audit file exists. Harmless in the
+    order the loop actually runs, and the config belongs to a person, so it is reported rather
+    than changed
 
 Week 2's debts are unchanged except where D41 and D44 touch them. The 58.6 g margin gap to the
-internal 2.75 target is still week 4's.
+internal 2.75 target is still week 4's, and three of the debts above now point at the same 4.8 g
+of room.
 
 ## Week H gap
 
@@ -163,8 +200,8 @@ This is now the item with the longest lead time in the project. It hard blocks w
 - Geometry, the mechanism and the load model are all frozen. Week 4 inherits a pitch link load
   of 101.82 N, a blade pitching moment of 2.1201 Nm, a carrier torque of 0.1371 Nm and a 47.48 N
   radial pull into the offset strut, all at the design point and all on the unbalanced blade
-- The blade balance decision is week 4's and it moves mass. So does the gear pair in debt 4.
-  Both eat into a conservative column that clears 2.5 by 4.8 g
+- The blade balance decision is week 4's and it moves mass. So do the gear pair in debt 4 and
+  the controller in debt 10. All three eat into a conservative column that clears 2.5 by 4.8 g
 - The shaft stops inboard of the pitch plane and the drive is single ended. That is D40 and it
   constrains any shaft stiffness answer
 - Peak to mean is 2.501 from the model and week 4 still sizes on 4.0 under D16. Nothing about

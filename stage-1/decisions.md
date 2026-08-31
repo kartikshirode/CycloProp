@@ -996,3 +996,53 @@ all three layouts and correcting only the winning row would be worse than leavin
 
 `09-packaging-and-integration.md` carries the real envelope, 364.4 by 316.1 by 362.1 mm, built as
 a sum of named parts. The largest dimension is along the rotor axis and the span still drives it.
+
+## D45: the week 3 audit corrects four figures inside D38, D40, D42 and D44
+
+31 August 2026, week 3, after the audit. Corrects D38, D40, D42 and D44 without reopening any of
+the decisions they carry. The log is append only, so the corrections live here.
+
+The audit is in `stage-1/audit/week-3.md`, verbatim, with 16 findings and what was done about
+each. Five of them landed on numbers already written into a frozen entry.
+
+**D38's sweep figures were stale.** It quotes 0.297 Nm of carrier torque for the 111.6 mm pitch
+link and says that is four times the 105 mm figure. Both come from a sweep run before the
+resultant magnitude normalisation was corrected, and the delivered sweep gives **0.3240 Nm**
+against 0.1371 Nm, a ratio of **2.36** rather than four. D38 also says the two servos "cannot
+hold the carrier on half of their stall torque" at 111.6 mm. They can, on a margin of exactly
+**1.000**, which is not a margin but is not a failure either.
+
+The decision stands. 105 mm still wins on carrier torque, on transmission angle by 18 degrees and
+on harmonic residual by half, and 2.36 times is still the number that decided it.
+
+**D40's band arithmetic was wrong.** It says the reachable band is 89.6 to 134.4 mm. L1 minus L4
+is 110.0 minus 24.4, which is **85.6** mm, so the band is 85.6 to 134.4 and the actual 89.6 mm
+sits 4 mm inside it rather than exactly on its edge. The symbolic version in
+`03-pitch-and-vectoring.md` was already right. The conclusion is unchanged and is now less of a
+knife edge than D40 made it look.
+
+**D42 overstates what the new gate can catch, and undercounts it.** `check_vector_map` emits four
+reports, not three, so week 3 added six checks rather than five. More importantly: against this
+solver the direction tracking check cannot fail. The model is rotationally equivariant, so
+rotating the command rotates the whole solution and the map is an exact rotation by construction.
+What the check actually catches is a hand-written or flat force table, which is what the old two
+scalar comparison let through, and that is the claim to make for it. One of the five attack cases,
+the command outside the authority, trips two gates rather than one.
+
+**D44's cluster figures used a different rule from the one it cites.** Week 2 gives each rotor its
+own 20 mm of clearance, so on the swept diameter the cluster figures are **510.6 mm** for two
+rotors and **624.8 mm** for three, not 491 and 585. The single rotor figure of 356 mm is right.
+The ordering conclusion was never in doubt under either arithmetic.
+
+**And one thing the audit found that no decision had covered.** `tools/linkage.py` checked its
+reconstruction of the week 2 load model against the live `aero_azimuthal_loads`, which `--write`
+had already replaced with the week 3 table. The script therefore ran once and then refused to run
+at all, which defeats the reason for having it. The week 2 published table is now a constant in
+the script, `WEEK2_PUBLISHED_LOADS`, tagged with the commit it came from. That was the worst
+finding in the set and it was invisible from inside the session, because the script was only ever
+run before `--write` or in the same breath as it.
+
+**What went into the gates as a result.** `lateral_force_N` is now a required field on
+`aero_azimuthal_loads` and `pitch.peak_lateral_force_N` joined week 3's positive list, because
+deleting the column and its stated peak left every gate green while removing the load week 4
+inherits. Two attack cases went in with them. 115 self-tests to 117.

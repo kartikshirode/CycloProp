@@ -16,8 +16,9 @@ structure, mass, materials and manufacturing, and it is the second heavy week.
 3. **[stage-1/progress/week-3.md](stage-1/progress/week-3.md)** is where the design stands and
    what week 4 inherits. [week-2.md](stage-1/progress/week-2.md) is still the mass and
    feasibility record
-4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 44 entries.
-   D30 unblocked week 2, D35 closed the stacked case, D38 to D44 are week 3
+4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 45 entries.
+   D30 unblocked week 2, D35 closed the stacked case, D38 to D45 are week 3, and D45 is the
+   audit response that corrects four figures inside D38, D40, D42 and D44
 5. **[stage-1/design/evidence-ledger.md](stage-1/design/evidence-ledger.md)** is what every
    number rests on and how strong it is
 6. **[stage-1/audit/week-3.md](stage-1/audit/week-3.md)** is the week 3 fresh-context audit,
@@ -114,17 +115,17 @@ mean blade load, and the side force angle against pitch offset. Both feed week 4
   writes `numbers.json` under `--write`, and `tools/test_gates.py` recomputes the loop closure on
   every published pitch row. A hand-edited row or a target cosine both fail it
 - **Kellen's link ratio does not carry across and his horn ratio does.** 105 mm rather than 111.6
-  takes the carrier torque from 0.297 Nm to 0.137 Nm and opens the transmission angle by 18
+  takes the carrier torque from 0.3240 Nm to 0.1371 Nm and opens the transmission angle by 18
   degrees. The sweep is in the script under `--sweep`. See D38
 - **The week 2 load model was rerun, not replaced.** It reconstructs to 5.2e-5 N on all 36 of its
   published rows before the schedule changes, so the comparison is like for like. See D41
 - **Side force is the open risk and it is stated as one.** The model gives 0.98 degrees of
-  aerodynamic tilt; measurement gives 10 to 45 for the whole tilt and rising with rpm. The design
-  carries an indexed bias plus bench trim, and the uncertainty costs up to 35 of the 120 degrees
+  aerodynamic tilt; measurement gives 10 to 35 for the whole tilt and rising with rpm. The design
+  carries an indexed bias plus bench trim, and the uncertainty costs up to 25 of the 120 degrees
   of authority
 - **The vectoring gate now tests the force map.** Comparing `vector_range_deg` with
-  `phase_authority_deg` only checked that the same number was written twice. Five new checks and
-  five new attack cases. See D42
+  `phase_authority_deg` only checked that the same number was written twice. Six new checks, two
+  new required fields and seven new attack cases. See D42 and D45
 
 ## The human gate
 
@@ -147,8 +148,8 @@ Gates are run by the supervisor in its own shell and never taken from the week-a
 `python tools/check.py --week N`, `--global`, and `python tools/test_gates.py`. Week 3 leaves all
 three green. `tools/check.py` has never been loosened: week 2 added four gates after the first
 audit, six thrust to weight gates, a measured-family exception on the coefficient floor and
-seven document gates; week 3 added three force map checks and two lateral load checks. 115
-self-tests.
+seven document gates; week 3 added four force map checks and two lateral load checks, then two
+more required fields after its audit. 117 self-tests.
 
 ## Open items
 

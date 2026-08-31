@@ -39,14 +39,15 @@ design's own solidity and chord to radius. It does not recompute the four-bar; t
 
 ### tools/test_gates.py
 Self-tests for check.py. Builds throwaway trees and checks an honest design passes while
-specific attacks fail, then runs `linkage_selftests` read-only over the real numbers.json. 115
+specific attacks fail, then runs `linkage_selftests` read-only over the real numbers.json. 117
 checks, which is `len(CASES) + 22 + len(extra)`. Week 2 took it from 77, week 3 from 104.
 Used by: run by hand after any change to check.py or linkage.py
 Gotcha: `honest_numbers()` is the fixture every case mutates, so a new required field in
 check.py has to be added there first or every case fails at once. Its vector_map spans 300
-degrees on purpose, because the week 3 evidence gate rejects commands clustered near zero.
-`linkage_selftests` is the only part that touches the real repo, it reads and never writes, and
-it returns an empty list on a tree from before week 3 so the suite still runs there.
+degrees on purpose, because the week 3 evidence gate rejects commands clustered near zero. Two
+things read the real repository: `linkage_selftests`, which reads numbers.json and never writes,
+and `REAL_PDF`, which copies the problem statement into throwaway trees. `linkage_selftests`
+returns an empty list on a tree from before week 3 so the suite still runs there.
 
 
 ### stage-1/design/numbers.json
@@ -56,11 +57,13 @@ radius, the candidate and scenario tables, azimuthal loads, mass envelope, sourc
 sensitivity, and since week 3 the pitch block, linkage_dimensions, pitch_schedule, vector_map
 and packaging. Week 4 fills structure, the mass budget and the three remaining results.
 Used by: every stage-1/design/*.md through its Numbers used block, tools/check.py, tools/linkage.py
-Gotcha: prose never restates a number, it cites the dotted key. The pitch, schedule, vector map
-and azimuthal load blocks are written by `tools/linkage.py --write` and hand editing any of them
-breaks the loop closure test in test_gates.py. `aero_azimuthal_loads` rows gained
-`lateral_force_N` in week 3 and its cycle mean is gated. Every mass_envelope_g line carries a
-scaling_class; week 4's mass_budget_g rows carry conservative_g and `refines`. See D33 and D41.
+Gotcha: prose never restates a number, it cites the dotted key. The pitch, schedule, vector map,
+linkage, packaging and azimuthal blocks are written wholesale by `tools/linkage.py --write`, so a
+hand-added key inside any of them is deleted by the next run. Only `pitch_schedule` is protected
+against hand editing, by the loop closure test in test_gates.py. `aero_azimuthal_loads` rows
+carry `lateral_force_N` since week 3 and both its cycle mean and its peak are gated. Every
+mass_envelope_g line carries a scaling_class; week 4's mass_budget_g rows carry conservative_g
+and `refines`. See D33 and D41.
 
 
 ### stage-1/design/evidence-ledger.md
@@ -150,9 +153,12 @@ inflow, sizes the vectoring actuator and computes the swept envelope. `--sweep` 
 and pitch link table the design point came from, `--balanced` shows the chordwise balance case.
 Used by: run by hand; `--write` is what fills the pitch, schedule, vector map, azimuthal load and
 packaging blocks of numbers.json, and tools/test_gates.py imports nothing from it
-Gotcha: `--write` refuses the balanced case, because that blade does not exist yet. It reads the
-frozen geometry out of numbers.json and writes back into the same file, so run it from a clean
-tree. It reconstructs week 2's load model first and stops if that no longer reproduces.
+Gotcha: `--write` refuses the balanced case, because that blade does not exist yet, and writes
+LF because the default here is CRLF against a repo that declares eol=lf. It reconstructs week 2's
+load model first, against the `WEEK2_PUBLISHED_LOADS` constant and never against the live table,
+because `--write` replaces that table and an earlier version compared the reconstruction with its
+own output. `BLADE_PARTS_G` duplicates the blade build-up that lives as prose in
+02-rotor-sizing.md; a week 4 change to the blade has to change it here too.
 
 ### stage-1/design/03-pitch-and-vectoring.md
 Required Stage 1 item 3 and the whole 15 percent kinematics and vectoring criterion. Topology,
@@ -194,6 +200,15 @@ command and its readback, 9 debts and what week 4 inherits.
 Used by: check.py counts a week as done only if this file carries STATUS: WEEK-COMPLETE
 Gotcha: it carries that marker, which is why check.py then demands stage-1/audit/week-3.md.
 
+
+### stage-1/audit/week-3.md
+The week 3 audit: one fresh-context read-only pass, 16 findings, verbatim, followed by what was
+done about each.
+Used by: check.py at every later week, which requires an audit file with its marker for each week
+already marked done
+Gotcha: must contain the literal line AUDIT-COMPLETE and end with the "Findings: N" line, which
+is grepped. The findings are reproduced word for word rather than summarised, so the corrections
+they triggered live in D45 and in the response section below them.
 
 ### reference/
 Primary sources. The problem statement PDF and its text, the API payload it came from, and the

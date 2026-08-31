@@ -215,7 +215,7 @@ pleased with myself for about ten minutes.
 
 Two things then went wrong at once. The pitch link passes 0.004 mm from the rotor axis, which is
 not a clearance, it is a hole in the middle of the design. And the carrier torque came out at
-0.297 Nm against a servo that can hold about a tenth of that.
+0.3240 Nm, which two servos hold on exactly half their stall torque and not a newton metre more.
 
 The first one I got wrong twice before getting it right. My first instinct was to shape the link
 around the shaft, which is what Kellen did, and my second was to move the mechanism outboard,
@@ -229,20 +229,21 @@ that a longer arm means less link force. It does, and the carrier torque goes up
 the offset grows with the horn and the torque scales on the offset. The sweep is in the script
 now for exactly that reason: I would not have believed the answer without the table. What fixed
 it was the pitch link, which I had assumed was fixed by Kellen's ratio and is not. 105 mm
-instead of 111.6 mm takes the carrier torque from 0.297 Nm to 0.137 Nm, opens the transmission
+instead of 111.6 mm takes the carrier torque from 0.3240 Nm to 0.1371 Nm, opens the transmission
 angle by 18 degrees and halves the harmonic residual. Same horn, same radius, one link length.
 
 The number I actually care about is the side force, and it is the one I am least happy with.
 The model puts the resultant 11.98 degrees off the commanded direction, of which 11.00 comes
-from the linkage and 0.98 from the aerodynamics. Benedict's figure 2.33 measures 10 to 45
-degrees on rotors like this one and it rises with rpm, and we run past the top of his sweep. So
+from the linkage and 0.98 from the aerodynamics. Sirohi, Adams and Benedict's twin put the whole
+tilt between 10 and 35 degrees on rotors like this one, and Benedict's figure 2.33 says in words
+that it rises with rpm and with blade count, so we sit high in that band. So
 the aerodynamic half of my number is wrong by an order of magnitude and I know why: uniform
 inflow, no wake return, no shed vorticity, no dynamic stall hysteresis. Every one of those feeds
 the lateral component. I could have written 30 degrees into the design and called it a
 correction. That would have looked better and meant less.
 
 What I did instead is treat it as a bias with a band around it: index the carrier at assembly,
-trim on the bench, and cost out the uncertainty. It costs 35 degrees of the 120, worst case,
+trim on the bench, and cost out the uncertainty. It costs 25 degrees of the 120, worst case,
 which is the single biggest consumer of vectoring authority in the module and is now written
 down as such.
 
@@ -257,3 +258,16 @@ And the blade is not balanced. Centre of mass at 39.92 percent chord against a p
 which on a cyclorotor puts a steady centrifugal moment on every blade and doubles the pitch link
 load. I nearly added a nose weight to make my own numbers look better. It is week 4's trade, the
 stored numbers are the unbalanced ones, and the script refuses to write the balanced case.
+
+I did not stop at the end. A fresh-context read found sixteen things, and the one that mattered
+was that the solver had disabled itself: `check_week2_model` compared its reconstruction against
+the live azimuthal table, which `--write` replaces, so the script ran exactly once and then
+refused. There is no way I catch that from inside a session where the only two ways I ever ran it
+were before `--write` or in the same breath as it. The week 2 table is a constant in the file now.
+
+Four figures inside frozen decisions were also wrong, all of them stale sweep numbers from before
+I corrected the resultant normalisation, and the widest was calling a 2.36 times difference four
+times. And I had quoted a band of 10 to 45 degrees for the side force off an axis label rather
+than off a plotted value. That one is the least excusable, because the wider band made my own
+uncertainty argument sound worse than the sources support, and I did not notice because it was
+arguing against me. D45 carries all of it.
