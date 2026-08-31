@@ -38,40 +38,58 @@ percent to 5 and is recorded as D35.
 
 ### Azimuthal load distribution
 
-A cycle-averaged coefficient hides what the blade actually sees. The model here uses 36
-azimuths, a prescribed sinusoidal pitch of plus or minus 40 degrees, and a uniform induced
-inflow from momentum theory. Induced velocity is 10.72 m/s against a tip speed of 27.70, so the
-inflow ratio is 0.387. That is large, and it is the single biggest reason a simple model should
-not be trusted for magnitude here.
+A cycle-averaged coefficient hides what the blade actually sees. The model uses 36 azimuths, a
+uniform induced inflow from momentum theory, and the pitch schedule the week 3 linkage solves.
+It used a prescribed sinusoid until week 3 replaced it, and the two are not the same shape.
+Induced velocity is 10.72 m/s against a tip speed of 27.70, so the inflow ratio is 0.387. That
+is large, and it is the single biggest reason a simple model should not be trusted for
+magnitude here.
 
 Angle of attack at each azimuth is the geometric pitch less the inflow angle, capped at 28
 degrees to stand in for dynamic stall delay. Lift uses a thin-airfoil slope. The distribution
 is then scaled so its cycle mean equals the thrust per blade from the coefficient route, which
 is the point of it: a load distribution and a sanity check, not an independent thrust estimate.
+`tools/linkage.py` is what evaluates it, and running that script with no arguments reproduces
+the week 2 sinusoid table to 5.2e-5 N on every row before it moves on to the solved schedule.
 
-| Azimuth | Vertical force per blade |
-| --- | --- |
-| 0 deg | 0.00 N |
-| 30 deg | 5.79 N |
-| 60 deg | 13.67 N |
-| 90 deg | 11.73 N |
-| 120 deg | 4.32 N |
-| 150 deg | 0.49 N |
-| 180 deg | 0.00 N |
+Azimuth is measured from the offset link, so 90 degrees is where the pitch mechanism is
+commanded to point. Module vertical sits 11.98 degrees past that, and the two force columns are
+resolved in module axes.
 
-The lower half mirrors the upper half, which follows from a symmetric prescribed schedule and a
-uniform inflow. Peak is 14.24 N against a cycle mean of 6.00 N, so peak to mean is 2.37.
+| Azimuth | Vertical force per blade | Lateral force per blade |
+| --- | --- | --- |
+| 0 deg | 1.08 N | 5.08 N |
+| 30 deg | 1.91 N | -5.86 N |
+| 60 deg | 11.18 N | -10.06 N |
+| 90 deg | 14.73 N | -3.13 N |
+| 120 deg | 7.45 N | 2.42 N |
+| 150 deg | 1.23 N | 1.37 N |
+| 180 deg | 0.02 N | 0.12 N |
+| 210 deg | 0.06 N | -0.19 N |
+| 240 deg | 2.19 N | -1.97 N |
+| 270 deg | 9.50 N | -2.02 N |
+| 300 deg | 13.92 N | 4.53 N |
+| 330 deg | 8.73 N | 9.71 N |
 
-That is below the published 3 to 4 range, and the honest reading is that the model
+The lower half no longer mirrors the upper one. That mirroring was a property of the prescribed
+sinusoid, not of the rotor, and the solved schedule has enough harmonic content to break it.
+Peak vertical force is 15.01 N at 80 degrees against a cycle mean of 6.00 N, so peak to mean is
+2.50.
+
+That is still below the published 3 to 4 range, and the honest reading is that the model
 under-predicts the peak rather than that this design is gentler than the literature. A
-prescribed sinusoid with uniform inflow has no wake return, no shed vorticity and no dynamic
-stall overshoot, and all three sharpen the peak. Week 4 uses 4.0 regardless, which is D16, and
-week 3 reruns this against the pitch schedule the solved linkage produces.
+quasi-steady model with uniform inflow has no wake return, no shed vorticity and no dynamic
+stall overshoot, and all three sharpen the peak. Week 4 uses 4.0 regardless, which is D16.
 
 What sets what, since the plan asks: vertical force is set by pitch amplitude and inflow ratio
-together. Side force is set by the phase between the pitch schedule and the azimuth, which is
-zero here by construction and will not be zero in week 3. Peak blade load is set by the stall
-cap more than by anything else, which is exactly why the number is soft.
+together. Side force is set by the phase between the pitch schedule and the azimuth, and it was
+zero by construction while the schedule was a phase-free sinusoid. It is not zero now. The
+cycle mean lateral force is trimmed to zero by pointing the offset 11.98 degrees off the module
+vertical, and the instantaneous lateral force still reaches 10.10 N per blade inside the cycle,
+which is a bearing and frame load rather than a thrust loss. Peak blade load is set by the
+stall cap more than by anything else, which is exactly why the number is soft.
+`03-pitch-and-vectoring.md` carries the schedule, the trim and what the measured literature
+says about both.
 
 ## Power
 
@@ -193,7 +211,9 @@ hard version of that test still runs in week 4 against a refined budget.
 - performance.momentum_area_m2 = 0.063888
 - performance.induced_velocity_ms = 10.7237
 - performance.inflow_ratio = 0.3871
-- performance.blade_load_peak_to_mean = 2.374
+- performance.blade_load_peak_to_mean = 2.501
+- pitch.side_force_tilt_deg = 11.978
+- pitch.peak_lateral_force_N = 10.0987
 - performance.motor_input_W = 457.573
 - performance.motor_rpm = 8417.0
 - performance.motor_torque_Nm = 0.4361
