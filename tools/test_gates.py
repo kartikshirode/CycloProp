@@ -1579,6 +1579,20 @@ case("criteria named beside the table instead of in it is rejected", False,
      upto=5, week=5, tweak=criteria_named_only_in_prose)
 
 
+def front_matter_on_the_submission(root, data):
+    """The real submission opens with a pandoc header, and `geometry: margin=25mm` in it
+    used to be reported as a length the design had not justified. Whole-week version of
+    the coverage probes further down."""
+    p = root / SUB
+    p.write_text('---\ntitle: "CycloProp Stage 1"\ngeometry: margin=25mm\n'
+                 'fontsize: 11pt\n---\n\n' + p.read_text(encoding="utf-8"),
+                 encoding="utf-8")
+
+
+case("a submission carrying a pandoc front matter block passes", True,
+     upto=5, week=5, tweak=front_matter_on_the_submission)
+
+
 def loop_residual(rows, R, e, a, l, alpha0, phi_deg=90.0):
     """Worst distance by which the pitch link fails to reach the offset pivot.
 
@@ -1790,6 +1804,38 @@ def main():
             ("an inline marker hiding two numbers is accepted",
              "thrust 991 N and 992 N " + inline, True),
             ("scientific notation is not invisible to the audit", "thrust of 9.99e2 N", False),
+        ]
+        for name, text, want_pass in probes:
+            (Path(tmp) / "t.md").write_text(text, encoding="utf-8")
+            chk.FAILURES.clear()
+            chk.check_numeric_coverage("t.md", data)
+            got = not chk.FAILURES
+            ok = got == want_pass
+            ANNOUNCED.append(1)
+            print(("ok    " if ok else "BROKE ") + name +
+                  f"   [expected {'pass' if want_pass else 'fail'}, got {'pass' if got else 'fail'}]")
+            if not ok:
+                failures.append((name, ""))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    # Front matter is build configuration and the audit skips it. The point of the last
+    # two probes is that the skip is positional: the same setting written into the body
+    # is a claim, and a real untraced number in the body still fails with a front matter
+    # block sitting above it.
+    tmp = tempfile.mkdtemp(prefix="cyclo-gate-")
+    try:
+        data = honest_numbers()
+        chk.set_root(tmp)
+        fm = chr(10).join(["---", 'title: "CycloProp Stage 1"', "geometry: margin=25mm",
+                           "fontsize: 11pt", "---", ""])
+        probes = [
+            ("a page margin in the front matter is not a design claim",
+             fm + chr(10) + "The requirement is at least 10 N.", True),
+            ("an untraced number in the body still fails under front matter",
+             fm + chr(10) + "The module produces 999 N of thrust.", False),
+            ("the same margin setting in the body is a claim and fails",
+             "The page is set with margin=25mm in the body text.", False),
         ]
         for name, text, want_pass in probes:
             (Path(tmp) / "t.md").write_text(text, encoding="utf-8")
