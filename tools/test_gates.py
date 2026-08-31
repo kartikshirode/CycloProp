@@ -464,6 +464,104 @@ def heavy(d):
 case("a module too heavy for T/W 2.5 is rejected", False, heavy)
 
 
+def _rescale_mass(d, nom_factor, cons_factor, target=None, target_note=True):
+    """Move the mass envelope so one chosen T/W case lands where a test wants it, keeping
+    every other mass gate consistent. The envelope lines, the stated totals, the selected
+    candidate row and the losing rows all have to move together or the test fails on a
+    gate it was not aiming at."""
+    for e in d["mass_envelope_g"]:
+        e["nominal_g"] = round(e["nominal_g"] * nom_factor, 4)
+        e["conservative_g"] = round(e["conservative_g"] * cons_factor, 4)
+    nom = sum(e["nominal_g"] for e in d["mass_envelope_g"])
+    cons = sum(e["conservative_g"] for e in d["mass_envelope_g"])
+    tn = d["performance"]["thrust_N"]
+    tc = d["performance"]["thrust_N_conservative"]
+    tw_cons = tc / (cons / 1000 * G)
+    d["results"]["mass_envelope_g"] = nom
+    d["results"]["mass_g_conservative"] = cons
+    d["results"]["thrust_to_weight_conservative"] = tw_cons
+    for i, c in enumerate(d["configuration_candidates"]):
+        if c.get("selected"):
+            c["module_mass_g"] = nom
+            c["module_tw"] = tn / (nom / 1000 * G)
+            c["module_tw_conservative"] = tw_cons
+        else:
+            c["module_tw_conservative"] = tw_cons * (0.83 if i == 1 else 0.72)
+    if target is not None:
+        d["results"]["mass_target_week4_g"] = target
+        d["sources"].setdefault("results", {})["mass_target_week4_g"] = (
+            "the conservative mass that clears the limit at the conservative thrust, "
+            "carried into the week 4 budget as the reduction to find line by line"
+            if target_note else "week 4")
+    return d
+
+
+def _target(d):
+    return d["performance"]["thrust_N_conservative"] / (2.5 * G) * 1000
+
+
+def stacked_miss(d):
+    """Conservative mass at 500 g against a 400 g nominal. The stacked downside misses
+    2.5, and the design case and both single downsides still clear it."""
+    return _rescale_mass(d, 1.0, 500.0 / 448.0, target=_target(d))
+
+
+case("a stacked downside miss passes week 2 with a week 4 mass target",
+     True, stacked_miss, upto=2, week=2)
+
+
+def stacked_miss_no_target(d):
+    return _rescale_mass(d, 1.0, 500.0 / 448.0)
+
+
+case("a stacked downside miss with no mass target is rejected",
+     False, stacked_miss_no_target, upto=2, week=2)
+
+
+def stacked_miss_wrong_target(d):
+    return _rescale_mass(d, 1.0, 500.0 / 448.0, target=_target(d) * 1.15)
+
+
+case("a stacked downside miss with an inflated mass target is rejected",
+     False, stacked_miss_wrong_target, upto=2, week=2)
+
+
+def stacked_miss_bare_target(d):
+    return _rescale_mass(d, 1.0, 500.0 / 448.0, target=_target(d), target_note=False)
+
+
+case("a mass target with no retirement path is rejected",
+     False, stacked_miss_bare_target, upto=2, week=2)
+
+
+def design_case_short(d):
+    """The whole envelope half again heavier, so even the design case misses the limit."""
+    return _rescale_mass(d, 1.5, 1.5)
+
+
+case("a design case under T/W 2.5 is rejected", False, design_case_short, upto=2, week=2)
+
+
+def mass_downside_short(d):
+    """Nominal untouched so the design case still clears. Conservative at 600 g, which the
+    mass downside on its own cannot carry."""
+    return _rescale_mass(d, 1.0, 600.0 / 448.0, target=_target(d))
+
+
+case("a mass downside alone under T/W 2.5 is rejected",
+     False, mass_downside_short, upto=2, week=2)
+
+
+def coeff_downside_short(d):
+    """Nominal at 500 g and conservative at 540 g. The design case and the mass downside
+    both clear, the coefficient downside on its own does not."""
+    return _rescale_mass(d, 500.0 / 400.0, 540.0 / 448.0, target=_target(d))
+
+
+case("a coefficient downside alone under T/W 2.5 is rejected",
+     False, coeff_downside_short, upto=2, week=2)
+
+
 def thin_basis(d):
     d["mass_budget_g"][0]["basis"] = "est."
     return d

@@ -890,9 +890,50 @@ def week2(data):
                          f"lines give {cons:.1f} g, stated {mc:.1f} g")
     if mc and tc:
         tw = tc / (mc / 1000.0 * G)
-        ok &= report(tw > TW_MINIMUM,
-                     "week2: conservative mass and thrust still clear T/W 2.5",
+        mn_tot, tn = num(data, "results.mass_envelope_g"), r.get("thrust_N")
+
+        # Four T/W cases, not one. The design case and each downside taken on its own are
+        # hard gates here. The stacked case, meaning the low coefficient and the high mass
+        # column together, is stated here and gated hard in week 4 instead. The reason is
+        # what the week 2 mass column is made of: nine of its thirteen lines say "assumed"
+        # in their basis and carry a blanket 20 to 25 percent growth rate. Freezing or
+        # refusing to freeze geometry on a number built that way tests the growth rates
+        # rather than the design. Week 4 replaces those lines with real sections and
+        # catalogue parts, and `week4: conservative T/W clears 2.5` already applies the
+        # same limit to that refined budget. See D30.
+        if mn_tot and tn:
+            for label, thrust, mass in [
+                    ("the design case", tn, mn_tot),
+                    ("the mass downside alone", tn, mc),
+                    ("the coefficient downside alone", tc, mn_tot)]:
+                case_tw = thrust / (mass / 1000.0 * G)
+                ok &= report(case_tw > TW_MINIMUM,
+                             f"week2: {label} clears T/W 2.5",
+                             f"T/W {case_tw:.3f} at {thrust:.2f} N and {mass:.0f} g")
+
+        ok &= report(close(num(data, "results.thrust_to_weight_conservative"), tw),
+                     "week2: the stacked downside T/W is stated and reproduces",
                      f"T/W {tw:.3f} at {tc:.2f} N and {mc:.0f} g")
+
+        # A miss is allowed to pass week 2 only if it hands week 4 an arithmetic target
+        # rather than a paragraph. The target is the conservative mass that would clear the
+        # limit at this conservative thrust, and the gate recomputes it.
+        if tw > TW_MINIMUM:
+            report(True, "week2: the stacked downside clears T/W 2.5 as well",
+                   f"T/W {tw:.3f} at {tc:.2f} N and {mc:.0f} g")
+        else:
+            target = tc / (TW_MINIMUM * G) * 1000.0
+            stated = num(data, "results.mass_target_week4_g")
+            ok &= report(stated is not None and close(stated, target),
+                         "week2: a stacked downside miss hands week 4 a mass target",
+                         f"target {target:.1f} g, {mc - target:.1f} g below the "
+                         f"conservative {mc:.1f} g",
+                         fail_detail=f"stacked T/W {tw:.3f} misses {TW_MINIMUM}, so "
+                                     f"results.mass_target_week4_g has to be "
+                                     f"{target:.1f} g, found {stated}")
+            ok &= require_text(data, ["sources.results.mass_target_week4_g"],
+                               "week2: the mass target says how the shortfall retires", 40)
+
         note("week2: planning mass ceiling at this thrust",
              f"{tc / (TW_MINIMUM * G) * 1000:.0f} g "
              f"({PLANNING_MASS_AT_10N_G:.0f} g would apply only at exactly 10 N)")
