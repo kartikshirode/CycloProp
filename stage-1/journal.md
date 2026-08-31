@@ -151,3 +151,44 @@ classed measured, so the floor in force is still 10 and not one number here move
 mechanism D23 described, sitting ready. Whoever gets Kellen open pays for the reading and gets
 the retirement, and the gate will not accept a measurement on somebody else's shape family in
 its place.
+
+
+## 31 August 2026, the evidence pass
+
+Both theses came out of the Wayback Machine in about a minute each, after two weeks of the live
+routes refusing. OAKTrust is still behind its Cloudflare challenge and DRUM was serving a
+maintenance page, but `web.archive.org` had captures of both bitstreams and the `id_` flag hands
+back the original bytes instead of a rewritten wrapper. That was the whole trick. Two weeks of
+"needs a person with a browser" for a URL prefix.
+
+Kellen tabulates no coefficients, which I had half expected. CT/sigma only exists inside his
+figures. Rather than squint at a plot I pulled the vector paths out of the PDF, so the axis
+calibration is the tick geometry and the data points are the polyline vertices matplotlib wrote.
+Fig 3.25 and Fig 3.28 are two separately drawn figures of the same measurement and they came out
+at 1.04424 and 1.04428.
+
+What I liked about the day was the checking. Agreement between two figures only proves I can
+read a plot twice. So I took CP/sigma off a third figure and closed the figure of merit:
+CT^1.5/(sqrt(2) CP) gives 0.595 against the 0.6 Kellen states in his own section 3.3 for exactly
+that rotor. Then power loading at the 60 N/m2 disk loading his text names for Fig 3.27 came out
+at 0.1202 against the 0.1201 plotted. Neither closure depends on the span, so neither could be
+rescued by guessing the rotor right. At that point I believed the number.
+
+Benedict was the uncomfortable one. I went in to confirm the basis under 0.6055 and found the
+basis was invented. 1.98 N at 2000 rpm is not in the dissertation anywhere: 1.98 N is the 809
+gram vehicle weight over four, and 2000 rpm is the twin rotor. The quad's real point is 1.91 N at
+1800 rpm, printed twice, which gives 0.7211. Two mistakes pulling opposite ways, netting 16
+percent low. It reproduced perfectly every time anybody checked it, which is exactly why it
+survived a pull and two audits. Checking that arithmetic reproduces is not the same as checking
+that the inputs exist.
+
+I did not raise the coefficient. Every measured value available sits above 0.6055 and raising it
+would push thrust, rpm, torque, the drive and half the mass lines upward to buy margin nothing is
+asking for. So it stays, and D36 says it stays on purpose now rather than by luck.
+
+The other thing worth recording is that I stopped for twenty minutes in the middle. `git status`
+came back dirty with nine files I had not touched, and a file went from clean to modified while I
+was watching, so there were two of us writing the same repository. I backed my own numbers.json
+edit out, checked key by key that I had not clobbered anything, moved my new files to the
+scratchpad, and reported instead of finishing. It cost half an hour. Overwriting somebody's
+uncommitted work would have cost more, and there is no way to get it back.

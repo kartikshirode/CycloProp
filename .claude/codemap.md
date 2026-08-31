@@ -57,19 +57,24 @@ and the three remaining results, which are still null.
 Used by: every stage-1/design/*.md through its Numbers used block, tools/check.py
 Gotcha: prose never restates a number, it cites the dotted key. Every mass_envelope_g line
 carries a scaling_class of geometry, power or fixed, because the drive is not a fixed mass.
-`results.mass_target_week4_g` exists only because the stacked case misses 2.5, and the gate
-recomputes it. Week 4's mass_budget_g rows carry conservative_g as well as mass_g, and their
-sum is what results.mass_g_conservative has to equal. See D33.
+`results.mass_target_week4_g` was deleted by D35 once the stacked case cleared 2.5, because the
+gate stops checking that field on a pass and a stale value would sit there unread. A
+coefficient_scenarios row classed measured also declares solidity and chord_to_radius, which is
+what drops the haircut floor to 5 percent; it fails closed without them. Week 4's mass_budget_g
+rows carry conservative_g as well as mass_g, and their sum is what results.mass_g_conservative
+has to equal. See D33.
 
 ### stage-1/design/evidence-ledger.md
-Week 2 deliverable. 17 numbered evidence rows with class, source, exact basis, area convention,
+Week 2 deliverable. 19 numbered evidence rows with class, source, exact basis, area convention,
 source geometry, source Reynolds and use, followed by the selection rules and the packaging
 assumption, all fixed before any candidate was scored. The freeze rule it published sits next
 to the D30 rule that replaced it rather than being edited in place.
 Used by: the three week 2 design documents, and the week 2 audit
 Gotcha: the gate checks only that the two headings exist, so the honesty of the classes is
-an audit matter. Nothing here is class measured; E7 is a real measurement on somebody else's
-rotor and is labelled transferred for that reason.
+an audit matter. Four rows are class measured since 31 August, all of them Kellen's
+measurements on Kellen's rotor, which is this design's shape family to within 1.1 percent and
+not this design. E1, the coefficient the design is built on, is still not one of them. E7 is a
+real measurement on somebody else's rotor and stays transferred for that reason.
 
 ### stage-1/design/01-configuration.md
 Required Stage 1 item 1. The frozen single rotor against redesigned 2 and 3 rotor clusters on
@@ -78,12 +83,13 @@ airfoil and drive topology choices.
 Used by: week 3 packaging and the week 5 submission
 Gotcha: needs the headings Configuration, Why this configuration and Numbers used, at least 400
 words of body, and 3 or more distinct declared numbers matching numbers.json to 2 percent. D32
-also requires the stacked 2.252 wherever it states the 3.163 design case.
+also requires the stacked 2.517 wherever it states the 3.163 design case, and `states_value`
+ignores the Numbers used block, so it has to appear in the prose.
 
 ### stage-1/design/02-rotor-sizing.md
 Required Stage 1 item 2. Shape family, the coefficient recompute, blade section and stiffness
-closure, the radius sweep, the mass envelope, and the four case verdict that freezes geometry
-and states the 623.9 g week 4 mass target.
+closure, the radius sweep, the mass envelope, and the four case verdict that freezes geometry.
+Since D35 all four cases clear 2.5 and the week 4 mass target is gone.
 Used by: week 4's mass budget, which refines every mass_envelope_g line by name
 Gotcha: needs the headings Rotor sizing, Shape family, Radius and Numbers used. The mass
 envelope line names here are what week 4's `refines` fields have to match, spelled the same
@@ -107,16 +113,18 @@ Gotcha: it carries that marker as of the second run. Debt 1 is the 68.5 g mass t
 Dates in first-run prose read 2 September; the commits say 30 August.
 
 ### stage-1/decisions.md
-Numbered append-only decision log, D1 to D34. Reopening an earlier entry means a new entry
+Numbered append-only decision log, D1 to D37. Reopening an earlier entry means a new entry
 saying which one it supersedes.
 Used by: every week agent as settled ground
 Gotcha: D27 supersedes the figures in D18, D20, D21 and D22, and D30 supersedes the freeze rule
 in D17 and answers D22. D30 is the entry to read before touching week 2 or any week 4 mass
-work, because it is where the hard stacked T/W test moved to.
+work, because it is where the hard stacked T/W test moved to. D35 to D37 are the evidence pass:
+D35 retired the transfer haircut and closed the stacked case, D36 corrected the provenance of
+the nominal coefficient and held the value anyway, D37 narrows D25 rather than superseding it.
 
 ### stage-1/journal.md
-Short narrative note per working session, newest last. Four entries, the last one being the
-week 2 freeze.
+Short narrative note per working session, newest last. Five entries, the last one being the
+evidence pass that read Kellen and Benedict.
 Used by: nothing mechanical, it is the record of what actually happened
 Gotcha: no gate reads it, so it is the one place that can say a model was wrong the first time.
 
@@ -126,7 +134,19 @@ human list and open items.
 Used by: check.py greps it for the NEXT-WEEK marker, which is the external witness for how
 many weeks are finished
 Gotcha: exactly one NEXT-WEEK line and it now reads 3. Two markers fail the gate, so the number
-never appears twice at the start of a line.
+never appears twice at the start of a line. Its four-case T/W table is the one a reader meets
+first, so it moves whenever the coefficient or the mass does.
+
+### reference/
+Primary sources. The problem statement PDF and its text, the API payload it came from, and the
+machine text extracts of Kellen 2019 and Benedict 2010 with a README giving the handle, the
+Wayback URL that worked, a curl line and the sha256 of each PDF.
+Used by: context.md is built from the problem statement; the evidence ledger cites the two
+theses by printed page
+Gotcha: the two thesis PDFs are deliberately not committed, 52 MB against a repository of
+about 2.2 MB, so the extracts plus a hash stand in for them. `check.py` skips this whole
+directory in the style and ASCII gates, because the extracts are somebody else's words and
+rewriting incoming evidence to match our own house style would damage it.
 
 ### stage-1/human-gate.md
 Week H task list and its five status markers. Registration, eligibility, roster, sender and
