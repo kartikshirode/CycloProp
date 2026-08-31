@@ -3,8 +3,9 @@
 Required Stage 1 item 2. Geometry, the radius trade, the blade section, and the coarse mass
 envelope that decides whether any of it closes.
 
-Read the last section first if you only have a minute. The sizing works. The mass does not
-close against the conservative case, and the gap is 69 g.
+Read the last section first if you only have a minute. The sizing works and the geometry is
+frozen. The stacked conservative case is still 68.5 g short of thrust to weight 2.5, and that
+shortfall now travels to week 4 as a mass target instead of holding the freeze. See D30.
 
 ## Shape family
 
@@ -27,7 +28,7 @@ It is also not avoidable inside this family. The conservative thrust has to clea
 own, the coefficient haircut is 15 percent, so design thrust cannot go below 11.76 N, and
 Reynolds goes with the square root of thrust. The lowest compliant point in this family already
 sits at 108,000. There is no design here that stays inside the documented band. Recorded as
-D25, and it is one more reason the week does not freeze.
+D25, and it is the largest piece of unretired risk the freeze carries.
 
 The direction of the extrapolation is at least the benign one. Shrestha's result is that
 non-dimensional thrust barely moves while power falls, so pushing Reynolds up should not cost
@@ -167,20 +168,33 @@ the mass ceiling. Non-blade power-scaled and fixed hardware is 283 g against a n
 of 733 g at 18 N, so 39 percent. Just inside, and the sweep says the same thing from the other
 direction.
 
-## The verdict, and it is not a freeze
+## The verdict, and the freeze
 
-Conservative thrust is 15.30 N and conservative mass is 692.4 g, giving a thrust to weight of
-**2.252**. The hard limit is above 2.5 and the internal target from D17 is 2.75.
+There are four thrust to weight cases here, not one, and reporting a single number hid that for
+most of week 2.
 
-- to reach 2.5 the conservative column has to lose 69 g, which is 9.9 percent
-- to reach 2.75 it has to lose 125 g, which is 18.1 percent
+| Case | Thrust | Mass | T/W | Against 2.5 |
+| --- | --- | --- | --- | --- |
+| design point | 18.00 N | 580.1 g | 3.163 | clears by 27 percent |
+| mass downside alone | 18.00 N | 692.4 g | 2.650 | clears by 6 percent |
+| coefficient downside alone | 15.30 N | 580.1 g | 2.689 | clears by 8 percent |
+| both stacked | 15.30 N | 692.4 g | 2.252 | misses by 68.5 g |
 
-Nominal thrust to weight is 3.163, which is already 49 percent above the best published module
-on the same boundary. Reaching 2.75 conservative needs a nominal of 3.86, and that is 81
-percent above the published record. Nothing available supports it.
+Geometry freezes on the first three. 18 N, 110 mm, with 120 mm carried as insurance. The
+stacked case is the one that misses and it is stated rather than buried: to reach 2.5 the
+conservative column has to come down to 623.9 g, which is 68.5 g or 9.9 percent.
 
-So geometry does not freeze. The fallbacks that were worked and what happens next are in
-`stage-1/progress/week-2.md`.
+That target is now week 4's, and D30 gives the reasoning in full. The short version is what the
+conservative column is made of. Nine of these thirteen lines say assumed in their basis and
+carry a blanket 20 or 25 percent growth rate, so the stacked number tests those rates about as
+hard as it tests the rotor. Week 4 replaces them with real sections, catalogue parts and a BOM,
+and `week4: conservative T/W clears 2.5` applies the same limit to that budget. The hard test
+did not go away. It moved to the week where the mass is real.
+
+Nominal thrust to weight is 3.163, already 49 percent above the best published module on the
+same boundary. Reaching 2.75 on the stacked case would need a nominal of 3.86, which is 81
+percent above the published record, and nothing available supports that. So the internal 2.75
+target from D17 is not met on the stacked case and is not claimed.
 
 ## Numbers used
 
@@ -198,3 +212,4 @@ So geometry does not freeze. The fallbacks that were worked and what happens nex
 - results.mass_envelope_g = 580.05
 - results.mass_g_conservative = 692.43
 - results.thrust_to_weight_conservative = 2.2525
+- results.mass_target_week4_g = 623.8818

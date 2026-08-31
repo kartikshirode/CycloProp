@@ -168,9 +168,11 @@ and speed together. The rotor wants 1.577 Nm, which needs a ratio above 4, and a
 cannot spin to the motor speed that ratio implies. No other shortlist motor covers it either,
 because the ones with the speed do not have the torque.
 
-Conservative thrust to weight measured across the whole sweep peaks at 18 N and 110 mm, at
-2.252. Which is below 2.5, so nothing here freezes. `stage-1/progress/week-2.md` carries the
-fallbacks that were worked and the report.
+Stacked conservative thrust to weight across the whole sweep peaks at 18 N and 110 mm, at
+2.252. That is the row the design freezes on, per D30, because the design case is 3.163 there
+and each downside on its own clears 2.5. The stacked miss goes to week 4 as a 623.9 g mass
+target. `stage-1/progress/week-2.md` carries the fallbacks that were worked before the freeze,
+and none of them closed the stacked case.
 
 ## Numbers used
 

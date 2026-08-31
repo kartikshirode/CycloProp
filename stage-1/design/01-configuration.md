@@ -1,9 +1,11 @@
 # Configuration
 
-Required Stage 1 item 1. This is the candidate configuration carried out of week 2. It is not
-frozen: the conservative case does not clear thrust to weight 2.5, so the decision gate in
-`stage-1/plan.md` holds the freeze. What follows is the layout the comparison chose and the
-reasoning behind it, and both stand whatever a person decides about the margin.
+Required Stage 1 item 1. This is the frozen configuration for Stage 1, frozen at 18 N of design
+thrust and a 110 mm radius by D30, with 120 mm carried as the insurance radius. The design case
+clears thrust to weight 2.5 at 3.163 and each downside taken on its own clears it too. Only the
+stacked downside misses, at 2.252, and that number is now a mass target handed to week 4 rather
+than a hold on the freeze. What follows is the layout the comparison chose and the reasoning
+behind it.
 
 The module is one cyclorotor. Three blades, NACA 0020, chord at 0.66 of the radius, blade
 aspect ratio 4, pitching plus or minus 40 degrees about an axis at 30 percent of chord. The

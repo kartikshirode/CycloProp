@@ -131,16 +131,23 @@ penalty, one shared motor sized on total power, one shared controller, and the s
 coefficient for all three even though splitting the thrust drops per-rotor Reynolds. If the
 single rotor still wins on those terms, it wins.
 
-**What freezes geometry.** The conservative case, meaning the low coefficient and the high
-mass column together, clearing thrust to weight 2.5 with its inputs carrying evidence. The
-internal target is 2.75. Between the two is compliant and red and needs a person to decide.
-Below 2.5, nothing freezes.
+**What freezes geometry.** Written before scoring as the stacked conservative case, meaning the
+low coefficient and the high mass column together, clearing thrust to weight 2.5 with its
+inputs carrying evidence. D30 changed that rule after the numbers came in and the change is
+recorded rather than quietly applied. Geometry now freezes on three hard cases: the design
+point, the mass downside alone and the coefficient downside alone, each above 2.5. The stacked
+case has to be stated and reproduce, and a miss hands week 4 a computed mass target of 623.9 g.
+The hard stacked test moved to week 4, where the mass lines are real sections and catalogue
+parts instead of nine assumed ones carrying a blanket growth rate. The 2.75 internal target
+from D17 stands as a target and is not met on the stacked case.
 
 ## Disclosed gaps
 
-- Kellen 2019, Heimerl et al. at the VFS 77th Forum, and Ramsey 2022 are all unread, all
-  behind the same JavaScript challenge. Kellen stopped being supporting evidence this week and
-  became load bearing, for the reason in `stage-1/progress/week-2.md`
+- Kellen 2019, Heimerl et al. at the VFS 77th Forum, and Ramsey 2022 are all unread, all behind
+  the same JavaScript challenge. Kellen was reclassified as a hard dependency mid-week by D23
+  and put back to supporting evidence by D30, once the freeze stopped depending on it. It is
+  still the cheapest thing on the list, because a measured coefficient at or above 0.6055 moves
+  the stacked case to 2.517 on its own
 - No published cyclorotor states a thrust to weight target and reports whether it met it.
   Searched in week 1, not found
 - No openly tabulated spread of blade-area thrust coefficients exists. The values sit inside
