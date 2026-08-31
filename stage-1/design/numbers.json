@@ -1,5 +1,5 @@
 {
-  "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder, and a string in a numeric field fails too. Week 2 fills geometry, operating, performance, efficiency, the candidate and sensitivity tables, power_by_radius, mass_envelope_g and sources. Week 3 fills pitch, pitch_schedule, vector_map and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, so an optimistic headline number achieves nothing. mass_envelope_g lines are {item, nominal_g, conservative_g, basis, scaling_class} with distinct item names. mass_budget_g lines are {item, mass_g, conservative_g, basis, refines}, where refines names the mass_envelope_g item this line came from, so week 4 continuity is checked per component and not only on the total, and conservative_g is what builds results.mass_g_conservative rather than a growth rate chosen after seeing the target. See D33. Aerodynamic power is bounded below by momentum theory over the declared momentum_area_m2, which may not exceed 2R times span, and the figure of merit that falls out has to be credible for a cyclorotor. thrust_sensitivity freezes in week 2 what raising thrust costs, and week 4 may only choose a row from it. Structural demands are derived: per-blade mass from the blade budget and blade count, rotor shaft torque from shaft power and speed, blade root bending from thrust per blade, lever arm and load factor. Row shapes for the remaining lists, so nothing sits in the schema without one: configuration_candidates {config, rotors, module_mass_g, thrust_N, module_tw, selected}, 3 or more; coefficient_scenarios {name, blade_area_coeff, basis, evidence_class}, 3 or more, where evidence_class is measured, derived or downside and a transferred value is never called measured, and a measured row also declares solidity and chord_to_radius so the gate can test whether it was taken on this design's own shape family; aero_azimuthal_loads {azimuth_deg, normal_force_N}, 24 or more; drive_candidates {name, continuous_power_W, continuous_torque_Nm, mass_g, selected}, 2 or more; linkage_dimensions {link, length_mm}, 4 or more; pitch_schedule {azimuth_deg, pitch_deg}, 24 or more; vector_map {phase_command_deg, vertical_force_N, lateral_force_N}, 3 or more. Every mass_envelope_g line also carries scaling_class, one of geometry, power or fixed, because the drive is not a fixed mass.",
+  "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder, and a string in a numeric field fails too. Week 2 fills geometry, operating, performance, efficiency, the candidate and sensitivity tables, power_by_radius, mass_envelope_g and sources. Week 3 fills pitch, pitch_schedule, vector_map and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, so an optimistic headline number achieves nothing. mass_envelope_g lines are {item, nominal_g, conservative_g, basis, scaling_class} with distinct item names. mass_budget_g lines are {item, mass_g, conservative_g, basis, refines}, where refines names the mass_envelope_g item this line came from, so week 4 continuity is checked per component and not only on the total, and conservative_g is what builds results.mass_g_conservative rather than a growth rate chosen after seeing the target. See D33. Aerodynamic power is bounded below by momentum theory over the declared momentum_area_m2, which may not exceed 2R times span, and the figure of merit that falls out has to be credible for a cyclorotor. thrust_sensitivity freezes in week 2 what raising thrust costs, and week 4 may only choose a row from it. Structural demands are derived: per-blade mass from the blade budget and blade count, rotor shaft torque from shaft power and speed, blade root bending from thrust per blade, lever arm and load factor. Row shapes for the remaining lists, so nothing sits in the schema without one: configuration_candidates {config, rotors, module_mass_g, thrust_N, module_tw, selected}, 3 or more; coefficient_scenarios {name, blade_area_coeff, basis, evidence_class}, 3 or more, where evidence_class is measured, derived or downside and a transferred value is never called measured, and a measured row also declares solidity and chord_to_radius so the gate can test whether it was taken on this design's own shape family; aero_azimuthal_loads {azimuth_deg, normal_force_N}, 24 or more; drive_candidates {name, continuous_power_W, continuous_torque_Nm, mass_g, selected}, 2 or more; linkage_dimensions {link, length_mm}, 4 or more; pitch_schedule {azimuth_deg, pitch_deg}, 24 or more; vector_map {phase_command_deg, vertical_force_N, lateral_force_N}, 3 or more. Every mass_envelope_g line also carries scaling_class, one of geometry, power or fixed, because the drive is not a fixed mass. Week 4 fills structure, mass_budget_g, bom and the remaining results, and it does so from tools/structure.py rather than by hand: run tools/linkage.py --write first when the blade section moves, then tools/structure.py --write. bom lines are {item, category, qty, unit_cost_inr, line_cost_inr, lead_time_weeks, make_or_buy, source, priced_date}, where the price is a distributor list level estimate and not an obtained quotation and they carry no physical unit, so nothing in the narrative coverage gate reads them as forces or masses. The structure block carries both the operating case and a declared overspeed: centrifugal load goes as the square of rotor speed, so blade_attachment_margin_overspeed and blade_combined_margin_overspeed are the margins that actually decide the blade, and the gate recomputes both from overspeed_factor. blade_margin is aerodynamic bending alone and is the smaller of the two spanwise loads on a cyclorotor, which is why blade_combined_margin exists beside it.",
   "geometry": {
     "radius_m": 0.11,
     "chord_m": 0.0726,
@@ -37,8 +37,8 @@
     "inflow_ratio": 0.3871,
     "solidity": 0.3151,
     "blade_area_m2": 0.06325,
-    "blade_tip_deflection_mm": 0.0778,
-    "blade_twist_deg": 0.0512,
+    "blade_tip_deflection_mm": 0.0936,
+    "blade_twist_deg": 0.0145,
     "motor_input_W": 457.573,
     "belt_ratio": 3.5,
     "motor_rpm": 8416.8,
@@ -541,19 +541,19 @@
     "axis_keepout_mm": 0.004,
     "neighbour_clearance_mm": 94.6,
     "pitch_bearing_travel_deg": 80.0,
-    "blade_pitch_inertia_kgm2": 1.1176e-05,
-    "blade_cg_pct_chord": 39.92,
-    "peak_blade_moment_Nm": 2.1201,
-    "peak_link_force_N": 101.82,
-    "carrier_torque_Nm": 0.1371,
+    "blade_pitch_inertia_kgm2": 1.205e-05,
+    "blade_cg_pct_chord": 39.31,
+    "peak_blade_moment_Nm": 2.2058,
+    "peak_link_force_N": 105.93,
+    "carrier_torque_Nm": 0.1389,
     "gear_step_up": 1.5,
-    "servo_torque_Nm": 0.0457,
+    "servo_torque_Nm": 0.0463,
     "servo_stall_torque_Nm": 0.216,
     "servo_travel_deg": 80.0,
-    "servo_torque_margin": 2.363,
+    "servo_torque_margin": 2.332,
     "slew_time_s": 0.1467,
     "actuator_draw_W": 2.88,
-    "carrier_radial_force_N": 47.48,
+    "carrier_radial_force_N": 53.22,
     "peak_lateral_force_N": 10.0987,
     "swept_outer_radius_mm": 148.03,
     "swept_inner_radius_mm": 86.54,
@@ -793,23 +793,36 @@
     "swept_diameter_mm": 296.1
   },
   "structure": {
-    "blade_mass_kg": null,
-    "centrifugal_load_N": null,
-    "blade_root_bending_Nm": null,
-    "shaft_torque_Nm": null,
-    "blade_allowable_Nm": null,
-    "shaft_allowable_Nm": null,
-    "blade_margin": null,
-    "shaft_margin": null,
-    "transmission_ratio": null,
-    "torque_reference": null,
-    "blade_load_lever_m": null,
-    "blade_load_factor": null,
-    "pitch_link_load_N": null,
-    "pitch_link_allowable_N": null,
-    "pitch_link_margin": null,
-    "blade_attachment_allowable_N": null,
-    "blade_attachment_margin": null
+    "blade_mass_kg": 0.031747,
+    "centrifugal_load_N": 221.464,
+    "blade_root_bending_Nm": 0.8712,
+    "shaft_torque_Nm": 1.41944,
+    "blade_allowable_Nm": 25.2528,
+    "shaft_allowable_Nm": 24.9563,
+    "blade_margin": 28.9863,
+    "shaft_margin": 17.5818,
+    "transmission_ratio": 3.5,
+    "torque_reference": "rotor shaft, downstream of the 3.5 to 1 belt reduction. The motor shaft carries motor_shaft_torque_Nm, which is this figure divided by the ratio and by the 0.93 belt efficiency",
+    "blade_load_lever_m": 0.0363,
+    "blade_load_factor": 4.0,
+    "pitch_link_load_N": 105.93,
+    "pitch_link_allowable_N": 349.727,
+    "pitch_link_margin": 3.3015,
+    "blade_attachment_allowable_N": 540.0,
+    "blade_attachment_margin": 2.4383,
+    "overspeed_factor": 1.2,
+    "centrifugal_load_overspeed_N": 318.908,
+    "blade_centrifugal_bending_Nm": 8.03913,
+    "blade_ei_Nm2": 51.115,
+    "blade_gj_Nm2": 7.8058,
+    "blade_windup_deg": 2.3509,
+    "blade_combined_margin": 2.8341,
+    "blade_combined_margin_overspeed": 1.9681,
+    "shaft_bending_Nm": 2.22965,
+    "shaft_combined_margin": 9.442,
+    "motor_shaft_torque_Nm": 0.43608,
+    "blade_attachment_margin_overspeed": 1.6933,
+    "carrier_phase_jitter_deg": 0.1432
   },
   "mass_envelope_g": [
     {
@@ -904,7 +917,239 @@
       "scaling_class": "geometry"
     }
   ],
-  "mass_budget_g": [],
+  "mass_budget_g": [
+    {
+      "item": "blade foam cores, 3 off",
+      "mass_g": 28.79,
+      "conservative_g": 33.11,
+      "basis": "Rohacell 51 IG class PMI foam at 52 kg/m3 filling 88% of the integrated NACA 0020 section over the 290.4 mm span, three blades. Growth class calculated, 15%",
+      "refines": "blades"
+    },
+    {
+      "item": "blade skins, 3 off",
+      "mass_g": 29.08,
+      "conservative_g": 33.44,
+      "basis": "two plies of 60 gsm carbon twill at 0.22 kg/m2 cured, over the integrated section perimeter of 151.7 mm, three blades. Growth class calculated, 15%",
+      "refines": "blades"
+    },
+    {
+      "item": "blade spar tubes, 3 off",
+      "mass_g": 17.42,
+      "conservative_g": 20.03,
+      "basis": "CFRP tube of 8.71 mm outer diameter and 0.5 mm wall on the pitch axis, full span, three blades. Growth class calculated, 15%",
+      "refines": "blades"
+    },
+    {
+      "item": "blade root close-outs, 3 blades",
+      "mass_g": 19.95,
+      "conservative_g": 22.35,
+      "basis": "two 7075-T6 root fittings per blade, 14 mm outer diameter over the spar and 10 mm long, plus 1.35 g of paste adhesive at the spar and closure seams. Growth class machined, 12%",
+      "refines": "blades"
+    },
+    {
+      "item": "rotor spider arms, 6 off",
+      "mass_g": 21.48,
+      "conservative_g": 24.71,
+      "basis": "CFRP bar of 14 by 1.5 mm section over the 110 mm rotor radius, two spiders of three arms. Growth class calculated, 15%",
+      "refines": "rotor frame and hubs"
+    },
+    {
+      "item": "rotor hub bosses, 2 off",
+      "mass_g": 14.41,
+      "conservative_g": 16.14,
+      "basis": "7075-T6 boss, 20 mm outer diameter, 14 mm bore, 16 mm long, clamping each spider to the shaft. Growth class machined, 12%",
+      "refines": "rotor frame and hubs"
+    },
+    {
+      "item": "root attachment brackets, 6 off",
+      "mass_g": 18.0,
+      "conservative_g": 20.16,
+      "basis": "7075-T6 clevis carrying the blade root fitting into the spider arm, sized on the recomputed centrifugal pull at the declared overspeed. Growth class machined, 12%",
+      "refines": "rotor frame and hubs"
+    },
+    {
+      "item": "pitch bearings, 6 off",
+      "mass_g": 7.8,
+      "conservative_g": 8.42,
+      "basis": "693ZZ, 3 by 8 by 4 mm, supplier listing, static rating 270 N each, two per blade. Growth class catalogue, 8%",
+      "refines": "pitch mechanism"
+    },
+    {
+      "item": "pitch links with rod ends, 3 off",
+      "mass_g": 12.28,
+      "conservative_g": 13.27,
+      "basis": "CFRP tube of 4 mm outer diameter and 0.5 mm wall at the solved 105.0 mm length, with two M3 aluminium bodied ball rod ends per link. Growth class catalogue, 8%",
+      "refines": "pitch mechanism"
+    },
+    {
+      "item": "pitch horns, 3 off",
+      "mass_g": 6.58,
+      "conservative_g": 7.37,
+      "basis": "7075-T6 arm of 8 by 4 mm section at the 24.4 mm horn radius, thickness set by its own bending margin. Growth class machined, 12%",
+      "refines": "pitch mechanism"
+    },
+    {
+      "item": "offset pivot post and pin",
+      "mass_g": 6.5,
+      "conservative_g": 7.28,
+      "basis": "7075-T6 post of 8 mm diameter reaching 40 mm from the phasing carrier to the common offset pivot, with the three link eyes and the pivot pin. Growth class machined, 12%",
+      "refines": "pitch mechanism"
+    },
+    {
+      "item": "phasing carrier ring, 40 mm gear",
+      "mass_g": 7.9,
+      "conservative_g": 8.85,
+      "basis": "6061-T6 ring with an integral 40 mm pitch diameter gear, 3 mm web, running on the carrier bearings outboard of the rotor. Growth class machined, 12%",
+      "refines": "pitch mechanism"
+    },
+    {
+      "item": "servo sector gear, 60 mm",
+      "mass_g": 4.5,
+      "conservative_g": 5.04,
+      "basis": "6061-T6 sector of a 60 mm pitch diameter gear, 2 mm face, spanning the 80 degrees of servo travel that the 1.5 step up turns into 120 of carrier. Growth class machined, 12%",
+      "refines": "pitch mechanism"
+    },
+    {
+      "item": "carrier support bearings, 2 off",
+      "mass_g": 4.4,
+      "conservative_g": 4.75,
+      "basis": "MR128ZZ, 8 by 12 by 3.5 mm, supplier listing, carrying the 47.48 N radial pull the three pitch links put into the offset post. Growth class catalogue, 8%",
+      "refines": "pitch mechanism"
+    },
+    {
+      "item": "rotor shaft tube",
+      "mass_g": 36.01,
+      "conservative_g": 41.41,
+      "basis": "roll wrapped CFRP tube, 16 mm outer diameter and 1.5 mm wall, 340 mm long over the span and the drive extension. Growth class calculated, 15%",
+      "refines": "rotor shaft"
+    },
+    {
+      "item": "shaft end plugs, 2 off",
+      "mass_g": 17.24,
+      "conservative_g": 19.31,
+      "basis": "7075-T6 plugs bonded into the tube, 30 mm at the drive end and 20 mm at the carrier end, turned to the 15 mm bearing journals. Growth class machined, 12%",
+      "refines": "rotor shaft"
+    },
+    {
+      "item": "main bearings, 2 off",
+      "mass_g": 16.0,
+      "conservative_g": 17.28,
+      "basis": "61802, 15 by 24 by 5 mm deep groove, supplier listing, one at each rotor station on the shaft end plugs. Growth class catalogue, 8%",
+      "refines": "main bearings"
+    },
+    {
+      "item": "bearing blocks, 2 off",
+      "mass_g": 16.0,
+      "conservative_g": 17.92,
+      "basis": "7075-T6 housing, 34 by 28 by 9 mm with a 24 mm bore, bolted to the frame tubes and carrying the main bearings. Growth class machined, 12%",
+      "refines": "frame and mounting hardware"
+    },
+    {
+      "item": "frame tubes, 4 off",
+      "mass_g": 46.36,
+      "conservative_g": 53.31,
+      "basis": "CFRP tube of 8 mm outer diameter and 1 mm wall, 340 mm long, spanning the packaged envelope between the two bearing blocks. Growth class calculated, 15%",
+      "refines": "frame and mounting hardware"
+    },
+    {
+      "item": "motor mount plate",
+      "mass_g": 8.0,
+      "conservative_g": 8.96,
+      "basis": "2.5 mm 7075-T6 plate, 55 by 45 mm with the belt slot and lightening cutouts, carrying the MN5006 and taking the belt reaction. Growth class machined, 12%",
+      "refines": "frame and mounting hardware"
+    },
+    {
+      "item": "airframe mount lugs, 4 off",
+      "mass_g": 7.2,
+      "conservative_g": 8.06,
+      "basis": "7075-T6 lug at each of the four mount points named in the packaging document, 1.8 g each. Growth class machined, 12%",
+      "refines": "frame and mounting hardware"
+    },
+    {
+      "item": "frame and mount design reserve",
+      "mass_g": 15.0,
+      "conservative_g": 18.75,
+      "basis": "unallocated hardware on the least developed group in the module: gussets, cable clamps, the servo bracket and the ESC tray, none of which is drawn yet. Growth class allowance, 25%",
+      "refines": "frame and mounting hardware"
+    },
+    {
+      "item": "motor, MN5006 KV450",
+      "mass_g": 106.0,
+      "conservative_g": 114.48,
+      "basis": "T-Motor Antigravity MN5006 KV450 from the supplier datasheet, 106 g including leads, the only week 2 drive row read off a manufacturer sheet. Growth class catalogue, 8%",
+      "refines": "motor"
+    },
+    {
+      "item": "rotor belt pulley, 56 tooth",
+      "mass_g": 28.15,
+      "conservative_g": 31.53,
+      "basis": "6061-T6 HTD-3M pulley, 53.5 mm pitch diameter, 10 mm rim with a lightened 2 mm web, on the shaft drive end. Growth class machined, 12%",
+      "refines": "transmission"
+    },
+    {
+      "item": "motor belt pulley, 16 tooth",
+      "mass_g": 6.62,
+      "conservative_g": 7.41,
+      "basis": "6061-T6 HTD-3M pulley, 15.3 mm pitch diameter, giving the 3.5 to 1 ratio week 2 selected. Growth class machined, 12%",
+      "refines": "transmission"
+    },
+    {
+      "item": "drive belt",
+      "mass_g": 10.2,
+      "conservative_g": 11.02,
+      "basis": "HTD-3M toothed belt, 9 mm wide and 300 mm long, supplier listing at 3.4 g per 100 mm. Growth class catalogue, 8%",
+      "refines": "transmission"
+    },
+    {
+      "item": "belt tensioner and bracket",
+      "mass_g": 6.0,
+      "conservative_g": 6.72,
+      "basis": "idler pulley on an eccentric bracket at the motor plate, setting belt pretension at build and holding it with one screw. Growth class machined, 12%",
+      "refines": "transmission"
+    },
+    {
+      "item": "esc, 40 A 6S class",
+      "mass_g": 19.5,
+      "conservative_g": 21.06,
+      "basis": "brushless controller rated above the 20.61 A the design point draws, supplier listing, 19.5 g with leads and heatshrink. Growth class catalogue, 8%",
+      "refines": "esc"
+    },
+    {
+      "item": "vectoring actuator servos, 2 off",
+      "mass_g": 25.0,
+      "conservative_g": 27.0,
+      "basis": "two Corona DS-929MG class digital metal gear servos at 12.5 g, supplier listing, driving the phasing carrier 180 degrees apart. Growth class catalogue, 8%",
+      "refines": "vectoring actuator"
+    },
+    {
+      "item": "pitch offset controller",
+      "mass_g": 8.5,
+      "conservative_g": 9.18,
+      "basis": "Matek F411-WSE class flight controller board, supplier listing, 8.5 g against the 8.0 g week 2 carried, which is the debt week 3 left open. Growth class catalogue, 8%",
+      "refines": "pitch offset controller"
+    },
+    {
+      "item": "module wiring harness",
+      "mass_g": 15.6,
+      "conservative_g": 19.5,
+      "basis": "14 AWG silicone power leads over 600 mm at 16 g/m, plus servo and signal wiring and the connectors at the module boundary. Growth class allowance, 25%",
+      "refines": "module wiring harness"
+    },
+    {
+      "item": "fasteners and threaded inserts",
+      "mass_g": 14.0,
+      "conservative_g": 17.5,
+      "basis": "40 M3 screws, washers and threaded inserts at the frame, bearing block, motor plate and mount lug joints, 0.35 g average. Growth class allowance, 25%",
+      "refines": "fasteners and bonded joints"
+    },
+    {
+      "item": "structural adhesive at module joints",
+      "mass_g": 7.5,
+      "conservative_g": 9.38,
+      "basis": "Araldite 2011 class toughened epoxy paste at the shaft plugs, bearing block bonds and bracket joints, bond areas taken from the joint list. Growth class allowance, 25%",
+      "refines": "fasteners and bonded joints"
+    }
+  ],
   "sources": {
     "performance": {
       "blade_area_coeff": "Benedict 2010, quad-cyclocopter rotor at hover. The repository carried 1.98 N per rotor at 2000 rpm, a pair the source never states: printed p.236 gives 1.91 N at 1800 rpm and printed p.225 gives 195 grams at the same speed, and those recompute to 0.7211 in this convention. 0.6055 is held anyway per D36, so nothing downstream moves upward on a correction. Derived, never measured on this configuration",
@@ -916,9 +1161,12 @@
       "reynolds": "134,074 at the design point, inside the 100,000 to 300,000 band Kellen measured this shape family across, and Kellen's own optimum rotor sits at 186,000. The 100,000 ceiling D25 rested on comes from Shrestha and Benedict and still bounds the Benedict-derived nominal, but the shape family now carries a measured coefficient bracketing the design point. See D37"
     },
     "structure": {
-      "blade_root_bending_Nm": null,
-      "shaft_torque_Nm": null,
-      "pitch_link_load_N": null
+      "blade_root_bending_Nm": "aerodynamic bending at mid span. The blade is held at both spiders, so a uniformly distributed peak load gives a lever of span over 8, 36.30 mm. The load is thrust per blade times the 4.0 peak to mean factor D16 sets, which is the top of the published 3 to 4 range because that range is simulated. The rerun week 3 model gives 2.501 and is not used here",
+      "shaft_torque_Nm": "aerodynamic power plus tare, divided by rotor angular speed at 2404.79 rpm. This is the rotor shaft, downstream of the 3.5 to 1 belt reduction. It reproduces the rotor_torque_Nm week 2 published in the sensitivity table",
+      "pitch_link_load_N": "peak pitch link force from the week 3 four-bar solution, rerun in tools/linkage.py against the week 4 blade. The blade is not chordwise balanced, so this is the unbalanced figure per D43, and the centrifugal pitching moment on the 9.31 percent chord offset is most of it",
+      "blade_allowable_Nm": "bending capacity of the closed cell section about the chord line, from the integrated NACA 0020 ordinates. The skin governs at 215 MPa of wrinkling stress over the foam, not at the 400 MPa laminate allowable, and the spar would take 63.2 Nm before the skin takes 25.3",
+      "blade_attachment_allowable_N": "two 693ZZ pitch bearings per blade at a 270 N static rating each, supplier listing. They are the softest element in the path from the blade to the spider arm, softer than the bonded root fitting or the bracket bolts",
+      "overspeed_factor": "20 percent over the design rotor speed, covering ESC control overshoot and a gust transient. The problem statement sets no endurance or speed schedule, so this is a declared case rather than a derived one"
     },
     "efficiency": {
       "transmission": "Single stage toothed belt at 0.93. Assumed, not measured. Published belt drive efficiency runs 0.95 to 0.98 at these speeds, so this is on the pessimistic side of the range",
@@ -931,12 +1179,16 @@
     }
   },
   "results": {
-    "total_mass_g": null,
-    "weight_N": null,
-    "thrust_to_weight": null,
+    "total_mass_g": 607.97,
+    "weight_N": 5.9642,
+    "thrust_to_weight": 3.018,
     "mass_envelope_g": 580.05,
-    "mass_g_conservative": 692.43,
-    "thrust_to_weight_conservative": 2.5173
+    "mass_g_conservative": 684.7,
+    "thrust_to_weight_conservative": 2.5457,
+    "bom_bought_inr": 36970,
+    "bom_tooling_inr": 28800,
+    "bom_total_inr": 65770,
+    "bom_longest_lead_weeks": 4
   },
   "thrust_sensitivity": [
     {
@@ -986,6 +1238,283 @@
       "drive": "none in the shortlist",
       "belt_ratio": null,
       "drive_consequence": "no shortlist drive fits at this radius. The motor input of 512.6 W is inside the 520 W continuous, but the torque wants a belt ratio the KV450 cannot spin to on 6S, which is why raising thrust stops paying here"
+    }
+  ],
+  "bom": [
+    {
+      "item": "T-Motor Antigravity MN5006 KV450",
+      "category": "drive",
+      "qty": 1,
+      "unit_cost_inr": 8500,
+      "line_cost_inr": 8500,
+      "lead_time_weeks": 3,
+      "make_or_buy": "buy",
+      "source": "Quadkopters, New Delhi, manufacturer datasheet price",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "40 A 6S brushless controller",
+      "category": "drive",
+      "qty": 1,
+      "unit_cost_inr": 3200,
+      "line_cost_inr": 3200,
+      "lead_time_weeks": 2,
+      "make_or_buy": "buy",
+      "source": "Robu.in, Pune",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "Corona DS-929MG class servo",
+      "category": "drive",
+      "qty": 2,
+      "unit_cost_inr": 1450,
+      "line_cost_inr": 2900,
+      "lead_time_weeks": 2,
+      "make_or_buy": "buy",
+      "source": "Robu.in, Pune",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "Matek F411-WSE class controller board",
+      "category": "drive",
+      "qty": 1,
+      "unit_cost_inr": 3900,
+      "line_cost_inr": 3900,
+      "lead_time_weeks": 3,
+      "make_or_buy": "buy",
+      "source": "Quadkopters, New Delhi",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "693ZZ miniature bearing",
+      "category": "hardware",
+      "qty": 6,
+      "unit_cost_inr": 60,
+      "line_cost_inr": 360,
+      "lead_time_weeks": 1,
+      "make_or_buy": "buy",
+      "source": "local bearing house, Mumbai",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "MR128ZZ miniature bearing",
+      "category": "hardware",
+      "qty": 2,
+      "unit_cost_inr": 90,
+      "line_cost_inr": 180,
+      "lead_time_weeks": 1,
+      "make_or_buy": "buy",
+      "source": "local bearing house, Mumbai",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "61802 deep groove bearing",
+      "category": "hardware",
+      "qty": 2,
+      "unit_cost_inr": 240,
+      "line_cost_inr": 480,
+      "lead_time_weeks": 1,
+      "make_or_buy": "buy",
+      "source": "local bearing house, Mumbai",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "M3 aluminium bodied rod end",
+      "category": "hardware",
+      "qty": 6,
+      "unit_cost_inr": 180,
+      "line_cost_inr": 1080,
+      "lead_time_weeks": 2,
+      "make_or_buy": "buy",
+      "source": "Robu.in, Pune",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "HTD-3M belt, 9 mm wide, 300 mm",
+      "category": "drive",
+      "qty": 1,
+      "unit_cost_inr": 420,
+      "line_cost_inr": 420,
+      "lead_time_weeks": 2,
+      "make_or_buy": "buy",
+      "source": "Powergear, Coimbatore",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "HTD-3M pulley blank, 16 tooth",
+      "category": "drive",
+      "qty": 1,
+      "unit_cost_inr": 650,
+      "line_cost_inr": 650,
+      "lead_time_weeks": 2,
+      "make_or_buy": "buy",
+      "source": "Powergear, Coimbatore",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "HTD-3M pulley blank, 56 tooth",
+      "category": "drive",
+      "qty": 1,
+      "unit_cost_inr": 1250,
+      "line_cost_inr": 1250,
+      "lead_time_weeks": 2,
+      "make_or_buy": "buy",
+      "source": "Powergear, Coimbatore",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "Rohacell 51 IG block, 300 by 150 by 20 mm",
+      "category": "material",
+      "qty": 1,
+      "unit_cost_inr": 2600,
+      "line_cost_inr": 2600,
+      "lead_time_weeks": 4,
+      "make_or_buy": "buy",
+      "source": "importer landed price, no Indian stockist found",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "60 gsm carbon twill, 1 m2",
+      "category": "material",
+      "qty": 1,
+      "unit_cost_inr": 1400,
+      "line_cost_inr": 1400,
+      "lead_time_weeks": 2,
+      "make_or_buy": "buy",
+      "source": "Composites Today, Chennai",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "epoxy laminating resin and hardener, 500 g",
+      "category": "material",
+      "qty": 1,
+      "unit_cost_inr": 1600,
+      "line_cost_inr": 1600,
+      "lead_time_weeks": 1,
+      "make_or_buy": "buy",
+      "source": "Composites Today, Chennai",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "Araldite 2011 paste adhesive, 50 ml",
+      "category": "material",
+      "qty": 1,
+      "unit_cost_inr": 950,
+      "line_cost_inr": 950,
+      "lead_time_weeks": 1,
+      "make_or_buy": "buy",
+      "source": "Huntsman distributor, Mumbai",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "CFRP tube stock, four diameters",
+      "category": "material",
+      "qty": 1,
+      "unit_cost_inr": 2900,
+      "line_cost_inr": 2900,
+      "lead_time_weeks": 3,
+      "make_or_buy": "buy",
+      "source": "Carbon Fiber India, Coimbatore",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "7075-T6 bar and plate stock",
+      "category": "material",
+      "qty": 1,
+      "unit_cost_inr": 2200,
+      "line_cost_inr": 2200,
+      "lead_time_weeks": 2,
+      "make_or_buy": "buy",
+      "source": "metal stockist, Mumbai",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "6061-T6 bar stock",
+      "category": "material",
+      "qty": 1,
+      "unit_cost_inr": 700,
+      "line_cost_inr": 700,
+      "lead_time_weeks": 1,
+      "make_or_buy": "buy",
+      "source": "metal stockist, Mumbai",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "M3 fasteners, washers and threaded inserts",
+      "category": "hardware",
+      "qty": 1,
+      "unit_cost_inr": 900,
+      "line_cost_inr": 900,
+      "lead_time_weeks": 1,
+      "make_or_buy": "buy",
+      "source": "fastener stockist, Mumbai",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "silicone wire, connectors and heatshrink",
+      "category": "hardware",
+      "qty": 1,
+      "unit_cost_inr": 800,
+      "line_cost_inr": 800,
+      "lead_time_weeks": 1,
+      "make_or_buy": "buy",
+      "source": "Robu.in, Pune",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "blade mould, two halves from tooling board",
+      "category": "tooling",
+      "qty": 1,
+      "unit_cost_inr": 9000,
+      "line_cost_inr": 9000,
+      "lead_time_weeks": 3,
+      "make_or_buy": "make",
+      "source": "CNC job work against the section drawing",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "spider arms and root brackets, CNC job work",
+      "category": "fabricated",
+      "qty": 1,
+      "unit_cost_inr": 6500,
+      "line_cost_inr": 6500,
+      "lead_time_weeks": 2,
+      "make_or_buy": "make",
+      "source": "CNC job work, 7075 and CFRP plate",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "bearing blocks and motor mount plate, CNC job work",
+      "category": "fabricated",
+      "qty": 1,
+      "unit_cost_inr": 4800,
+      "line_cost_inr": 4800,
+      "lead_time_weeks": 2,
+      "make_or_buy": "make",
+      "source": "CNC job work, 7075 plate",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "carrier ring gear and servo sector gear",
+      "category": "fabricated",
+      "qty": 1,
+      "unit_cost_inr": 5500,
+      "line_cost_inr": 5500,
+      "lead_time_weeks": 3,
+      "make_or_buy": "make",
+      "source": "gear cutting job work, 6061",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "rotor assembly and balancing jig",
+      "category": "tooling",
+      "qty": 1,
+      "unit_cost_inr": 3000,
+      "line_cost_inr": 3000,
+      "lead_time_weeks": 2,
+      "make_or_buy": "make",
+      "source": "aluminium extrusion and a dial indicator mount",
+      "priced_date": "31 August 2026"
     }
   ]
 }
