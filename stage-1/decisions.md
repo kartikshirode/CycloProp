@@ -1289,3 +1289,112 @@ properties that live in the solver rather than in `numbers.json`, and both the h
 it. The self test total is counted at the point every line is printed now, rather than kept as a
 constant beside the loops, which is what D51 claimed and had not actually done. 123 self-tests to
 124.
+
+## D54: the coverage gate skips the pandoc front matter
+
+31 August 2026, week 5 preparation. Records a gate change, the way D42 and D51 did for weeks 3
+and 4. This one is a defect fix rather than a new check.
+
+`check_numeric_coverage` read every line of the submission, including the YAML header pandoc
+uses to set the page margin, the font size and the title. So `geometry: margin=25mm` was
+reported as a 25 mm length the design had not justified from `numbers.json`, and it sat in the
+gate output as one of two untraced numbers for the whole of week 4.
+
+Front matter is build configuration and not a claim about the rotor, so `front_matter_lines`
+finds the block and the coverage loop skips it. Two properties matter more than the fix.
+
+**The skip is positional.** It applies to a delimited block at the top of the file and to
+nothing else, so `margin=25mm` written into the body is still a claim and still fails. Fixing
+this by exempting the string, or by deleting the margin setting, or by hanging an allow comment
+on it would each have solved the symptom and left the gate lying about a different file later.
+
+**An unterminated opening delimiter counts as no front matter.** Otherwise a stray horizontal
+rule on line 1 hides an entire document from the audit, which is a worse failure than the one
+being fixed.
+
+Four self-tests went in: three coverage probes covering the three cases above, and one whole
+week 5 case that puts a real header on the fixture submission. 124 self-tests to 128.
+
+## D55: item 7 is structure plus tagged placeholders, and the tags are P-1 to P-9
+
+31 August 2026, week 5 preparation.
+
+`07-team-and-execution.md` did not exist for three weeks because week H is outstanding and D5
+forbids an agent naming a person, an institution, a qualification or a tool licence. Waiting
+also meant the one deliverable that needs nothing from `numbers.json` was sitting in the four
+day week that carries the deadline, which the plan itself calls the worst place for it.
+
+So the file is written as everything that does not need a human, with nine numbered gaps that
+do. The execution plan across all 11 Stage 2 items, the capability gap analysis against the
+problem statement's seven preference areas, the Stage 2 gates and the route through the missing
+capability are all real content. The roster, the institution, the prior work behind each
+preference area, the tool licences, the weekly hours, the sender, the registration reference,
+the eligibility check and the facilities are `[P-1]` to `[P-9]`.
+
+The tags are the decision. They appear in the design document, in the submission's identity
+table and in the email draft, so one list drives all three and a person filling them in cannot
+miss one by reading only the report. Four of the nine are also week H markers and the file says
+which.
+
+Claims that are already in the file are claims about the Stage 1 work rather than about people:
+what was solved, what was calculated, what somebody else measured and we read. Those need no
+human input because the files are the evidence.
+
+## D56: the submission states the 33 budget lines, not group totals
+
+31 August 2026, week 5 preparation. An assembly rule, recorded because it changed what the
+submission contains rather than what it claims.
+
+The first rebuild carried the mass budget as 13 group totals, which reads better and cannot be
+traced: a group total is a sum computed for `05-mass-and-tw.md` and it exists in no file, so
+five of them failed the coverage audit and the rest passed by accidentally landing within 2
+percent of an unrelated stored mass. Passing by coincidence is worse than failing. The
+submission carries all 33 stored lines instead, each of which is a value in `numbers.json`.
+
+Two numbers came out of the narrative for the same reason. The Grashof sum of 125.4 mm is
+arithmetic on two link lengths and is stated as the comparison it actually is, which keeps the
+claim and loses the untraceable number. The balanced pitch link load is a solver output under
+`--balanced` that is deliberately not stored, so the balance trade is stated by its margins and
+its effect on the stacked case instead.
+
+One allow comment is used in the whole document, on the published side force angles from three
+studies. That is what the escape exists for, the reason is stated, and it hides 3 of the 4
+numbers the ceiling permits.
+
+## D57: the report is 21 pages and the page limit question goes with the submission
+
+31 August 2026, week 5 preparation.
+
+No organiser limit was ever supplied. The question was drafted for early September and never
+sent, so the working assumption stands: 15 pages of main body plus cited appendices, which is
+what the handoff told week 5 to use.
+
+The built report is 21 pages. One page of title and contents, 15 pages of body through the
+sources section, and the rest is appendix A, the examiner questions, and appendix B, the numbers
+block. That meets the assumption on the reading that a page target applies to the report body,
+and it does not meet it on the reading that it applies to the file.
+
+Nothing was cut to reach a number. Two rounds of trimming took out repetition and loose wording,
+and what is left is the seven required items, the criteria map, the claims table and the
+provenance section. Cutting further means dropping the mass budget or the claims table, and both
+are answering a weighted criterion directly.
+
+The question is asked once, at the end of the staged email, framed so it needs no reply. That is
+the last cheap chance to get the format right and it costs nothing if the answer never comes.
+
+## D58: this pass prepares week 5 and does not run it
+
+31 August 2026. Recorded so a later session cannot read five closed gates as a finished week.
+
+Week 5 is hard blocked by week H and all four blocking markers are still pending. That block is
+mechanical, it is in the loop config, and D5 puts the same rule under it. So this pass closed
+every week 5 gate that does not need a person and stopped at the one that does.
+
+What that means in practice: `python tools/check.py --week 5` fails on the human gate alone.
+There is no `stage-1/progress/week-5.md`, nothing carries `STATUS: WEEK-COMPLETE` for week 5,
+and `NEXT-WEEK:` in the handoff still reads 5. Week 5 runs when a person has added the markers
+and the real team facts, and what is left of it then is short.
+
+The alternative was to leave the submission stale until the markers arrive. That loses the four
+days the deadline does not have, and it leaves the one gate defect in `check.py` sitting under
+week 5 while it is being run.

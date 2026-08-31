@@ -354,3 +354,56 @@ Eleven more, all fair, all fixed or recorded. Two claims that overreached, one m
 eight row table that no gate was reading, an arithmetic slip in the mass decomposition that
 did not sum to its own stated net, and a material row crediting the epoxy with a margin
 nothing computes. D53 carries the corrections that land inside frozen entries.
+
+## 31 August 2026, week 5 preparation
+
+Not week 5. Week 5 is blocked on four markers a person has to add and those markers were still
+pending when this started, so the job was to close everything else and stop at the wall rather
+than climb over it. Five of the six failing gates were mine. The sixth stays failing and it
+should.
+
+Started with the gate defect, because working against a gate that is lying to you is a waste of
+a day. The coverage audit was reading the submission's pandoc header and reporting
+`margin=25mm` as a length the design had not justified. Three wrong fixes were available and all
+three were tempting: delete the margin setting, exempt the string, hang an allow comment on it.
+The fix is positional. Front matter is a delimited block at the top of a file, the audit skips
+it, and the same setting written into the body still fails. I wrote the self-test for that third
+case first and it is the one that would catch a lazier version of this fix later.
+
+Then item 7, which has been missing for three weeks for a good reason. You cannot write a team
+capability section without a team. What you can write is everything around it: the Stage 2 plan
+across all 11 items, the gap analysis against the seven preference areas, the gates, and nine
+numbered holes for the facts. The tags are the useful part. P-1 to P-9 appear in the design
+document, in the submission's identity table and in the email draft, so one list drives all
+three.
+
+The submission rebuild is where the interesting failure was. I carried the mass budget across as
+13 group totals, which reads far better than 33 lines, and the coverage audit rejected five of
+them. Fine. What stopped me was the other eight: they passed. A group total is a sum that exists
+in no file, and those eight passed because they happened to land within 2 percent of some
+unrelated stored mass. Eight numbers passing by coincidence is worse than five failing honestly,
+so the table is all 33 stored lines now and every one of them is a value the gate can find.
+
+Two numbers left the narrative. 125.4 mm was the Grashof sum, and stating the comparison it
+actually is keeps the claim and loses the number. The balanced pitch link load is a solver output
+nobody stored, so the balance trade is argued by its margins instead. One allow comment survives
+in the whole document, on published side force angles from three studies, which is exactly what
+the escape is for.
+
+The PDF took three builds. First one had five overfull lines: the organiser's email address next
+to a code span in one paragraph, and a table header wider than its own column. Both are now
+gone and the log is clean. Two things worth knowing about reading a xelatex PDF back with pypdf.
+It gives you a single ff ligature character wherever the text says "off", so any gate string
+carrying a double f would silently miss. And the contents page comes back as "T eam capability" with a
+space in it, from kerning, while the same heading in the body extracts fine. The identity gate
+passed on the body copy and would have failed if it had only had the contents entry to work
+with. Neither bit us. Both are the kind of thing that bites at 2 am on the 26th.
+
+21 pages. One of title and contents, 15 of body, the rest appendix. I trimmed twice and stopped,
+because the next cut was either the mass budget or the claims table and both answer a weighted
+criterion directly. The page limit question was drafted three weeks ago and never sent, so it
+goes at the end of the submission email where it costs nothing.
+
+The email is drafted and staged and it is not sent. The registration reference is a placeholder,
+because nobody has recorded it and an agent inventing one is inventing a fact about the team.
+What is left for a person is short and it is in the handoff.
