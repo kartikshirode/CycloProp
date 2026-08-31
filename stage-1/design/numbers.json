@@ -1,5 +1,5 @@
 {
-  "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder, and a string in a numeric field fails too. Week 2 fills geometry, operating, performance, efficiency, the candidate and sensitivity tables, power_by_radius, mass_envelope_g and sources. Week 3 fills pitch, pitch_schedule, vector_map and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, so an optimistic headline number achieves nothing. mass_envelope_g lines are {item, nominal_g, conservative_g, basis, scaling_class} with distinct item names. mass_budget_g lines are {item, mass_g, conservative_g, basis, refines}, where refines names the mass_envelope_g item this line came from, so week 4 continuity is checked per component and not only on the total, and conservative_g is what builds results.mass_g_conservative rather than a growth rate chosen after seeing the target. See D33. Aerodynamic power is bounded below by momentum theory over the declared momentum_area_m2, which may not exceed 2R times span, and the figure of merit that falls out has to be credible for a cyclorotor. thrust_sensitivity freezes in week 2 what raising thrust costs, and week 4 may only choose a row from it. Structural demands are derived: per-blade mass from the blade budget and blade count, rotor shaft torque from shaft power and speed, blade root bending from thrust per blade, lever arm and load factor. Row shapes for the remaining lists, so nothing sits in the schema without one: configuration_candidates {config, rotors, module_mass_g, thrust_N, module_tw, selected}, 3 or more; coefficient_scenarios {name, blade_area_coeff, basis, evidence_class}, 3 or more, where evidence_class is measured, derived or downside and a transferred value is never called measured; aero_azimuthal_loads {azimuth_deg, normal_force_N}, 24 or more; drive_candidates {name, continuous_power_W, continuous_torque_Nm, mass_g, selected}, 2 or more; linkage_dimensions {link, length_mm}, 4 or more; pitch_schedule {azimuth_deg, pitch_deg}, 24 or more; vector_map {phase_command_deg, vertical_force_N, lateral_force_N}, 3 or more. Every mass_envelope_g line also carries scaling_class, one of geometry, power or fixed, because the drive is not a fixed mass.",
+  "_note": "Single source of truth for every number in the Stage 1 submission. Nulls and empty lists fail the gates, so nothing here survives as a placeholder, and a string in a numeric field fails too. Week 2 fills geometry, operating, performance, efficiency, the candidate and sensitivity tables, power_by_radius, mass_envelope_g and sources. Week 3 fills pitch, pitch_schedule, vector_map and packaging. Week 4 fills structure, mass_budget_g and the remaining results. Hard limits are checked against values RECOMPUTED from geometry and the mass lines, so an optimistic headline number achieves nothing. mass_envelope_g lines are {item, nominal_g, conservative_g, basis, scaling_class} with distinct item names. mass_budget_g lines are {item, mass_g, conservative_g, basis, refines}, where refines names the mass_envelope_g item this line came from, so week 4 continuity is checked per component and not only on the total, and conservative_g is what builds results.mass_g_conservative rather than a growth rate chosen after seeing the target. See D33. Aerodynamic power is bounded below by momentum theory over the declared momentum_area_m2, which may not exceed 2R times span, and the figure of merit that falls out has to be credible for a cyclorotor. thrust_sensitivity freezes in week 2 what raising thrust costs, and week 4 may only choose a row from it. Structural demands are derived: per-blade mass from the blade budget and blade count, rotor shaft torque from shaft power and speed, blade root bending from thrust per blade, lever arm and load factor. Row shapes for the remaining lists, so nothing sits in the schema without one: configuration_candidates {config, rotors, module_mass_g, thrust_N, module_tw, selected}, 3 or more; coefficient_scenarios {name, blade_area_coeff, basis, evidence_class}, 3 or more, where evidence_class is measured, derived or downside and a transferred value is never called measured, and a measured row also declares solidity and chord_to_radius so the gate can test whether it was taken on this design's own shape family; aero_azimuthal_loads {azimuth_deg, normal_force_N}, 24 or more; drive_candidates {name, continuous_power_W, continuous_torque_Nm, mass_g, selected}, 2 or more; linkage_dimensions {link, length_mm}, 4 or more; pitch_schedule {azimuth_deg, pitch_deg}, 24 or more; vector_map {phase_command_deg, vertical_force_N, lateral_force_N}, 3 or more. Every mass_envelope_g line also carries scaling_class, one of geometry, power or fixed, because the drive is not a fixed mass.",
   "geometry": {
     "radius_m": 0.11,
     "chord_m": 0.0726,
@@ -17,8 +17,8 @@
   "performance": {
     "thrust_N": 18.0,
     "blade_area_coeff": 0.6055,
-    "blade_area_coeff_low": 0.5147,
-    "thrust_N_conservative": 15.3007,
+    "blade_area_coeff_low": 0.5752,
+    "thrust_N_conservative": 17.0992,
     "aero_power_W": 321.71,
     "tare_power_W": 35.746,
     "electrical_power_W": 481.655,
@@ -69,7 +69,7 @@
       "largest_dimension_mm": 264.0,
       "module_mass_g": 550.21,
       "module_mass_conservative_g": 656.47,
-      "thrust_to_weight_conservative": 2.3759
+      "thrust_to_weight_conservative": 2.6552
     },
     {
       "radius_m": 0.11,
@@ -89,7 +89,7 @@
       "largest_dimension_mm": 290.4,
       "module_mass_g": 580.05,
       "module_mass_conservative_g": 692.43,
-      "thrust_to_weight_conservative": 2.2525
+      "thrust_to_weight_conservative": 2.5173
     },
     {
       "radius_m": 0.12,
@@ -109,7 +109,7 @@
       "largest_dimension_mm": 316.8,
       "module_mass_g": 612.12,
       "module_mass_conservative_g": 731.03,
-      "thrust_to_weight_conservative": 2.1336
+      "thrust_to_weight_conservative": 2.3844
     },
     {
       "radius_m": 0.13,
@@ -129,7 +129,7 @@
       "largest_dimension_mm": 343.2,
       "module_mass_g": 646.51,
       "module_mass_conservative_g": 772.44,
-      "thrust_to_weight_conservative": 2.0192
+      "thrust_to_weight_conservative": 2.2566
     },
     {
       "radius_m": 0.14,
@@ -149,7 +149,7 @@
       "largest_dimension_mm": 369.6,
       "module_mass_g": 683.35,
       "module_mass_conservative_g": 816.8,
-      "thrust_to_weight_conservative": 1.9095
+      "thrust_to_weight_conservative": 2.134
     }
   ],
   "configuration_candidates": [
@@ -175,7 +175,7 @@
       "module_mass_conservative_g": 692.43,
       "thrust_N": 18.0,
       "module_tw": 3.1633,
-      "module_tw_conservative": 2.2525,
+      "module_tw_conservative": 2.5173,
       "selected": true
     },
     {
@@ -200,7 +200,7 @@
       "module_mass_conservative_g": 939.85,
       "thrust_N": 18.0,
       "module_tw": 2.3341,
-      "module_tw_conservative": 1.6595,
+      "module_tw_conservative": 1.8546,
       "selected": false
     },
     {
@@ -225,33 +225,47 @@
       "module_mass_conservative_g": 1178.44,
       "thrust_N": 18.0,
       "module_tw": 1.8629,
-      "module_tw_conservative": 1.3235,
+      "module_tw_conservative": 1.4791,
       "selected": false
     }
   ],
   "coefficient_scenarios": [
     {
-      "name": "S2 quad rotor hover point, transferred",
+      "name": "K19 optimum rotor, measured on this shape family",
+      "blade_area_coeff": 0.6648,
+      "solidity": 0.3183,
+      "chord_to_radius": 0.6667,
+      "basis": "Kellen 2019, Table 2.1 configuration 8, printed p.17: 5.5 in chord, 3 blades, 8.25 in radius, 22 in span, NACA 0020, pitch amplitude 40 degrees. CT/sigma read off the vector path data of Fig 3.25 (1.04424) and Fig 3.28 (1.04428), which agree to 0.003 percent, then converted by coeff = (2/pi)(CT/sigma) out of Kellen's projected area convention A = span times 2R. Measured on Kellen's rotor and not on ours, and that rotor's solidity and chord to radius sit within 1.1 percent of this design's. Chord Reynolds 186,000, inside the 100,000 to 300,000 band that also contains this design's 134,074",
+      "evidence_class": "measured"
+    },
+    {
+      "name": "S2 quad rotor hover point, corrected against the primary source",
+      "blade_area_coeff": 0.7211,
+      "basis": "Benedict 2010 printed p.236: at the operating RPM of 1800, each rotor produced around 1.91 N of thrust. Printed p.225 gives the same point as 195 grams at 1800 rpm and 40 degrees pitching amplitude. Four NACA 0010 blades of 33.0 mm chord and 158.8 mm span at 76.2 mm radius, printed p.220 and p.233. Recomputed in this project's blade area convention. This is the transfer the nominal should have rested on, and its chord Reynolds is 31,600 rather than the 35,100 the ledger carried",
+      "evidence_class": "derived"
+    },
+    {
+      "name": "nominal, held at 0.6055 rather than raised",
       "blade_area_coeff": 0.6055,
-      "basis": "1.98 N per rotor on four NACA 0010 blades of 33.0 mm chord and 158.8 mm span at 76.2 mm radius and 2000 rpm, divided by the blade area dynamic pressure in this project's own area convention",
+      "basis": "the value the rest of the design is built on. Its arithmetic used 1.98 N at 2000 rpm, which is the 809 gram all-up vehicle weight of Benedict's Table 5.1 divided by four, paired with the twin rotor's operating speed. The source states neither as a quad thrust. All three measured or corrected points now sit above 0.6055, so the old error ran in the safe direction and the gap is held as deliberate margin rather than spent. See D36",
       "evidence_class": "derived"
     },
     {
       "name": "S2 twin rotor, three blades at the same radius and speed",
       "blade_area_coeff": 0.8114,
-      "basis": "1.47 N per rotor on three blades of 25.4 mm chord and 152.4 mm span at 76.2 mm radius and 2000 rpm, recomputed the same way. Higher than the quad but at a solidity of 0.159, far outside the measured band, so it is carried as an upside indication and not adopted",
+      "basis": "1.47 N per rotor, half of the 300 grams total Benedict 2010 printed p.229 reports at 2000 rpm, on three blades of 25.4 mm chord and 152.4 mm span at 76.2 mm radius, recomputed the same way. The source rounds the same quantity to 1.5 N per rotor on printed p.232. Higher than the quad but at a solidity of 0.159, far outside the measured band, so it is carried as an upside indication and not adopted",
       "evidence_class": "derived"
     },
     {
       "name": "blade deflection loss only",
       "blade_area_coeff": 0.5752,
-      "basis": "the nominal transfer less a 5 percent thrust loss for blade bending and torsion, sized against the computed section stiffness rather than assumed",
+      "basis": "the nominal less a 5 percent thrust loss for blade bending and torsion, sized against the computed section stiffness rather than assumed. This is the low coefficient the conservative case now runs on, because the Kellen measurement retired the other allowance. See D35",
       "evidence_class": "downside"
     },
     {
-      "name": "deflection loss and configuration transfer",
+      "name": "deflection loss and configuration transfer, retired",
       "blade_area_coeff": 0.5147,
-      "basis": "the nominal transfer less 5 percent for blade flexibility and a further 10 percent for a transfer that changes blade count, airfoil and chord ratio at once with nothing measured to de-risk it",
+      "basis": "the nominal less 5 percent for blade flexibility and a further 10 percent for a transfer that changed blade count, airfoil and chord ratio at once with nothing measured to de-risk it. Retired on 31 August 2026 when Kellen came in at 0.6648, measured on this design's own shape family and above the nominal, which is the test D23 set. Kept as the record of what the conservative case used to be",
       "evidence_class": "downside"
     }
   ],
@@ -608,13 +622,13 @@
   "mass_budget_g": [],
   "sources": {
     "performance": {
-      "blade_area_coeff": "Benedict 2010 (S2), quad-cyclocopter rotor at hover, 1.98 N per rotor at 2000 rpm; recomputed here in the blade-area convention and labelled derived, never measured on this configuration",
-      "blade_area_coeff_low": "Engineering downside scenario, not a published bound. Kellen 2019 holds the measured coefficient for this shape family and is still behind a browser challenge, so nothing here is a measured lower limit",
+      "blade_area_coeff": "Benedict 2010, quad-cyclocopter rotor at hover. The repository carried 1.98 N per rotor at 2000 rpm, a pair the source never states: printed p.236 gives 1.91 N at 1800 rpm and printed p.225 gives 195 grams at the same speed, and those recompute to 0.7211 in this convention. 0.6055 is held anyway per D36, so nothing downstream moves upward on a correction. Derived, never measured on this configuration",
+      "blade_area_coeff_low": "The nominal less the 5 percent blade deflection allowance and nothing else. The 10 percent configuration-transfer allowance retired when Kellen 2019 came in at 0.6648, measured on this shape family and above the nominal, which is the test D23 set. Still an engineering downside scenario rather than a published lower bound. See D35",
       "momentum_area_m2": "Projected frontal area 2R times span, the standard cyclorotor momentum closure and the cap the gate applies",
-      "power_loading_ref_N_per_W": "Benedict 2010 (S2) twin-cyclorotor at its operating point, 0.062 N/W of blade aerodynamic power, the lower of the two measured routes available",
+      "power_loading_ref_N_per_W": "Benedict 2010 twin-cyclorotor at its operating point, printed p.232: at the operating thrust of 1.5 N (per rotor), the power loading of the rotor was 0.062 N/W. The quad reaches 0.076 N/W on printed p.236, so 0.062 is the lower of the two measured routes and it is the one used",
       "blade_deflection_thrust_loss": "Bounded from above by the computed blade section, not derived from it: EI 66.8 Nm2 gives 0.086 mm of tip deflection and GJ 9.6 Nm2 gives 0.054 degrees of twist, so the section alone supports well under 1 percent. The 5 percent is carried as a floor over build tolerance, bond line variation and unsteady effects the section does not model",
-      "figure_of_merit": "Kellen 2019 reports 0.6 at UAV scale for this shape family. Summary class, since the thesis body is unread, and it is the value that turns the momentum floor into the working aerodynamic power",
-      "reynolds": "134074 at the design point. Above the 100,000 top of the range over which non-dimensional thrust is published as Reynolds invariant, so the coefficient transfer is an extrapolation upward rather than an interpolation. See D25"
+      "figure_of_merit": "Kellen 2019 section 3.3, read off the thesis rather than a summary: the peak figure of merit was found to be 0.6, on a 3-bladed cyclorotor with a 5.5in chord, 22in. span, and 8.25 in radius. Reading CT/sigma off Fig 3.25 and CP/sigma off Fig 3.26 for that rotor and closing FM = CT^1.5/(sqrt(2)*CP) gives 0.595, so the stated value reproduces to 0.8 percent",
+      "reynolds": "134,074 at the design point, inside the 100,000 to 300,000 band Kellen measured this shape family across, and Kellen's own optimum rotor sits at 186,000. The 100,000 ceiling D25 rested on comes from Shrestha and Benedict and still bounds the Benedict-derived nominal, but the shape family now carries a measured coefficient bracketing the design point. See D37"
     },
     "structure": {
       "blade_root_bending_Nm": null,
@@ -629,9 +643,6 @@
     "drive": {
       "continuous_rating": "T-Motor publishes Max. Power (180s) and Peak Current (180s), which is a three minute maximum and not an indefinite hover rating. Week 2 derates both by 0.80 for continuous duty. The derate is a judgement, stated rather than hidden, because the problem statement gives no endurance requirement to size it against",
       "belt_ratio": "Smallest ratio at which motor torque stays inside the derated continuous torque and motor speed stays under 90 percent of what the 6S pack can turn it at, allowing for the internal resistance drop at the working current"
-    },
-    "results": {
-      "mass_target_week4_g": "The conservative mass that would clear thrust to weight 2.5 at the conservative thrust of 15.3007 N, computed as thrust over 2.5 g. Week 4 has to find 68.5 g against the 692.43 g conservative column, which is 9.9 percent of it, by replacing assumed sections with weighed or catalogue masses rather than by trimming a growth rate. Eight envelope lines carry a 20 or 25 percent rate on an assumed basis and hold 86.4 g of allowance between them, so the shortfall sits inside them and does not need the design to change. The refined budget is tested against the same limit by week4: conservative T/W clears 2.5. See D30 and D31"
     }
   },
   "results": {
@@ -640,8 +651,7 @@
     "thrust_to_weight": null,
     "mass_envelope_g": 580.05,
     "mass_g_conservative": 692.43,
-    "thrust_to_weight_conservative": 2.2525,
-    "mass_target_week4_g": 623.8818
+    "thrust_to_weight_conservative": 2.5173
   },
   "thrust_sensitivity": [
     {
