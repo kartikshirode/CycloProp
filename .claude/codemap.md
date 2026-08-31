@@ -31,7 +31,8 @@ reader for signed values, and week 2 added `check_week2_selection`, `measured_sh
 `check_conservative_budget` and `states_value` over `WEEK2_DOCS`. Week 4 added
 `budget_conservative_total`, two combined blade margins, an overspeed attachment margin, a
 recomputed centrifugal bending term, `MIN_OVERSPEED`, a 25 percent band on the conservative
-budget and a floor on `shaft_combined_margin`.
+budget and a floor on `shaft_combined_margin`. Week 5 added `front_matter_lines` and nothing
+else.
 Used by: the supervisor after every week tick, and tools/test_gates.py
 Gotcha: hard limits never touch stored headline values. `num` returns None for zero and for
 negatives, so any signed quantity has to go through `snum` or half the table vanishes silently.
@@ -44,15 +45,18 @@ aerodynamic bending alone and is deliberately not the gating one, because centri
 9.2 times larger here; `blade_combined_margin` and the two overspeed margins are.
 `shaft_combined_margin` is the one margin it floors without recomputing, because that needs shaft
 section properties which live in tools/structure.py. It does not recompute the four-bar;
-test_gates does.
+test_gates does. `check_numeric_coverage` skips a delimited YAML block at the top of a file and
+nothing else: the skip is positional, so `margin=25mm` in the body still fails, and an opening
+`---` with no closing one counts as no front matter so a stray rule cannot hide a document. See
+D54.
 
 
 ### tools/test_gates.py
 Self-tests for check.py. Builds throwaway trees and checks an honest design passes while
-specific attacks fail, then runs `linkage_selftests` read-only over the real numbers.json. 124
+specific attacks fail, then runs `linkage_selftests` read-only over the real numbers.json. 128
 checks, and that total is `len(ANNOUNCED)`, counted at the one print prefix every self-test line
 goes out through, not kept beside the loops. Week 2 took it from 77, week 3 from 104, week 4
-from 117.
+from 117, and week 5 from 124 with the front matter cases.
 Used by: run by hand after any change to check.py, linkage.py or structure.py
 Gotcha: `honest_numbers()` is the fixture every case mutates, so a new required field in
 check.py has to be added there first or every case fails at once. That is exactly how week 4
@@ -148,7 +152,7 @@ Gotcha: it carries that marker as of the second run. Debt 1 is the 68.5 g mass t
 Dates in first-run prose read 2 September; the commits say 30 August.
 
 ### stage-1/decisions.md
-Numbered append-only decision log, D1 to D53. Reopening an earlier entry means a new entry saying
+Numbered append-only decision log, D1 to D58. Reopening an earlier entry means a new entry saying
 which one it supersedes.
 Used by: every week agent as settled ground
 Gotcha: D27 supersedes figures in D18, D20, D21 and D22, and D30 supersedes the freeze rule in
@@ -160,23 +164,28 @@ the one to read before touching a mass number, D48 retires the duplicated blade 
 declares the overspeed case, D50 keeps the 5 percent allowance while giving it a calculation, D51
 records the gate change and D52 says the BOM is priced and not quoted. D53 is the audit response
 and it corrects the balanced pitch link figures inside D46 and withdraws one sentence of D51.
+D54 to D58 are the week 5 preparation pass: D54 records the front matter gate fix, D55 sets the
+P-1 to P-9 placeholder scheme, D56 is why the submission carries 33 budget lines instead of group
+totals, D57 is the page target, and D58 says the pass prepared week 5 and did not run it.
 
 
 ### stage-1/journal.md
-Short narrative note per working session, newest last. Seven entries, the last one being week 4's
-structure and mass work and the API failure it was recovered from.
+Short narrative note per working session, newest last. Eight entries, the last one being the week
+5 preparation pass.
 Used by: nothing mechanical, it is the record of what actually happened
 Gotcha: no gate reads it, so it is the one place that can say a model was wrong the first time.
 
 
 ### handoff.md
 Where a fresh session starts. Current state, the frozen geometry and mechanism, the eight
-structural margins, what week 5 inherits, the human list and open items.
+structural margins, what the preparation pass changed, what is left of week 5, the ordered human
+list and open items.
 Used by: check.py greps it for the NEXT-WEEK marker, which is the external witness for how many
 weeks are finished
-Gotcha: exactly one NEXT-WEEK line and it now reads 5. Two markers fail the gate, so the number
-never appears twice at the start of a line. Its four-case T/W table is the one a reader meets
-first, so it moves whenever the coefficient or the mass does, and week 4 moved the mass.
+Gotcha: exactly one NEXT-WEEK line and it still reads 5, because the preparation pass did not
+complete week 5 and must not read as if it had. Two markers fail the gate, so the number never
+appears twice at the start of a line. Its four-case T/W table is the one a reader meets first, so
+it moves whenever the coefficient or the mass does, and week 4 moved the mass.
 
 
 ### tools/linkage.py
@@ -214,26 +223,56 @@ Gotcha: needs the headings Package envelope, Mounting, Drivetrain, Interfaces an
 and 300 words. Its swept diameter of 296.1 mm is what D44 says the week 2 packaging rule missed.
 
 ### stage-1/submission/cycloprop-stage1.md
-The submission source. Seven top-level headings matching the required items, the criteria map
-table and a Numbers used block. Items 1 to 4 carry frozen week 2 and week 3 work; 5 and 6 name
-week 4 and 7 names week 5.
+The submission source, rebuilt in the week 5 preparation pass from the reviewed design documents.
+A pandoc front matter block, an identity table carrying three placeholders, a summary, the seven
+required items as top-level headings, the 8 row criteria map, a claims and risk table, a
+provenance section, appendix A of 12 examiner questions and appendix B with the Numbers used
+block. 99 declared numbers.
 Used by: pandoc, and check.py at week 5 for headings, criteria rows, substance and numeric coverage
-Gotcha: this is still the week 3 smoke build and it is stale. Its Numbers used block declares
-`results.mass_g_conservative = 692.43` and `results.thrust_to_weight_conservative = 2.5173`,
-both of which moved in week 4, and its item 5 narrative carries the week 2 mass case. No week 4
-gate reads this file, so nothing catches that until week 5. The numeric coverage gate has been
-run on it by hand twice: 10 untraced numbers in week 3, 2 after the week 4 qualifier fix, and
-those 2 are `margin=25mm` in the pandoc front matter and 125.4 mm at line 66. The heading text
-has to keep matching REQUIRED_ITEMS in check.py word for word.
+Gotcha: the heading text has to keep matching REQUIRED_ITEMS in check.py word for word, and
+`## Numbers used` needs two hashes or `check_declared_numbers` does not find it. The criteria map
+must stay the first heading containing "criteri" and its table must sit directly under it, because
+`section_under` stops at the next heading. Its mass table is the 33 stored budget lines rather
+than group totals: group sums exist in no file and eight of them passed the coverage audit only by
+landing within 2 percent of an unrelated stored mass. See D56. One allow comment is used in the
+whole document, on published side force angles, and it hides 3 of the 4 numbers the ceiling
+permits. `[P-1]`, `[P-2]` and `[P-7]` in the identity table are for a person.
 
 ### stage-1/submission/cycloprop-stage1.pdf
 The built PDF, committed because check.py reads it at week 5 and the attachment is what gets
-evaluated. 5 pages from the week 3 draft.
+evaluated. 21 pages: 1 of title and contents, 15 of body through the sources section, then the two
+appendices.
 Used by: check.py at week 5, which reads it with pypdf and looks for this submission's own strings
 Gotcha: rebuild it whenever the source changes, with
 `pandoc stage-1/submission/cycloprop-stage1.md --from=markdown --pdf-engine=xelatex --toc
 --number-sections -o stage-1/submission/cycloprop-stage1.pdf`. A stale PDF passes the page count
-and fails the string check.
+and fails the string check. Two extraction traps found reading it back: pypdf returns one ff
+ligature character wherever the text says "off", so a must_contain string with a double f would
+miss, and the contents entry extracts as "T eam capability" from kerning while the body heading
+extracts cleanly. Check the xelatex log for overfull lines after any edit; a long unbreakable
+token such as the organiser address beside a code span caused the two that were fixed.
+
+### stage-1/submission/email-draft.md
+The staged submission email. Drafted, never sent, per D5. Carries the recipient, a subject line,
+the attachment name, the three team placeholders, the registration reference placeholder and a six
+step list of what a person does before pressing send.
+Used by: check.py at week 5, which requires the file and greps it for the attachment name, the
+organiser address, the word attachment and a subject line
+Gotcha: the registration reference is `[REGISTRATION REFERENCE]` in both the subject and the body
+and it is also `[P-7]`. The two live organiser questions from stage-1/organiser-email.md moved
+here, framed so they need no reply.
+
+### stage-1/design/07-team-and-execution.md
+Required Stage 1 item 7, written in the week 5 preparation pass. Nine placeholders tagged `[P-1]`
+to `[P-9]` in one table at the top, the roster section, the capability table against the problem
+statement's seven preference areas, four stated gaps, the Stage 2 schedule across all 11 required
+items with a closing gate each, the Stage 2 gates and the route through the missing capability.
+Used by: the week 5 submission, which condenses it into item 7
+Gotcha: needs the headings Team capability, Execution plan and Stage 2, though the title alone
+satisfies two of the three, so the real constraint is D5 rather than the gate: no name,
+institution, qualification, tool licence or capability claim about a person may be written here.
+Claims in the file are about the Stage 1 work, which is checkable. Four of the nine placeholders
+are also week H markers and the table says which. See D55.
 
 ### tools/structure.py
 Week 4 solver. Integrates the NACA 0020 section from its ordinate polynomial, builds the blade
