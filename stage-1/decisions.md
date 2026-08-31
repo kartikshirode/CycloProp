@@ -689,3 +689,132 @@ So: geometry is frozen, the documents are not. Week 4 restates the stacked figur
 `01-configuration.md`, `02-rotor-sizing.md` and `04-thrust-and-power.md` when the mass moves,
 and the gate's failure message says so. Frozen means the design stops moving, not that the prose
 stops tracking it.
+
+
+## D35: Kellen's measurement retires the configuration-transfer allowance
+
+31 August 2026, after both primary sources were retrieved and read.
+
+D23 set the test in one sentence: if Kellen's measured blade-area coefficient for this shape
+family in this Reynolds band lands at or above the transferred value, the 10 percent
+configuration-transfer allowance retires. The thesis is in hand and it passes the test.
+
+**What was measured.** Kellen's Table 2.1 configuration 8 is a 3-bladed rotor, 5.5 in chord,
+8.25 in radius, 22 in span, NACA 0020, run at pitch amplitudes up to plus or minus 40 degrees.
+That is this design's shape family: chord-to-radius 0.6667 against our 0.66, solidity 0.3183
+against our 0.3151, blade aspect ratio 4.0 in both, three blades and the same airfoil and the
+same pitch amplitude. Solidity and chord-to-radius agree to 1.1 percent.
+
+**How the number was got.** Kellen tabulates no coefficients. CT/sigma lives inside figures, so
+it was read out of the PDF's vector path data rather than off pixels: the axis calibration is
+the tick geometry, and the data points are the polyline vertices. Fig 3.25 gives 1.04424 at
+three blades and Fig 3.28, drawn separately against solidity, gives 1.04428. They agree to 0.003
+percent.
+
+His conventions are on p.vii: A is the projected area, span times 2R; CT is TRes over rho A
+(Omega R) squared; sigma is Nb c over 2 pi R. This project divides thrust by 0.5 rho (Omega R)
+squared times blade area. Substituting one into the other, the rho, the areas and the speeds all
+cancel and what is left is a constant:
+
+    coeff = (2/pi) x (CT/sigma)
+
+So 1.0443 becomes 0.6648.
+
+**Why it is believable.** Two closures, both independent of the reading and both tied to
+quantitative claims in Kellen's own text. Taking CP/sigma off Fig 3.26 for the same rotor and
+computing FM = CT^1.5 / (sqrt(2) x CP) gives 0.595, against the 0.6 section 3.3 states for
+exactly this configuration. And computing power loading at the 60 N/m2 fixed disk loading the
+text names for Fig 3.27 gives 0.1202 N/W against the 0.1201 that figure plots. Neither closure
+depends on the span, so neither can be rescued by a lucky guess about the rotor.
+
+**What changes.** The low coefficient becomes 0.5752, the nominal less blade flexibility alone.
+Conservative thrust becomes 17.0992 N. The stacked conservative thrust to weight becomes 2.5173,
+which clears the hard limit of 2.5, so `results.mass_target_week4_g` describes a shortfall that
+no longer exists and is deleted along with its source entry. The gate stops asking for that field
+once the stacked case clears, so leaving it would have parked an unchecked number in the schema.
+
+**What does not change.** The blade-flexibility allowance stays at 5 percent. Nominal thrust,
+geometry, rpm, the power chain, the drive and the mass envelope are all untouched. The low
+coefficient is still an engineering downside scenario rather than a published lower bound, and
+the evidence ledger still says so.
+
+**What it clears by, stated because it is thin.** 2.5173 against 2.5 is 4.8 g of conservative
+mass. The column could reach 697.2 g before the stacked case fell under the limit and it sits at
+692.4 g. The hard stacked test in week 4 under D30 is still the one that matters, and D33 still
+governs how that column gets built.
+
+## D36: the nominal coefficient stays at 0.6055, and the record of where it came from is corrected
+
+31 August 2026, same reading session as D35.
+
+Benedict 2010 was pulled to check the basis under `performance.blade_area_coeff`. The basis was
+wrong.
+
+**What the repository carried.** 1.98 N per rotor at 2000 rpm on the quad-cyclocopter, four
+NACA 0010 blades of 33.0 mm chord and 158.8 mm span at 76.2 mm radius. That arithmetic does give
+0.6055, so it reproduced every time anybody checked it, which is why it survived a week 1 pull
+and two week 2 audits.
+
+**What the dissertation says.** The pair does not appear in it. 1.98 N is the 809 gram all-up
+vehicle weight of Table 5.1 divided by four, and the quad never hovered untethered at its own
+weight. 2000 rpm belongs to the twin rotor. The quad's measured hover point is on printed p.236:
+at the operating RPM of 1800, each rotor produced around 1.91 N of thrust. Printed p.225 gives
+the same point as 195 grams at 1800 rpm and 40 degrees pitching amplitude. In this project's
+convention that is 0.7211. The chord Reynolds of that rotor is 31,600, not the 35,100 the ledger
+carried, because that too was computed at 2000 rpm.
+
+Two mistakes that pulled in opposite directions. The thrust was too high by 3.7 percent and the
+speed was too high by 11 percent, and since thrust goes as the square of speed the net was a
+coefficient 16 percent below the truth.
+
+**The decision: 0.6055 stands.** Every measured or corrected value now available sits above it.
+Kellen measures 0.6648 on this shape family, the corrected quad point is 0.7211, and Benedict's
+twin is 0.8114. Raising the nominal would raise design thrust everywhere it is used, move rpm,
+power, torque, the drive selection and every mass line that scales with them, and it would spend
+a margin nothing in the design is asking for. An error that ran in the safe direction is not a
+reason to go back and remove the safety.
+
+So the number is unchanged and its status is not. It was a transferred estimate that happened to
+be low. It is now a deliberate floor, held below three separate measurements, and both
+`numbers.json` and the evidence ledger say that in those words. The correction is recorded here
+rather than applied, because a value that quietly stops matching its own stated basis is worse
+than one that never matched it.
+
+**What this does not license.** Nobody may quote 0.7211 or 0.6648 as the design coefficient in a
+later week and recompute thrust upward from it. Those two are reserve. If a later week wants the
+margin, that is a decision entry, not an edit.
+
+## D37: D25 narrows to the provenance of the nominal, and no longer to the design point
+
+31 August 2026. Narrows D25. Does not supersede D12, and does not touch the solidity axis.
+
+D25 said no compliant point in this shape family sits inside the Reynolds band the coefficient is
+supported over. The support it meant was Shrestha and Benedict, non-dimensional thrust holding
+from 10,000 to 100,000, and the design point at 134,000 sits above it. That was correct on the
+evidence available and it is why three week 2 documents had to be corrected after the first
+audit.
+
+Kellen changes what the sentence covers. The thesis abstract states the study range as chord
+Reynolds 100,000 to 300,000, Table 2.1 lists all 37 configurations tested inside it, and the
+3-bladed optimum sits at 186,000 on a 5.5 in chord at 20 m/s. The design point at 134,074 is
+inside that band, on this design's own shape family, with a measured blade-area coefficient
+attached to it.
+
+**What survives, stated narrowly.** The nominal coefficient still comes from a Benedict rotor at
+a chord Reynolds of 31,600, and Shrestha is still the only published support for carrying a
+value across that gap. That specific transfer is still an extrapolation and E11 still carries it.
+
+**What does not survive.** The claim that no compliant design in this family can sit inside a
+measured band. It can, and this one does. D25 also argued the point was unavoidable because the
+15 percent haircut forced design thrust above 11.76 N and put the floor at 108,000. The haircut
+is 5 percent since D35, so the floor is 10.53 N and Reynolds there is 102,500, which is inside
+Kellen's band as well. Every compliant point in this family now sits inside a band this shape was
+measured across.
+
+**Why this is a narrowing and not a reversal.** D25's underlying complaint was that a number was
+being carried further than its evidence reached. That is still true of the nominal. What is no
+longer true is that the geometry and the design point are out on their own, because the shape
+family has its own measurement bracketing them. The risk moved from the design point to the
+provenance, and the provenance is what D36 answers by holding the value low.
+
+D25 is not edited. This entry is where the qualification lives.
