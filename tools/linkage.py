@@ -41,7 +41,11 @@ resultant instead of being pinned to the module vertical.
 import argparse
 import json
 import math
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import structure                                          # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 NUMBERS = ROOT / "stage-1" / "design" / "numbers.json"
@@ -77,12 +81,21 @@ FINE_STEP_DEG = 0.25              # what the extrema, clearances and derivatives
 STALL_CAP_DEG = 28.0              # week 2's stand-in for dynamic stall delay
 OFFSET_AZIMUTH_DEG = 90.0         # azimuth reference: psi = 90 is the offset direction
 
-# Blade build-up, from `02-rotor-sizing.md`. Chordwise station of each part's own centre
-# of mass as a fraction of chord, used only to locate the blade centre of mass.
-BLADE_PARTS_G = {"foam": 9.60, "skin": 9.51, "spar": 5.81, "bond and fittings": 4.53}
+# Blade build-up. This used to be a hand copy of the week 2 masses, which week 3 recorded
+# as a debt because nothing made it follow a change to the blade. It now comes from
+# `tools/structure.py`, the same integration that builds the week 4 blade budget lines, so
+# the pitch loads and the mass budget cannot disagree about what a blade weighs. Stations
+# are the chordwise centre of each part as a fraction of chord.
 SPAR_STATION = 0.30               # spar tube on the pitch axis
 FITTING_STATION = 0.30            # root fittings on the pitch axis
 AERO_CENTRE_PCT = 25.0            # thin airfoil, quarter chord
+
+
+def blade_parts_g(chord_m, span_m):
+    """Part masses of one blade, in grams, keyed by the station they sit at."""
+    bl = structure.blade(chord_m, span_m)
+    return {"foam": bl["m_foam_g"], "skin": bl["m_skin_g"], "spar": bl["m_spar_g"],
+            "bond and fittings": bl["m_close_out_g"]}
 
 # Actuator, Corona DS-929MG class. Supplier listing rather than a manufacturer datasheet,
 # the same evidence class as four of the five week 2 drive rows.
@@ -300,11 +313,11 @@ def section_properties(chord_m, axis_frac, n=2000):
     }
 
 
-def blade_inertia(chord_m, axis_frac, blade_mass_kg):
+def blade_inertia(chord_m, span_m, axis_frac, blade_mass_kg):
     """Pitch inertia about the pitch axis and the chordwise offset of the blade centre.
 
     Uniform area density inside the section for the second moments. The centre of mass
-    uses the week 2 build-up instead, because the skin sits on the perimeter and the spar
+    uses the part build-up instead, because the skin sits on the perimeter and the spar
     sits on the axis, and that moves the centre forward of the pure area centroid.
     """
     sec = section_properties(chord_m, axis_frac)
@@ -315,8 +328,9 @@ def blade_inertia(chord_m, axis_frac, blade_mass_kg):
         "spar": SPAR_STATION,
         "bond and fittings": FITTING_STATION,
     }
-    total = sum(BLADE_PARTS_G.values())
-    cg_frac = sum(BLADE_PARTS_G[k] * stations[k] for k in BLADE_PARTS_G) / total
+    parts = blade_parts_g(chord_m, span_m)
+    total = sum(parts.values())
+    cg_frac = sum(parts[k] * stations[k] for k in parts) / total
     return {
         "i_p_kgm2": i_p,
         "i_ss_kgm2": blade_mass_kg * sec["i_ss_over_area"],
@@ -466,8 +480,10 @@ def solve(data, balanced=False):
     tip, thrust = o["tip_speed_ms"], p["thrust_N"]
     induced = p["induced_velocity_ms"]
     omega = o["rpm"] * 2.0 * math.pi / 60.0
-    blade_mass = next(x["nominal_g"] for x in data["mass_envelope_g"]
-                      if x["item"] == "blades") / blades / 1000.0
+    # The blade the section build-up actually gives, not the week 2 envelope line. Those
+    # two agreed until week 4 drew the root close-out, and the pitch loads follow the
+    # blade rather than the estimate of it.
+    blade_mass = sum(blade_parts_g(chord, span).values()) / 1000.0
 
     a = round(HORN_OVER_RADIUS * R * 1000.0, 1) / 1000.0
     l = round(LINK_OVER_RADIUS * R * 1000.0, 1) / 1000.0
@@ -509,7 +525,7 @@ def solve(data, balanced=False):
     fine_az = [r["az"] for r in rows]
     fine_force = [v * scale for v in
                   blade_forces(fine_pitch, fine_az, tip, induced, tau)]
-    inertia = blade_inertia(chord, axis_frac, blade_mass)
+    inertia = blade_inertia(chord, span, axis_frac, blade_mass)
     inertia["blade_mass_kg"] = blade_mass
     loads = pitch_loads(rows, omega, R, inertia, chord, axis_frac, fine_force, balanced)
     torque, radial_series = carrier_torque(rows, loads, e, phi, blades)
