@@ -62,10 +62,11 @@ is the fixed angle between the horn and the chord and is chosen so the cycle mea
 | L4 pitch horn | 24.4 mm | coupler |
 
 The horn is Kellen's 2 in on a 9 in radius, scaled. The pitch link is not. His 9.133 in scales
-to 111.6 mm here, and the sweep under `--sweep` puts that at 0.297 Nm of carrier torque against
-0.137 Nm at 105 mm, with a transmission angle 18 degrees tighter and a harmonic residual more
-than twice as large. His rotor ran a different offset regime on a radius twice this one, so the
-ratio does not carry across and the sweep is what picked 105 mm.
+to 111.6 mm here, and the sweep under `--sweep` puts that at 0.3240 Nm of carrier torque against
+0.1371 Nm at 105 mm, with a transmission angle 18 degrees tighter and a harmonic residual more
+than twice as large. At 111.6 mm the two servos hold the carrier on exactly half their stall
+torque, a margin of 1.000, which is not a margin. His rotor ran a different offset regime on a
+radius twice this one, so the ratio does not carry across and the sweep is what picked 105 mm.
 
 Only L2 was solved. Bisecting on the peak to peak pitch travel gives 15.40 mm for plus or minus
 40 degrees, and the bracket is not arbitrary either: the horn tip circle has to meet the pitch
@@ -193,6 +194,13 @@ End to end takes 0.147 s at the published 0.11 s per 60 degrees, which is a vect
 not a control loop, so that is fast enough by a wide margin. Two servos at 0.24 A on 6 V draw
 2.88 W, inside the 6.0 W week 2 carried for them.
 
+**The controller.** A Matek Systems F411-WSE class board, 8.5 g in a 28 by 28 by 14 mm case,
+with four servo outputs and a servo rail selectable to 5 or 6 V at 3.5 A continuous. It takes
+the 6S pack directly on a 6 to 30 V input, so the module needs no separate regulator, and 3.5 A
+covers two servos drawing 0.24 A each with room over. It is 0.5 g above the 8.0 g week 2
+nominal for the pitch offset controller and inside that line's 9.2 g conservative figure, which
+is a week 4 line to close rather than a week 3 mass change.
+
 **Command to force.** Five commands across the authority, with vertical and lateral resolved in
 module axes and vertical taken along the design resultant.
 
@@ -221,17 +229,18 @@ The model puts the resultant 11.98 degrees round from the offset direction, in t
 rotation. Of that, the pitch peak accounts for 11.00 and the aerodynamics for the remaining
 0.98, which is the honest split and the second number is small.
 
-The measured range is not small. Benedict's figure 2.33 gives the resultant phase between 10 and
-45 degrees over 400 to 2000 rpm for 2, 3, 4 and 5 bladed rotors at 35 and 40 degrees of pitching
-amplitude, and it rises with both rotational speed and blade count. Adams measured 15 to 35
-degrees depending on amplitude and rpm, Sirohi about 10, and Benedict's twin sat at 30 at its
-operating point. This design runs 3 blades at 40 degrees and 2405 rpm, which is past the top of
-the speed sweep in that figure, so it sits at or beyond the high end of a range whose trend is
-already upward.
+The measured range is not small. Sirohi measured about 10 degrees, Adams 15 to 35 depending on
+amplitude and rpm, and Benedict's twin sat at 30 at its operating point, so the band the design
+works to is 10 to 35 degrees. Benedict's figure 2.33 is the reason to expect this design high in
+that band rather than low. It sweeps 2, 3, 4 and 5 bladed rotors at 35 and 40 degrees of
+pitching amplitude from 400 to 2000 rpm, and his text states both trends in words: the tilt
+rises with rotational speed, and it rises with blade count. No number is taken off that figure,
+because the text extract we hold carries its axis and not its plotted values. This design runs 3
+blades at 40 degrees and 2405 rpm, past the top of that speed sweep, on both trends.
 
 So the model under-predicts, and it should. A quasi-steady blade element model with uniform
 inflow has no wake return, no shed vorticity and no dynamic stall hysteresis. All three feed the
-lateral component, which is why measurement gives 10 to 45 and arithmetic gives 0.98.
+lateral component, which is why measurement gives 10 to 35 and arithmetic gives 0.98.
 
 **How the design handles it.** The tilt is a bias, not a loss. Benedict measured his by rotating
 the whole rotor assembly by the phase angle until the resultant lay on the vertical axis, and
@@ -241,9 +250,9 @@ model gives and it is the value the design carries into week 4, marked as a lowe
 than a prediction.
 
 **What the uncertainty costs, which is the part worth arguing about.** Index the carrier at the
-centre of the measured band and the residual after trim is up to 17.5 degrees either way. The
+centre of the 10 to 35 band and the residual after trim is up to 12.5 degrees either way. The
 actuator has to absorb that, and it comes straight off the symmetric vectoring range: 120
-degrees of authority becomes 85 degrees usable, worst case, or plus and minus 42.5 about
+degrees of authority becomes 95 degrees usable, worst case, or plus and minus 47.5 about
 vertical instead of plus and minus 60. That is still a usable vectoring module and it is the
 single largest consumer of authority in the design. It also means the bench calibration is not
 optional. One hover run with a two axis load cell fixes the bias to a degree or two and gives
@@ -251,7 +260,7 @@ the range straight back.
 
 **At the ends of the operating range.** The tilt rises with rpm, so trimming at the design point
 leaves a residual at any other speed. Benedict's figure spans roughly 20 degrees of phase across
-its 400 to 2000 rpm sweep on a 3-bladed rotor, which is the same order as the 17.5 degrees the
+its 400 to 2000 rpm sweep on a 3-bladed rotor, which is the same order as the 12.5 degrees the
 band uncertainty already costs. Thrust magnitude on this module is set by rpm, so the two are
 coupled and a vectoring command at reduced thrust needs a different trim. That is a calibration
 schedule rather than a constant, and writing one measured angle into the design as a universal
@@ -273,9 +282,10 @@ it.
 - The three per revolution carrier ripple at 120 Hz is above any servo's control bandwidth. The
   torque margin covers it statically, and the phase jitter it produces needs the real servo
   gearbox ratio and rotor inertia to bound. Week 4
-- The servo figures are a supplier listing for the Corona DS-929MG class, not a manufacturer
-  datasheet. That is the same evidence class as four of the five week 2 drive rows and it
-  carries the same debt
+- The servo and controller figures are supplier listings rather than manufacturer datasheets,
+  the same evidence class as four of the five week 2 drive rows, and they carry the same debt.
+  The named controller is 0.5 g over the week 2 nominal line and inside its conservative figure,
+  so week 4 either finds a lighter board or grows the line
 
 ## Numbers used
 
@@ -296,6 +306,9 @@ it.
 - pitch.actuator_mass_g = 25.0
 - pitch.servo_travel_deg = 80.0
 - pitch.gear_step_up = 1.5
+- pitch.carrier_gear_mm = 40.0
+- pitch.servo_gear_mm = 60.0
+- pitch.servo_mass_g = 12.5
 - pitch.carrier_torque_Nm = 0.1371
 - pitch.servo_torque_Nm = 0.0457
 - pitch.servo_stall_torque_Nm = 0.216

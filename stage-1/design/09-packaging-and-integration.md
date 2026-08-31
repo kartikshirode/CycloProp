@@ -15,9 +15,11 @@ thick and the swept diameter is 296.1 mm against a rotor diameter of 220.
 That is worth flagging against week 2. The packaging rule in `01-configuration.md` compares
 layouts on rotor count times 2R plus 20 mm of clearance plus 40 mm of frame, which put the
 single rotor at 290 mm and made the span the largest dimension. On the swept diameter the same
-rule gives 356 mm for one rotor, 491 for two and 585 for three, so the single rotor still wins
-on size and it wins by more. The comparison table stands because it is a common rule applied to
-all three, and the number that changes is the absolute figure rather than the ordering.
+rule gives 356 mm for one rotor, 511 for two and 625 for three, so the single rotor still wins
+on size and it wins by more. Each rotor keeps its own 20 mm of clearance, which is how week 2
+wrote the rule, so the cluster figures are not three swept diameters plus a single 60. The
+comparison table stands because it is one rule applied to all three, and what changes is the
+absolute figure rather than the ordering.
 
 The module envelope is a sum of named parts, not an estimate:
 
@@ -40,6 +42,64 @@ That axis keep-out is the reason the drivetrain is single ended. The rotor shaft
 and stops inboard of the pitch plane. The offset pivot is fed by a post from the phasing
 carrier, which sits outboard of everything that rotates with the rotor and is supported from the
 frame.
+
+### Layout along the rotor axis
+
+Dimensions in mm. The rotor axis runs left to right and the shaft stops before the pitch plane,
+which is what makes the drive single ended.
+
+```
+      drive end                                                     non-drive end
+  |<-18->|<--12-->|<-8->|<--------- 290.4 span --------->|<-8->|<--12-->|<--16-->|
+  +------+--------+-----+--------------------------------+-----+--------+--------+
+  | belt | bearing| side|                                | side| bearing| phasing|
+  |  and | block  |plate|          blades and hubs       |plate| block  | carrier|
+  |pulley|        |     |                                |     |        |  + 2   |
+  +------+--------+-----+--------------------------------+-----+--------+ servos +
+  |======= rotor shaft, 14 mm dia, stops here ==========================|        |
+                                                              pitch     |  post  |
+                                                              plane --->|<-------|
+  |<------------------------------ 364.4 overall ----------------------------->|
+```
+
+The pitch plane sits between the non-drive bearing block and the phasing carrier. Nothing
+coaxial may occupy it, because the pitch links pass within 0.004 mm of the centreline.
+
+### Layout in the rotor plane
+
+Looking along the rotor axis from the non-drive end. The rotor turns counter-clockwise and the
+offset link points at 90 degrees of azimuth.
+
+```
+                        frame tube
+                    +-------------------+
+                    |   . - - - - - .   |   <-- outer swept radius 148.03
+                    | .   blade 1     . |
+                    |.   /             .|
+        mount lug -->|  /   inner swept  |<-- mount lug
+                    |. /    radius       |
+                    | /     86.54       .|
+                    |/    O <-- rotor axis, and 15.4 to the offset pivot E
+                    |\   / \             |
+                    | \ /   \           .|
+        mount lug -->|  X  E  \ pitch   |<-- mount lug
+                    |. / \    \  links  .|
+                    | blade 2  blade 3  |
+                    |   . - - - - - .   |
+                    +-------------------+
+                    |<-- 316.1 across -->|
+                              |
+                        46 motor stack
+                              |
+                    +-------------------+
+                    |  motor and mount  |
+                    +-------------------+
+```
+
+The three pitch links converge on E. The link belonging to the blade furthest from E is the one
+that crosses the axis at O, and the swept annulus between 86.54 and 148.03 mm is what the frame
+tubes have to stay outside.
+
 
 ## Mounting
 
@@ -64,6 +124,8 @@ off the non-drive end without disturbing the rotor. The belt is reachable at the
 the motor in place. Blades come out individually once the pitch link is unpinned at the horn, so
 a damaged blade does not mean stripping the mechanism. The ESC and the offset controller board
 mount on the outside of the frame on the motor side, where they are in the rotor's own downwash.
+The controller is a Matek Systems F411-WSE class board, 28 by 28 by 14 mm and 8.5 g, taking the
+6S pack directly and feeding both servos off its own selectable 5 or 6 V rail at 3.5 A.
 
 ## Drivetrain
 
@@ -99,7 +161,7 @@ Electrical, to the vehicle:
 | Motor phases | three, motor to ESC, inside the module |
 | ESC signal | one channel, throttle, sets rotor speed and therefore thrust magnitude |
 | Actuator signal | one channel, phase command, driving both servos in parallel |
-| Actuator power | 6.0 W allowance on the same 6 V rail as the controller |
+| Actuator power | 6.0 W allowance on the controller board's own 6 V servo rail |
 | Sensing | none at Stage 1. The phase bias is a bench calibration, not a closed loop |
 
 Two things an integrator should read twice. Thrust magnitude and thrust direction are separate

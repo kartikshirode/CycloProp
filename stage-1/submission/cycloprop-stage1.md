@@ -78,9 +78,9 @@ authority. Direction follows command one to one in the model and the resultant m
 at 18.0 N across the range.
 
 The measured side force is the open risk and it is stated as one. The model puts the resultant
-11.98 degrees off the commanded direction. Published measurements run 10 to 45 degrees and rise
+11.98 degrees off the commanded direction. Published measurements run 10 to 35 degrees and rise
 with rpm and blade count, so the model under-predicts and the design carries an indexed
-mechanical bias plus actuator trim, at a worst case cost of 35 degrees of the 120.
+mechanical bias plus actuator trim, at a worst case cost of 25 degrees of the 120.
 
 Detail in `03-pitch-and-vectoring.md`, including the loop closure, the 37 row schedule, the
 force vector map and the interference result that put the drive on one end.
@@ -181,6 +181,9 @@ populated with placeholders that read like names.
 - pitch.transmission_angle_min_deg = 58.58
 - pitch.transmission_angle_max_deg = 143.23
 - pitch.vector_range_deg = 120.0
+- pitch.carrier_gear_mm = 40.0
+- pitch.servo_gear_mm = 60.0
+- pitch.servo_mass_g = 12.5
 - pitch.actuator_count = 2
 - pitch.side_force_tilt_deg = 11.978
 - pitch.peak_link_force_N = 101.82
