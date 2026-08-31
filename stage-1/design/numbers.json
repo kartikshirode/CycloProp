@@ -629,6 +629,9 @@
     "drive": {
       "continuous_rating": "T-Motor publishes Max. Power (180s) and Peak Current (180s), which is a three minute maximum and not an indefinite hover rating. Week 2 derates both by 0.80 for continuous duty. The derate is a judgement, stated rather than hidden, because the problem statement gives no endurance requirement to size it against",
       "belt_ratio": "Smallest ratio at which motor torque stays inside the derated continuous torque and motor speed stays under 90 percent of what the 6S pack can turn it at, allowing for the internal resistance drop at the working current"
+    },
+    "results": {
+      "mass_target_week4_g": "The conservative mass that would clear thrust to weight 2.5 at the conservative thrust of 15.3007 N, computed as thrust over 2.5 g. Week 4 has to find 68.5 g against the 692.43 g conservative column, which is 9.9 percent of it, by replacing assumed sections with weighed or catalogue masses rather than by trimming a growth rate. Eight envelope lines carry a 20 or 25 percent rate on an assumed basis and hold 86.4 g of allowance between them, so the shortfall sits inside them and does not need the design to change. The refined budget is tested against the same limit by week4: conservative T/W clears 2.5. See D30 and D31"
     }
   },
   "results": {
@@ -637,7 +640,8 @@
     "thrust_to_weight": null,
     "mass_envelope_g": 580.05,
     "mass_g_conservative": 692.43,
-    "thrust_to_weight_conservative": 2.2525
+    "thrust_to_weight_conservative": 2.2525,
+    "mass_target_week4_g": 623.8818
   },
   "thrust_sensitivity": [
     {
