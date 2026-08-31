@@ -121,11 +121,20 @@ def honest_numbers():
 
     # Structural demands derived from the design rather than asserted beside it.
     ratio, lever, load_factor = 2.0, S / 4, 4.0
+    overspeed = 1.2
     shaft_dem = shaft / omega
     blade_dem = thrust / nb * lever * load_factor
-    blade_all, shaft_all = blade_dem * 2.9, shaft_dem * 3.0
+    # Centrifugal bending is the larger of the two spanwise loads on a cyclorotor and it
+    # goes as the square of rotor speed, so an honest section is sized on both of them
+    # together at the declared overspeed rather than on the aerodynamic case alone. That
+    # leaves blade_margin comfortable and the combined margins tight, which is the shape
+    # the real design has as well.
+    cf_dem = fc * lever
+    fc_over = fc * overspeed ** 2
+    combined_over = (blade_dem + cf_dem) * overspeed ** 2
+    blade_all, shaft_all = combined_over * 2.0, shaft_dem * 3.0
     link_dem, link_all = 42.0, 95.0
-    att_all = fc * 2.2
+    att_all = fc_over * 2.2
 
     # The azimuthal table is a distribution of the thrust, so its cycle mean has to
     # reproduce thrust per blade. A shape alone used to satisfy the gate.
@@ -222,7 +231,13 @@ def honest_numbers():
                       "pitch_link_load_N": link_dem, "pitch_link_allowable_N": link_all,
                       "pitch_link_margin": link_all / link_dem,
                       "blade_attachment_allowable_N": att_all,
-                      "blade_attachment_margin": att_all / fc},
+                      "blade_attachment_margin": att_all / fc,
+                      "overspeed_factor": overspeed,
+                      "centrifugal_load_overspeed_N": fc_over,
+                      "blade_attachment_margin_overspeed": att_all / fc_over,
+                      "blade_centrifugal_bending_Nm": cf_dem,
+                      "blade_combined_margin": blade_all / (blade_dem + cf_dem),
+                      "blade_combined_margin_overspeed": blade_all / combined_over},
         "mass_envelope_g": envelope,
         "mass_budget_g": budget,
         "sources": {
@@ -442,6 +457,11 @@ def run(root, week):
     return r.returncode, r.stdout
 
 
+# Checks that are printed outside CASES: 13 coverage probes, 6 unit awareness probes
+# and 5 --all probes. Counted here because the closing line reports a total, and the
+# hand kept constant it replaced had drifted one behind what the run actually prints.
+PROBE_CHECKS = 24
+
 CASES = []
 
 
@@ -563,14 +583,30 @@ def heavy(d):
 case("a module too heavy for T/W 2.5 is rejected", False, heavy)
 
 
-def _rescale_mass(d, nom_factor, cons_factor, target=None, target_note=True):
+def _rescale_mass(d, nom_factor, cons_factor, target=None, target_note=True,
+                  scale_budget=True):
     """Move the mass envelope so one chosen T/W case lands where a test wants it, keeping
     every other mass gate consistent. The envelope lines, the stated totals, the selected
     candidate row and the losing rows all have to move together or the test fails on a
-    gate it was not aiming at."""
+    gate it was not aiming at.
+
+    The refined budget moves with the envelope by default. Since D33 the stated
+    conservative mass is the sum of the budget's own conservative lines once that budget
+    exists, so a fixture that moves the envelope and leaves the budget behind is not a
+    heavier design, it is a design whose two mass lists disagree, and it fails on that
+    instead of on the case the test was aiming at. `chosen_conservative_mass` is the one
+    caller that wants them to disagree, and it says so."""
     for e in d["mass_envelope_g"]:
         e["nominal_g"] = round(e["nominal_g"] * nom_factor, 4)
         e["conservative_g"] = round(e["conservative_g"] * cons_factor, 4)
+    if scale_budget:
+        # Only the conservative column, because that is the one bound to a stated scalar.
+        # The nominal budget column is what per-blade mass and the centrifugal load are
+        # derived from, so scaling it would move the structure block underneath a test
+        # that is about mass, and every caller here runs at week 2 where the nominal
+        # budget column is not read at all.
+        for b in d["mass_budget_g"]:
+            b["conservative_g"] = round(b["conservative_g"] * cons_factor, 4)
     nom = sum(e["nominal_g"] for e in d["mass_envelope_g"])
     cons = sum(e["conservative_g"] for e in d["mass_envelope_g"])
     tn = d["performance"]["thrust_N"]
@@ -652,7 +688,7 @@ def chosen_conservative_mass(d):
     and the stated total are moved together, so every week 2 gate still passes and the
     conservative T/W improves, while the refined budget's own conservative lines are left
     where they were. Only the sum rule notices."""
-    return _rescale_mass(d, 1.0, 420.0 / 448.0)
+    return _rescale_mass(d, 1.0, 420.0 / 448.0, scale_budget=False)
 
 
 case("a week 4 conservative mass the budget lines do not give is rejected",
@@ -797,6 +833,82 @@ def stated_not_derived_margin(d):
 
 case("a structural margin that does not follow from allowable over demand is rejected",
      False, stated_not_derived_margin)
+
+
+# ---- round 4, the week 4 structural cases ---------------------------------------
+# Everything below stores a self-consistent structure block on purpose. Each one would
+# have passed every margin gate that existed before week 4, because each one is wrong in
+# a way that only the case week 4 added can see.
+
+def aero_only_blade(d):
+    """A section sized on aerodynamic bending alone, with every stored margin reproducing
+    from what sits beside it. On a cyclorotor that is the small load: centrifugal bending
+    is nine times it here, so the section is about half of what the blade needs and
+    `blade_margin` still reads a healthy 2.9. Only the combined case can say so."""
+    st = d["structure"]
+    st["blade_allowable_Nm"] = st["blade_root_bending_Nm"] * 2.9
+    st["blade_margin"] = 2.9
+    st["blade_combined_margin"] = st["blade_allowable_Nm"] / (
+        st["blade_root_bending_Nm"] + st["blade_centrifugal_bending_Nm"])
+    st["blade_combined_margin_overspeed"] = (st["blade_combined_margin"]
+                                             / st["overspeed_factor"] ** 2)
+    return d
+
+
+case("a blade sized on aerodynamic bending alone is rejected", False, aero_only_blade)
+
+
+def token_overspeed(d):
+    """An overspeed of 1.001 satisfies the inequality and covers nothing. Every derived
+    overspeed value is recomputed from it, so the design is internally consistent and the
+    only thing wrong with it is that the declared case is not a case."""
+    st = d["structure"]
+    st["overspeed_factor"] = 1.001
+    sq = 1.001 ** 2
+    st["centrifugal_load_overspeed_N"] = st["centrifugal_load_N"] * sq
+    st["blade_attachment_margin_overspeed"] = (st["blade_attachment_allowable_N"]
+                                               / st["centrifugal_load_overspeed_N"])
+    st["blade_combined_margin_overspeed"] = st["blade_allowable_Nm"] / (
+        (st["blade_root_bending_Nm"] + st["blade_centrifugal_bending_Nm"]) * sq)
+    return d
+
+
+case("a token overspeed of 1.001 is rejected", False, token_overspeed)
+
+
+def asserted_centrifugal_bending(d):
+    """Centrifugal bending written down rather than taken from the recomputed centrifugal
+    load and the same lever the aerodynamic case uses. Halved, it lifts the combined
+    margin by two thirds, and both combined margins still reproduce from the numbers
+    stored next to them, so the derivation check is the only witness."""
+    st = d["structure"]
+    st["blade_centrifugal_bending_Nm"] *= 0.5
+    st["blade_combined_margin"] = st["blade_allowable_Nm"] / (
+        st["blade_root_bending_Nm"] + st["blade_centrifugal_bending_Nm"])
+    st["blade_combined_margin_overspeed"] = (st["blade_combined_margin"]
+                                             / st["overspeed_factor"] ** 2)
+    return d
+
+
+case("centrifugal bending that does not follow from the load and the lever is rejected",
+     False, asserted_centrifugal_bending)
+
+
+def conservative_column_off_the_envelope(d):
+    """The refined conservative column and the week 2 conservative envelope 28 percent
+    apart. Every nominal line still sits inside its own 25 percent band, the stated scalar
+    still sums to the budget lines, no line shrinks under growth, and both thrust to
+    weight cases still clear, so the only rule left is the distance between the two
+    columns. The fixture opens the gap by inflating the envelope rather than by deflating
+    the budget, because the budget's floor of 105 percent of its own nominal puts the low
+    side out of reach at these masses. The gate reads the distance either way."""
+    for e in d["mass_envelope_g"]:
+        e["conservative_g"] = round(e["conservative_g"] * 620.0 / 448.0, 4)
+    return d
+
+
+case("a conservative budget that walks away from the week 2 envelope is rejected",
+     False, conservative_column_off_the_envelope)
 
 
 def lighter_conservative_line(d):
@@ -1675,9 +1787,15 @@ def main():
     try:
         data = honest_numbers()
         chk.set_root(tmp)
+        # The last one is the qualifier rule. A key whose unit suffix is followed by a
+        # word, thrust_N_conservative, mass_g_conservative, is still a force and still a
+        # mass, and while the match ran only at the end of the key the submission's own
+        # conservative thrust could not trace to the number that produced it.
         probes = [("produces 400 N of thrust", False), ("Envelope is 400 mm long.", True),
                   ("A force of -10 N acts.", False), ("At least 10 N.", True),
-                  ("| 999 N |", False)]
+                  ("| 999 N |", False),
+                  (f"The conservative case gives "
+                   f"{data['performance']['thrust_N_conservative']:.2f} N.", True)]
         for text, want_pass in probes:
             (Path(tmp) / "t.md").write_text(text, encoding="utf-8")
             chk.FAILURES.clear()
@@ -1745,7 +1863,7 @@ def main():
         for name, out in failures:
             print(f"\n===== {name} =====\n{out}")
         return 1
-    print(f"All {len(CASES) + 22 + len(extra)} gate self-tests behaved as expected.")
+    print(f"All {len(CASES) + PROBE_CHECKS + len(extra)} gate self-tests behaved as expected.")
     return 0
 
 
