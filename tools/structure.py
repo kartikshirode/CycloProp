@@ -314,8 +314,9 @@ def build(data):
          "degrees of servo travel that the 1.5 step up turns into 120 of carrier"),
         ("carrier support bearings, 2 off", 2 * CARRIER_BEARING["mass_g"],
          "pitch mechanism", "catalogue",
-         f"{CARRIER_BEARING['name']}, supplier listing, carrying the 47.48 N radial pull "
-         f"the three pitch links put into the offset post"),
+         f"{CARRIER_BEARING['name']}, supplier listing, carrying the "
+         f"{float(data['pitch']['carrier_radial_force_N']):.2f} N radial pull the "
+         f"three pitch links put into the offset post"),
 
         ("rotor shaft tube", shaft_tube_g, "rotor shaft", "calculated",
          f"roll wrapped CFRP tube, {SHAFT_OD_M * 1000:.0f} mm outer diameter and "
@@ -592,6 +593,13 @@ def balance_report(data, b):
     nom = b["total_g"] + added
     cons = b["total_cons_g"] + added * 1.12
     tc = float(data["performance"]["thrust_N_conservative"])
+    # The balanced link load comes from the solver, not from a ratio. An earlier version
+    # scaled the unbalanced load by 0.655, which was the week 3 balanced-to-unbalanced
+    # ratio on the week 2 blade, and it survived the blade changing underneath it. The
+    # import is deferred because tools/linkage.py imports this module at load time.
+    import linkage
+    bal = linkage.solve(data, balanced=True)
+    link_bal = bal["peak_link_force_N"]
     print()
     print("=== chordwise balance trade, D43 ===")
     print(f"  centre of mass at {cg_pct:.2f} pct chord, axis at {axis_pct:.1f}, "
@@ -602,8 +610,9 @@ def balance_report(data, b):
           f"{b['total_cons_g']:.2f} -> {cons:.2f} g conservative")
     print(f"  conservative T/W {tc / (b['total_cons_g'] / 1000.0 * G):.4f} -> "
           f"{tc / (cons / 1000.0 * G):.4f} against a hard limit of 2.5")
-    print(f"  pitch link would fall to about {b['link_load_N'] * 0.655:.1f} N, "
-          f"margin {b['link_allow_N'] / (b['link_load_N'] * 0.655):.2f} "
+    print(f"  blade pitching moment would fall to {bal['peak_blade_moment_Nm']:.4f} Nm")
+    print(f"  pitch link would fall to {link_bal:.2f} N, "
+          f"margin {b['link_allow_N'] / link_bal:.2f} "
           f"against the {b['link_allow_N'] / b['link_load_N']:.2f} it already has")
 
 
@@ -763,7 +772,13 @@ def write(data, b, m):
     res["bom_tooling_inr"] = sum(r["line_cost_inr"] for r in rows if r["make_or_buy"] == "make")
     res["bom_total_inr"] = res["bom_bought_inr"] + res["bom_tooling_inr"]
     res["bom_longest_lead_weeks"] = max(r["lead_time_weeks"] for r in rows)
-    NUMBERS.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    # newline is forced to LF and ensure_ascii matched to tools/linkage.py, because
+    # the two scripts write this same file in sequence and the second one wins. The
+    # platform default put CRLF back into a file linkage.py had just written as LF,
+    # against a repository that declares eol=lf. Git normalises it on the way in, so
+    # the damage never showed up in git status.
+    NUMBERS.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+                       encoding="utf-8", newline="\n")
     print(f"\nwrote {NUMBERS}")
 
 
