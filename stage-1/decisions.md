@@ -818,3 +818,181 @@ family has its own measurement bracketing them. The risk moved from the design p
 provenance, and the provenance is what D36 answers by holding the value low.
 
 D25 is not edited. This entry is where the qualification lives.
+
+## D38: the pitch link is 105 mm, picked by sweep, and only the horn is scaled from Kellen
+
+31 August 2026, week 3. Freezes the linkage geometry.
+
+The topology comes from Kellen, who names four fixed lengths and built the thing twice. L1 is the
+rotor radius, L2 the offset link, L3 the pitch link, L4 the horn. On his cyclocopter those are 9
+in, variable, 9.133 in and 2 in, printed pages 55 and 56.
+
+Scaling both ratios to this radius gives a 24.4 mm horn and a 111.6 mm pitch link, and that
+combination works. It is not the one to build. Running `tools/linkage.py --sweep` over horn
+lengths of 18 to 36 mm and pitch links of 100 to 118 mm shows 111.6 mm sitting at 0.297 Nm of
+carrier torque, a transmission angle floor of 40.97 degrees and a harmonic residual of 2.67
+degrees, against 0.137 Nm, 58.58 degrees and 1.195 degrees at 105 mm with the same horn.
+
+Four times the torque on the part a 12.5 g servo has to hold is the number that decided it. At
+111.6 mm the two servos together cannot hold the carrier on half of their stall torque. At 105 mm
+the margin is 2.36.
+
+**What is frozen.** L1 110.0 mm from week 2, L2 15.40 mm, L3 105.0 mm, L4 24.4 mm, open assembly
+mode, construction angle -110.524 degrees. L2 is the only one solved rather than chosen:
+bisecting on peak to peak pitch travel is what puts it at 15.40 mm for plus or minus 40 degrees.
+
+**Why the horn ratio survived and the link ratio did not.** The sweep is flat in horn length over
+20 to 26 mm and steep in link length. Kellen's rotor is twice this radius and runs a different
+offset regime, so there was never a reason to expect both ratios to carry across, and only one
+did.
+
+## D39: azimuth is measured from the offset link, not from module vertical
+
+31 August 2026, week 3. Sets the convention every week 3 table is written in.
+
+Two conventions were available and they put different numbers in `pitch.phase_delay_deg`.
+Referencing azimuth to module vertical makes the stored delay minus the aerodynamic tilt, which
+is a restatement of the side force number under a name that says pitch mechanism. Referencing it
+to the offset link makes the stored delay the lag between the command and the pitch peak, which
+is a property of the four-bar and of nothing else.
+
+**The convention: 90 degrees of azimuth is the direction the offset link points.** The mechanism
+then lags its own command by 11.00 degrees, and module vertical sits 11.978 degrees further round
+because the aerodynamics adds its own tilt on top. Both numbers are stored, separately, and
+neither is derivable from the other.
+
+This is worth writing down because it is not the obvious choice and a later reader will want to
+know why the pitch peak is at 101 degrees rather than at 90. `aero_azimuthal_loads` uses the same
+azimuth column, with its two force components resolved in module axes, so the load table and the
+schedule table can be read side by side.
+
+## D40: the drive is single ended, because the pitch link sweeps through the rotor axis
+
+31 August 2026, week 3. Constrains packaging and hands week 4 a shaft that stops short.
+
+With all three pitch links converging on one offset pivot, the link belonging to the blade
+furthest from the offset passes within 0.004 mm of the rotor centreline. That is a crossing, not
+a near miss, and it is structural rather than unlucky: it happens whenever L3 minus L2 falls
+inside the band L1 minus L4 to L1 plus L4, which for this link set is 89.6 mm to 134.4 mm against
+an actual 89.6 mm.
+
+**So the plane the pitch links sweep cannot contain the rotor shaft.** The shaft runs the span,
+carries both main bearings and stops inboard of that plane. The rotor is driven from the other
+end, where the belt pulley has the axis to itself. The offset pivot is fed by a post reaching in
+from a phasing carrier that turns about the axis outboard of everything rotating with the rotor.
+
+Kellen hit the same constraint and solved it differently, by shaping L3 to bend around the
+central hardware. A cranked link carries bending as well as tension and it is a harder part to
+make, so the end split is the better trade here.
+
+**What this costs.** Nothing coaxial may sit in the pitch plane, and week 4 cannot answer a shaft
+stiffness problem by running the shaft through to an outboard bearing on that side.
+
+## D41: the azimuthal load model is rerun on the solved schedule, and week 2's table is replaced
+
+31 August 2026, week 3. Supersedes the `aero_azimuthal_loads` table frozen in week 2 and the peak
+to mean figure that came out of it.
+
+Week 2's model prescribed a sinusoid with no phase offset. Its lateral components cancelled
+exactly over the cycle, so the model reported zero side force as an input rather than as a
+result, and week 2 said so at the time.
+
+The model itself is kept and only its input changed. `tools/linkage.py` reconstructs it from
+`04-thrust-and-power.md` and reproduces the published week 2 table to 5.2e-5 N on every one of
+its 36 rows, which is what makes this a rerun rather than a new model. Two things then change.
+The schedule is the one the four-bar produces. And the uniform inflow now points opposite the
+resultant it helped produce, instead of being pinned to module vertical.
+
+**What moved.** Peak blade load goes from 14.24 N to 15.01 N and peak to mean from 2.374 to
+2.501. The upper and lower halves of the revolution stop mirroring each other, because that
+mirroring was a property of the prescribed sinusoid. The lateral column is no longer zero: its
+cycle mean is trimmed out by pointing the offset 11.978 degrees off vertical, and the
+instantaneous lateral force still reaches 10.10 N per blade inside the cycle.
+
+**What did not move.** The cycle mean vertical force is still 6.0000 N per blade and still
+reproduces the 18.0 N design thrust across three blades, which is the week 2 gate. Nothing in the
+mass envelope moved. Week 4 still sizes structure on the 4.0 peak to mean of D16 rather than on
+2.501, because a quasi-steady model with uniform inflow under-predicts the peak.
+
+`04-thrust-and-power.md` carries one load model and not two.
+
+## D42: phase authority is 120 degrees, and the gate now tests the force map rather than two scalars
+
+31 August 2026, week 3. Freezes the vectoring claim and changes `tools/check.py`.
+
+The authority is a gear ratio and two published numbers, not a property of angles. The servo's
+operating travel is 80 degrees, 40 per side. The phasing carrier is a ring around the rotor axis
+and its gear cannot be much under 40 mm because it has to clear the offset post at 15.4 mm
+radius. Putting a 60 mm sector gear on the servo makes that a 1.5 step up, so 80 degrees of servo
+becomes 120 degrees of carrier. A larger step up needs a sector gear the module cannot carry.
+
+**`pitch.vector_range_deg` is set equal to that**, because the model's map does support one to
+one direction control. Five commands across the range turn the resultant by exactly the command
+and hold its magnitude at 18.000 N. Be honest about why that is so clean: the rotor is
+axisymmetric, the blades are evenly spaced and the inflow settles onto whichever direction the
+resultant points, so rotating the command rotates the entire solution. It is a statement about
+the model's symmetry and about the mechanism's reach, and not a measurement of force at any
+command.
+
+**The gate changed with it.** `check.py` compared `vector_range_deg` with `phase_authority_deg`
+and nothing else, which only checks that the same number was written twice. Three new checks now
+read the force table: every mapped command has to sit inside the authority, the commands have to
+span at least half the claimed range, and the direction the forces imply has to turn with the
+command to within 15 degrees. Two more read the load table: the cycle mean lateral force has to
+be trimmed to within 5 percent of the mean vertical, and `pitch.peak_lateral_force_N` has to
+reproduce from the rows.
+
+Five attack cases went into `tools/test_gates.py` alongside them, one per new check, and each was
+confirmed to fail on the gate it targets rather than incidentally. `linkage_selftests` was added
+in the same file and it is the one part of that suite that reads the real repository: it
+recomputes the four-bar loop closure on every published pitch row, and confirms that one degree
+of hand editing and a target cosine both break it. The suite went from 104 self-tests to 115.
+
+Nothing was loosened. `snum` was added because `num` rejects zero and negative values, which
+would have silently dropped every phase command at or below zero out of the new checks.
+
+## D43: the blade is not chordwise balanced, and the stored pitch loads are the unbalanced ones
+
+31 August 2026, week 3. Hands week 4 a trade rather than making it.
+
+The pitch axis is frozen at 30 percent chord. Building the blade the way `02-rotor-sizing.md`
+describes puts its centre of mass at 39.92 percent, because the foam sits at the section centroid
+and the skin sits further aft still, and only the spar and the root fittings sit on the axis.
+
+On a cyclorotor the rotation axis runs parallel to the blade span, so centrifugal force acts in
+the section plane and an unbalanced blade gets a steady moment trying to swing its chord radially
+outward. That moment scales with the offset. At 9.92 percent of chord it doubles the peak blade
+pitching moment, from 1.0139 Nm balanced to 2.1201 Nm as built, and takes the peak pitch link
+force from 69.38 N to 101.82 N.
+
+**The stored numbers are the unbalanced ones.** They describe the blade that exists on paper
+today. `tools/linkage.py --balanced` prints the other case and refuses to write it, because a
+target is not a design.
+
+**What week 4 decides.** A nose balance mass on the pitch axis side would take the link load back
+down and cost module mass, against a conservative column that clears 2.5 by 4.8 g. Moving the
+spar forward or biasing the skin lay-up would do some of it for free. Neither is a week 3 call,
+and both need the real section week 4 builds.
+
+The actuator is not the reason to care. Even unbalanced the carrier torque is 0.1371 Nm and the
+servo margin is 2.36. This is a pitch link strength case.
+
+## D44: the week 2 packaging rule understates the module, and the comparison it made still stands
+
+31 August 2026, week 3. Corrects a week 2 figure without reopening the week 2 conclusion.
+
+`01-configuration.md` compares layouts on rotor count times 2R, plus 20 mm of clearance and 40 mm
+of frame. For the single rotor that is 280 mm against a 290.4 mm span, so the span won and 290 mm
+went into the table as the largest dimension.
+
+2R is the wrong circle. The blade pitches plus or minus 40 degrees about an axis at 30 percent
+chord, so 70 percent of a 72.6 mm chord swings outboard and the swept diameter is 296.1 mm rather
+than 220. Sampling the section outline at every rotor position is what gives that.
+
+**The ordering does not move.** Applying the swept diameter to the same rule gives 356 mm for one
+rotor, 491 for two and 585 for three, so the single rotor still wins on size and wins by more
+than the old figures said. The week 2 table is left as it is, because it is one rule applied to
+all three layouts and correcting only the winning row would be worse than leaving it alone.
+
+`09-packaging-and-integration.md` carries the real envelope, 364.4 by 316.1 by 362.1 mm, built as
+a sum of named parts. The largest dimension is along the rotor axis and the span still drives it.

@@ -192,3 +192,68 @@ was watching, so there were two of us writing the same repository. I backed my o
 edit out, checked key by key that I had not clobbered anything, moved my new files to the
 scratchpad, and reported instead of finishing. It cost half an hour. Overwriting somebody's
 uncommitted work would have cost more, and there is no way to get it back.
+
+## 31 August 2026, week 3, the linkage
+
+The thing I was most worried about turned out to be the easy part, and something I had not
+thought about at all ate most of the day.
+
+Easy part first. Reconstructing week 2's azimuthal load model took twenty minutes, because
+`04-thrust-and-power.md` had written down enough to rebuild it: 36 azimuths, a prescribed
+sinusoid, uniform inflow from momentum theory, angle of attack as pitch less inflow angle capped
+at 28 degrees, thin airfoil slope, scaled so the cycle mean matches thrust per blade. I wrote
+four candidate readings of that description and scored each against the 36 stored numbers. One
+of them reproduced the whole table to 5.2e-5 N. That is not a fit, it is an identification, and
+it meant week 3 could rerun the model rather than replace it. Documents that say what they did
+are worth the space they take.
+
+Then the four-bar. Kellen names his four lengths on printed pages 55 and 56 and gives three of
+them as numbers, so I scaled his ratios to a 110 mm radius, solved the offset by bisection on
+peak to peak pitch travel, and got a working mechanism first try. Amplitude 40 degrees,
+revolution closing on itself, Grashof double crank with the ground as the shortest link. I was
+pleased with myself for about ten minutes.
+
+Two things then went wrong at once. The pitch link passes 0.004 mm from the rotor axis, which is
+not a clearance, it is a hole in the middle of the design. And the carrier torque came out at
+0.297 Nm against a servo that can hold about a tenth of that.
+
+The first one I got wrong twice before getting it right. My first instinct was to shape the link
+around the shaft, which is what Kellen did, and my second was to move the mechanism outboard,
+which does not help because the carrier still needs the axis. What actually works is to admit
+the pitch plane cannot have anything coaxial in it at all, put the belt on one end and the
+phasing carrier on the other, and stop the shaft short. It is a cleaner machine than the one I
+started drawing. It is also a constraint week 4 inherits whether it likes it or not.
+
+The torque one I nearly solved the wrong way. My first move was a longer horn, on the reasoning
+that a longer arm means less link force. It does, and the carrier torque goes up anyway, because
+the offset grows with the horn and the torque scales on the offset. The sweep is in the script
+now for exactly that reason: I would not have believed the answer without the table. What fixed
+it was the pitch link, which I had assumed was fixed by Kellen's ratio and is not. 105 mm
+instead of 111.6 mm takes the carrier torque from 0.297 Nm to 0.137 Nm, opens the transmission
+angle by 18 degrees and halves the harmonic residual. Same horn, same radius, one link length.
+
+The number I actually care about is the side force, and it is the one I am least happy with.
+The model puts the resultant 11.98 degrees off the commanded direction, of which 11.00 comes
+from the linkage and 0.98 from the aerodynamics. Benedict's figure 2.33 measures 10 to 45
+degrees on rotors like this one and it rises with rpm, and we run past the top of his sweep. So
+the aerodynamic half of my number is wrong by an order of magnitude and I know why: uniform
+inflow, no wake return, no shed vorticity, no dynamic stall hysteresis. Every one of those feeds
+the lateral component. I could have written 30 degrees into the design and called it a
+correction. That would have looked better and meant less.
+
+What I did instead is treat it as a bias with a band around it: index the carrier at assembly,
+trim on the bench, and cost out the uncertainty. It costs 35 degrees of the 120, worst case,
+which is the single biggest consumer of vectoring authority in the module and is now written
+down as such.
+
+Two smaller things. The vector map came out exactly one to one, magnitude flat at 18.000 N at
+every command, and my first reaction was that I had made a mistake. I had not: an axisymmetric
+rotor with a self-consistent inflow is rotationally equivariant, so the map has to be an exact
+rotation. That makes it a weak piece of evidence dressed as a strong one, so I said so in the
+document and then went and made the gate harder, because a table like that would have passed
+the old check with the lateral column set to zero.
+
+And the blade is not balanced. Centre of mass at 39.92 percent chord against a pitch axis at 30,
+which on a cyclorotor puts a steady centrifugal moment on every blade and doubles the pitch link
+load. I nearly added a nose weight to make my own numbers look better. It is week 4's trade, the
+stored numbers are the unbalanced ones, and the script refuses to write the balanced case.
