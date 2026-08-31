@@ -5,10 +5,10 @@ This file is where a fresh session starts.
 
 NEXT-WEEK: 2
 
-**That marker still says 2 on purpose.** Week 2 ran, produced everything it was asked for, and
-reported BLOCKED on the one thing that decides the project. Geometry did not freeze, so week 2
-is not done and the marker does not move. Full account in
-[stage-1/progress/week-2.md](stage-1/progress/week-2.md).
+**That marker still says 2 on purpose.** Week 2 ran and produced everything it was asked for,
+then reported BLOCKED on the thrust to weight call. That call is now made and recorded as D30,
+so week 2 reruns to freeze the geometry and finish. The marker moves when it does. Full account
+in [stage-1/progress/week-2.md](stage-1/progress/week-2.md).
 
 ## Read these first, in order
 
@@ -46,36 +46,47 @@ against a hard limit of 2.5 and an internal target of 2.75.
 
 That is a miss of 69 g of module mass against the hard limit, on a 692 g conservative estimate.
 
-## The decision waiting for you
+## The decision has been made, see D30
 
-**1. Pull Kellen 2019.** Two minutes in a browser and the single highest-leverage thing
-available. If the measured blade-area thrust coefficient for this shape family lands at or above
-0.6055, the configuration-transfer allowance retires, the coefficient haircut drops from 15
-percent to 5, and the conservative case moves to **2.518** with nothing else changing. That
-clears the hard limit while still sitting under 2.75, so it turns a blocked week into a red one
-needing a margin call. It also settles D25, because Kellen measured in the Reynolds band this
-design actually sits in and the current transfer does not.
+Week 2 halted correctly and the call it stopped for is recorded as D30 in
+[stage-1/decisions.md](stage-1/decisions.md). Read that entry before touching anything.
+
+The short version. Four thrust to weight cases exist, not one. The design point is 3.1633.
+The mass downside alone gives 2.6499 and the coefficient downside alone gives 2.6889, so each
+clears the limit on its own. Only stacking both misses, at 2.2525. Nine of the thirteen
+envelope lines are assumed sections carrying a blanket 20 or 25 percent growth rate, so the
+stacked figure tests those rates as much as the design.
+
+Geometry therefore freezes at 18 N and 110 mm, with 120 mm carried as insurance. The stacked
+test moves to week 4, where `week4: conservative T/W clears 2.5` already applies the same
+limit to a budget built from real sections and catalogue parts. Week 2 gains three new hard
+gates in its place, one per single case, and a miss on the stacked case now has to hand week 4
+a mass target of 623.9 g that the gate recomputes.
+
+Every fallback was rechecked by hand before deciding and none of them closes. 20 N fails on
+power at 110 mm and on an empty belt window at 120 mm. The 100 mm row has an empty belt window
+too, for any pulley pair rather than only the half integer ones week 2 tried. No shortlist
+drive reaches 503 W under 78 g. A uniform 10 percent growth rate still leaves 2.44.
+
+## Still worth a human doing, in this order
+
+**1. Pull Kellen 2019.** No longer a blocker, still the cheapest win available. It moves the
+stacked case to 2.5173 on its own, and it settles D25, because Kellen measured across a
+Reynolds band of 100,000 to 300,000 and this design sits at 134,074, inside it.
 
 Handle 1969.1/184958, item `a4c62d38-3778-44f4-b398-cdcba283fa06` on the Texas A&M repository.
-Open the item page, click Download, drop the PDF in `reference/`. The 403 is a Cloudflare
-JavaScript challenge, not a permissions gate, and a real browser passes it in about two seconds.
+The item page, the bitstream and the handle URL all return 403 to a script, because it is a
+Cloudflare JavaScript challenge rather than a permissions gate. A real browser passes it in
+about two seconds. Open the item page, click Download, drop the PDF in `reference/`.
 
-**2. Search the motor catalogue properly.** Week 2's audit turned up that this design is **drive
-limited**. Conservative thrust to weight keeps improving as the rotor gets smaller, and the 100
-mm row would give 2.376, but nothing in the shortlist can hold it: the rotor torque wants a belt
-ratio the selected KV450 cannot spin to on 6S, and the motor that has the speed does not have
-the torque. A drive delivering about 503 W continuously at 78 g or less clears 2.5 at 100 mm on
-its own. With Kellen in hand the same row tolerates 86 g and clears **2.75**. That pair is the
-only route to the internal target this week found.
+**2. Week H.** All five markers pending. It hard blocks week 5 and nothing else. Eligibility
+first, because the clause disqualifies a whole team at any stage.
 
-**3. Rule on the conservative mass allowance.** Week 2 uses 15 percent growth on catalogue parts,
-20 on anything computed from an assumed section and 25 on the module frame, averaging 19.4. At a
-uniform 10 percent the case reaches 2.44, still short. It is a smaller lever than it looks.
-
-**4. Accept the finding.** Nominal thrust to weight is 3.163, already 49 percent above the best
-published module on the same boundary. Reaching 2.75 conservative needs 3.86, which is 81
-percent above the record. If none of the above moves, the honest position is that this design
-does not close with 10 percent paper margin, and Stage 2 gets told so.
+**3. The drive, at week 4.** Pack voltage sits outside the module boundary, so cell count
+costs the module nothing. Motor torque ceiling goes as current over KV and speed ceiling as
+KV times voltage, so their product is power and has no KV in it. Week 2 fixed KV450 on 6S and
+then searched only the belt ratio, which imposed a constraint the motor's power rating does
+not. A lower KV variant on more cells would reopen the 100 mm row. It needs a datasheet.
 
 ## What week 2 established that does not depend on the freeze
 
