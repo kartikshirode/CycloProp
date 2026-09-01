@@ -136,6 +136,17 @@ def honest_numbers():
     link_dem, link_all = 42.0, 95.0
     att_all = fc_over * 2.2
 
+    # Pitch bearing oscillating duty, laid out the way tools/structure.py computes it. The
+    # bearing swings 80 degrees once a revolution instead of turning, so the cage moves a
+    # third of that and every ball stays inside its own arc. The fixture is honest, which
+    # here means the recirculation ratio is under 1 and the static safety factor at the
+    # operating load clears the 2.0 floor that follows from it.
+    brg_z, brg_ball, brg_pd, brg_travel = 7, 1.5875, 5.5, 80.0
+    brg_cage = (1.0 - brg_ball / brg_pd) / 2.0
+    brg_swing, brg_spacing = brg_cage * brg_travel, 360.0 / brg_z
+    brg_rate = (2.0 / math.pi) * math.radians(brg_travel / 2.0) * omega
+    brg_fric = 2 * nb * 0.5 * 0.0015 * (fc / 2.0) * 0.003 * brg_rate
+
     # The azimuthal table is a distribution of the thrust, so its cycle mean has to
     # reproduce thrust per blade. A shape alone used to satisfy the gate.
     raw_az = [(a, abs(math.cos(math.radians(a))) + 0.12) for a in range(0, 360, 10)]
@@ -217,7 +228,8 @@ def honest_numbers():
                   "phase_delay_deg": phase, "vector_range_deg": 360.0,
                   "phase_authority_deg": 360.0, "schedule_rms_residual_deg": rms,
                   "actuator_count": 2, "actuator_mass_g": 18.0,
-                  "side_force_tilt_deg": 28.0, "peak_lateral_force_N": peak_lat},
+                  "side_force_tilt_deg": 28.0, "peak_lateral_force_N": peak_lat,
+                  "pitch_bearing_travel_deg": 80.0},
         "packaging": {"envelope_length_mm": 400, "envelope_width_mm": 300,
                       "envelope_height_mm": 300, "mount_points": 4},
         "structure": {"blade_mass_kg": blade_mass, "centrifugal_load_N": fc,
@@ -241,7 +253,23 @@ def honest_numbers():
                       # Combined bending and torsion is always worse than torsion alone.
                       # check.py floors this one without recomputing it, because the shaft
                       # section properties are not in numbers.json.
-                      "shaft_combined_margin": shaft_all / shaft_dem * 0.8},
+                      "shaft_combined_margin": shaft_all / shaft_dem * 0.8,
+                      # The oscillating duty on the pitch bearings. The fixture computes
+                      # it the way tools/structure.py does so the honest tree passes, and
+                      # the attacks below break one link at a time.
+                      "pitch_bearing_balls": brg_z,
+                      "pitch_bearing_ball_mm": brg_ball,
+                      "pitch_bearing_pitch_diameter_mm": brg_pd,
+                      "pitch_bearing_cage_swing_deg": brg_swing,
+                      "pitch_bearing_ball_spacing_deg": brg_spacing,
+                      "pitch_bearing_recirculation_ratio": brg_swing / brg_spacing,
+                      "pitch_bearing_recirculation_travel_deg": brg_spacing / brg_cage,
+                      "pitch_bearing_load_N": fc / 2.0,
+                      "pitch_bearing_static_safety": att_all / 2.0 / (fc / 2.0),
+                      "pitch_bearing_static_safety_floor": 2.0,
+                      "pitch_bearing_oscillation_hz": rpm / 60.0,
+                      "pitch_bearing_friction_W": brg_fric,
+                      "pitch_bearing_plain_alternative_W": brg_fric * 53.0},
         "mass_envelope_g": envelope,
         "mass_budget_g": budget,
         "sources": {
@@ -906,6 +934,98 @@ def asserted_centrifugal_bending(d):
 
 case("centrifugal bending that does not follow from the load and the lever is rejected",
      False, asserted_centrifugal_bending)
+
+
+def asserted_recirculation_ratio(d):
+    """The ratio written down as 1.2 while the cage swing and the ball spacing beside it
+    still say 0.55. Claiming full recirculation is how the oscillating floor gets switched
+    off, so the ratio is derived from the two numbers under it and never read."""
+    d["structure"]["pitch_bearing_recirculation_ratio"] = 1.2
+    return d
+
+
+case("a recirculation ratio the cage swing does not give is rejected",
+     False, asserted_recirculation_ratio)
+
+
+def impossible_ball_complement(d):
+    """The honest way to reach a ratio of 1.0 with everything reproducing: more balls, so
+    the spacing shrinks under the cage swing. 13 of them need 20.6 mm of a 17.3 mm pitch
+    circle, which is the only thing standing between this fixture and a passing tree."""
+    st = d["structure"]
+    st["pitch_bearing_balls"] = 13
+    st["pitch_bearing_ball_spacing_deg"] = 360.0 / 13
+    st["pitch_bearing_recirculation_ratio"] = (st["pitch_bearing_cage_swing_deg"]
+                                               / st["pitch_bearing_ball_spacing_deg"])
+    cage = st["pitch_bearing_cage_swing_deg"] / 80.0
+    st["pitch_bearing_recirculation_travel_deg"] = st["pitch_bearing_ball_spacing_deg"] / cage
+    return d
+
+
+case("a ball count that will not fit on the pitch circle is rejected",
+     False, impossible_ball_complement)
+
+
+def lowered_oscillating_floor(d):
+    """A floor a later week can lower is not a floor. Everything else here is honest."""
+    d["structure"]["pitch_bearing_static_safety_floor"] = 1.5
+    return d
+
+
+case("an oscillating static safety floor below 2.0 is rejected", False,
+     lowered_oscillating_floor)
+
+
+def asserted_cage_swing(d):
+    """Cage swing halved and the ratio kept consistent with it, so the recirculation
+    check and the floor both read healthy. Only the derivation from the ball geometry and
+    the frozen pitch travel can see it."""
+    st = d["structure"]
+    st["pitch_bearing_cage_swing_deg"] *= 0.5
+    st["pitch_bearing_recirculation_ratio"] = (st["pitch_bearing_cage_swing_deg"]
+                                               / st["pitch_bearing_ball_spacing_deg"])
+    return d
+
+
+case("a cage swing that does not follow from the ball geometry is rejected",
+     False, asserted_cage_swing)
+
+
+def bearing_friction_off_the_budget(d):
+    """Friction big enough to be a power line, still sitting outside the power budget. A
+    bearing swap is exactly how this happens, because the plain bearing that fixes the
+    wear mode costs fifty times what the ball bearing does."""
+    d["structure"]["pitch_bearing_friction_W"] = 10.0
+    d["structure"]["pitch_bearing_plain_alternative_W"] = 530.0
+    return d
+
+
+case("pitch bearing friction large enough to be a budget line is rejected",
+     False, bearing_friction_off_the_budget)
+
+
+def wear_floor_missed_under_a_low_overspeed(d):
+    """The one shape where the oscillating floor is the binding constraint. At the design
+    1.20 overspeed a 1.5 strength margin already implies a static safety factor of 2.16,
+    so the wear floor never bites. Drop the declared overspeed to 1.10 and it does: this
+    tree clears every strength margin, clears the overspeed case at 1.60, and still runs
+    the pitch bearing at 1.936 against a floor of 2.0."""
+    st = d["structure"]
+    ov, fc = 1.10, st["centrifugal_load_N"]
+    st["overspeed_factor"] = ov
+    st["centrifugal_load_overspeed_N"] = fc * ov ** 2
+    st["blade_attachment_allowable_N"] = fc * ov ** 2 * 1.6
+    st["blade_attachment_margin"] = st["blade_attachment_allowable_N"] / fc
+    st["blade_attachment_margin_overspeed"] = 1.6
+    st["blade_combined_margin_overspeed"] = st["blade_allowable_Nm"] / (
+        (st["blade_root_bending_Nm"] + st["blade_centrifugal_bending_Nm"]) * ov ** 2)
+    st["pitch_bearing_static_safety"] = (st["blade_attachment_allowable_N"] / 2.0
+                                         / st["pitch_bearing_load_N"])
+    return d
+
+
+case("a pitch bearing that clears strength and misses the wear floor is rejected",
+     False, wear_floor_missed_under_a_low_overspeed)
 
 
 def conservative_column_off_the_envelope(d):
