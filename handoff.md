@@ -1,6 +1,6 @@
 # CycloProp handoff
 
-Updated 31 August 2026. Stage 1 is due **27 September 2026** and we submit on 26 September.
+Updated 1 September 2026. Stage 1 is due **27 September 2026** and we submit on 26 September.
 This file is where a fresh session starts.
 
 NEXT-WEEK: 5
@@ -8,11 +8,11 @@ NEXT-WEEK: 5
 Weeks 1 to 4 are done. Geometry froze in week 2, the mechanism in week 3, and week 4 closed the
 structure, the refined mass budget and the materials and manufacturing case.
 
-**Week 5 has not run and this file does not say it has.** It is hard blocked by week H, and a
-preparation pass on 31 August closed every week 5 gate that does not need a person: item 7 is
-written, the submission is rebuilt and its PDF is built and inspected, the coverage gate defect
-is fixed, and the email is drafted and staged. `python tools/check.py --week 5` now fails on the
-human gate alone. See D58, and "What is left of week 5" below.
+**Week 5 has not run and this file does not say it has.** It is hard blocked by week H. A
+preparation pass on 31 August closed every week 5 gate that does not need a person, and a
+hardening pass on 1 September closed four engineering items that were being carried into Stage 2
+without being quantified. `python tools/check.py --week 5` fails on the human gate alone. See
+D58 and D60 to D63, and "What is left of week 5" below.
 
 ## Read these first, in order
 
@@ -22,7 +22,8 @@ human gate alone. See D58, and "What is left of week 5" below.
 3. **[stage-1/progress/week-4.md](stage-1/progress/week-4.md)** is where the design stands and
    what week 5 inherits. [week-3.md](stage-1/progress/week-3.md) is the mechanism record and
    [week-2.md](stage-1/progress/week-2.md) the feasibility one
-4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 58 entries.
+4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 63 entries.
+   D60 to D63 are the 1 September hardening pass and none of them moved a design number.
    D30 unblocked week 2, D35 closed the stacked case, D38 to D45 are week 3, and D46 to D53 are
    week 4, with D53 the audit response. D54 to D58 are the week 5 preparation pass. D47 is the
    one to read before touching any mass number, and D58 before assuming week 5 ran
@@ -105,10 +106,11 @@ centrifugal machine before it is an aerodynamic one. See D49.
 Required item 7, the submission, the PDF and the staged email are done. What is left is the
 human gate, the real team facts, and one short run to fold them in.
 
-**1. Week H still blocks it.** Four markers in [stage-1/human-gate.md](stage-1/human-gate.md) are
-pending and `check.py` fails week 5 until a person adds all four. An agent never writes one. The
-fifth, `TECHNICAL-READ-COMPLETE`, already appears in that file's prose, so the gate does not see
-it as outstanding; it is still a real task and it blocks final staging rather than the start.
+**1. Week H still blocks it.** All five markers in [stage-1/human-gate.md](stage-1/human-gate.md)
+are pending and `check.py` fails week 5 until a person adds every one. An agent never writes one.
+The count used to read four because the gate searched the whole file and found
+`TECHNICAL-READ-COMPLETE` inside the sentence explaining how to write it. Fixed in D59, and the
+project state never changed: five were always outstanding.
 
 **2. The nine placeholders.** `[P-1]` to `[P-9]`, listed in one table at the top of
 [07-team-and-execution.md](stage-1/design/07-team-and-execution.md) and referenced from the
@@ -149,7 +151,7 @@ add `ELIGIBILITY-CHECKED`.
 put the reference into `[P-7]`, which is the placeholder in the email subject and body.
 
 **3. Confirm the roster and the sender**, then add `ROSTER-CONFIRMED` and `SENDER-CONFIRMED`.
-That is the four markers and it unblocks week 5.
+That is four of the five and the fifth, `TECHNICAL-READ-COMPLETE`, comes after step 6 below.
 
 **4. Fill `[P-1]` to `[P-9]`** in `07-team-and-execution.md`, and the three identity fields at
 the top of the submission.
@@ -165,12 +167,16 @@ it does not move.
 
 **Ramsey 2022 and Heimerl** are still unpulled and still worth an hour if one exists. Ramsey
 would give a second structural mass anchor and Heimerl would replace the peak to mean load
-factor and the side force angle with measurements. Neither is cited as read anywhere.
+factor and the side force angle with measurements. Neither is cited as read anywhere. Both need
+network and neither is a small download, so they were left for a session with bandwidth to spare.
+
+**Four of the five motor rows and the servo are still supplier listings** rather than datasheet
+PDFs, which is E13 in the ledger. Same reason.
 
 ## The human gate
 
-Four of the five markers in [stage-1/human-gate.md](stage-1/human-gate.md) are outstanding and
-they are the only thing failing `--week 5`. They were advisory before week 2 and the engineering
+All five markers in [stage-1/human-gate.md](stage-1/human-gate.md) are outstanding and they are
+the only thing failing `--week 5`. They were advisory before week 2 and the engineering
 did not depend on them, so weeks 2, 3 and 4 ran. Week 5 cannot finish without them, because a
 capability section with invented names and a submission staged against no registration reference
 would both be fabrication rather than work.
@@ -189,25 +195,33 @@ added four force map checks and two lateral load checks; week 4 added two combin
 an overspeed attachment margin, a recomputed centrifugal bending term and a band on the
 conservative budget. The week 5 preparation pass fixed one reader defect and loosened nothing:
 the coverage audit no longer reads the pandoc front matter as a design claim, and the skip is
-positional so the same text in the body still fails. 128 self-tests.
+positional so the same text in the body still fails. The 1 September pass added 34 gates across the pitch bearing duty, the drive margin, the solver run order and the blade sensitivity, and loosened one thing on purpose: the PDF identity check now ignores whitespace, so kerning inside a heading cannot fail a good document. 162 self-tests.
 
 ## Open items
 
 - **The blade attachment at 1.20 overspeed is 1.69 and it is the tightest margin in the module.**
-  The number is not the problem. The duty is: the pitch bearings swing 80 degrees under a steady
-  110 N each, which is fretting, and a static rating says nothing about it. Stage 2 needs a
-  supplier oscillating derate or a bench test
+  The duty is computed now rather than flagged: the bearing sits at 0.5533 of full recirculation,
+  so it wears where it sits, and it carries a static safety factor of 2.44 at the operating load
+  against a declared floor of 2.0. What is still missing is a run to failure at speed on the
+  flight grease. See D60
 - **The BOM is priced and not quoted.** No supplier was contacted. The 5 lines above 4500 INR are
   52 percent of the 65770 INR total and they need written quotes at Stage 2. See D52
 - **Material allowables are published typical values for the class**, not batch certificates, and
-  no coupon has been tested. The cured laminate modulus is the one that matters, because the
-  blade allowable turns on it
-- **The two scripts have a hand resolved run order** and no gate enforces it. Better than the
-  hand copied constant it replaced, and still a cycle
+  no coupon has been tested. The foam is the sensitive one and the laminate is not: over a 2 to 1
+  band on the skin modulus the overspeed margin moves under 3 percent, while the blade reaches
+  its floor at 0.6689 of the published foam properties. Stage 2's first coupon is a wrinkling
+  test on the delivered foam. See D63
+- **The 0.80 continuous derate still has no source** and cannot be given one from inside the
+  project. What it has now is a bound: the selection breaks even at 0.7927, no lower thrust row
+  holds the stacked case, and no larger motor fits the mass. A dynamometer run is the first drive
+  gate in Stage 2. See D61
 - **Working solo**, confirmed 27 August. Weekly hours still unstated, which matters because there
   is nobody to absorb a slipped week and week 2 already used two of its slots
-- **The 0.80 continuous derate has no source.** T-Motor publishes a 180 second maximum and the
-  problem statement states no endurance requirement, so the derate is a judgement
+- **The two scripts had a hand resolved run order and now it is gated.** Running them backwards
+  leaves `structure.pitch_link_load_N` holding the value from before the blade moved while
+  `pitch.peak_link_force_N` carries the new one, and `check_solver_order` reads that gap. Note
+  that from an already converged file both orders reproduce it byte for byte, so a
+  reproducibility check would have said the order does not matter. See D62
 - **Four of the five motor rows and the servo are supplier listings**, not datasheet PDFs. Week 4
   did not open a manufacturer sheet for any of them
 - **The coefficient reserve is deliberate and must stay unspent.** 0.6055 sits below all three
@@ -215,17 +229,19 @@ positional so the same text in the body still fails. 128 self-tests.
   blade flexibility allowance and deliberately did not spend it. See D36 and D50
 - **`largest_dimension_mm` in the week 2 tables is 290 mm** and the packaged module is 364.4 mm.
   The week 2 comparison is unaffected because it applied one rule to all three layouts. See D44
-- **`check.py` demands the current week's audit** while `.claude/weekly-loop.md` says the current
-  week is exempt, so `--week N` fails until the audit file exists. Harmless in the order the loop
-  actually runs. The config belongs to a person, so it is reported and not changed
+- **`check.py` demands an audit for every week already marked done**, which includes the week
+  being gated once its progress file is written, so `--week N` fails in the window between the
+  done marker and the audit file. That is stricter than `.claude/weekly-loop.md` describes and it
+  is the code that is right. Harmless in the order the loop actually runs
 - **The page limit and the file naming convention were never answered.** The questions were
   drafted for early September and never sent. The working assumption is 15 pages of body plus
   cited appendices, the built report is 21 pages on that reading, and the question now rides at
   the end of the staged submission email. See D57
 - **The submission carries `[P-1]`, `[P-2]` and `[P-7]` in its identity table** and will print
   "to be completed" in the attachment until a person fills them and rebuilds the PDF
-- [stage-1/organiser-email.md](stage-1/organiser-email.md) is mostly answered by the problem
-  statement now and its two live questions have moved into the submission email draft
+- [stage-1/organiser-email.md](stage-1/organiser-email.md) is cut back to the record of three
+  questions the problem statement answered. Its two live ones ride at the end of the
+  submission email
 
 ## Standing risk
 
@@ -236,11 +252,11 @@ reproducible rather than remembered.
 
 Week H is still the one dependency an agent cannot clear, and it now has the longest lead time in
 the project by a distance. Everything else that could be done ahead of it has been done. What is
-left of week 5 is short, and it stays blocked until four markers and nine facts arrive from a
+left of week 5 is short, and it stays blocked until five markers and nine facts arrive from a
 person.
 
-One trap found while reading the built PDF back, worth knowing before the last rebuild. pypdf
-returns a single ff ligature character wherever the text says "off", and the contents page
-returns "T eam capability" with a space in it from kerning while the same heading in the body
-extracts cleanly. The identity gate passes on the body copy. A gate string carrying a double f
-would not.
+The two PDF extraction traps found while reading the built report back are handled in `check.py`
+now rather than written down as warnings. `pdf_text` expands the ff ligature pypdf returns
+wherever the text says "off", and `check_pdf` compares with the whitespace removed so the
+contents page's kerned "T eam capability" still matches. `pdf_selftests` reads the real document
+back and holds both. See D62.

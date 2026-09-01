@@ -1555,3 +1555,46 @@ also pointed at `.codex/weekly-loop.md` as the source of the blocked trigger, wh
 the execution contract since D28.
 
 Four new gates and eight new self-tests, 149 to 157.
+
+## D63: the blade is foam limited, not laminate limited
+
+1 September 2026, after week 4.
+
+Since week 2 this project has said in five places that the cured laminate modulus is the number
+the blade allowable turns on, and that a coupon panel is therefore the first test Stage 2 runs.
+It was never checked. It is wrong.
+
+**What the sweep says.** Skin wrinkling over the foam sets the section at 0.5 times the cube root
+of the three moduli, 215.2638 MPa, and the allowable moment is that stress times EI over the skin
+modulus and the distance to the extreme fibre. Lower the skin modulus and the wrinkling stress
+falls as its cube root, while EI over the skin modulus rises because the spar and foam terms do
+not move and only their share of the total grows. The two nearly cancel. Swept from 0.5 of the
+published class value up to all of it, the worst overspeed margin anywhere in the band is 1.9587
+against 1.9681 at the published value. Under 3 percent across a 2 to 1 range, with the worst
+point in the middle rather than at the bottom.
+
+The foam moduli sit inside that same cube root as a pair, so knocking them down together moves
+the allowable as the two thirds power. The overspeed margin reaches 1.5 at 0.6689 of the
+published foam properties. A third off the foam is what it takes, and a third off the skin is
+worth nothing.
+
+**The realistic case is milder.** A shortfall on delivered foam is less likely than a grade
+substitution, and a lighter grade cuts the demand as well as the allowable. On Rohacell 31 IG
+instead of 51 IG the blade weighs 28.057 g rather than 31.75 and the overspeed margin lands at
+1.5443. It clears. A shop that cannot get the specified grade can build the blade out of the
+lighter one, which is worth knowing before somebody has to decide it under time pressure.
+
+**What changes.** The three moduli are in `numbers.json` now, so the wrinkling stress is
+recomputed by the gate instead of living only inside `tools/structure.py` where a material change
+could not be seen from outside. Both sweep results are floored, the way `shaft_combined_margin`
+is, because they need the integrated section. The band has to reach at least 0.6 of published,
+so a sweep too narrow to find anything is rejected. And the Stage 2 test order flips: a sandwich
+wrinkling coupon on the delivered foam first, the certificate for the grade second, the laminate
+panel after that. The laminate panel still earns its place, because deflection and wind up do
+move with the skin modulus even though the strength margin does not.
+
+Five places corrected: the materials document twice, the submission's Stage 2 table, its risk
+table and examiner question 12. The handoff carried it too.
+
+Seven new gates and five new self-tests, 157 to 162. Nothing in the design moved. What moved is
+what Stage 2 spends its first week on.
