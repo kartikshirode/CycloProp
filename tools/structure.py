@@ -554,6 +554,88 @@ def bearing_duty(data, b):
     }
 
 
+SKIN_BAND_LOW = 0.50           # how far down the skin modulus the band is swept
+MARGIN_FLOOR = 1.5
+FOAM_DOWNGRADE = {"name": "Rohacell 31 IG", "E": 36e6, "Gm": 13e6, "rho": 32.0}
+
+
+def blade_sensitivity(data, b):
+    """Which material property the blade allowable actually turns on.
+
+    The evidence ledger has said since week 2 that the cured laminate modulus is the number
+    that matters, because the blade allowable turns on it. That is worth checking rather
+    than repeating, and it turns out to be backwards.
+
+    Skin wrinkling over the foam sets the allowable, at 0.5 times the cube root of the three
+    moduli. The allowable moment is that stress times EI over the skin modulus and the
+    distance to the extreme fibre. Drop the skin modulus and the wrinkling stress falls as
+    its cube root while EI over the skin modulus rises, because the spar and the foam terms
+    stay where they are. The two nearly cancel. Sweep the skin from half its published value
+    to all of it and the overspeed margin moves by under 3 percent, with the worst point in
+    the middle of the band rather than at either end.
+
+    The foam is the sensitive one. Its modulus and shear modulus both sit inside the same
+    cube root, so knocking them down together moves the allowable as the two thirds power.
+    blade_foam_knockdown_at_floor is where that takes the overspeed margin to 1.5.
+
+    Neither sweep moves blade mass, so the centrifugal load and the demand are the same on
+    every point and only the allowable moves. The one case that does move mass is a grade
+    substitution, and that is computed separately because it cuts the load as well."""
+    demand_over = ((b["m_aero_Nm"] + b["m_cf_Nm"])
+                   * float(data["structure"]["overspeed_factor"]) ** 2)
+    chord, span = b["chord"], b["span"]
+    skin, foam = MATERIALS["cf_twill"], MATERIALS["pmi_foam"]
+    e_skin, e_foam, g_foam, rho_foam = skin["E"], foam["E"], foam["Gm"], foam["rho"]
+
+    def allow(es=None, ef=None, gf=None):
+        skin["E"] = es if es is not None else e_skin
+        foam["E"] = ef if ef is not None else e_foam
+        foam["Gm"] = gf if gf is not None else g_foam
+        try:
+            return blade(chord, span)["m_allow_Nm"]
+        finally:
+            skin["E"], foam["E"], foam["Gm"] = e_skin, e_foam, g_foam
+
+    steps = 21
+    worst = min(allow(es=e_skin * (SKIN_BAND_LOW + (1.0 - SKIN_BAND_LOW) * i / (steps - 1)))
+                for i in range(steps)) / demand_over
+
+    lo, hi = 0.30, 1.0
+    for _ in range(40):
+        mid = (lo + hi) / 2.0
+        if allow(ef=e_foam * mid, gf=g_foam * mid) / demand_over > MARGIN_FLOOR:
+            hi = mid
+        else:
+            lo = mid
+    knockdown = (lo + hi) / 2.0
+
+    # The grade substitution, which is the realistic version of a foam shortfall: a lighter
+    # Rohacell has less of every modulus and less density, so it cuts the demand too.
+    foam.update(E=FOAM_DOWNGRADE["E"], Gm=FOAM_DOWNGRADE["Gm"], rho=FOAM_DOWNGRADE["rho"])
+    try:
+        down = build(json.loads(json.dumps(data)))
+        down_margin = (down["blade"]["m_allow_Nm"]
+                       / (down["m_aero_over_Nm"] + down["m_cf_over_Nm"]))
+        down_mass = down["blade"]["mass_g"]
+    finally:
+        foam.update(E=e_foam, Gm=g_foam, rho=rho_foam)
+
+    return {
+        "wrinkle_MPa": b["blade"]["sigma_wrinkle_Pa"] / 1e6,
+        "allow_skin_Nm": b["blade"]["m_allow_skin_Nm"],
+        "allow_spar_Nm": b["blade"]["m_allow_spar_Nm"],
+        "skin_modulus_GPa": e_skin / 1e9,
+        "foam_modulus_MPa": e_foam / 1e6,
+        "foam_shear_MPa": g_foam / 1e6,
+        "skin_band_low": SKIN_BAND_LOW,
+        "skin_band_worst_margin": worst,
+        "foam_knockdown_at_floor": knockdown,
+        "foam_downgrade": FOAM_DOWNGRADE["name"],
+        "foam_downgrade_margin": down_margin,
+        "foam_downgrade_blade_g": down_mass,
+    }
+
+
 MOTOR_DERATE = 0.80
 PACK_CELLS = 6
 CELL_NOMINAL_V = 3.70
@@ -832,6 +914,7 @@ def report(data):
 
 def write(data, b, m):
     bd = bearing_duty(data, b)
+    bs = blade_sensitivity(data, b)
     st = data.setdefault("structure", {})
     st.update({
         "blade_mass_kg": round(b["blade_mass_kg"], 6),
@@ -876,6 +959,17 @@ def write(data, b, m):
         "pitch_bearing_oscillation_hz": round(bd["oscillation_hz"], 4),
         "pitch_bearing_friction_W": round(bd["friction_W"], 4),
         "pitch_bearing_plain_alternative_W": round(bd["plain_friction_W"], 4),
+        "blade_wrinkle_stress_MPa": round(bs["wrinkle_MPa"], 4),
+        "blade_allow_skin_Nm": round(bs["allow_skin_Nm"], 4),
+        "blade_allow_spar_Nm": round(bs["allow_spar_Nm"], 4),
+        "blade_skin_modulus_GPa": bs["skin_modulus_GPa"],
+        "blade_foam_modulus_MPa": bs["foam_modulus_MPa"],
+        "blade_foam_shear_MPa": bs["foam_shear_MPa"],
+        "blade_skin_band_low": bs["skin_band_low"],
+        "blade_skin_band_worst_margin": round(bs["skin_band_worst_margin"], 4),
+        "blade_foam_knockdown_at_floor": round(bs["foam_knockdown_at_floor"], 4),
+        "blade_foam_downgrade_margin": round(bs["foam_downgrade_margin"], 4),
+        "blade_foam_downgrade_blade_g": round(bs["foam_downgrade_blade_g"], 4),
         "torque_reference": (
             "rotor shaft, downstream of the 3.5 to 1 belt reduction. The motor shaft "
             "carries motor_shaft_torque_Nm, which is this figure divided by the ratio and "
@@ -934,6 +1028,23 @@ def write(data, b, m):
             "two 693ZZ pitch bearings per blade at a 270 N static rating each, supplier "
             "listing. They are the softest element in the path from the blade to the "
             "spider arm, softer than the bonded root fitting or the bracket bolts"),
+        "blade_skin_band_worst_margin": (
+            "worst blade_combined_margin_overspeed found sweeping the skin modulus from "
+            "blade_skin_band_low of its published class value up to all of it. The sweep "
+            "does not move blade mass, so only the allowable moves. The band is nearly flat "
+            "because skin wrinkling falls as the cube root of the skin modulus while EI over "
+            "the skin modulus rises, and the two almost cancel"),
+        "blade_foam_knockdown_at_floor": (
+            "factor on the foam modulus and shear modulus together at which "
+            "blade_combined_margin_overspeed reaches 1.5. Both sit inside the same cube "
+            "root, so the allowable moves as the two thirds power and the foam is the "
+            "sensitive input rather than the laminate. Floored by the gate rather than "
+            "recomputed by it, because it needs the integrated section"),
+        "blade_foam_downgrade_margin": (
+            "blade_combined_margin_overspeed on Rohacell 31 IG instead of 51 IG, the "
+            "substitution a shop makes when the specified grade is not on the shelf. A "
+            "lighter grade cuts the demand as well as the allowable, so it is the honest "
+            "version of a foam shortfall and it is milder than the knockdown above"),
         "pitch_bearing_recirculation_ratio": (
             "cage swing over ball spacing for the 693ZZ at the 80 degrees of pitch travel "
             "the four-bar gives. Cage swing is (1 - d/Dm)/2 of the inner ring angle with a "

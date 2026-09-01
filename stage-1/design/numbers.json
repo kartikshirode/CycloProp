@@ -844,7 +844,18 @@
     "pitch_bearing_static_safety_floor": 2.0,
     "pitch_bearing_oscillation_hz": 40.0798,
     "pitch_bearing_friction_W": 0.1673,
-    "pitch_bearing_plain_alternative_W": 8.9234
+    "pitch_bearing_plain_alternative_W": 8.9234,
+    "blade_wrinkle_stress_MPa": 215.2638,
+    "blade_allow_skin_Nm": 25.2528,
+    "blade_allow_spar_Nm": 63.1857,
+    "blade_skin_modulus_GPa": 60.0,
+    "blade_foam_modulus_MPa": 70.0,
+    "blade_foam_shear_MPa": 19.0,
+    "blade_skin_band_low": 0.5,
+    "blade_skin_band_worst_margin": 1.9587,
+    "blade_foam_knockdown_at_floor": 0.6689,
+    "blade_foam_downgrade_margin": 1.5443,
+    "blade_foam_downgrade_blade_g": 28.057
   },
   "mass_envelope_g": [
     {
@@ -1195,7 +1206,10 @@
       "overspeed_factor": "20 percent over the design rotor speed, covering ESC control overshoot and a gust transient. The problem statement sets no endurance or speed schedule, so this is a declared case rather than a derived one",
       "pitch_bearing_recirculation_ratio": "cage swing over ball spacing for the 693ZZ at the 80 degrees of pitch travel the four-bar gives. Cage swing is (1 - d/Dm)/2 of the inner ring angle with a stationary outer ring, d and Dm from catalogue geometry and a 7 ball complement. Below 1.0 each ball stays inside its own arc, so the wear mode is false brinelling and not fatigue. The ratio only reaches 1.0 at 144.6 degrees of travel, which no cyclorotor pitch schedule asks for, so the regime cannot be tuned out and has to be carried",
       "pitch_bearing_static_safety": "693ZZ static rating over the centrifugal pull per bearing at the operating speed, which is where wear accumulates. The overspeed case is strength and it is gated separately on blade_attachment_margin_overspeed. The 2.0 floor is a declared rule for a bearing that does not fully recirculate, in the same class of judgement as overspeed_factor, and Stage 2 closes it with a run to failure rather than with a catalogue number",
-      "pitch_bearing_friction_W": "0.5 x mu x P x d summed over six bearings at the mean swing rate, mu taken at 0.0015 for a deep groove ball bearing. It is under a tenth of a percent of rotor shaft power, which is why it sits outside the power budget rather than inside it. The PTFE fabric lined plain bearing that would be immune to the wear mode costs pitch_bearing_plain_alternative_W instead, on a 0.08 liner friction coefficient, and that is the trade Stage 2 makes"
+      "pitch_bearing_friction_W": "0.5 x mu x P x d summed over six bearings at the mean swing rate, mu taken at 0.0015 for a deep groove ball bearing. It is under a tenth of a percent of rotor shaft power, which is why it sits outside the power budget rather than inside it. The PTFE fabric lined plain bearing that would be immune to the wear mode costs pitch_bearing_plain_alternative_W instead, on a 0.08 liner friction coefficient, and that is the trade Stage 2 makes",
+      "blade_skin_band_worst_margin": "worst blade_combined_margin_overspeed found sweeping the skin modulus from blade_skin_band_low of its published class value up to all of it. The sweep does not move blade mass, so only the allowable moves. The band is nearly flat because skin wrinkling falls as the cube root of the skin modulus while EI over the skin modulus rises, and the two almost cancel",
+      "blade_foam_knockdown_at_floor": "factor on the foam modulus and shear modulus together at which blade_combined_margin_overspeed reaches 1.5. Both sit inside the same cube root, so the allowable moves as the two thirds power and the foam is the sensitive input rather than the laminate. Floored by the gate rather than recomputed by it, because it needs the integrated section",
+      "blade_foam_downgrade_margin": "blade_combined_margin_overspeed on Rohacell 31 IG instead of 51 IG, the substitution a shop makes when the specified grade is not on the shelf. A lighter grade cuts the demand as well as the allowable, so it is the honest version of a foam shortfall and it is milder than the knockdown above"
     },
     "efficiency": {
       "transmission": "Single stage toothed belt at 0.93. Assumed, not measured. Published belt drive efficiency runs 0.95 to 0.98 at these speeds, so this is on the pessimistic side of the range",
