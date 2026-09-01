@@ -119,6 +119,17 @@ def honest_numbers():
     elec = shaft / (eff[0] * eff[1] * eff[2])
     act_p, ctl_p = 6.0, 2.0
 
+    # Drive margin. The 180 second datasheet figures and the one derate that turns them
+    # into continuous ones, then the fractions of each the design point actually draws.
+    # Laid out the way tools/structure.py derives them so the honest tree passes.
+    derate, ratio_belt, v_nom, res_ohm, kv_sel = 0.80, 2.0, 22.2, 0.05, 400
+    m_in_W = shaft / (eff[0] * eff[1])
+    m_in_A = m_in_W / v_nom
+    m_rpm = rpm * ratio_belt
+    peak_W, peak_A = 320.0 / derate, 67.0 / derate
+    v_load = v_nom - m_in_A * res_ohm
+    ceiling_rpm = kv_sel * v_load
+
     # Structural demands derived from the design rather than asserted beside it.
     ratio, lever, load_factor = 2.0, S / 4, 4.0
     overspeed = 1.2
@@ -184,7 +195,18 @@ def honest_numbers():
                         "momentum_area_m2": mom_area, "ideal_power_W": ideal,
                         "figure_of_merit": fm, "power_loading_ref_N_per_W": pl_ref,
                         "aero_power_W_published": ap_pub, "power_spread": spread,
-                        "blade_deflection_thrust_loss": defl_loss},
+                        "blade_deflection_thrust_loss": defl_loss,
+                        "motor_input_W": m_in_W, "motor_input_current_A": m_in_A,
+                        "motor_rpm": m_rpm, "belt_ratio": ratio_belt,
+                        "motor_derate": derate,
+                        "motor_current_frac_180s": m_in_A / peak_A,
+                        "motor_power_frac_180s": m_in_W / peak_W,
+                        "pack_voltage_nominal_V": v_nom,
+                        "pack_voltage_loaded_V": v_load,
+                        "motor_speed_ceiling_rpm": ceiling_rpm,
+                        "motor_speed_rule": 0.90,
+                        "motor_rpm_frac_ceiling": m_rpm / ceiling_rpm,
+                        "thrust_floor_stacked_N": 2.5 * (m_cons / 1000.0) * G / (ct_low / ct)},
         "efficiency": {"transmission": eff[0], "motor": eff[1], "esc": eff[2]},
         "power_by_radius": [{"radius_m": r, "aero_power_W": ap * 0.14 / r}
                             for r in (0.10, 0.12, 0.14, 0.16)],
@@ -212,9 +234,13 @@ def honest_numbers():
         "drive_candidates": [
             {"name": "outrunner A", "continuous_power_W": 320.0, "kv": 400,
              "continuous_current_A": 67.0, "continuous_torque_Nm": 9.5493 / 400 * 67.0,
+             "max_power_180s_W": 320.0 / derate, "peak_current_180s_A": 67.0 / derate,
+             "internal_resistance_ohm": res_ohm,
              "mass_g": 62.0, "selected": True},
             {"name": "outrunner B", "continuous_power_W": 400.0, "kv": 350,
              "continuous_current_A": 77.0, "continuous_torque_Nm": 9.5493 / 350 * 77.0,
+             "max_power_180s_W": 400.0 / derate, "peak_current_180s_A": 77.0 / derate,
+             "internal_resistance_ohm": 0.06,
              "mass_g": 88.0, "selected": False}],
         "linkage_dimensions": [
             {"link": "crank", "length_mm": 24.0}, {"link": "coupler", "length_mm": 61.0},
@@ -1026,6 +1052,77 @@ def wear_floor_missed_under_a_low_overspeed(d):
 
 case("a pitch bearing that clears strength and misses the wear floor is rejected",
      False, wear_floor_missed_under_a_low_overspeed)
+
+
+def one_derate_for_the_winner(d):
+    """The loser derated harder than the winner. Both rows stay self consistent on their
+    own terms, the winner still covers the design point, and the comparison is rigged.
+    Nothing checked that the same derate reached every row until now."""
+    x = d["drive_candidates"][1]
+    x["continuous_power_W"] = x["max_power_180s_W"] * 0.70
+    x["continuous_current_A"] = x["peak_current_180s_A"] * 0.70
+    x["continuous_torque_Nm"] = 9.5493 / x["kv"] * x["continuous_current_A"]
+    return d
+
+
+case("a shortlist with a different derate on each row is rejected", False,
+     one_derate_for_the_winner)
+
+
+def design_point_outgrows_the_drive(d):
+    """A design point that has grown past the derate it was chosen under. Power still fits,
+    which is what the older gate reads, and current does not. The fixture recomputes the
+    voltage drop and the speed fraction off the higher current, so the speed rule still
+    passes and the current gate is the only thing left standing."""
+    p, x = d["performance"], d["drive_candidates"][0]
+    p["motor_input_current_A"] = 70.0
+    p["motor_current_frac_180s"] = 70.0 / x["peak_current_180s_A"]
+    p["pack_voltage_loaded_V"] = (p["pack_voltage_nominal_V"]
+                                  - 70.0 * x["internal_resistance_ohm"])
+    p["motor_speed_ceiling_rpm"] = x["kv"] * p["pack_voltage_loaded_V"]
+    p["motor_rpm_frac_ceiling"] = p["motor_rpm"] / p["motor_speed_ceiling_rpm"]
+    return d
+
+
+case("a design point drawing more than the derate allows is rejected", False,
+     design_point_outgrows_the_drive)
+
+
+def asserted_thrust_floor(d):
+    """The stacked thrust floor written down low, so the design thrust clears it with room
+    it does not have. This is the number that stops the design point being lowered to give
+    the drive some air, so an asserted one is worth nothing."""
+    d["performance"]["thrust_floor_stacked_N"] = 8.0
+    return d
+
+
+case("a stacked thrust floor the conservative mass does not give is rejected", False,
+     asserted_thrust_floor)
+
+
+def loosened_speed_rule(d):
+    """The 90 percent motor speed rule relaxed to 95. It is the rule that emptied the
+    100 mm radius row in week 2, and until now it lived in prose where nothing could
+    check it."""
+    d["performance"]["motor_speed_rule"] = 0.95
+    return d
+
+
+case("a motor speed rule looser than 90 percent is rejected", False, loosened_speed_rule)
+
+
+def asserted_speed_ceiling(d):
+    """A speed ceiling raised by a fifth with the fraction kept consistent with it, so the
+    design looks comfortable against the rule. Only KV times the loaded pack voltage can
+    say otherwise."""
+    p = d["performance"]
+    p["motor_speed_ceiling_rpm"] *= 1.2
+    p["motor_rpm_frac_ceiling"] = p["motor_rpm"] / p["motor_speed_ceiling_rpm"]
+    return d
+
+
+case("a motor speed ceiling that KV and the pack do not give is rejected", False,
+     asserted_speed_ceiling)
 
 
 def conservative_column_off_the_envelope(d):
