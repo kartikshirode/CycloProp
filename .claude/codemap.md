@@ -32,7 +32,11 @@ reader for signed values, and week 2 added `check_week2_selection`, `measured_sh
 `budget_conservative_total`, two combined blade margins, an overspeed attachment margin, a
 recomputed centrifugal bending term, `MIN_OVERSPEED`, a 25 percent band on the conservative
 budget and a floor on `shaft_combined_margin`. Week 5 added `front_matter_lines` and nothing
-else.
+else. The 1 September review pass added `naca_section`, `thin_tube`, `blade_section`,
+`blade_overspeed_demand`, `check_structure_recompute`, `check_blade_sweeps`,
+`check_bearing_rating`, `check_fm_transfer`, `check_motor_current`, `check_pitch_authority`,
+`check_selected_drive_carried`, `check_bom`, `component_cover`, `marker_written`,
+`scan_coverage` and `check_design_coverage`. See D66.
 Used by: the supervisor after every week tick, and tools/test_gates.py
 Gotcha: hard limits never touch stored headline values. `num` returns None for zero and for
 negatives, so any signed quantity has to go through `snum` or half the table vanishes silently.
@@ -43,9 +47,12 @@ design's own solidity and chord to radius. `budget_conservative_total` is a thir
 the budget, and against the week 2 envelope only before that. See D47. `blade_margin` is
 aerodynamic bending alone and is deliberately not the gating one, because centrifugal bending is
 9.2 times larger here; `blade_combined_margin` and the two overspeed margins are.
-`shaft_combined_margin` is the one margin it floors without recomputing, because that needs shaft
-section properties which live in tools/structure.py. It does not recompute the four-bar;
-test_gates does. `check_numeric_coverage` skips a delimited YAML block at the top of a file and
+`shaft_combined_margin` used to be floored without recomputing. It is derived now, along with
+every other structural allowable, from a second integration of the blade section that lives in
+this file rather than in tools/structure.py. That duplication is deliberate and it is the whole
+value of those gates: calling the solver would prove only that the solver agrees with itself, so
+the step count is different on purpose and the two implementations have to agree about the
+section. It does not recompute the four-bar; test_gates does. `check_numeric_coverage` skips a delimited YAML block at the top of a file and
 nothing else: the skip is positional, so `margin=25mm` in the body still fails, and an opening
 `---` with no closing one counts as no front matter so a stray rule cannot hide a document. See
 D54.
@@ -53,15 +60,19 @@ D54.
 
 ### tools/test_gates.py
 Self-tests for check.py. Builds throwaway trees and checks an honest design passes while
-specific attacks fail, then runs `linkage_selftests` read-only over the real numbers.json. 128
+specific attacks fail, then runs `linkage_selftests` read-only over the real numbers.json. 184
 checks, and that total is `len(ANNOUNCED)`, counted at the one print prefix every self-test line
 goes out through, not kept beside the loops. Week 2 took it from 77, week 3 from 104, week 4
-from 117, and week 5 from 124 with the front matter cases.
+from 117, week 5 from 124 with the front matter cases, the 1 September hardening pass to 162 and
+the review pass to 184.
 Used by: run by hand after any change to check.py, linkage.py or structure.py
 Gotcha: `honest_numbers()` is the fixture every case mutates, so a new required field in
 check.py has to be added there first or every case fails at once. That is exactly how week 4
-broke 4 cases. Its blade allowable is derived from the combined overspeed case, not from
-aerodynamic bending, so the combined margins clear their floor the way the real design's do. Its
+broke 4 cases. It imports check.py as `gates` and builds its blade from the same section
+integration the gate reads, because a fixture that asserts an allowable is no longer an honest
+tree. Its blade allowable is the section's, and the demand is the combined overspeed case rather
+than aerodynamic bending, so the combined margins clear their floor the way the real design's
+do. Its
 vector_map spans 300 degrees on purpose, because the week 3 evidence gate rejects commands
 clustered near zero. `_rescale_mass` moves the budget's conservative column with the envelope's
 by default, since D47 binds the stated scalar to whichever list is live;
@@ -152,7 +163,7 @@ Gotcha: it carries that marker as of the second run. Debt 1 is the 68.5 g mass t
 Dates in first-run prose read 2 September; the commits say 30 August.
 
 ### stage-1/decisions.md
-Numbered append-only decision log, D1 to D58. Reopening an earlier entry means a new entry saying
+Numbered append-only decision log, D1 to D66. Reopening an earlier entry means a new entry saying
 which one it supersedes.
 Used by: every week agent as settled ground
 Gotcha: D27 supersedes figures in D18, D20, D21 and D22, and D30 supersedes the freeze rule in

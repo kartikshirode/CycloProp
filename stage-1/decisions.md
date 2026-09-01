@@ -1688,3 +1688,76 @@ records, then a re-audit. A gate written after the fix is a gate nobody has seen
 
 Nothing in the repository was changed by the review itself. This entry and the review file are
 the whole of it.
+
+
+## D66: the review's gates are written and the tree fails them on purpose
+
+1 September 2026, straight after D65. This is Phase 1 of the plan in
+`stage-1/audit/full-review.md`. No design number moved, no document was corrected and nothing was
+made to pass. The pass writes the gates and watches them reject the repository, because a gate
+written after the fix is a gate nobody has seen fail.
+
+`python tools/check.py --all` was 208 passes and no failures. It is 246 passes and 9 failures
+now. `python tools/test_gates.py` was 162 cases and is 184, all behaving as expected.
+
+**The strength side of every structural margin is recomputed.** `check.py` integrates the section
+a second time, from the blade build published in `06-materials-and-manufacturing.md`, at a
+different step count from the solver so the two have to agree about the section rather than about
+their arithmetic. It is not an import: a gate that calls the solver it is checking proves the
+solver agrees with itself. Everything that used to be read is derived now. Bending and torsional
+stiffness, the wrinkling stress, both allowable moments, the blade mass, tip deflection, wind up,
+aerodynamic twist, the shaft allowable, the shaft combined margin, the pitch link allowable, and
+both blade sensitivity sweeps. Every one of them reproduces against the stored value to better
+than 0.1 percent, which is the first independent confirmation the blade in `tools/structure.py`
+is right.
+
+**Nine gates reject the tree.** Seven are the review's own Tier 1 findings and two ask for a
+number the record does not carry.
+
+- the attachment allowable is 540 N, and two ISO 76 ratings computed from the ball complement
+  this design already publishes give 434 N
+- on that rating the overspeed attachment margin is 1.3608 against a floor of 1.5
+- and the oscillating static safety is 1.9596 against a declared floor of 2.0
+- the servo torque divides by the gear ratio where it should multiply, so 0.0463 Nm should read
+  0.1042 Nm and the margin 2.332 should read 1.04
+- the four-bar transmission angle does not clear 40 degrees
+- the K19 scenario states a coefficient and no figure of merit, so the transfer that R1 turns on
+  cannot be checked
+- four BOM rows name a distributor and nothing about where the price came from
+- `performance.motor_idle_current_A` is not stored, and evidence row E12 records it
+- the substituted foam grade has a stated margin and no modulus, shear modulus or density
+
+**One finding the review did not have.** The four-bar transmission angle runs 58.58 to 143.23
+degrees. Folded about the right angle the worst of those is 36.77 degrees, under the 40 the
+textbook rule asks for, so one end of the range is tighter than a four-bar should be worked at.
+R38 said the angles were ungated and stopped there. Nothing has been changed about the linkage.
+It is a Phase 2 item and it probably wants the horn length or the offset moved.
+
+**Two corrections to the review's own text.** R28 said `check_blade_sensitivity` recomputes the
+wrinkling stress and never uses it. It does use it, and the hole was one layer down: the
+allowable that the wrinkling stress feeds was the number nothing recomputed. R35 named two
+`report(True)` branches and both were real, but the pitch bearing one was worse than described.
+It was not one arm of a pass. It was a check that only ran when the bearing failed to
+recirculate, so the floor was in force for one duty and printed for the other. It applies to both
+now.
+
+**One plan item was changed rather than executed, and this says so.** Item 12 asked for the
+coverage audit to be extended to the nine design documents as a hard gate. Measuring first gave
+149 untraced numbers at the old window and 210 at the new one. Those are working files, and they
+quote source data, intermediate values and figures a later week superseded, none of which belongs
+in `numbers.json`. A hard rule there would be answered with 210 escape markers, which is the
+hatch the audit exists to shut. So the window narrowed anyway, from 2 percent to 0.5, which is
+the half of R30 that matters and which the built submission passes with nothing to change. The
+design documents get a count per document and a ratchet on the total. It can fall and it cannot
+grow.
+
+**The fixture was rebuilt because it stopped being honest.** `honest_numbers()` asserted a 108 g
+blade and an allowable picked as a multiple of the demand, which no longer describes a tree that
+should pass. It builds its blade from the same section the gate reads. 22 new attack cases move
+one piece at a time: the allowable raised off its own section, foam three orders of magnitude
+softer with the wrinkling stress kept consistent, current taken as power over pack voltage, the
+idle current dropped, the servo torque divided by the gear ratio, one budget line standing in for
+two components, a marker quoted rather than asserted, and a chain shaved 1.95 percent at each of
+four links.
+
+The tree stays red until Phase 2 settles Tier 1. That is what the order is for.

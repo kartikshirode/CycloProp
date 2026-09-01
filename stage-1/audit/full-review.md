@@ -193,6 +193,15 @@ Every one verified. None of them moves a stored number.
 | R49 | Confidentiality is never asserted, though the problem statement invites it | One free line |
 | R50 | Nothing re-checks the official channels between the 26 August requirements snapshot and the 26 September send | The problem statement reserves the right to change any stage and says changes come through official channels |
 
+## R64, found by Phase 1 rather than by the review
+
+The four-bar transmission angle runs 58.58 to 143.23 degrees. Folded about the right angle, the
+worst of those leaves 36.77 degrees, under the 40 a four-bar is normally held to. R38 listed the
+two angles as ungated stored values and went no further. They are gated now and one end of the
+range does not clear, so the linkage has a Phase 2 item of its own: move the horn length or the
+offset, or state why 36.77 is acceptable for a lightly loaded pitch link that never goes over
+centre.
+
 ## Tier 5: records and steering files
 
 | # | What |
@@ -217,6 +226,10 @@ Six phases. The order is not negotiable in one place: gates come before the numb
 because a gate written after the fix is a gate nobody has seen fail.
 
 ### Phase 1: make the gates fail
+
+**Executed 1 September 2026. See D66.** 208 gate passes became 246, and 9 of them fail. The
+self-test suite went from 162 cases to 184. Item 12 was changed rather than executed and D66
+says why; everything else on this list was written as described.
 
 Write the gates that expose Tier 1 and watch them reject the current repository. This is the
 only phase that produces a red tree on purpose.

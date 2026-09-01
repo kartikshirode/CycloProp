@@ -8,11 +8,17 @@ NEXT-WEEK: 5
 Weeks 1 to 4 are done. Geometry froze in week 2, the mechanism in week 3, and week 4 closed the
 structure, the refined mass budget and the materials and manufacturing case.
 
+**The gates are red and they are meant to be.** A five pass review on 1 September found 63
+things, and Phase 1 of the fix plan wrote the gates that expose the three which move the design.
+`python tools/check.py --all` fails 9 gates. None of them is a regression and every one is a
+finding waiting on Phase 2. Read `stage-1/audit/full-review.md` and D66 before touching anything,
+and do not make a gate pass by moving the number it reads.
+
 **Week 5 has not run and this file does not say it has.** It is hard blocked by week H. A
 preparation pass on 31 August closed every week 5 gate that does not need a person, and a
 hardening pass on 1 September closed four engineering items that were being carried into Stage 2
-without being quantified. `python tools/check.py --week 5` fails on the human gate alone. See
-D58 and D60 to D63, and "What is left of week 5" below.
+without being quantified. The human gate is still the only thing week 5 fails that a person can
+clear. See D58, D60 to D63 and D66, and "What is left of week 5" below.
 
 ## Read these first, in order
 
@@ -22,8 +28,9 @@ D58 and D60 to D63, and "What is left of week 5" below.
 3. **[stage-1/progress/week-4.md](stage-1/progress/week-4.md)** is where the design stands and
    what week 5 inherits. [week-3.md](stage-1/progress/week-3.md) is the mechanism record and
    [week-2.md](stage-1/progress/week-2.md) the feasibility one
-4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 63 entries.
-   D60 to D63 are the 1 September hardening pass and none of them moved a design number.
+4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 66 entries.
+   D60 to D63 are the 1 September hardening pass and none of them moved a design number. D65
+   opens Tier 1 of the review and D66 is the gate pass that made the tree fail on purpose.
    D30 unblocked week 2, D35 closed the stacked case, D38 to D45 are week 3, and D46 to D53 are
    week 4, with D53 the audit response. D54 to D58 are the week 5 preparation pass. D47 is the
    one to read before touching any mass number, and D58 before assuming week 5 ran
@@ -201,7 +208,7 @@ added four force map checks and two lateral load checks; week 4 added two combin
 an overspeed attachment margin, a recomputed centrifugal bending term and a band on the
 conservative budget. The week 5 preparation pass fixed one reader defect and loosened nothing:
 the coverage audit no longer reads the pandoc front matter as a design claim, and the skip is
-positional so the same text in the body still fails. The 1 September pass added 34 gates across the pitch bearing duty, the drive margin, the solver run order and the blade sensitivity, and loosened one thing on purpose: the PDF identity check now ignores whitespace, so kerning inside a heading cannot fail a good document. 162 self-tests.
+positional so the same text in the body still fails. The 1 September hardening pass added 34 gates across the pitch bearing duty, the drive margin, the solver run order and the blade sensitivity, and loosened one thing on purpose: the PDF identity check now ignores whitespace, so kerning inside a heading cannot fail a good document. The review pass that followed added 38 more and loosened nothing: the section is integrated a second time inside check.py so every structural allowable is recomputed rather than read, markers have to open a line everywhere rather than only in the human gate, components are matched to budget lines one to one, the BOM is gated at all, and the coverage window narrowed from 2 percent to 0.5. 184 self-tests. See D66.
 
 ## Open items
 
