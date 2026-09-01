@@ -41,8 +41,8 @@ mm. Largest dimension is that width or the span, whichever wins.
 | Layout | Per rotor radius | Per rotor thrust | rpm | Reynolds | Blade area | Largest dimension | Module mass | Nominal T/W | Conservative T/W |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | single, 3 blades | 110 mm | 18.0 N | 2405 | 134,000 | 0.0632 m2 | 290 mm | 580 g | 3.163 | 2.517 |
-| two rotors | 80 mm | 9.0 N | 3141 | 94,800 | 0.0669 m2 | 400 mm | 786 g | 2.334 | 1.855 |
-| three rotors | 65 mm | 6.0 N | 3891 | 77,400 | 0.0663 m2 | 490 mm | 985 g | 1.863 | 1.479 |
+| two rotors | 80 mm | 9.0 N | 3215 | 94,800 | 0.0669 m2 | 400 mm | 786 g | 2.334 | 1.855 |
+| three rotors | 65 mm | 6.0 N | 3976 | 77,400 | 0.0663 m2 | 490 mm | 985 g | 1.863 | 1.479 |
 
 Every column in that table is the week 2 mass envelope, because the comparison had to run
 on one common build-up and the other two layouts have no refined budget behind them. On

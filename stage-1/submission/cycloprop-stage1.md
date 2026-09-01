@@ -217,7 +217,7 @@ of a 0.216 Nm stall figure, a margin of 2.33, and the phase jitter is bounded by
 resultant 11.978 degrees round from the offset direction, of which 11.00 comes from the linkage
 phase delay and only 0.978 from the aerodynamics. Measurement says the aerodynamic part is much
 larger. Sirohi measured about 10 degrees, Adams 15 to 35 depending on amplitude and rotor speed,
-and Benedict's twin sat at 30 at its operating point. <!-- allow: published side force angles from three cyclorotor studies, and the trim residual worked in 03-pitch-and-vectoring.md; none of them is a value this design computes -->
+and Benedict's twin sat at 30 degrees at its operating point.
 A quasi steady model with uniform inflow has no wake return, no shed vorticity and no dynamic
 stall hysteresis, and all three feed the lateral component, so under-prediction is the expected
 failure and not a surprise.
@@ -354,7 +354,7 @@ least developed part of the module. It covers gussets, cable clamps, the servo b
 ESC tray, none of which is drawn. It is not spread across rounded lines and it is not buried
 inside a growth rate.
 
-**What is genuinely fixed in this module is one 8.0 g controller board.** That is worth saying
+**What is genuinely fixed in this module is one 8.5 g controller board.** That is worth saying
 plainly, because the usual thrust to weight argument for a bigger rotor is that fixed hardware
 amortises over more thrust. Sorted honestly, the wiring follows the envelope, the fasteners follow
 the frame, the servo torque follows the pitch link load which follows thrust, and the bearings,
@@ -513,8 +513,9 @@ covered.
 | UAV subsystem integration and testing | interface definitions, an assembly order and six pre-spin measurements | nothing has been built or tested |
 
 **Execution plan for Stage 2.** The window is 3 October to 2 December 2026 and this plan submits
-on 1 December. All 11 Stage 2 items are scheduled, with the tool category each one needs, what it
-waits on and the gate that closes it.
+on 1 December. All 11 Stage 2 items are scheduled below with the gate that closes each one, and
+`07-team-and-execution.md` carries the same schedule with the tool category, the dependency and
+the owner against every item.
 
 | Weeks | Stage 2 items | Closed when |
 | --- | --- | --- |
@@ -543,13 +544,13 @@ Where each published criterion is answered in this report.
 
 | Criterion | Weight | Where it is answered |
 | --- | --- | --- |
-| Feasibility of achieving 10 N thrust | 15% | Item 4, thrust from geometry and a coefficient measured on this shape family |
-| Feasibility of thrust-to-weight above 2.5 | 15% | Item 5, a 33 line budget and four cases, all clearing the limit |
-| Kinematic design of blade-pitch and thrust-vectoring mechanism | 15% | Item 3, loop closure, solved schedule, Grashof and the force vector map |
-| Aerodynamic analysis or simulation quality | 15% | Item 4, momentum floor, figure of merit, a second power route and an azimuthal model |
-| Structural design and strength assessment | 15% | Item 6, two load cases, 8 margins and the analyses not done |
-| Manufacturability, material selection and cost realism | 10% | Item 6, per part process and tolerance, assembly order and a costed bill of materials |
-| CAD quality, integration readiness and packaging | 5% | Item 1 and item 6, swept envelope, interfaces and mounts, without CAD at this stage |
+| Feasibility of achieving 10 N thrust | 15% | Estimated thrust and power requirement: thrust from geometry on a transferred coefficient held below a measurement of this shape family |
+| Feasibility of thrust-to-weight above 2.5 | 15% | Estimated module weight and thrust-to-weight ratio: a 33 line budget and four cases, all clearing the limit |
+| Kinematic design of blade-pitch and thrust-vectoring mechanism | 15% | Blade arrangement and pitch-control concept: loop closure, solved schedule, Grashof and the force vector map |
+| Aerodynamic analysis or simulation quality | 15% | Estimated thrust and power requirement: momentum floor, figure of merit, a second power route and an azimuthal model |
+| Structural design and strength assessment | 15% | Initial material and manufacturing approach: two load cases, 8 margins and the analyses not done |
+| Manufacturability, material selection and cost realism | 10% | Initial material and manufacturing approach: per part process and tolerance, assembly order and a costed bill of materials |
+| CAD quality, integration readiness and packaging | 5% | Cyclorotor concept and configuration, with the swept envelope, interfaces and mounts, and no CAD at this stage |
 | Presentation, viva and technical clarity | 10% | This report, the claims table below and the examiner questions in appendix A |
 
 # Claims, evidence and risk
@@ -563,7 +564,7 @@ Stage 2 does about that.
 | Module mass 607.97 g nominal, 684.7 g conservative | 33 drawn or catalogue lines, growth by line class | medium to high | a wet layup blade comes out heavy, or undrawn frame parts eat the 15.0 g reserve | CAD mass properties, a mould trial, weighed parts |
 | Blade deflection 0.0936 mm, wind up 2.3509 degrees | closed form beam and torsion on the integrated section | medium | cured laminate modulus below the published class value | coupon panel, then FEA |
 | Direction follows the vector command one to one at 18.0 N | model symmetry, not measurement | low on magnitude | wake skew, the frame in the flow, the blade meeting its own wake | two axis load cell across the range |
-| Stacked conservative thrust to weight 2.5457 | recomputed from geometry and the mass lines | medium | either input moving, since it clears by 12.5 g | items 3, 6 and 7 together |
+| Stacked conservative thrust to weight 2.5457 | recomputed from geometry and the mass lines | medium | either input moving, since it clears by 12.5 g | Stage 2 items 3, 6 and 7 together |
 | Blade attachment margin 1.6933 at overspeed | static rating over recomputed centrifugal load | low | an oscillating fretting duty that a static rating does not describe | oscillating derate or a bench test |
 | Peak to mean blade load 4.0 | published simulated range, top of it taken | low to medium | the true peak is higher under dynamic stall | measured blade forces, or CFD |
 | Module electrical power 489.655 W | momentum floor, figure of merit, efficiency chain | medium | all three efficiencies are assumed and the motor one is sensitive | bench measurement on the built module |
@@ -628,13 +629,13 @@ invariant while the drive and structure are not. This module makes 18.0 N from o
 belt, one shaft and one pitch mechanism, where the benchmark makes a fraction of that per rotor
 from four sets of hardware. The gap is not a claim to have beaten anybody at the same scale. It
 is amortisation, and the report is careful about how little of it is real: the genuinely fixed
-mass in this module is one 8.0 g board.
+mass in this module is one 8.5 g board.
 
-**3. What in the module is actually fixed as the rotor grows?** Almost nothing. The 8.0 g
+**3. What in the module is actually fixed as the rotor grows?** Almost nothing. The 8.5 g
 controller. Wiring follows the envelope, fasteners follow the frame, servo torque follows the
 pitch link load which follows thrust, and the shaft, bearings and transmission follow rotor
-torque. This is stated in item 5 because it is the weakest part of the usual argument for a large
-single rotor and hiding it would be worse than losing the point.
+torque. This is stated in the module weight section because it is the weakest part of the usual argument
+for a large single rotor, and hiding it would be worse than losing the point.
 
 **4. Why 110.0 mm and not the radius your own sweep prefers?** The sweep prefers smaller. A
 smaller rotor is lighter on every geometry scaled line and conservative thrust to weight rises
@@ -685,7 +686,7 @@ coefficient carries, so the allowance now has a calculation under it instead of 
 floor. Driving the blade from both ends would roughly quarter it and costs hardware the mass
 budget has no room for.
 
-**10. Your side force model gives about 1 degree of aerodynamic tilt and the literature measures
+**10. Your side force model gives about a degree of aerodynamic tilt and the literature measures
 tens of degrees. Why publish it?** Because it is the honest output of a quasi steady model with
 uniform inflow, and because the difference is explainable rather than mysterious: that model has
 no wake return, no shed vorticity and no dynamic stall hysteresis, and all three drive the
