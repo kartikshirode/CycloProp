@@ -440,8 +440,15 @@ def build(root, data, upto=4):
                        "Subject: PUSHPAK Grand Challenge, CycloProp Stage 1", "",
                        "The attachment is cycloprop-stage1.pdf and it carries the full",
                        "design report for the module.", ""]), encoding="utf-8")
+        # Shaped like the real file: instructions that name the markers, then a status block
+        # that carries them. The gate reads the block alone, so prose above it naming a marker
+        # must not count as a person having written one.
         (d / "stage-1" / "human-gate.md").write_text(
-            "\n".join(["# Week H", "", "REGISTRATION-CONFIRMED", "ELIGIBILITY-CHECKED",
+            "\n".join(["# Week H", "",
+                       "Replace TECHNICAL-READ-PENDING with TECHNICAL-READ-COMPLETE only",
+                       "after opening the built PDF and reading it end to end.", "",
+                       "## Status", "",
+                       "REGISTRATION-CONFIRMED", "ELIGIBILITY-CHECKED",
                        "ROSTER-CONFIRMED", "SENDER-CONFIRMED",
                        "TECHNICAL-READ-COMPLETE", ""]), encoding="utf-8")
     return d
@@ -1564,6 +1571,41 @@ def human_gate_outstanding(root, data):
 
 case("week 5 with the eligibility check outstanding is rejected", False, upto=5, week=5,
      tweak=human_gate_outstanding)
+
+
+def marker_only_in_the_instructions(root, data):
+    """Status block says PENDING while the prose above it explains how to write the CONFIRMED
+    form. A whole-file substring search passed this, so the marker gating final staging was
+    satisfied by the sentence telling a person to write it later."""
+    p = root / "stage-1" / "human-gate.md"
+    head, sep, status = p.read_text(encoding="utf-8").partition("## Status")
+    p.write_text(head + sep + status.replace("TECHNICAL-READ-COMPLETE",
+                                             "TECHNICAL-READ-PENDING"), encoding="utf-8")
+
+
+case("a marker named only in the instructions does not count as confirmed",
+     False, upto=5, week=5, tweak=marker_only_in_the_instructions)
+
+
+def status_block_removed(root, data):
+    """No status heading at all. Fails closed rather than falling back to the whole file."""
+    p = root / "stage-1" / "human-gate.md"
+    p.write_text(p.read_text(encoding="utf-8").replace("## Status", "Markers"), encoding="utf-8")
+
+
+case("a human gate file with no status block is rejected",
+     False, upto=5, week=5, tweak=status_block_removed)
+
+
+def marker_buried_in_a_sentence(root, data):
+    """Present inside the block, but as part of a sentence rather than on its own line."""
+    p = root / "stage-1" / "human-gate.md"
+    p.write_text(p.read_text(encoding="utf-8").replace(
+        "\nROSTER-CONFIRMED", "\nthe roster is ROSTER-CONFIRMED as of today"), encoding="utf-8")
+
+
+case("a marker buried in a sentence does not count as confirmed",
+     False, upto=5, week=5, tweak=marker_buried_in_a_sentence)
 
 
 def criteria_named_only_in_prose(root, data):

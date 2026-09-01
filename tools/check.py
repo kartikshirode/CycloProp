@@ -1815,6 +1815,7 @@ HUMAN_GATE_MARKERS = ["REGISTRATION-CONFIRMED", "ELIGIBILITY-CHECKED",
                       "ROSTER-CONFIRMED", "SENDER-CONFIRMED",
                       "TECHNICAL-READ-COMPLETE"]
 HUMAN_GATE_FILE = "stage-1/human-gate.md"
+HUMAN_GATE_STATUS_HEADING = "## Status"
 
 
 def check_audits_exist(target):
@@ -1845,7 +1846,17 @@ def check_human_gate():
         return report(False, "week5: the human gate file exists",
                       f"{HUMAN_GATE_FILE} is missing")
     text = p.read_text(encoding="utf-8")
-    absent = [m for m in HUMAN_GATE_MARKERS if m not in text]
+    # Read the status block only, and require the marker to be the whole line. Searching the
+    # file for the substring passed TECHNICAL-READ-COMPLETE the moment the instructions above
+    # explained how to write it, so the marker gating final staging was already satisfied by
+    # the sentence telling a person to write it later. The other four survived that only
+    # because their prose happened to spell the PENDING form.
+    head, sep, status = text.partition(HUMAN_GATE_STATUS_HEADING)
+    if not sep:
+        return report(False, "week5: the human gate file has a status block",
+                      f"{HUMAN_GATE_FILE} has no '{HUMAN_GATE_STATUS_HEADING}' heading")
+    written = {ln.strip() for ln in status.splitlines()}
+    absent = [m for m in HUMAN_GATE_MARKERS if m not in written]
     return report(not absent, "week5: the human gate is confirmed before anything is staged",
                   "outstanding: " + ", ".join(absent) if absent else "")
 
