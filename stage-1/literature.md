@@ -249,7 +249,17 @@ The return could not find the CycloProp problem statement online and flagged the
 
   Two lines from the abstract land directly on gates added this week. Blades are **foam core with carbon fibre skin, giving large bending and torsional stiffness**, which is the closest published analogue to our construction and is the stiffness case the deflection gate now demands. And the supporting structure and transmission are designed **resilient to large centrifugal loads**, which is the blade attachment gate treated as a first-order driver by someone building at 25 kg.
 
-  Note a conflict: the conference abstract says c/R 0.67 and the thesis says 0.64. Prefer the thesis and state the conflict if either is cited
+  Note a conflict: the conference abstract says c/R 0.67 and the thesis says 0.64. Prefer the thesis and state the conflict if either is cited.
+
+  **Retrieval is settled and the answer is no, 1 September 2026.** The PDF is
+  `RAMSEY-THESIS-2022.pdf` at 84,853,674 bytes, and its exact address is in
+  [../reference/README.md](../reference/README.md). Cloudflare answers 403 with
+  `cf-mitigated: challenge` to every scripted route, and the Wayback Machine has no capture of
+  any of its paths, so the trick that rescued Kellen and Benedict has nothing to serve. It needs
+  a browser. The abstract above was re-read from the repository's OAI-PMH endpoint, which is not
+  behind the challenge, so what this entry claims is verified against the authoritative record
+  rather than against a search result. What is still missing is the subsystem mass table, which
+  is the only reason Ramsey was wanted, and no abstract carries it
 - Shrestha, "Experimental Investigation of a MAV-Scale Cyclocopter", PhD, University of Maryland 2018, DOI 10.13016/S6EN-WSUK. Open
 - Runco, Himmelberg and Benedict, Journal of Aircraft 2018, the optimisation study behind the micro rotor. Likely carries thrust coefficient data at low Reynolds
 - **Heimerl, Halder, Benedict et al., "Experimental and Computational Investigation of a UAV-Scale Cycloidal Rotor in Forward Flight", VFS 77th Annual Forum.** **The highest-value paper on this list.** They measured **instantaneous radial and tangential blade forces** in a water tunnel across **Re 30,000 to 100,000**, sweeping rotational speed, flow speed, pitch amplitude and pitch offset at advance ratios from 0, meaning hover, to 0.44. That brackets our Reynolds band exactly and converts two currently-simulated gated numbers into measured ones: the blade peak-to-mean load factor, and the side force angle against pitch offset, which is also the input to the vectoring section

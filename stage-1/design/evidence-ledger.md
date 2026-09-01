@@ -184,6 +184,13 @@ it wants the conservative column at 633.8 g against the 692.4 g it holds, a gap 
   the URLs that worked. Heimerl et al. at the VFS 77th Forum and Ramsey 2022 are still unread.
   Heimerl would replace the assumed peak-to-mean blade load in E8, and Ramsey would give a
   second structural mass anchor against the single one E9 provides
+- **Ramsey 2022 is now a located gap rather than an open search.** Its exact bitstream URL and
+  84,853,674 byte size are recorded in `reference/README.md`. Cloudflare refuses every scripted
+  route with `cf-mitigated: challenge` and the Wayback Machine holds no capture of it, so it
+  needs a browser. Its abstract was verified against the repository's OAI-PMH record, which is
+  not behind the challenge, and it corroborates the foam core and carbon skin blade at 25 kg.
+  That is a summary class reading and it buys nothing: E9 is still the only structural mass
+  anchor and no reserve moves on it. See D64
 - No published cyclorotor states a thrust to weight target and reports whether it met it.
   Searched in week 1, not found
 - No openly tabulated spread of blade-area thrust coefficients exists, which is why E18 had to
