@@ -88,7 +88,16 @@ BOND_LINE_G_PER_BLADE = 1.35
 
 # Bearings and catalogue hardware. Masses and ratings are supplier listings, the same
 # evidence class as four of the five week 2 motor rows.
-PITCH_BEARING = {"name": "693ZZ, 3 by 8 by 4 mm", "mass_g": 1.30, "c0_N": 270.0}
+PITCH_BEARING = {"name": "693ZZ, 3 by 8 by 4 mm", "mass_g": 1.30, "c0_N": 270.0,
+                 "bore_mm": 3.0, "od_mm": 8.0, "ball_mm": 1.5875, "balls": 7}
+
+# The pitch bearing does not rotate. It swings through pitch_bearing_travel_deg once per
+# revolution under a centrifugal pull whose direction is fixed in the arm, which is the
+# textbook false brinelling arrangement and a static rating says nothing about it. The
+# duty is worked out in bearing_duty() rather than assumed away.
+PITCH_BEARING_S0_FLOOR = 2.0
+BALL_FRICTION_MU = 0.0015
+PLAIN_LINER_MU = 0.08
 CARRIER_BEARING = {"name": "MR128ZZ, 8 by 12 by 3.5 mm", "mass_g": 2.20, "c0_N": 620.0}
 MAIN_BEARING = {"name": "61802, 15 by 24 by 5 mm", "mass_g": 8.00, "c0_N": 2320.0}
 ROD_END = {"name": "M3 aluminium bodied ball rod end", "mass_g": 1.60, "static_N": 600.0}
@@ -479,6 +488,72 @@ def build(data):
     }
 
 
+def bearing_duty(data, b):
+    """Oscillating duty on the blade pitch bearings, which the static rating misses.
+
+    Two things decide whether a swinging ball bearing wears out on its own contact spots
+    instead of rolling onto fresh raceway. The first is how far the ball set travels. For
+    a stationary outer ring the cage turns at (1 - d/Dm)/2 of the inner ring angle, so a
+    generous 80 degrees of blade pitch moves the balls by less than 30. The second is the
+    ball spacing, 360 over the ball count. When the cage swing falls short of the spacing
+    every ball stays inside its own arc for the life of the machine, grease stops being
+    dragged back into the contact, and the failure mode is false brinelling rather than
+    fatigue.
+
+    Both numbers come from catalogue geometry, so the ratio is computed and stored rather
+    than argued. The ball count is the one soft input: 7 is the usual complement for this
+    size and the conclusion survives 6 or 8, because the critical amplitude stays above
+    120 degrees in all three cases and the mechanism only gives 80.
+
+    Friction is the other half of the question, because it decides what the alternative
+    costs. A deep groove ball bearing gives back roughly a tenth of a watt across all six.
+    A PTFE fabric lined plain bearing, which is what an oscillating aerospace joint uses
+    and is immune to the wear mode above, costs about fifty times that, and at 40 swings a
+    second the sliding distance is what turns the trade around."""
+    brg = PITCH_BEARING
+    pitch_dia = (brg["bore_mm"] + brg["od_mm"]) / 2.0
+    gamma = brg["ball_mm"] / pitch_dia
+    cage_ratio = (1.0 - gamma) / 2.0
+    travel = float(data["pitch"]["pitch_bearing_travel_deg"])
+    cage_swing = cage_ratio * travel
+    spacing = 360.0 / brg["balls"]
+    # Full swing at which the cage carries every ball onto its neighbour's track.
+    crit_travel = spacing / cage_ratio
+
+    # Load per bearing at the operating point, not at the declared overspeed. Overspeed is
+    # a strength case and it is already gated on the static rating. Wear is a duty case and
+    # it accumulates at the speed the machine actually runs at.
+    load_N = b["fc_N"] / 2.0
+    s0 = brg["c0_N"] / load_N
+
+    rev_hz = float(data["operating"]["rpm"]) / 60.0
+    amp_rad = math.radians(travel / 2.0)
+    omega = 2.0 * math.pi * rev_hz
+    mean_rate = (2.0 / math.pi) * amp_rad * omega          # mean |dtheta/dt| over a cycle
+    ball_torque = 0.5 * BALL_FRICTION_MU * load_N * brg["bore_mm"] / 1000.0
+    plain_torque = PLAIN_LINER_MU * load_N * brg["bore_mm"] / 2000.0
+    count = 2 * int(data["geometry"]["blades"])
+    shaft_power = b["shaft_power_W"]
+    return {
+        "balls": brg["balls"],
+        "ball_mm": brg["ball_mm"],
+        "pitch_dia_mm": pitch_dia,
+        "cage_ratio": cage_ratio,
+        "cage_swing_deg": cage_swing,
+        "ball_spacing_deg": spacing,
+        "recirculation_ratio": cage_swing / spacing,
+        "recirculation_travel_deg": crit_travel,
+        "load_N": load_N,
+        "s0": s0,
+        "oscillation_hz": rev_hz,
+        "sliding_mm_per_s": 4.0 * amp_rad * brg["bore_mm"] / 2.0 * rev_hz,
+        "friction_W": count * ball_torque * mean_rate,
+        "friction_frac": count * ball_torque * mean_rate / shaft_power,
+        "plain_friction_W": count * plain_torque * mean_rate,
+        "plain_friction_frac": count * plain_torque * mean_rate / shaft_power,
+    }
+
+
 def margins(b):
     return {
         "blade_margin": b["blade"]["m_allow_Nm"] / b["m_aero_Nm"],
@@ -656,6 +731,21 @@ def report(data):
     for k, v in m.items():
         print(f"  {k:36s} {v:8.3f}")
     print()
+    print("=== pitch bearing oscillating duty ===")
+    bd = bearing_duty(data, b)
+    print(f"  cage swing          {bd['cage_swing_deg']:9.3f} deg of {bd['ball_spacing_deg']:.2f} "
+          f"deg ball spacing, ratio {bd['recirculation_ratio']:.4f}")
+    print(f"  full recirculation  {bd['recirculation_travel_deg']:9.2f} deg of travel, "
+          f"mechanism gives {float(data['pitch']['pitch_bearing_travel_deg']):.1f}")
+    print(f"  static safety       {bd['s0']:9.4f} at {bd['load_N']:.2f} N per bearing, "
+          f"floor {PITCH_BEARING_S0_FLOOR:.1f}")
+    print(f"  oscillation         {bd['oscillation_hz']:9.3f} Hz, sliding "
+          f"{bd['sliding_mm_per_s']:.1f} mm/s at the bore")
+    print(f"  friction, all six   {bd['friction_W']:9.4f} W  "
+          f"{bd['friction_frac'] * 100:.3f} percent of shaft power")
+    print(f"  plain bearing swap  {bd['plain_friction_W']:9.4f} W  "
+          f"{bd['plain_friction_frac'] * 100:.3f} percent, the fallback if it frets")
+    print()
     print("=== mass budget ===")
     groups = {}
     for r in b["rows"]:
@@ -688,6 +778,7 @@ def report(data):
 
 
 def write(data, b, m):
+    bd = bearing_duty(data, b)
     st = data.setdefault("structure", {})
     st.update({
         "blade_mass_kg": round(b["blade_mass_kg"], 6),
@@ -719,6 +810,19 @@ def write(data, b, m):
         "blade_attachment_margin": round(m["blade_attachment_margin"], 4),
         "blade_attachment_margin_overspeed": round(m["blade_attachment_margin_overspeed"], 4),
         "carrier_phase_jitter_deg": round(b["jitter_deg"], 4),
+        "pitch_bearing_balls": bd["balls"],
+        "pitch_bearing_ball_mm": bd["ball_mm"],
+        "pitch_bearing_pitch_diameter_mm": bd["pitch_dia_mm"],
+        "pitch_bearing_cage_swing_deg": round(bd["cage_swing_deg"], 4),
+        "pitch_bearing_ball_spacing_deg": round(bd["ball_spacing_deg"], 4),
+        "pitch_bearing_recirculation_ratio": round(bd["recirculation_ratio"], 4),
+        "pitch_bearing_recirculation_travel_deg": round(bd["recirculation_travel_deg"], 3),
+        "pitch_bearing_load_N": round(bd["load_N"], 4),
+        "pitch_bearing_static_safety": round(bd["s0"], 4),
+        "pitch_bearing_static_safety_floor": PITCH_BEARING_S0_FLOOR,
+        "pitch_bearing_oscillation_hz": round(bd["oscillation_hz"], 4),
+        "pitch_bearing_friction_W": round(bd["friction_W"], 4),
+        "pitch_bearing_plain_alternative_W": round(bd["plain_friction_W"], 4),
         "torque_reference": (
             "rotor shaft, downstream of the 3.5 to 1 belt reduction. The motor shaft "
             "carries motor_shaft_torque_Nm, which is this figure divided by the ratio and "
@@ -753,6 +857,28 @@ def write(data, b, m):
             "two 693ZZ pitch bearings per blade at a 270 N static rating each, supplier "
             "listing. They are the softest element in the path from the blade to the "
             "spider arm, softer than the bonded root fitting or the bracket bolts"),
+        "pitch_bearing_recirculation_ratio": (
+            "cage swing over ball spacing for the 693ZZ at the 80 degrees of pitch travel "
+            "the four-bar gives. Cage swing is (1 - d/Dm)/2 of the inner ring angle with a "
+            "stationary outer ring, d and Dm from catalogue geometry and a 7 ball "
+            "complement. Below 1.0 each ball stays inside its own arc, so the wear mode is "
+            "false brinelling and not fatigue. The ratio only reaches 1.0 at 144.6 degrees "
+            "of travel, which no cyclorotor pitch schedule asks for, so the regime cannot "
+            "be tuned out and has to be carried"),
+        "pitch_bearing_static_safety": (
+            "693ZZ static rating over the centrifugal pull per bearing at the operating "
+            "speed, which is where wear accumulates. The overspeed case is strength and it "
+            "is gated separately on blade_attachment_margin_overspeed. The 2.0 floor is a "
+            "declared rule for a bearing that does not fully recirculate, in the same "
+            "class of judgement as overspeed_factor, and Stage 2 closes it with a run to "
+            "failure rather than with a catalogue number"),
+        "pitch_bearing_friction_W": (
+            "0.5 x mu x P x d summed over six bearings at the mean swing rate, mu taken at "
+            "0.0015 for a deep groove ball bearing. It is under a tenth of a percent of "
+            "rotor shaft power, which is why it sits outside the power budget rather than "
+            "inside it. The PTFE fabric lined plain bearing that would be immune to the "
+            "wear mode costs pitch_bearing_plain_alternative_W instead, on a 0.08 liner "
+            "friction coefficient, and that is the trade Stage 2 makes"),
         "overspeed_factor": (
             "20 percent over the design rotor speed, covering ESC control overshoot and a "
             "gust transient. The problem statement sets no endurance or speed schedule, so "

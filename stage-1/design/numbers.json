@@ -822,7 +822,20 @@
     "shaft_combined_margin": 9.442,
     "motor_shaft_torque_Nm": 0.43608,
     "blade_attachment_margin_overspeed": 1.6933,
-    "carrier_phase_jitter_deg": 0.1432
+    "carrier_phase_jitter_deg": 0.1432,
+    "pitch_bearing_balls": 7,
+    "pitch_bearing_ball_mm": 1.5875,
+    "pitch_bearing_pitch_diameter_mm": 5.5,
+    "pitch_bearing_cage_swing_deg": 28.4545,
+    "pitch_bearing_ball_spacing_deg": 51.4286,
+    "pitch_bearing_recirculation_ratio": 0.5533,
+    "pitch_bearing_recirculation_travel_deg": 144.592,
+    "pitch_bearing_load_N": 110.7318,
+    "pitch_bearing_static_safety": 2.4383,
+    "pitch_bearing_static_safety_floor": 2.0,
+    "pitch_bearing_oscillation_hz": 40.0798,
+    "pitch_bearing_friction_W": 0.1673,
+    "pitch_bearing_plain_alternative_W": 8.9234
   },
   "mass_envelope_g": [
     {
@@ -1166,7 +1179,10 @@
       "pitch_link_load_N": "peak pitch link force from the week 3 four-bar solution, rerun in tools/linkage.py against the week 4 blade. The blade is not chordwise balanced, so this is the unbalanced figure per D43, and the centrifugal pitching moment on the 9.31 percent chord offset is most of it",
       "blade_allowable_Nm": "bending capacity of the closed cell section about the chord line, from the integrated NACA 0020 ordinates. The skin governs at 215 MPa of wrinkling stress over the foam, not at the 400 MPa laminate allowable, and the spar would take 63.2 Nm before the skin takes 25.3",
       "blade_attachment_allowable_N": "two 693ZZ pitch bearings per blade at a 270 N static rating each, supplier listing. They are the softest element in the path from the blade to the spider arm, softer than the bonded root fitting or the bracket bolts",
-      "overspeed_factor": "20 percent over the design rotor speed, covering ESC control overshoot and a gust transient. The problem statement sets no endurance or speed schedule, so this is a declared case rather than a derived one"
+      "overspeed_factor": "20 percent over the design rotor speed, covering ESC control overshoot and a gust transient. The problem statement sets no endurance or speed schedule, so this is a declared case rather than a derived one",
+      "pitch_bearing_recirculation_ratio": "cage swing over ball spacing for the 693ZZ at the 80 degrees of pitch travel the four-bar gives. Cage swing is (1 - d/Dm)/2 of the inner ring angle with a stationary outer ring, d and Dm from catalogue geometry and a 7 ball complement. Below 1.0 each ball stays inside its own arc, so the wear mode is false brinelling and not fatigue. The ratio only reaches 1.0 at 144.6 degrees of travel, which no cyclorotor pitch schedule asks for, so the regime cannot be tuned out and has to be carried",
+      "pitch_bearing_static_safety": "693ZZ static rating over the centrifugal pull per bearing at the operating speed, which is where wear accumulates. The overspeed case is strength and it is gated separately on blade_attachment_margin_overspeed. The 2.0 floor is a declared rule for a bearing that does not fully recirculate, in the same class of judgement as overspeed_factor, and Stage 2 closes it with a run to failure rather than with a catalogue number",
+      "pitch_bearing_friction_W": "0.5 x mu x P x d summed over six bearings at the mean swing rate, mu taken at 0.0015 for a deep groove ball bearing. It is under a tenth of a percent of rotor shaft power, which is why it sits outside the power budget rather than inside it. The PTFE fabric lined plain bearing that would be immune to the wear mode costs pitch_bearing_plain_alternative_W instead, on a 0.08 liner friction coefficient, and that is the trade Stage 2 makes"
     },
     "efficiency": {
       "transmission": "Single stage toothed belt at 0.93. Assumed, not measured. Published belt drive efficiency runs 0.95 to 0.98 at these speeds, so this is on the pessimistic side of the range",
