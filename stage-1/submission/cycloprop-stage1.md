@@ -280,9 +280,20 @@ derated by 0.80 before anything is selected against it. Nothing justifies 0.80 r
 or 0.90 except ordinary practice, and the problem statement states no endurance requirement to
 size it against. It is an assumption and it is marked as one.
 
+What can be done without a source is bound the consequence. The design draws 0.704 of the
+published 180 second power and 0.7927 of the published 180 second current, and that second
+figure is also the derate at which the selection breaks even: above it the motor covers the
+design point and below it it does not. Neither exit from that is open. Backing the design point
+down a row fails because the stacked thrust to weight case needs 17.6768 N and no lower row of
+the sensitivity table reaches it, and a larger motor fails because motor mass is a power class
+item against 12.5 g of conservative headroom. What makes it tolerable is the duty rather than
+the margin: 0.7927 is a fraction of a three minute rating, so for a demonstration inside three
+minutes there is a fifth of the datasheet figure in hand. A dynamometer run early in Stage 2
+settles it, and it is the first drive gate in the plan.
+
 A drive is accepted only if three things hold at once. Power: 457.573 W of a derated 520.0 W
 continuous. Torque: 0.4361 Nm against 0.4414 Nm continuous at 3.5 to 1 through a 0.93 belt, which
-is the tight one at 99 percent. Speed: the motor turns 8417 rpm and a 6S pack can reach 9435
+is the tight one at 99 percent. Speed: the motor turns 8417 rpm and a 6S pack can reach 9433.5
 against its internal resistance at the working current. Four other motors were screened and each
 one fails at least one of the three.
 
@@ -565,10 +576,10 @@ Stage 2 does about that.
 | Blade deflection 0.0936 mm, wind up 2.3509 degrees | closed form beam and torsion on the integrated section | medium | cured laminate modulus below the published class value | coupon panel, then FEA |
 | Direction follows the vector command one to one at 18.0 N | model symmetry, not measurement | low on magnitude | wake skew, the frame in the flow, the blade meeting its own wake | two axis load cell across the range |
 | Stacked conservative thrust to weight 2.5457 | recomputed from geometry and the mass lines | medium | either input moving, since it clears by 12.5 g | Stage 2 items 3, 6 and 7 together |
-| Blade attachment margin 1.6933 at overspeed | static rating over recomputed centrifugal load | low | an oscillating fretting duty that a static rating does not describe | oscillating derate or a bench test |
+| Blade attachment margin 1.6933 at overspeed | static rating over recomputed centrifugal load, with the oscillating duty computed | medium | the bearing sits at 0.5533 of full recirculation, so it wears where it sits and no catalogue figure covers that | run to failure at speed under load, with the flight grease |
 | Peak to mean blade load 4.0 | published simulated range, top of it taken | low to medium | the true peak is higher under dynamic stall | measured blade forces, or CFD |
 | Module electrical power 489.655 W | momentum floor, figure of merit, efficiency chain | medium | all three efficiencies are assumed and the motor one is sensitive | bench measurement on the built module |
-| The drive holds the design point continuously | derated ratings against power, torque and speed | medium | the 0.80 derate has no source and torque sits at 99 percent | datasheets, then a thermal run |
+| The drive holds the design point continuously | derated ratings against power, torque and speed | medium | the 0.80 derate has no source, it breaks even at 0.7927, and torque sits at 99 percent | dynamometer run at the working current, early enough that a drive change is still affordable |
 | Side force tilt 11.978 degrees | quasi steady model with uniform inflow | low | measurement puts it far higher and it moves with rotor speed | load cell calibration across the speed range |
 | Module cost 65770 INR, longest lead 4 weeks | distributor list prices, nothing quoted | low on price | gear cutting is priced by setup at a quantity of one | written quotations |
 | Material allowables | published typical values per class | medium | no certificate, no coupon, and the skin modulus is what the blade turns on | coupon panel and a bond shear coupon |

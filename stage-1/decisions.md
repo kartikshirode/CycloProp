@@ -1472,3 +1472,47 @@ failure at speed under the real load with the flight grease, and this entry move
 "unquantified" to "quantified and still untested" rather than closing it.
 
 Ten new gates and six new self-tests, 138 to 144. Nothing was loosened.
+
+## D61: the derate keeps its 0.80 and gets a bound on what it costs
+
+1 September 2026, after week 4.
+
+The 0.80 continuous derate has been the weakest number in the drive selection since week 2 and
+it was carried as "assumed, no source" in E15. It cannot be given a source from inside the
+project. T-Motor publishes a 180 second maximum, the problem statement asks for no endurance,
+and there is no duty to size a derate against. So the choice was to keep arguing about it or to
+bound the consequence. This entry bounds it.
+
+**The break even.** The design draws 0.7927 of the published 180 second current and 0.704 of the
+published 180 second power. Current is tighter, and 0.7927 turns out to be two numbers at once:
+it is the fraction drawn and it is the derate at which the MN5006 stops covering the design
+point. The declared 0.80 clears it by less than a point.
+
+**Neither exit is open.** Lowering the design point does not work, because the stacked thrust to
+weight case needs 17.6768 N and no row of the sensitivity table below 18 N reaches it. The 16 N
+row has drive room to spare and still misses on the stacked case. A larger motor does not work
+either, because motor mass is a power class item and the conservative column has 12.5 g in hand
+against a next size up that costs several times that. Both of those are now gated, so neither can
+be taken quietly.
+
+**Why it is still tolerable.** 0.7927 is a fraction of a three minute rating, so any
+demonstration inside three minutes runs against the datasheet figure with a fifth of it spare.
+The 0.80 continuous rule is a conservatism we imposed for indefinite running that nothing asks
+for. It stays, because a module that holds thrust for three minutes is a thin answer to a hover
+requirement, but it is not what decides whether the module works. What settles it is a
+dynamometer run at the working current, early enough in Stage 2 that a drive change is still
+affordable, and that is now the first drive gate in the plan.
+
+**One older rule moved out of prose.** Belt ratios were screened in week 2 on motor speed staying
+under 90 percent of what the pack turns the motor at after the resistive drop. That rule is what
+emptied the 100 mm radius row and it was enforced nowhere. The pack voltage, the loaded voltage,
+the ceiling, the rule and the fraction are stored and recomputed now, and the gate refuses both a
+rule looser than 0.9 and a ceiling KV and the pack do not give.
+
+**One date corrected.** E12 and E13 dated a datasheet read to 2 September 2026, which had not
+happened yet. That is week 2's systematic two day drift, recorded as debt 14 and deliberately
+left across a dozen files. These two cells are the exception because they date a source read
+rather than a piece of writing, and they now say what the commits say.
+
+Thirteen new gates and five new self-tests, 144 to 149. The submission and its PDF are rebuilt,
+still 21 pages, and the xelatex log has no overfull lines.
