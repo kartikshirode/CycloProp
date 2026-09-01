@@ -1643,3 +1643,48 @@ D50.
 
 The honest status change is from "unpulled, worth an hour" to "located, needs a browser, worth
 15 minutes of somebody's". That is a smaller item and a more useful one.
+
+## D65: the full review stands, and Tier 1 is opened rather than absorbed
+
+1 September 2026, after the five pass review.
+
+Five fresh-context auditors read the completed weeks cold and in parallel. Every finding was
+reproduced against a baseline of 208 gate passes and 162 self-tests before it was written down.
+The record is `stage-1/audit/full-review.md`, 63 findings in five tiers with a six phase plan.
+
+**What survived.** The arithmetic. An auditor wrote its own four-bar solver and its own section
+integration and reproduced roughly sixty quantities to five or six figures. The coefficient
+conversion, both source transfers, all eight margins, the mechanism's Grashof class, the momentum
+floor and the 33 line budget all hold. One auditor went looking for a hidden assumption in the
+aerodynamics and found the closures genuinely strong: a 30 percent coefficient inflation with
+every dependent number kept consistent was caught by four gates at once.
+
+**What did not.** Two things, and both were claims this project had been repeating.
+
+The first is that every published number is recomputed from first principles. That is true of
+thrust and power and false of mass. Halving every mass line together passes every gate at a
+reported thrust to weight of 6.881. The denominator is held by a 25 character basis string and a
+self-consistency band between two lists the same author writes.
+
+The second is that the 1 September pass loosened nothing. It also swept nothing: the whole-file
+substring bug D59 fixed in the human gate is still live in `check_audits_exist` and in
+`done_set`, and deleting the week 4 audit sign off leaves the gate reporting four weeks audited.
+That was reproduced on a mirror of the live repository. Finding one instance of a bug and not
+looking for the others is the mistake, not the original bug.
+
+**Tier 1 is a design question and it is opened, not answered here.** The thrust coefficient was
+cut 9 percent below Kellen and the figure of merit was kept at Kellen's peak. Those two are not
+independent, so the power demand fell 13 percent as a side effect of a thrust conservatism. On
+the consistent reading the rotor needs 370 W rather than 321.71 W, the figure of merit is 0.52
+rather than 0.6, and the selected drive covers neither the torque nor the current nor the power.
+Separately the servo gear ratio is inverted in `tools/linkage.py`, which turns an actuator margin
+of 2.332 into 1.04.
+
+Neither of those is absorbed into a document. They move the design, the drive selection can reach
+the radius freeze, and this entry exists to say plainly that the project is not closed on them.
+
+**Order of work.** Gates first, then numbers, then documents, then the missing content, then the
+records, then a re-audit. A gate written after the fix is a gate nobody has seen fail.
+
+Nothing in the repository was changed by the review itself. This entry and the review file are
+the whole of it.
