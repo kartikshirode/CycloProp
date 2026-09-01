@@ -1598,3 +1598,48 @@ table and examiner question 12. The handoff carried it too.
 
 Seven new gates and five new self-tests, 157 to 162. Nothing in the design moved. What moved is
 what Stage 2 spends its first week on.
+
+## D64: Ramsey 2022 is located, unreachable by script, and closed as a search
+
+1 September 2026.
+
+Ramsey has sat on the "still worth an hour" list since week 2 and has been searched for in three
+sessions. This entry ends the search, because the answer is now known rather than unknown.
+
+**What was found.** The file is `RAMSEY-THESIS-2022.pdf`, 84,853,674 bytes, at
+`https://oaktrust.library.tamu.edu/bitstreams/748b37d5-3cd9-449e-af50-4689341f9849/download`.
+That address is in `reference/README.md` so nobody has to derive it again.
+
+**Why it still cannot be fetched.** Two independent blocks. The URL answers 403 carrying
+`cf-mitigated: challenge`, which is the Cloudflare JavaScript wall, not a permissions gate.
+Five routes were tried and all five hit it: the item page, the handle, the DSpace 7 REST API, a
+fetch tool and a third party text extraction proxy. And the Wayback Machine, which is what
+rescued Kellen and Benedict, has no capture of the handle, the item page, the legacy bitstream
+path or the DSpace 7 bitstream. Ramsey was deposited in December 2022 and released in September
+2023, after the legacy paths stopped being the ones crawlers followed. Older TAMU items are
+captured on those paths and still fetch, so the gap is specific to this item rather than a bad
+query.
+
+It needs a browser and 85 MB of connection. Both are human actions and neither is available in
+a scripted session.
+
+**What was gained anyway.** The repository's OAI-PMH endpoint is not behind the challenge and
+answers 200 to plain curl. `oai_dc` gives the full abstract, `ore` lists every bitstream with
+filename, mimetype and byte length, and `didl` names the primary one. That is where the URL and
+the size came from, and it works for any OAKTrust item with its handle substituted. It gives
+metadata and addresses, never file bytes. Recorded in `reference/README.md` because the next
+blocked TAMU source should start there rather than at the front end.
+
+The abstract is now verified against the authoritative record instead of against a search
+result, and it confirms what `literature.md` already carried: 6 blades, c/R 0.64, NACA 0015,
+pitch axis at 45 percent, plus or minus 45 degrees, 700 rpm, and blades built as a foam core
+with a carbon fibre skin. That last one corroborates our own construction at a scale two orders
+of magnitude above ours.
+
+**What it buys: nothing.** The reading is summary class and no gated number moves on it. E9,
+Runco, is still the only structural mass anchor, and the subsystem mass table that was the whole
+reason for wanting Ramsey lives in the PDF. The coefficient reserve stays unspent, per D36 and
+D50.
+
+The honest status change is from "unpulled, worth an hour" to "located, needs a browser, worth
+15 minutes of somebody's". That is a smaller item and a more useful one.

@@ -165,10 +165,16 @@ identity fields, section order, the summary numbers and the claims table.
 **7. Send on 26 September**, from the registered address, and keep the sent copy. That is D5 and
 it does not move.
 
-**Ramsey 2022 and Heimerl** are still unpulled and still worth an hour if one exists. Ramsey
-would give a second structural mass anchor and Heimerl would replace the peak to mean load
-factor and the side force angle with measurements. Neither is cited as read anywhere. Both need
-network and neither is a small download, so they were left for a session with bandwidth to spare.
+**Ramsey 2022 is located and needs a browser.** The exact URL and the 84,853,674 byte size are
+in [reference/README.md](reference/README.md). Cloudflare refuses every scripted route with
+`cf-mitigated: challenge` and the Wayback Machine has no capture, so the trick that rescued
+Kellen and Benedict has nothing to serve. Fifteen minutes with a browser and the bandwidth
+gets it. Its abstract is verified and buys nothing on its own: Runco is still the only
+structural mass anchor. See D64.
+
+**Heimerl is still unsearched.** It would replace the assumed peak to mean blade load and the
+side force angle with measurements, and it is a VFS Forum paper rather than a thesis, so the
+route is different and probably paid.
 
 **Four of the five motor rows and the servo are still supplier listings** rather than datasheet
 PDFs, which is E13 in the ledger. Same reason.
