@@ -280,16 +280,13 @@ derated by 0.80 before anything is selected against it. Nothing justifies 0.80 r
 or 0.90 except ordinary practice, and the problem statement states no endurance requirement to
 size it against. It is an assumption and it is marked as one.
 
-What can be done without a source is bound the consequence. The design draws 0.704 of the
-published 180 second power and 0.7927 of the published 180 second current, and that second
-figure is also the derate at which the selection breaks even: above it the motor covers the
-design point and below it it does not. Neither exit from that is open. Backing the design point
-down a row fails because the stacked thrust to weight case needs 17.6768 N and no lower row of
-the sensitivity table reaches it, and a larger motor fails because motor mass is a power class
-item against 12.5 g of conservative headroom. What makes it tolerable is the duty rather than
-the margin: 0.7927 is a fraction of a three minute rating, so for a demonstration inside three
-minutes there is a fifth of the datasheet figure in hand. A dynamometer run early in Stage 2
-settles it, and it is the first drive gate in the plan.
+The consequence is bounded even though the number is not sourced. The design draws 0.704 of the
+published 180 second power and 0.7927 of the current, and that second figure is also the derate
+at which the selection breaks even. Neither exit is open below it: the stacked thrust to weight
+case needs 17.6768 N so no lower sensitivity row helps, and motor mass is a power class item
+against 12.5 g of conservative headroom. What makes it tolerable is the duty. 0.7927 is a
+fraction of a three minute rating, so a demonstration inside three minutes runs with a fifth of
+the datasheet figure spare. A dynamometer run is the first drive gate in Stage 2.
 
 A drive is accepted only if three things hold at once. Power: 457.573 W of a derated 520.0 W
 continuous. Torque: 0.4361 Nm against 0.4414 Nm continuous at 3.5 to 1 through a 0.93 belt, which
@@ -534,7 +531,7 @@ the owner against every item.
 | 2 to 3 | kinematic model, then motor, actuator, bearing and controller selection | the multibody schedule matches the closed form one and reproduces the pitch link load |
 | 4 to 5 | aerodynamic analysis for thrust prediction | a converged run at the design point with mesh and timestep independence shown |
 | 6 | structural analysis of blades, supports, frame, shaft and linkages | the 8 margins reproduce or move, with every difference explained |
-| 7 | material selection, mass estimate and thrust to weight | cured laminate modulus measured on a panel built the way the blade is built |
+| 7 | material selection, mass estimate and thrust to weight | a wrinkling coupon on the delivered foam, which is what the blade allowable turns on, then the laminate panel |
 | 8 | manufacturability and assembly plan, bill of materials, risk assessment | written quotes for the five lines above 4500 INR, and every open risk owned |
 | 8 to 9 | build and test plan, then the report | a staged spin plan, an instrumented thrust measurement and a place to run it |
 
@@ -573,16 +570,16 @@ Stage 2 does about that.
 | --- | --- | --- | --- | --- |
 | Blade area coefficient 0.6055 gives 18.0 N | transferred from a recomputed hover point, bracketed above by 0.6648 measured on this shape family | medium | the transfer is wrong in the unsafe direction, or the model overstates thrust at an inflow ratio of 0.3871 | transient CFD, then a load cell run |
 | Module mass 607.97 g nominal, 684.7 g conservative | 33 drawn or catalogue lines, growth by line class | medium to high | a wet layup blade comes out heavy, or undrawn frame parts eat the 15.0 g reserve | CAD mass properties, a mould trial, weighed parts |
-| Blade deflection 0.0936 mm, wind up 2.3509 degrees | closed form beam and torsion on the integrated section | medium | cured laminate modulus below the published class value | coupon panel, then FEA |
+| Blade deflection 0.0936 mm, wind up 2.3509 degrees | closed form beam and torsion on the integrated section | medium | cured laminate modulus under the class value, which moves these two even though it barely moves the strength margin | coupon panel, then FEA |
 | Direction follows the vector command one to one at 18.0 N | model symmetry, not measurement | low on magnitude | wake skew, the frame in the flow, the blade meeting its own wake | two axis load cell across the range |
 | Stacked conservative thrust to weight 2.5457 | recomputed from geometry and the mass lines | medium | either input moving, since it clears by 12.5 g | Stage 2 items 3, 6 and 7 together |
-| Blade attachment margin 1.6933 at overspeed | static rating over recomputed centrifugal load, with the oscillating duty computed | medium | the bearing sits at 0.5533 of full recirculation, so it wears where it sits and no catalogue figure covers that | run to failure at speed under load, with the flight grease |
+| Blade attachment margin 1.6933 at overspeed | static rating over recomputed centrifugal load, oscillating duty computed | medium | 0.5533 of full recirculation, so it wears where it sits and no catalogue figure covers that | run to failure at speed, on the flight grease |
 | Peak to mean blade load 4.0 | published simulated range, top of it taken | low to medium | the true peak is higher under dynamic stall | measured blade forces, or CFD |
 | Module electrical power 489.655 W | momentum floor, figure of merit, efficiency chain | medium | all three efficiencies are assumed and the motor one is sensitive | bench measurement on the built module |
-| The drive holds the design point continuously | derated ratings against power, torque and speed | medium | the 0.80 derate has no source, it breaks even at 0.7927, and torque sits at 99 percent | dynamometer run at the working current, early enough that a drive change is still affordable |
+| The drive holds the design point continuously | derated ratings against power, torque and speed | medium | the 0.80 derate has no source, breaks even at 0.7927, and torque sits at 99 percent | dynamometer run at the working current, early |
 | Side force tilt 11.978 degrees | quasi steady model with uniform inflow | low | measurement puts it far higher and it moves with rotor speed | load cell calibration across the speed range |
 | Module cost 65770 INR, longest lead 4 weeks | distributor list prices, nothing quoted | low on price | gear cutting is priced by setup at a quantity of one | written quotations |
-| Material allowables | published typical values per class | medium | no certificate, no coupon, and the skin modulus is what the blade turns on | coupon panel and a bond shear coupon |
+| Material allowables | published typical values per class | medium | no certificate, no coupon, and the foam is the sensitive one rather than the laminate: the floor arrives at 0.6689 of the published foam properties | wrinkling coupon on the delivered foam, then a laminate panel and a bond shear coupon |
 
 # Sources and how they were read
 
@@ -712,10 +709,14 @@ N, but they swing through 80 degrees under a steady load rather than rotating, a
 rating says nothing about fretting. That is why the overspeed case is declared at all: at the
 design point the same joint reads 2.44 and looks comfortable.
 
-**12. What is the first test you run in Stage 2?** A coupon panel, laid up the way the blade is
-laid up, for cured laminate modulus and areal mass. It is cheap, it is fast, and the blade
-allowable turns on the skin modulus more than on anything else, so a 15 percent shortfall there
-moves the margin that sizes the module. Second is a static pull on one blade attachment above the
+**12. What is the first test you run in Stage 2?** A sandwich wrinkling coupon on the delivered
+foam. The obvious answer is a laminate panel, and we assumed it was the answer until the
+sensitivity was actually run. Skin wrinkling over the foam sets the blade allowable, and dropping
+the skin modulus lowers the wrinkling stress as its cube root while raising EI over the skin
+modulus, so the two nearly cancel: over a 2 to 1 band on the skin the worst overspeed margin is
+1.9587 against 1.9681 at the published value. The foam moduli sit in the same cube root as a pair,
+so the allowable moves as their two thirds power and the margin reaches its floor at 0.6689 of
+them. The blade is foam limited. Second is a static pull on one blade attachment above the
 overspeed load of 318.908 N. The rotor does not spin until both have passed.
 
 # Appendix B: numbers and provenance
