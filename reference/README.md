@@ -37,6 +37,52 @@ Extract: [benedict2010-extract.txt](benedict2010-extract.txt)
 curl -L -o benedict2010.pdf "https://web.archive.org/web/20230314013537id_/https://drum.lib.umd.edu/bitstream/handle/1903/11257/Moble_umd_0117E_11828.pdf"
 ```
 
+## Ramsey 2022, located and still unreachable
+
+Ramsay Allen Ramsey, December 2022. *Development and Flight Testing of a 25-Kilogram
+Quad-Cyclocopter.* MS thesis, Texas A&M University. Handle 1969.1/198531, item UUID
+`692efcdd-c56a-4c7a-b507-f3e673986b51`.
+
+No extract here, because the file cannot be fetched from a script. What is here instead is the
+exact address, so nobody spends a fourth session looking for it.
+
+```
+https://oaktrust.library.tamu.edu/bitstreams/748b37d5-3cd9-449e-af50-4689341f9849/download
+```
+
+`RAMSEY-THESIS-2022.pdf`, 84,853,674 bytes. Two things block it and they are separate problems.
+
+The URL answers 403 with a `cf-mitigated: challenge` header, which is the same Cloudflare
+JavaScript wall that kept Kellen out for two weeks. Every route was tried: the item page, the
+handle, the DSpace 7 REST API under `/server/api/`, a fetch tool and a third party text
+extraction proxy. All five get the interstitial. A real browser passes.
+
+The Wayback route that rescued Kellen and Benedict does not exist here. The CDX index has zero
+captures of the handle, the item page, the legacy bitstream path or the DSpace 7 bitstream
+above. Ramsey was deposited in December 2022 and released in September 2023, which is after the
+legacy `/bitstream/handle/` paths stopped being the ones crawlers followed, so there is nothing
+archived to fall back to. Older TAMU items are captured on the legacy path and still fetch fine,
+which is what makes the gap specific rather than a broken query.
+
+So it needs a browser and 85 MB of connection. Both are human actions.
+
+## The OAI-PMH endpoint is not behind Cloudflare
+
+This is the useful part and it is worth knowing before fighting the front end again.
+
+```
+https://oaktrust.library.tamu.edu/server/oai/request?verb=GetRecord&metadataPrefix=ore&identifier=oai:oaktrust.library.tamu.edu:1969.1/198531
+```
+
+That answers 200 to plain curl. Harvesters use OAI and it is not proxied through the challenge.
+Swap `metadataPrefix=oai_dc` for title, author, dates and the full abstract; `ore` lists every
+bitstream in the item with its filename, mimetype and byte length, which is where the URL and
+the 84,853,674 above came from; `didl` names the primary bitstream alone, which is the quickest
+way to tell the thesis from its licence file and thumbnails.
+
+Any OAKTrust item works, with its handle substituted. It gives metadata and addresses, never
+file bytes.
+
 ## Use the Wayback copies, not the live repositories
 
 Both live routes fail from a script and they fail for different reasons.
