@@ -1398,3 +1398,29 @@ and the real team facts, and what is left of it then is short.
 The alternative was to leave the submission stale until the markers arrive. That loses the four
 days the deadline does not have, and it leaves the one gate defect in `check.py` sitting under
 week 5 while it is being run.
+
+## D59: human gate markers are read from the status block, not from the whole file
+
+1 September 2026, found while listing what is left of week 5.
+
+`check_human_gate` tested `marker not in text` across the entire file. The instructions in
+`stage-1/human-gate.md` explain how to confirm the last item: replace `TECHNICAL-READ-PENDING`
+with `TECHNICAL-READ-COMPLETE` after opening the built PDF and reading it end to end. That
+sentence contains the literal marker, so the substring search found it and the gate reported
+that marker satisfied.
+
+The one that gates final staging, the human read of the attachment, was passing because the
+file explained how to write it later.
+
+The other four survived only by accident of wording. Their prose spells the PENDING form, so
+nothing matched. Any edit that mentioned `ROSTER-CONFIRMED` while explaining the process would
+have silently confirmed the roster.
+
+**What changes.** The gate splits the file at the `## Status` heading and reads only what
+follows, and a marker has to be the whole line after stripping. A file with no status block
+fails rather than falling back to the whole text, so the failure mode is a refusal rather than
+a pass. Three self-tests: a marker named only in the instructions, a missing status block, and
+a marker buried inside a sentence within the block.
+
+Nothing about the project's state changed. Four markers were outstanding before this and five
+are outstanding now, which is the honest count and always was.
