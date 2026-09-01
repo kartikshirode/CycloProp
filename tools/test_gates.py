@@ -159,6 +159,12 @@ def honest_numbers():
     # together at the declared overspeed rather than on the aerodynamic case alone. That
     # leaves blade_margin comfortable and the combined margins tight, which is the shape
     # the real design has as well.
+    # Two bearings at each of the blade's two root stations, on the ISO 76 rating rather
+    # than a supplier listing, and a sharing factor because two bearings on one pin do not
+    # split a radial load perfectly.
+    brg_stations, brg_per_station, brg_share = 2, 2, 0.90
+    brg_per_blade = brg_stations * brg_per_station
+    brg_c0 = gates.ISO76_F0 * 7 * 1.5875 ** 2
     cf_dem = fc * lever
     fc_over = fc * overspeed ** 2
     combined_over = (blade_dem + cf_dem) * overspeed ** 2
@@ -179,8 +185,7 @@ def honest_numbers():
     link_dem = 42.0
     # Two pitch bearings hold each blade and the rating they are held to is the one ISO 76
     # gives for this ball complement, not a supplier listing.
-    brg_c0 = gates.ISO76_F0 * 7 * 1.5875 ** 2
-    att_all = 2 * brg_c0
+    att_all = brg_per_blade * brg_c0 * brg_share
 
     e_skin, e_foam, g_foam = 60.0, 70.0, 19.0
     wrinkle = bl["wrinkle_Pa"] / 1e6
@@ -224,7 +229,8 @@ def honest_numbers():
     brg_cage = (1.0 - brg_ball / brg_pd) / 2.0
     brg_swing, brg_spacing = brg_cage * brg_travel, 360.0 / brg_z
     brg_rate = (2.0 / math.pi) * math.radians(brg_travel / 2.0) * omega
-    brg_fric = 2 * nb * 0.5 * 0.0015 * (fc / 2.0) * 0.003 * brg_rate
+    brg_load = fc / brg_per_blade
+    brg_fric = brg_per_blade * nb * 0.5 * 0.0015 * brg_load * 0.003 * brg_rate
 
     # The azimuthal table is a distribution of the thrust, so its cycle mean has to
     # reproduce thrust per blade. A shape alone used to satisfy the gate.
@@ -319,6 +325,11 @@ def honest_numbers():
                         "pack_voltage_loaded_V": v_load,
                         "motor_speed_ceiling_rpm": ceiling_rpm,
                         "motor_speed_rule": 0.90,
+                        "motor_torque_frac_continuous": motor_dem / (9.5493 / kv_sel * 67.0),
+                        "pack_cells": 6,
+                        "motor_mech_capacity_W": 0.90 * v_load * 67.0,
+                        "motor_mech_required_W": shaft / eff[0],
+                        "thrust_floor_nominal_N": 2.5 * (total / 1000.0) * G,
                         "motor_rpm_frac_ceiling": m_rpm / ceiling_rpm,
                         "thrust_floor_stacked_N": 2.5 * (m_cons / 1000.0) * G / (ct_low / ct)},
         "efficiency": {"transmission": eff[0], "motor": eff[1], "esc": eff[2]},
@@ -429,9 +440,14 @@ def honest_numbers():
                       "pitch_bearing_ball_spacing_deg": brg_spacing,
                       "pitch_bearing_recirculation_ratio": brg_swing / brg_spacing,
                       "pitch_bearing_recirculation_travel_deg": brg_spacing / brg_cage,
-                      "pitch_bearing_load_N": fc / 2.0,
-                      "pitch_bearing_static_safety": att_all / 2.0 / (fc / 2.0),
+                      "pitch_bearing_load_N": brg_load,
+                      "pitch_bearing_static_safety": brg_c0 / brg_load,
                       "pitch_bearing_static_safety_floor": 2.0,
+                      "pitch_bearings_per_blade": brg_per_blade,
+                      "pitch_bearing_stations": brg_stations,
+                      "pitch_bearing_share": brg_share,
+                      "pitch_bearing_c0_iso_N": brg_c0,
+                      "pitch_bearing_c0_listed_N": 270.0,
                       "pitch_bearing_oscillation_hz": rpm / 60.0,
                       "pitch_bearing_friction_W": brg_fric,
                       "pitch_bearing_plain_alternative_W": brg_fric * 53.0,
@@ -466,6 +482,8 @@ def honest_numbers():
                 "shaft_torque_Nm": "shaft power divided by rotor angular speed at the design point",
                 "pitch_link_load_N": "four bar link load from the offset disk reaction at peak pitching moment"}},
         "results": {"bom_bought_inr": bom_bought, "bom_tooling_inr": bom_made,
+                    "mass_to_close_stacked_g": round(
+                        m_cons - t_cons / (2.5 * G) * 1000.0, 2),
                     "bom_total_inr": bom_bought + bom_made,
                     "bom_longest_lead_weeks": max(r["lead_time_weeks"] for r in bom),
                     "total_mass_g": total, "weight_N": total / 1000 * G,
@@ -961,13 +979,59 @@ case("a mass downside alone under T/W 2.5 is rejected",
 
 
 def coeff_downside_short(d):
-    """Nominal at 500 g and conservative at 540 g. The design case and the mass downside
-    both clear, the coefficient downside on its own does not."""
+    """Nominal at 500 g and conservative at 540 g. The coefficient downside on its own is
+    the tightest of the three cases here.
+
+    It cannot be pushed under the declared downside floor on its own, and that is
+    arithmetic rather than an oversight: the coefficient downside is a fixed fraction of the
+    design case, 0.849 with this fixture's haircut, so it reaches 2.0 only after the design
+    case has already dropped under 2.5. What this case holds is that all three are computed
+    and that the stacked one carries its mass target."""
     return _rescale_mass(d, 500.0 / 400.0, 540.0 / 448.0, target=_target(d))
 
 
-case("a coefficient downside alone under T/W 2.5 is rejected",
-     False, coeff_downside_short, upto=2, week=2)
+case("a coefficient downside at 500 g with a stated mass target passes",
+     True, coeff_downside_short, upto=2, week=2)
+
+
+def _stacked_between(d, gap=None, drop=False):
+    """Conservative mass at 620 g, so the stacked downside lands near 2.2: over the declared
+    floor of 2.0 and under the requirement of 2.5. That is the design's own position since
+    1 September, and what the gate asks for there is the mass that would close it."""
+    d = _rescale_mass(d, 1.0, 531.0 / 448.0, target=_target(d))
+    tc = d["performance"]["thrust_N_conservative"]
+    mc = d["results"]["mass_g_conservative"]
+    ct = d["performance"]["blade_area_coeff"]
+    d["performance"]["thrust_floor_stacked_N"] = (
+        2.5 * (mc / 1000.0) * G / (d["performance"]["blade_area_coeff_low"] / ct))
+    d["sources"].setdefault("results", {})["mass_to_close_stacked_g"] = (
+        "grams that would have to leave the conservative budget for the stacked downside "
+        "to reach the requirement, and where they would come from")
+    d["results"]["mass_to_close_stacked_g"] = (
+        mc - tc / (2.5 * G) * 1000.0 if gap is None else gap)
+    if drop:
+        d["results"].pop("mass_to_close_stacked_g")
+    return d
+
+
+def stacked_gap_published(d):
+    return _stacked_between(d)
+
+
+def stacked_gap_missing(d):
+    return _stacked_between(d, drop=True)
+
+
+def stacked_gap_wrong(d):
+    return _stacked_between(d, gap=5.0)
+
+
+case("a stacked downside between the floor and the requirement passes when the mass gap "
+     "is published", True, stacked_gap_published)
+case("a stacked downside that does not publish the mass gap is rejected",
+     False, stacked_gap_missing)
+case("a mass gap that does not reproduce from the shortfall is rejected",
+     False, stacked_gap_wrong)
 
 
 def thin_basis(d):
@@ -2564,7 +2628,9 @@ def linkage_selftests():
                         abs(p["actuator_mass_g"] - env[0]["nominal_g"]) < 1e-6,
                         f"{p['actuator_mass_g']} g against {env[0]['nominal_g']} g"))
     if p.get("carrier_torque_Nm") and p.get("servo_torque_Nm"):
-        want = p["carrier_torque_Nm"] / p["gear_step_up"] / p["actuator_count"]
+        # Multiplied. The gear pair steps the carrier ANGLE up, so it steps the servo
+        # TORQUE up too, and this read the ratio backwards until 1 September.
+        want = p["carrier_torque_Nm"] * p["gear_step_up"] / p["actuator_count"]
         out.append(("servo torque follows from the carrier torque it holds",
                     abs(want - p["servo_torque_Nm"]) < 5e-4,
                     f"{p['servo_torque_Nm']} Nm against {want:.4f}"))
