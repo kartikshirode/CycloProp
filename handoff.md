@@ -228,7 +228,9 @@ positional so the same text in the body still fails. The 1 September pass added 
   measured or corrected values available. Week 4 found a calculation that supports the 5 percent
   blade flexibility allowance and deliberately did not spend it. See D36 and D50
 - **`largest_dimension_mm` in the week 2 tables is 290 mm** and the packaged module is 364.4 mm.
-  The week 2 comparison is unaffected because it applied one rule to all three layouts. See D44
+  The comparison is unaffected because one rule reached all three layouts, and both
+  `01-configuration.md` and `09-packaging-and-integration.md` now say so where a reader meets
+  the number rather than only in D44
 - **`check.py` demands an audit for every week already marked done**, which includes the week
   being gated once its progress file is written, so `--week N` fails in the window between the
   done marker and the audit file. That is stricter than `.claude/weekly-loop.md` describes and it

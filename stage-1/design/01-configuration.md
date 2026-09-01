@@ -17,6 +17,13 @@ At the design point the rotor is 220 mm across and 290 mm along the span, so the
 dimension of the module is the span. That matters more than it sounds: a cyclorotor is a
 rectangle, and what an integrator has to package is the span, not the diameter.
 
+That 290 mm is the screening figure and not the built envelope. It comes from one packaging rule
+applied to all three layouts here, and the rule takes the greater of the module width and the
+blade span while ignoring frame, mounts and the pitch mechanism. The module that came out of week
+3 packages into 364.4 by 316.1 by 362.1 mm. The comparison below stands because the same rule
+reached every row, and [09-packaging-and-integration.md](09-packaging-and-integration.md) works
+the ordering through on the swept diameter as well. See D44.
+
 ## Why this configuration
 
 D2 said the module should be one larger rotor rather than a cluster, and it said so on thin
