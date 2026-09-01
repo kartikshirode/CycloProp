@@ -109,6 +109,52 @@ CONSERVATIVE_MASS_MIN_RATIO = 1.05    # conservative mass at least 5 percent hea
 
 MODULE_COMPONENTS = ["blade", "frame", "pitch", "motor", "actuator", "mount"]
 
+
+def component_cover(items):
+    """Which components in the module boundary are covered by these line item names, where
+    covering one takes a line of its own.
+
+    Two defects, both real. The words were matched as substrings of every name joined
+    together, so "frame" was satisfied by "mainframe" and "mount" by "dismounted". And one
+    line named "motor mount bracket and fasteners" satisfied motor AND mount at once, so a
+    module carrying no motor, no shaft, no bearings and no transmission passed the gate whose
+    only job is to stop exactly that.
+
+    So the words match on a boundary, and the lines are matched to components one to one.
+    Six components against thirteen lines is small enough to solve by augmenting paths."""
+    edges = {}
+    for c in MODULE_COMPONENTS:
+        pat = re.compile(r"\b" + re.escape(c), re.I)
+        edges[c] = {i for i, name in enumerate(items) if pat.search(name)}
+    taken = {}
+
+    def assign(c, seen):
+        for i in edges[c]:
+            if i in seen:
+                continue
+            seen.add(i)
+            if i not in taken or assign(taken[i], seen):
+                taken[i] = c
+                return True
+        return False
+
+    return {c for c in MODULE_COMPONENTS if assign(c, set())}
+
+# A servo asked to hold against a reversing ripple at three per revolution is not sized on
+# stall. Half of stall is the usable holding torque, and the margin is taken on that.
+SERVO_USABLE_FRACTION = 0.5
+
+# Words that name a thrust to weight, so a loose numeric token cannot stand in for the
+# claim. Any number inside the tolerance used to satisfy the gate, and an unrelated belt
+# ratio of 2.606 satisfied it once.
+TW_WORDS = ["thrust to weight", "thrust-to-weight", "t/w"]
+
+# ISO 76 basic static load rating for a single row radial deep groove ball bearing,
+# C0 = f0 * Z * Dw^2 * cos(alpha), with f0 = 12.3 for this type and alpha = 0. Computed
+# from the ball complement the design already publishes, so a supplier listing with no
+# supplier named cannot be the only thing carrying the tightest margin in the module.
+ISO76_F0 = 12.3
+
 VERBATIM_DIRS = {"reference"}
 # Documents written by someone else and kept as received. The style rules exist so our own
 # prose reads as ours; rewriting incoming evidence to satisfy them would damage it.
@@ -291,21 +337,38 @@ NUM_DECL = re.compile(r"^\s*-\s*([A-Za-z0-9_.]+)\s*=\s*([-+0-9.eE]+)\s*$")
 NUM_TOKEN = re.compile(r"\d+\.\d+")
 
 
-def states_value(rel, value, tol=TOL):
+def states_value(rel, value, tol=TOL, keywords=()):
     """True when the document's narrative quotes this value, at any rounding inside `tol`.
     Matching numeric tokens rather than one formatted string means 2.25, 2.252 and 2.2525
     all count, which is what a document written by a person actually looks like.
 
     The `## Numbers used` block is cut off first. A declaration is machine-readable and a
     reader skimming the prose never sees it, so a document whose only copy of the number
-    sits in that block has not said the thing this gate exists to make it say."""
+    sits in that block has not said the thing this gate exists to make it say.
+
+    `keywords` is what stops a loose token from standing in for the claim. Any number
+    inside the tolerance used to satisfy this, so the stacked thrust to weight sentence was
+    satisfied by an unrelated belt ratio that happened to land nearby. With keywords the
+    matching token has to sit in the same sentence as a word that names the quantity, where
+    a sentence is the line it is on plus the line before, because prose wraps."""
     p = ROOT / rel
     if not p.is_file() or value is None:
         return False
     narrative = re.split(r"##\s*Numbers used", p.read_text(encoding="utf-8"),
                          maxsplit=1, flags=re.I)[0]
-    for m in NUM_TOKEN.finditer(narrative):
-        if close(float(m.group()), value, tol):
+    if not keywords:
+        return any(close(float(m.group()), value, tol)
+                   for m in NUM_TOKEN.finditer(narrative))
+    # The paragraph is the window, not the line and not the sentence. Prose wraps at column
+    # 95 here, so a sentence spans three lines and the sentence naming a quantity is often
+    # the one before the sentence quoting it. A paragraph is the smallest unit a person
+    # actually reads as one thing, and it still stops a number from being certified by a
+    # naming word four hundred lines away.
+    for para in re.split(r"\n\s*\n", narrative):
+        if not any(close(float(m.group()), value, tol) for m in NUM_TOKEN.finditer(para)):
+            continue
+        low = para.lower()
+        if any(k.lower() in low for k in keywords):
             return True
     return False
 
@@ -512,6 +575,24 @@ ANY_ALLOW = re.compile(r"<!--\s*allow(-table)?\s*:?(.*?)-->")
 MIN_ALLOW_REASON = 15
 MAX_UNCHECKED_NUMBERS = 4
 
+# The window a prose number has to land in to count as traced. It used to be DISPLAY_TOL,
+# the 2 percent allowance meant for rounding a number the file already holds, and against a
+# stored set this dense that window is wide enough to catch almost anything: a fabricated
+# wattage traced 57.8 percent of the time, a fabricated angle 50.2 percent and a fabricated
+# mass 33.3 percent. Five wrong numbers injected into the submission all traced. At 0.5
+# percent the same measurement drops by roughly a factor of four and the built submission
+# still passes with nothing to change, so the width was never buying anything.
+COVERAGE_TOL = 0.005
+
+# The nine design documents are working files rather than the deliverable, and they quote
+# intermediate values, source data and superseded figures the submission does not. Holding
+# them to the submission's hard rule today would mean 210 escape markers, which is the
+# escape hatch this gate exists to close, so the count is reported per document and only the
+# total is gated. The ceiling is what the tree carried when it was first measured at the
+# window above, on 1 September 2026, so the number can fall and cannot grow. At the old 2
+# percent window it read 149, which is the measure of how much the width was hiding.
+DESIGN_UNTRACED_CEILING = 210
+
 
 def allow_reason(line, table=False):
     """A stated reason has to contain 15 characters of actual reason. Counting characters
@@ -579,29 +660,20 @@ def collect_dimensioned(node, out, key=""):
             out.add((float(node) * du[1], du[0]))
 
 
-def check_numeric_coverage(rel, data):
-    """Every number in the submission narrative that carries a physical unit has to match
-    a computed value in the same dimension, be the 10 N requirement, or sit inside an
-    exempt region: a blockquote, an allow-line, or an allow-table.
+def scan_coverage(rel, data):
+    """Walk a document and sort every dimensioned number into traced, untraced and exempt.
 
-    The YAML front matter block is not narrative at all and is skipped before any of that,
-    per `front_matter_lines`.
-
-    Exempt does not mean free. A number inside an exempt region that still fails to trace
-    counts against a hard ceiling, because the promise being kept here is that at most a
-    handful of numbers in the submission are unchecked by anything. Counting markers let
-    one marker hide a twenty-row table and kept that promise only on paper."""
+    Split out of `check_numeric_coverage` so the same scan can be run over the design
+    documents without duplicating the parser, which is where a second copy would drift."""
     p = ROOT / rel
     if not p.is_file():
-        return False
+        return None
     known = set(COVERAGE_ALLOW)
     collect_dimensioned(data, known)
 
     text = p.read_text(encoding="utf-8")
     bare = [m.group(0) for m in ANY_ALLOW.finditer(text)
             if len(m.group(2).strip()) < MIN_ALLOW_REASON]
-    ok = report(not bare, f"{rel} every audit escape states a reason",
-                "; ".join(bare[:3]) if bare else "")
 
     front_matter = front_matter_lines(text)
     unmatched, unchecked, table_exempt = [], [], False
@@ -621,10 +693,31 @@ def check_numeric_coverage(rel, data):
             val, unit = float(m.group(1)), m.group(2)
             dim, scale = PROSE_UNITS[unit]
             canon = val * scale
-            if any(d == dim and abs(canon - k) <= max(DISPLAY_TOL * abs(k), 1e-12)
+            if any(d == dim and abs(canon - k) <= max(COVERAGE_TOL * abs(k), 1e-12)
                    for k, d in known):
                 continue                       # traces, so an exemption costs nothing
             (unchecked if exempt else unmatched).append(f"{i}: {m.group(0)}")
+    return {"bare": bare, "unmatched": unmatched, "unchecked": unchecked}
+
+
+def check_numeric_coverage(rel, data):
+    """Every number in the submission narrative that carries a physical unit has to match
+    a computed value in the same dimension, be the 10 N requirement, or sit inside an
+    exempt region: a blockquote, an allow-line, or an allow-table.
+
+    The YAML front matter block is not narrative at all and is skipped before any of that,
+    per `front_matter_lines`.
+
+    Exempt does not mean free. A number inside an exempt region that still fails to trace
+    counts against a hard ceiling, because the promise being kept here is that at most a
+    handful of numbers in the submission are unchecked by anything. Counting markers let
+    one marker hide a twenty-row table and kept that promise only on paper."""
+    scan = scan_coverage(rel, data)
+    if scan is None:
+        return False
+    bare, unmatched, unchecked = scan["bare"], scan["unmatched"], scan["unchecked"]
+    ok = report(not bare, f"{rel} every audit escape states a reason",
+                "; ".join(bare[:3]) if bare else "")
     ok &= report(not unmatched, f"{rel} narrative numbers all trace to numbers.json",
                  f"{len(unmatched)} untraced: " + "; ".join(unmatched[:5]) if unmatched else "")
     ok &= report(len(unchecked) <= MAX_UNCHECKED_NUMBERS,
@@ -632,6 +725,43 @@ def check_numeric_coverage(rel, data):
                  f"{len(unchecked)} exempted: " + "; ".join(unchecked[:6])
                  if unchecked else "")
     return ok
+
+
+DESIGN_DOCS = ["stage-1/design/01-configuration.md",
+               "stage-1/design/02-rotor-sizing.md",
+               "stage-1/design/03-pitch-and-vectoring.md",
+               "stage-1/design/04-thrust-and-power.md",
+               "stage-1/design/05-mass-and-tw.md",
+               "stage-1/design/06-materials-and-manufacturing.md",
+               "stage-1/design/07-team-and-execution.md",
+               "stage-1/design/08-structure-and-loads.md",
+               "stage-1/design/09-packaging-and-integration.md"]
+
+
+def check_design_coverage(data):
+    """The same audit over the design documents, counted rather than enforced.
+
+    The submission carries the hard rule because it is the thing that gets read by someone
+    who cannot check it. The nine design documents are working files: they quote source
+    data, intermediate values and figures a later week superseded, and none of that belongs
+    in numbers.json. A hard rule here would be answered with escape markers, which is the
+    hatch the audit exists to shut.
+
+    So the total is a ratchet against what the tree carried when this was first measured. It
+    can fall and it cannot grow, and every document's count is printed so the ones carrying
+    the debt are visible rather than averaged away."""
+    total, per = 0, []
+    for rel in DESIGN_DOCS:
+        scan = scan_coverage(rel, data)
+        if scan is None:
+            continue
+        n = len(scan["unmatched"])
+        total += n
+        per.append(f"{rel.rsplit('/', 1)[-1]} {n}")
+    note("design documents, numbers not traced to numbers.json", "; ".join(per))
+    return report(total <= DESIGN_UNTRACED_CEILING,
+                  f"the design documents trace no worse than {DESIGN_UNTRACED_CEILING} "
+                  f"untraced numbers", f"{total} across {len(per)} documents")
 
 
 def section_under(text, keyword):
@@ -894,6 +1024,30 @@ def check_week2_selection(data, r):
                          "week2: the selected candidate wins on conservative thrust to weight",
                          f"selected {sel[0].get('module_tw_conservative')}, "
                          f"best on the table {max(tws)}")
+        # Every row's thrust to weight comes from that row's OWN mass and thrust. Neither
+        # column was recomputed from anything, so the worst of three configurations could be
+        # declared the winner and the comparison would still pass its shape check.
+        lo_c, nom_c = (num(data, "performance.blade_area_coeff_low"),
+                       num(data, "performance.blade_area_coeff"))
+        wrong = []
+        for x in cands:
+            if not isinstance(x, dict):
+                continue
+            th, mn = num(x, "thrust_N"), num(x, "module_mass_g")
+            mc_, tw_n = num(x, "module_mass_conservative_g"), num(x, "module_tw")
+            tw_c = num(x, "module_tw_conservative")
+            nm = str(x.get("config", "?"))
+            if None not in (th, mn, tw_n) and not close(tw_n, th / (mn / 1000.0 * G), DISPLAY_TOL):
+                wrong.append(f"{nm}: states {tw_n} against {th / (mn / 1000.0 * G):.4f} from "
+                             f"{th} N over {mn} g")
+            if None not in (th, mc_, tw_c, lo_c, nom_c):
+                want = th * (lo_c / nom_c) / (mc_ / 1000.0 * G)
+                if not close(tw_c, want, DISPLAY_TOL):
+                    wrong.append(f"{nm}: states {tw_c} conservative against {want:.4f} from "
+                                 f"the low coefficient over {mc_} g")
+        ok &= report(not wrong,
+                     "week2: every candidate thrust to weight reproduces from its own row",
+                     "; ".join(wrong[:3]) if wrong else f"{len(cands)} rows recomputed")
         if len(sel) == 1:
             env_total, mm = num(data, "results.mass_envelope_g"), sel[0].get("module_mass_g")
             if env_total and isinstance(mm, (int, float)) and not isinstance(mm, bool):
@@ -964,10 +1118,12 @@ def week2(data):
         ok &= report(not bad, "week2: every envelope line has nominal, conservative and basis",
                      "; ".join(bad[:5]) if bad else "")
         items = [str(b.get("item", "")).strip().lower() for b in env if isinstance(b, dict)]
-        names = " ".join(items)
-        absent = [x for x in MODULE_COMPONENTS if x not in names]
+        covered = component_cover(items)
+        absent = [x for x in MODULE_COMPONENTS if x not in covered]
         ok &= report(not absent, "week2: envelope covers every component in the module boundary",
-                     "missing: " + ", ".join(absent) if absent else "")
+                     f"{len(covered)} of {len(MODULE_COMPONENTS)} components, each on a line "
+                     f"of its own",
+                     fail_detail="no line of its own for: " + ", ".join(absent))
         # Week 4's budget lines point back at these names, so two lines sharing one name
         # would merge two components into a single group nobody can tell apart.
         ok &= report(len(set(items)) == len(items) and "" not in items,
@@ -1017,7 +1173,10 @@ def week2(data):
         ok &= report(SOLIDITY_MIN <= sigma <= SOLIDITY_MAX,
                      f"week2: solidity is inside the measured optimum band "
                      f"{SOLIDITY_MIN} to {SOLIDITY_MAX}",
-                     f"sigma {sigma:.4f}, so the transferred coefficient needs re-deriving")
+                     f"sigma {sigma:.4f}",
+                     fail_detail=f"sigma {sigma:.4f} is outside the band the coefficient was "
+                                 f"measured in, so the transferred coefficient needs "
+                                 f"re-deriving")
 
     cl, cn = num(data, "performance.blade_area_coeff_low"), num(data, "performance.blade_area_coeff")
     if cl and cn:
@@ -1102,12 +1261,12 @@ def week2(data):
         # 2.252 on the same page. Presence, not a conditional on the design number: which
         # numeric token in a document is a thrust to weight is not something a regex knows.
         for rel, _heads in WEEK2_DOCS:
-            ok &= report(states_value(rel, tw),
+            ok &= report(states_value(rel, tw, keywords=TW_WORDS),
                          f"week2: {rel} states the stacked conservative T/W",
                          f"T/W {tw:.3f}",
-                         fail_detail=f"no number within {TOL:.1%} of {tw:.4f} in the "
-                                     f"narrative. Either it states the design case alone, "
-                                     f"or a later week moved the conservative mass and "
+                         fail_detail=f"no number within {TOL:.1%} of {tw:.4f} sitting beside "
+                                     f"a word that names it. Either it states the design case "
+                                     f"alone, or a later week moved the conservative mass and "
                                      f"this document still quotes the old figure. See D34")
 
         # A miss is allowed to pass week 2 only if it hands week 4 an arithmetic target
@@ -1183,6 +1342,7 @@ def week2(data):
     # Thrust is a free variable, so the sensitivity of everything to it gets frozen here.
     # Week 4 may only pick a row from this table, never invent a new thrust under deadline.
     ok &= check_thrust_sensitivity(data, r)
+    ok &= check_fm_transfer(data)
     ok &= check_week2_selection(data, r)
 
     if "electrical_power_W" in r:
@@ -1397,7 +1557,15 @@ def week3(data):
         "packaging.envelope_length_mm", "packaging.envelope_width_mm",
         "packaging.envelope_height_mm", "packaging.mount_points",
         "pitch.phase_authority_deg", "pitch.schedule_rms_residual_deg",
+        "pitch.horn_m", "pitch.pitch_link_m",
     ], "week3: numbers.json carries the pitch and packaging schema")
+    # The four-bar closure self-test needs five link dimensions and three of them were
+    # required by nothing, so deleting one switched the closure check off and the suite
+    # still reported success. The construction angle is legitimately negative, so it is
+    # checked for being a finite number rather than a positive one.
+    ok &= report(snum(data, "pitch.construction_angle_deg") is not None,
+                 "week3: the four-bar construction angle is stated",
+                 f"{dotted(data, 'pitch.construction_angle_deg')}")
     for key, (_, _, w) in ROW_SPECS.items():
         if w == 3:
             ok &= require_rows(data, key, 3)
@@ -1791,9 +1959,16 @@ def check_drive_margin(data):
                      and isinstance(r.get("thrust_N"), (int, float))
                      and r["thrust_N"] < thrust]
             clear = [t for t in below if t >= floor]
-            report(True, "week4: no lower sensitivity row clears the stacked floor"
-                   if not clear else "week4: a lower sensitivity row would also clear",
-                   f"{len(below)} row(s) below the design point, {len(clear)} of them clear")
+            # A real gate on both arms. D61's whole argument for tolerating the unsourced
+            # derate is that the design point cannot be backed off to relieve the drive, and
+            # that argument is only true while no lower row clears the stacked floor. If one
+            # ever does, the decision is wrong rather than the table.
+            ok &= report(not clear,
+                         "week4: no lower sensitivity row clears the stacked floor",
+                         f"{len(below)} row(s) below the design point, none of them clear",
+                         fail_detail=f"{len(clear)} of {len(below)} lower row(s) clear "
+                                     f"{floor:.4f} N, so D61's argument that the design point "
+                                     f"cannot be lowered no longer holds")
     return ok
 
 
@@ -1858,13 +2033,16 @@ def check_pitch_bearing_duty(data):
     ok &= report(floor is not None and floor >= PITCH_BEARING_S0_FLOOR,
                  "week4: the oscillating static safety floor is at least 2.0",
                  f"declared {floor}" if floor is not None else "not declared")
-    if ratio < 1.0 and floor is not None and s0 is not None:
+    # One arm, not two. The floor is declared for this duty and it applies whatever the
+    # recirculation ratio turns out to be; the ratio says how much the floor matters, not
+    # whether it is in force. The branch this replaces passed on both arms, so a bearing
+    # that recirculated was certified by a printed observation.
+    if floor is not None and s0 is not None:
         ok &= report(s0 >= floor,
-                     "week4: a bearing that never recirculates clears the oscillating floor",
-                     f"{s0:.4f} against {floor}, ratio {ratio:.4f} of full recirculation")
-    else:
-        report(True, "week4: the pitch bearing recirculates, so the strength floor governs",
-               f"ratio {ratio:.4f}")
+                     "week4: the pitch bearing clears the oscillating static floor",
+                     f"{s0:.4f} against {floor}, at {ratio:.4f} of full recirculation"
+                     + (", so it wears where it sits" if ratio < 1.0 else
+                        ", so it rolls onto fresh track"))
 
     # Friction stays out of the power budget only while it is small enough to round away.
     # If a bearing change pushes it past a percent of shaft power it becomes a budget line.
@@ -1879,6 +2057,577 @@ def check_pitch_bearing_duty(data):
     ok &= report(alt is not None and fw is not None and alt > fw,
                  "week4: the plain bearing fallback is costed against the ball bearing",
                  f"{alt} W against {fw} W" if alt is not None else "not costed")
+    return ok
+
+
+
+# ------------------------------------------------ the structure, recomputed here
+
+# Until now this file read the blade allowable, the shaft allowable, the link allowable and
+# the two blade sweeps straight out of numbers.json. Every one of them is the numerator of
+# a margin, so reading them left the margins half checked: the demand recomputed and the
+# strength taken on trust. Foam a thousand times softer than the blade assumes passed with
+# a 2.0 overspeed margin, because nothing connected the moduli to the allowable.
+#
+# So the section is integrated a second time, here, from the blade build published in
+# stage-1/design/06-materials-and-manufacturing.md. This is deliberately not an import of
+# tools/structure.py. A gate that calls the solver it is checking proves only that the
+# solver agrees with itself. Two implementations that have to agree is the point, and
+# either one drifting fails this.
+#
+# The moduli are read from numbers.json rather than repeated here, so a material change
+# moves the allowable on both sides of the comparison and cannot be spent quietly.
+BLADE_FOAM_FILL = 0.88             # fraction of the section the core fills
+BLADE_SKIN_AREAL_KG_M2 = 0.22      # cured areal mass of the two ply skin
+BLADE_SKIN_RHO = 1550.0
+BLADE_SPAR_DIA_FRAC = 0.12         # spar outer diameter as a fraction of chord
+BLADE_SPAR_WALL_M = 0.0005
+BLADE_FIT_OD_M, BLADE_FIT_LEN_M, BLADE_BOND_G = 0.014, 0.010, 1.35
+SPAR_E_PA, SPAR_SIGMA_PA, SPAR_TAU_PA = 130e9, 700e6, 55e6
+SKIN_SIGMA_PA, SKIN_G_PA = 400e6, 4.0e9
+BLADE_FOAM_RHO = 52.0
+AL_RHO, AL_SIGMA_PA = 2810.0, 400e6
+SHAFT_OD_M, SHAFT_WALL_M = 0.016, 0.0015
+HORN_W_M, HORN_T_M = 0.008, 0.004
+LINK_OD_M, LINK_WALL_M = 0.004, 0.0005
+ROD_END_STATIC_N = 600.0
+# Deliberately not the solver's 2000. The integral has to be converged, not reproduced step
+# for step: two implementations that agree only at an identical step count agree about
+# their arithmetic and not about the section.
+SECTION_STEPS = 1201
+
+
+def naca_half_thickness(x, t=0.20):
+    return 5 * t * (0.2969 * math.sqrt(x) - 0.1260 * x - 0.3516 * x * x
+                    + 0.2843 * x ** 3 - 0.1015 * x ** 4)
+
+
+def naca_section(chord_m, n=SECTION_STEPS):
+    """Area, second moment about the chord line, perimeter, the skin shell integral and the
+    half thickness, all per unit span, for the symmetric section the blade is drawn on."""
+    area = i_solid = perim = y2ds = y_max = 0.0
+    prev = None
+    for i in range(n + 1):
+        x = i / n
+        yt = naca_half_thickness(x) * chord_m
+        xs = x * chord_m
+        y_max = max(y_max, yt)
+        if prev is not None:
+            dx = xs - prev[0]
+            area += (yt + prev[1]) * dx
+            i_solid += (1.0 / 3.0) * (yt ** 3 + prev[1] ** 3) * dx
+            ds = math.hypot(dx, yt - prev[1])
+            perim += 2.0 * ds
+            y2ds += (yt * yt + prev[1] * prev[1]) * ds
+        prev = (xs, yt)
+    return {"area_m2": area, "i_chord_m4": i_solid, "perimeter_m": perim,
+            "skin_y2_ds_m3": y2ds, "y_max_m": y_max}
+
+
+def thin_tube(od_m, wall_m):
+    id_m = od_m - 2 * wall_m
+    return {"area_m2": math.pi / 4.0 * (od_m ** 2 - id_m ** 2),
+            "i_m4": math.pi / 64.0 * (od_m ** 4 - id_m ** 4),
+            "j_m4": math.pi / 32.0 * (od_m ** 4 - id_m ** 4)}
+
+
+def blade_section(data, skin_factor=1.0, foam_factor=1.0, foam_rho=None):
+    """The blade, rebuilt from the published section and the stored moduli.
+
+    `skin_factor` and `foam_factor` knock the moduli down so the two sensitivity sweeps can
+    be recomputed rather than believed. `foam_rho` substitutes a grade, which moves the mass
+    and therefore the centrifugal demand as well as the allowable."""
+    chord, span = num(data, "geometry.chord_m"), num(data, "geometry.span_m")
+    es = num(data, "structure.blade_skin_modulus_GPa")
+    ef = num(data, "structure.blade_foam_modulus_MPa")
+    gf = num(data, "structure.blade_foam_shear_MPa")
+    if None in (chord, span, es, ef, gf):
+        return None
+    es, ef, gf = es * 1e9 * skin_factor, ef * 1e6 * foam_factor, gf * 1e6 * foam_factor
+    sec = naca_section(chord)
+    skin_t = BLADE_SKIN_AREAL_KG_M2 / BLADE_SKIN_RHO
+    spar = thin_tube(BLADE_SPAR_DIA_FRAC * chord, BLADE_SPAR_WALL_M)
+
+    ei = (es * skin_t * sec["skin_y2_ds_m3"] + SPAR_E_PA * spar["i_m4"]
+          + ef * sec["i_chord_m4"] * BLADE_FOAM_FILL)
+    gj = 4.0 * sec["area_m2"] ** 2 * SKIN_G_PA / (sec["perimeter_m"] / skin_t)
+    wrinkle = 0.5 * (es * ef * gf) ** (1.0 / 3.0)
+    allow_skin = min(wrinkle, SKIN_SIGMA_PA) * ei / (es * sec["y_max_m"])
+    allow_spar = SPAR_SIGMA_PA * ei / (SPAR_E_PA * BLADE_SPAR_DIA_FRAC * chord / 2.0)
+
+    rho = BLADE_FOAM_RHO if foam_rho is None else foam_rho
+    fit = thin_tube(BLADE_FIT_OD_M,
+                    (BLADE_FIT_OD_M - BLADE_SPAR_DIA_FRAC * chord) / 2.0)
+    mass_g = (sec["area_m2"] * BLADE_FOAM_FILL * span * rho * 1000.0
+              + sec["perimeter_m"] * span * BLADE_SKIN_AREAL_KG_M2 * 1000.0
+              + spar["area_m2"] * span * BLADE_SKIN_RHO * 1000.0
+              + 2 * fit["area_m2"] * BLADE_FIT_LEN_M * AL_RHO * 1000.0 + BLADE_BOND_G)
+    return {"section": sec, "ei_Nm2": ei, "gj_Nm2": gj, "wrinkle_Pa": wrinkle,
+            "allow_skin_Nm": allow_skin, "allow_spar_Nm": allow_spar,
+            "allow_Nm": min(allow_skin, allow_spar), "mass_g": mass_g}
+
+
+def blade_overspeed_demand(data, blade_mass_g):
+    """Combined root moment at the declared overspeed, for a blade of this mass. Aero and
+    centrifugal both scale with the square of speed, so the whole thing does."""
+    R, rpm = num(data, "geometry.radius_m"), num(data, "operating.rpm")
+    nb, thrust = num(data, "geometry.blades"), num(data, "performance.thrust_N")
+    lf, lever = num(data, "structure.blade_load_factor"), num(data, "structure.blade_load_lever_m")
+    ov = num(data, "structure.overspeed_factor")
+    if None in (R, rpm, nb, thrust, lf, lever, ov):
+        return None
+    fc = blade_mass_g / 1000.0 * (rpm * 2 * math.pi / 60.0) ** 2 * R
+    return (thrust / nb * lf * lever + fc * lever) * ov ** 2
+
+
+def check_structure_recompute(data):
+    """The strength side of every structural margin, recomputed rather than read.
+
+    This is the half that was missing. `blade_allowable_Nm`, `shaft_allowable_Nm`,
+    `pitch_link_allowable_N` and `blade_attachment_allowable_N` are the numerators of four
+    margins and all four used to be stored numbers nothing checked."""
+    ok = True
+    b = blade_section(data)
+    if b is None:
+        return report(False, "week4: the blade allowable is recomputed from the section",
+                      "geometry or the blade moduli are missing")
+    for key, got, label in [
+            ("structure.blade_ei_Nm2", b["ei_Nm2"], "blade bending stiffness"),
+            ("structure.blade_gj_Nm2", b["gj_Nm2"], "blade torsional stiffness"),
+            ("structure.blade_wrinkle_stress_MPa", b["wrinkle_Pa"] / 1e6,
+             "the skin wrinkling stress"),
+            ("structure.blade_allow_skin_Nm", b["allow_skin_Nm"],
+             "the skin limited allowable moment"),
+            ("structure.blade_allow_spar_Nm", b["allow_spar_Nm"],
+             "the spar limited allowable moment"),
+            ("structure.blade_allowable_Nm", b["allow_Nm"], "the blade allowable moment"),
+            ("structure.blade_mass_kg", b["mass_g"] / 1000.0, "the blade mass")]:
+        ok &= report(close(num(data, key), got, DISPLAY_TOL),
+                     f"week4: {label} reproduces from the integrated section",
+                     f"computed {got:.6g}, stated {dotted(data, key)}")
+
+    # Deflection and wind up come off the same two stiffnesses, so they cost nothing more.
+    span, chord = num(data, "geometry.span_m"), num(data, "geometry.chord_m")
+    nb, thrust = num(data, "geometry.blades"), num(data, "performance.thrust_N")
+    ptm = num(data, "performance.blade_load_peak_to_mean")
+    axis = num(data, "geometry.pitch_axis_pct_chord")
+    if None not in (span, chord, nb, thrust, ptm, axis):
+        peak = thrust / nb * ptm
+        ok &= report(close(num(data, "performance.blade_tip_deflection_mm"),
+                           5.0 * peak * span ** 3 / (384.0 * b["ei_Nm2"]) * 1000.0,
+                           DISPLAY_TOL),
+                     "week4: blade tip deflection reproduces from EI and the peak load",
+                     f"computed {5.0 * peak * span ** 3 / (384.0 * b['ei_Nm2']) * 1000.0:.4f} mm")
+        tw_rad = peak * (axis - 25.0) / 100.0 * chord * span / (8.0 * b["gj_Nm2"])
+        ok &= report(close(num(data, "performance.blade_twist_deg"),
+                           math.degrees(tw_rad), DISPLAY_TOL),
+                     "week4: blade aerodynamic twist reproduces from GJ",
+                     f"computed {math.degrees(tw_rad):.4f} deg")
+    pbm = num(data, "pitch.peak_blade_moment_Nm")
+    if pbm and span:
+        wu = math.degrees(pbm * span / (2.0 * b["gj_Nm2"]))
+        ok &= report(close(num(data, "structure.blade_windup_deg"), wu, DISPLAY_TOL),
+                     "week4: blade wind up reproduces from GJ and the pitching moment",
+                     f"computed {wu:.4f} deg")
+
+    # Shaft. Torsion allowable, and the combined stress margin the file used to floor and
+    # leave alone because the section properties lived only in the solver.
+    sh = thin_tube(SHAFT_OD_M, SHAFT_WALL_M)
+    allow = SPAR_TAU_PA * sh["j_m4"] / (SHAFT_OD_M / 2.0)
+    ok &= report(close(num(data, "structure.shaft_allowable_Nm"), allow, DISPLAY_TOL),
+                 "week4: the shaft allowable torque reproduces from the tube section",
+                 f"computed {allow:.4f} Nm, stated {dotted(data, 'structure.shaft_allowable_Nm')}")
+    st, sb = num(data, "structure.shaft_torque_Nm"), num(data, "structure.shaft_bending_Nm")
+    if None not in (st, sb):
+        tau = st * (SHAFT_OD_M / 2.0) / sh["j_m4"]
+        sig = sb * (SHAFT_OD_M / 2.0) / sh["i_m4"]
+        margin = SPAR_TAU_PA / math.hypot(sig / 2.0, tau)
+        ok &= report(close(num(data, "structure.shaft_combined_margin"), margin, DISPLAY_TOL),
+                     "week4: the shaft combined margin reproduces from bending and torsion",
+                     f"computed {margin:.4f}, stated "
+                     f"{dotted(data, 'structure.shaft_combined_margin')}")
+
+    # Pitch load path. The horn is the weakest of the three and that is what has to show.
+    horn_m, link_m = num(data, "pitch.horn_m"), num(data, "pitch.pitch_link_m")
+    if None not in (horn_m, link_m):
+        horn = AL_SIGMA_PA * HORN_W_M * HORN_T_M ** 2 / 6.0 / horn_m
+        buckle = (math.pi ** 2 * SPAR_E_PA * thin_tube(LINK_OD_M, LINK_WALL_M)["i_m4"]
+                  / link_m ** 2)
+        want = min(horn, ROD_END_STATIC_N, buckle)
+        ok &= report(close(num(data, "structure.pitch_link_allowable_N"), want, DISPLAY_TOL),
+                     "week4: the pitch link allowable is the weakest of horn, rod end and "
+                     "buckling",
+                     f"horn {horn:.1f} N, rod end {ROD_END_STATIC_N:.0f} N, "
+                     f"buckling {buckle:.1f} N, so {want:.1f} N")
+    return ok
+
+
+def check_bearing_rating(data):
+    """The tightest margin in the module rests on a static rating from a supplier listing
+    with no supplier named. ISO 76 gives that rating from the ball complement this design
+    already publishes, so the listing does not have to be taken on trust: the attachment has
+    to clear its floor on the computed rating, whatever a listing says.
+
+    Two blades hold each attachment, so the allowable is two bearings."""
+    z = num(data, "structure.pitch_bearing_balls")
+    dw = num(data, "structure.pitch_bearing_ball_mm")
+    fc_over = num(data, "structure.centrifugal_load_overspeed_N")
+    load = num(data, "structure.pitch_bearing_load_N")
+    floor = num(data, "structure.pitch_bearing_static_safety_floor")
+    stated = num(data, "structure.blade_attachment_allowable_N")
+    if None in (z, dw, fc_over, load, floor, stated):
+        return report(False, "week4: the pitch bearing rating is checkable against ISO 76",
+                      "the ball complement or the attachment allowable is missing")
+    c0 = ISO76_F0 * z * dw ** 2
+    ok = report(stated <= 2 * c0 * (1 + DISPLAY_TOL),
+                "week4: the attachment allowable is no higher than two ISO 76 ratings",
+                f"stated {stated:.1f} N against {2 * c0:.1f} N from {z:.0f} balls of "
+                f"{dw} mm, a ratio of {stated / (2 * c0):.3f}")
+    ok &= report(2 * c0 / fc_over >= MIN_MARGIN,
+                 f"week4: the attachment clears {MIN_MARGIN} on the ISO 76 rating",
+                 f"{2 * c0 / fc_over:.4f} at {fc_over:.1f} N of overspeed pull")
+    ok &= report(c0 / load >= floor,
+                 "week4: the oscillating static safety clears its floor on the ISO 76 rating",
+                 f"{c0 / load:.4f} against {floor}")
+    return ok
+
+
+def check_blade_sweeps(data):
+    """The two sensitivity results, recomputed. They used to be stored numbers with a floor
+    applied to them, which holds the answer and not the question."""
+    ok = True
+    base = blade_section(data)
+    if base is None:
+        return report(False, "week4: the blade sweeps are recomputable", "no section")
+    demand = blade_overspeed_demand(data, base["mass_g"])
+    if demand is None:
+        return report(False, "week4: the blade sweeps are recomputable", "no overspeed demand")
+
+    low = num(data, "structure.blade_skin_band_low")
+    if low is not None:
+        worst = min(
+            (blade_section(data, skin_factor=low + (1.0 - low) * i / 200.0)["allow_Nm"]
+             for i in range(201)), default=None) / demand
+        ok &= report(close(num(data, "structure.blade_skin_band_worst_margin"),
+                           worst, DISPLAY_TOL),
+                     "week4: the skin modulus sweep reproduces across the declared band",
+                     f"computed {worst:.4f}, stated "
+                     f"{dotted(data, 'structure.blade_skin_band_worst_margin')}")
+        ok &= report(worst >= MIN_MARGIN,
+                     "week4: the blade clears the floor anywhere in the skin modulus band",
+                     f"worst {worst:.4f} against {MIN_MARGIN}")
+
+    lo, hi = 0.02, 1.0
+    for _ in range(60):
+        mid = 0.5 * (lo + hi)
+        b = blade_section(data, foam_factor=mid)
+        if b["allow_Nm"] / demand < MIN_MARGIN:
+            lo = mid
+        else:
+            hi = mid
+    kd = 0.5 * (lo + hi)
+    ok &= report(close(num(data, "structure.blade_foam_knockdown_at_floor"), kd, DISPLAY_TOL),
+                 "week4: the foam knockdown that reaches the floor reproduces",
+                 f"computed {kd:.4f}, stated "
+                 f"{dotted(data, 'structure.blade_foam_knockdown_at_floor')}")
+    ok &= report(kd < 1.0,
+                 "week4: the delivered foam has room before the blade reaches the floor",
+                 f"the floor arrives at {kd:.4f} of the published foam moduli")
+
+    # The grade substitution a shop would actually make. Lighter foam is softer AND lighter,
+    # so the demand falls with the allowable and the sweep above overstates the loss. That
+    # only reproduces if the substitute grade's own properties are on the record: a stated
+    # margin for an unnamed material is a number nobody can check.
+    dg_g = num(data, "structure.blade_foam_downgrade_blade_g")
+    dg_m = num(data, "structure.blade_foam_downgrade_margin")
+    e2 = num(data, "structure.blade_foam_downgrade_modulus_MPa")
+    g2 = num(data, "structure.blade_foam_downgrade_shear_MPa")
+    r2 = num(data, "structure.blade_foam_downgrade_density_kgm3")
+    if None in (e2, g2, r2):
+        ok &= report(False,
+                     "week4: the substituted foam grade states its own properties",
+                     "structure carries blade_foam_downgrade_margin and no modulus, shear "
+                     "modulus or density for the grade it belongs to, so the margin cannot "
+                     "be recomputed")
+    elif None not in (dg_g, dg_m):
+        e0, g0 = (num(data, "structure.blade_foam_modulus_MPa"),
+                  num(data, "structure.blade_foam_shear_MPa"))
+        sub_b = blade_section(data, foam_factor=e2 / e0, foam_rho=r2)
+        # Modulus and shear modulus do not fall by the same factor between grades, so the
+        # single knockdown blade_section takes is not enough. Rebuild the wrinkling stress
+        # on both of the substitute's own moduli.
+        es = num(data, "structure.blade_skin_modulus_GPa") * 1e9
+        sec, span = base["section"], num(data, "geometry.span_m")
+        skin_t = BLADE_SKIN_AREAL_KG_M2 / BLADE_SKIN_RHO
+        spar = thin_tube(BLADE_SPAR_DIA_FRAC * num(data, "geometry.chord_m"),
+                         BLADE_SPAR_WALL_M)
+        ei2 = (es * skin_t * sec["skin_y2_ds_m3"] + SPAR_E_PA * spar["i_m4"]
+               + e2 * 1e6 * sec["i_chord_m4"] * BLADE_FOAM_FILL)
+        wr2 = 0.5 * (es * e2 * 1e6 * g2 * 1e6) ** (1.0 / 3.0)
+        allow2 = min(min(wr2, SKIN_SIGMA_PA) * ei2 / (es * sec["y_max_m"]),
+                     SPAR_SIGMA_PA * ei2 / (SPAR_E_PA * BLADE_SPAR_DIA_FRAC
+                                            * num(data, "geometry.chord_m") / 2.0))
+        got = allow2 / blade_overspeed_demand(data, sub_b["mass_g"])
+        ok &= report(close(dg_g, sub_b["mass_g"], DISPLAY_TOL),
+                     "week4: the substituted blade mass reproduces at the lighter grade",
+                     f"computed {sub_b['mass_g']:.3f} g at {r2} kg/m3, stated {dg_g}")
+        ok &= report(close(dg_m, got, DISPLAY_TOL),
+                     "week4: the substituted grade margin reproduces from its own moduli",
+                     f"computed {got:.4f}, stated {dg_m}")
+        ok &= report(got >= MIN_MARGIN,
+                     "week4: the blade survives the lighter foam grade a shop would "
+                     "substitute", f"{got:.4f} against {MIN_MARGIN}")
+    return ok
+
+
+def check_fm_transfer(data):
+    """Figure of merit and thrust coefficient are not independent quantities.
+
+    FM is C_T^1.5 over root two times C_P. Take the thrust coefficient a fraction k below
+    the rotor it was measured on, hold that rotor's power coefficient, and the figure of
+    merit that follows is k^1.5 times the measured one, not the measured one. Cutting the
+    thrust for conservatism and keeping the figure of merit spends the same conservatism a
+    second time, as optimism, and it lands on the power the drive is selected against.
+
+    The scenario row the coefficient came from has to say what figure of merit was measured
+    alongside it. Without that pairing the transfer is two numbers from one rotor used as
+    though they came from two."""
+    fm = num(data, "performance.figure_of_merit")
+    cn = num(data, "performance.blade_area_coeff")
+    scen = dotted(data, "coefficient_scenarios")
+    if fm is None or cn is None or not isinstance(scen, list):
+        return report(False, "week2: the figure of merit names the rotor it came from",
+                      "figure_of_merit, blade_area_coeff or coefficient_scenarios missing")
+    measured = [x for x in scen if isinstance(x, dict)
+                and str(x.get("evidence_class")) == "measured"]
+    if not measured:
+        note("week2: no measured coefficient scenario, so the figure of merit transfers "
+             "from nothing and there is no consistency to check")
+        return True
+    paired = [x for x in measured
+              if isinstance(x.get("figure_of_merit"), (int, float))
+              and not isinstance(x.get("figure_of_merit"), bool)]
+    if not paired:
+        return report(False, "week2: the measured scenario pairs its coefficient with the "
+                             "figure of merit measured beside it",
+                      "; ".join(str(x.get("name", "?")) for x in measured[:3])
+                      + " state a coefficient and no figure_of_merit, so the transfer "
+                        "cannot be checked for consistency")
+    ok = True
+    for src in paired:
+        cs, fs = num(src, "blade_area_coeff"), num(src, "figure_of_merit")
+        if cs is None or fs is None:
+            continue
+        ceiling = fs * (cn / cs) ** 1.5
+        ok &= report(fm <= ceiling * (1 + DISPLAY_TOL),
+                     "week2: the figure of merit is consistent with the coefficient it was "
+                     "transferred with",
+                     f"{src.get('name', '?')} measured {cs} at FM {fs}; this design takes "
+                     f"{cn}, a factor of {cn / cs:.4f}, so the figure of merit that follows "
+                     f"is {ceiling:.4f} and the file states {fm}")
+    return ok
+
+
+def check_motor_current(data):
+    """Current in a permanent magnet motor comes from torque, not from dividing input power
+    by pack voltage. That quotient is the current the motor would draw if it were an ideal
+    resistor at unity power factor, and it runs low by roughly the efficiency.
+
+    Kt is 9.5493 over KV. The idle current the datasheet publishes is part of the draw and
+    was being dropped. The selected motor's continuous torque is also compared against the
+    shaft torque it has to make, which the design's own text calls the tight one and which
+    no gate anywhere touched."""
+    drives = dotted(data, "drive_candidates")
+    if not isinstance(drives, list):
+        return report(False, "week4: motor current follows from torque", "no drive_candidates")
+    sel = [x for x in drives if isinstance(x, dict) and x.get("selected") is True]
+    if len(sel) != 1:
+        return report(False, "week4: motor current follows from torque",
+                      f"{len(sel)} drives marked selected")
+    d = sel[0]
+    kv, cont_t = num(d, "kv"), num(d, "continuous_torque_Nm")
+    cont_a = num(d, "continuous_current_A")
+    tq = num(data, "structure.motor_shaft_torque_Nm") or num(data, "performance.motor_torque_Nm")
+    amps = num(data, "performance.motor_input_current_A")
+    idle = num(data, "performance.motor_idle_current_A")
+    if None in (kv, tq, amps):
+        return report(False, "week4: motor current follows from torque",
+                      "KV, motor shaft torque or the stated current is missing")
+    kt = 9.5493 / kv
+    ok = report(idle is not None,
+                "week4: the motor idle current is carried in the draw",
+                f"{idle} A" if idle is not None else
+                "performance.motor_idle_current_A is not stored, and evidence row E12 "
+                "records it, so the stated draw is short by the idle current")
+    want = tq / kt + (idle or 0.0)
+    ok &= report(close(amps, want, DISPLAY_TOL),
+                 "week4: the stated motor current reproduces from torque and Kt",
+                 f"{tq} Nm over Kt {kt:.6f} gives {tq / kt:.4f} A"
+                 + (f" plus {idle} A idle" if idle else "")
+                 + f", so {want:.4f} A against a stated {amps}")
+    if cont_a is not None:
+        ok &= report(want <= cont_a,
+                     "week4: the derated continuous current covers the current the torque "
+                     "demands", f"{want:.4f} A against {cont_a} A")
+    if cont_t is not None:
+        ok &= report(tq <= cont_t,
+                     "week4: the motor shaft torque sits inside the continuous torque",
+                     f"{tq} Nm against {cont_t} Nm, {tq / cont_t:.1%} of it")
+    return ok
+
+
+TRANSMISSION_ANGLE_MIN_DEG = 40.0
+
+
+def check_pitch_authority(data):
+    """The servo, the four-bar transmission angles and the axis keepout. Three stored
+    numbers the design argues from and nothing read.
+
+    The gear pair steps the carrier angle UP, which the phase authority already says:
+    80 degrees of servo travel reaches 120 degrees of carrier phase. Angle amplification at
+    the output is torque multiplication at the input, so the servo supplies more than the
+    carrier torque and not less."""
+    ok = True
+    ct, step, n = (num(data, "pitch.carrier_torque_Nm"), num(data, "pitch.gear_step_up"),
+                   num(data, "pitch.actuator_count"))
+    st, stall = num(data, "pitch.servo_torque_Nm"), num(data, "pitch.servo_stall_torque_Nm")
+    marg = num(data, "pitch.servo_torque_margin")
+    if None not in (ct, step, n, st):
+        want = ct * step / n
+        ok &= report(close(st, want, DISPLAY_TOL),
+                     "week4: the servo torque follows the gear ratio in the right direction",
+                     f"{ct} Nm of carrier torque at a step up of {step} across {n:.0f} servos "
+                     f"is {want:.4f} Nm each, and the file states {st}")
+    if None not in (st, stall, marg):
+        want = stall * SERVO_USABLE_FRACTION / st
+        ok &= report(close(marg, want, DISPLAY_TOL),
+                     "week4: the servo margin is taken on half of stall",
+                     f"{stall} Nm of stall gives {stall * SERVO_USABLE_FRACTION} Nm usable "
+                     f"over {st} Nm, so {want:.4f} against a stated {marg}")
+        ok &= report(want >= MIN_MARGIN,
+                     f"week4: the servo margin clears {MIN_MARGIN}",
+                     f"{want:.4f} on half of stall")
+
+    lo = num(data, "pitch.transmission_angle_min_deg")
+    hi = num(data, "pitch.transmission_angle_max_deg")
+    if None not in (lo, hi):
+        worst = min(lo, 180.0 - lo, hi, 180.0 - hi)
+        ok &= report(worst >= TRANSMISSION_ANGLE_MIN_DEG,
+                     f"week4: the four-bar transmission angle stays clear of "
+                     f"{TRANSMISSION_ANGLE_MIN_DEG} degrees",
+                     f"the range runs {lo} to {hi} degrees, so the worst deviation from a "
+                     f"right angle leaves {worst:.2f} degrees")
+    keep = snum(data, "pitch.axis_keepout_mm")
+    ok &= report(keep is not None and keep > 0.0,
+                 "week4: the pitch axis keepout is stated and positive",
+                 f"{keep} mm" if keep is not None else "not stated")
+    return ok
+
+
+BOM_CATEGORIES = {"drive", "hardware", "material", "tooling", "fabricated"}
+BOM_MAKE_OR_BUY = {"make", "buy"}
+
+
+def check_selected_drive_carried(data):
+    """The motor that was selected has to be the motor that is weighed.
+
+    `drive_candidates[].mass_g` was required by the row shape and read by nothing, so a 900 g
+    motor could be selected while the budget carried a 46 g one. The budget lines that refine
+    into the motor group are what the thrust to weight is built on, so those are what the
+    selected candidate's mass has to equal."""
+    drives = dotted(data, "drive_candidates")
+    budget = dotted(data, "mass_budget_g")
+    if not isinstance(drives, list) or not isinstance(budget, list):
+        return report(False, "week4: the selected drive is the drive that is weighed",
+                      "drive_candidates or mass_budget_g is missing")
+    sel = [x for x in drives if isinstance(x, dict) and x.get("selected") is True]
+    if len(sel) != 1:
+        return report(False, "week4: the selected drive is the drive that is weighed",
+                      f"{len(sel)} drives marked selected")
+    want = num(sel[0], "mass_g")
+    ok = report(want is not None,
+                "week4: the selected drive states a mass",
+                f"{want} g" if want is not None else "no mass_g on the selected row")
+    # A line that names the motor and weighs what the selected candidate weighs. Grouping by
+    # refines would have swept the shaft, the bearings and the transmission in with it, and
+    # a group total can absorb a motor of any mass at all.
+    named = [b for b in budget if isinstance(b, dict)
+             and re.search(r"\bmotor", str(b.get("item", "")), re.I)]
+    hits = [b for b in named if want is not None and close(num(b, "mass_g"), want, DISPLAY_TOL)]
+    ok &= report(bool(hits),
+                 "week4: the budget carries the selected drive at its stated mass",
+                 f"{hits[0].get('item')} at {num(hits[0], 'mass_g')} g" if hits else "",
+                 fail_detail=f"no budget line naming a motor weighs the {want} g the "
+                             f"selected candidate states; the lines that name one are "
+                             + ", ".join(f"{b.get('item')} {num(b, 'mass_g')} g"
+                                         for b in named[:4]))
+    return ok
+
+
+def check_bom(data):
+    """Twenty five rows, nine fields, four derived totals and, until now, no gate at all.
+
+    It backs the manufacturability and cost criterion, which is 10 percent of the Stage 1
+    score, and `grep -ci bom tools/check.py` returned zero."""
+    rows = dotted(data, "bom")
+    if not isinstance(rows, list) or not rows:
+        return report(False, "week4: the BOM exists", "numbers.json has no bom list")
+    bad = []
+    for i, x in enumerate(rows):
+        if not isinstance(x, dict):
+            bad.append(f"row {i} is not an object")
+            continue
+        nm = str(x.get("item", "")).strip()
+        qty, unit = num(x, "qty"), num(x, "unit_cost_inr")
+        line, lead = num(x, "line_cost_inr"), snum(x, "lead_time_weeks")
+        if len(nm) < 3:
+            bad.append(f"row {i} has no item name")
+        if x.get("category") not in BOM_CATEGORIES:
+            bad.append(f"{nm}: category {x.get('category')!r}")
+        if x.get("make_or_buy") not in BOM_MAKE_OR_BUY:
+            bad.append(f"{nm}: make_or_buy {x.get('make_or_buy')!r}")
+        if qty is None or abs(qty - round(qty)) > 1e-9:
+            bad.append(f"{nm}: qty {x.get('qty')!r} is not a whole number")
+        if unit is None:
+            bad.append(f"{nm}: no unit cost")
+        if lead is None or lead < 0:
+            bad.append(f"{nm}: lead time {x.get('lead_time_weeks')!r}")
+        if len(str(x.get("source", "")).strip()) < MIN_BASIS_CHARS:
+            bad.append(f"{nm}: the source does not say where the price came from")
+        if len(str(x.get("priced_date", "")).strip()) < 8:
+            bad.append(f"{nm}: no priced date")
+        if None not in (qty, unit, line) and not close(line, qty * unit, 1e-9):
+            bad.append(f"{nm}: line cost {line} against {qty * unit:.0f}")
+    ok = report(not bad, f"week4: every BOM row is complete and its line cost multiplies out",
+                "; ".join(bad[:4]) if bad else f"{len(rows)} rows")
+
+    good = [x for x in rows if isinstance(x, dict)]
+    tot = sum(num(x, "line_cost_inr") or 0.0 for x in good)
+    bought = sum(num(x, "line_cost_inr") or 0.0 for x in good if x.get("make_or_buy") == "buy")
+    made = sum(num(x, "line_cost_inr") or 0.0 for x in good if x.get("make_or_buy") == "make")
+    lead = max((snum(x, "lead_time_weeks") or 0.0 for x in good), default=0.0)
+    for key, want, label in [("results.bom_total_inr", tot, "the BOM total"),
+                             ("results.bom_bought_inr", bought, "the bought total"),
+                             ("results.bom_tooling_inr", made, "the made total"),
+                             ("results.bom_longest_lead_weeks", lead, "the longest lead time")]:
+        ok &= report(close(num(data, key), want, 1e-9),
+                     f"week4: {label} reproduces from the rows",
+                     f"computed {want:.0f}, stated {dotted(data, key)}")
+    ok &= report(close(bought + made, tot, 1e-9),
+                 "week4: bought and made account for the whole BOM",
+                 f"{bought:.0f} plus {made:.0f} against {tot:.0f}")
+
+    # The motor in the BOM is the motor that was selected. A costed build that prices a
+    # different drive from the one the design closes on is a different build.
+    drives = dotted(data, "drive_candidates")
+    if isinstance(drives, list):
+        sel = [x for x in drives if isinstance(x, dict) and x.get("selected") is True]
+        if len(sel) == 1:
+            nm = str(sel[0].get("name", "")).strip().lower()
+            ok &= report(any(nm and nm in str(x.get("item", "")).strip().lower()
+                             for x in good),
+                         "week4: the BOM prices the drive the design selected",
+                         f"{sel[0].get('name')}")
     return ok
 
 
@@ -1899,11 +2648,12 @@ def week4(data):
                 or float(b.get("mass_g", 0)) < MIN_MASS_LINE_G]
         ok &= report(not tiny, f"week4: no mass line below {MIN_MASS_LINE_G} g",
                      "; ".join(tiny[:5]) if tiny else "")
-        names = " ".join(str(b.get("item", "")).lower() for b in budget)
-        absent = [x for x in ["blade", "frame", "pitch", "motor", "actuator", "mount"]
-                  if x not in names]
+        covered = component_cover([str(b.get("item", "")).lower() for b in budget])
+        absent = [x for x in MODULE_COMPONENTS if x not in covered]
         ok &= report(not absent, "week4: budget covers every component the problem statement names",
-                     "missing: " + ", ".join(absent) if absent else "")
+                     f"{len(covered)} of {len(MODULE_COMPONENTS)} components, each on a line "
+                     f"of its own",
+                     fail_detail="no line of its own for: " + ", ".join(absent))
 
     r = recompute(data)
     if "total_mass_g" in r:
@@ -1954,6 +2704,60 @@ def week4(data):
         "structure.blade_attachment_margin_overspeed",
         "structure.blade_combined_margin_overspeed",
     ], "week4: numbers.json carries the structural schema")
+
+    # Every key added after week 4 opened. Week 2 protects its block this way and the later
+    # gates did not copy the pattern, so each of them could be switched off by deleting the
+    # key it reads: the gate skipped its own check and reported nothing at all.
+    ok &= require_positive(data, [
+        "structure.blade_ei_Nm2", "structure.blade_gj_Nm2", "structure.blade_windup_deg",
+        "structure.shaft_bending_Nm", "structure.shaft_combined_margin",
+        "structure.motor_shaft_torque_Nm", "structure.carrier_phase_jitter_deg",
+        "structure.blade_wrinkle_stress_MPa", "structure.blade_allow_skin_Nm",
+        "structure.blade_allow_spar_Nm", "structure.blade_skin_modulus_GPa",
+        "structure.blade_foam_modulus_MPa", "structure.blade_foam_shear_MPa",
+        "structure.blade_skin_band_low", "structure.blade_skin_band_worst_margin",
+        "structure.blade_foam_knockdown_at_floor", "structure.blade_foam_downgrade_margin",
+        "structure.blade_foam_downgrade_blade_g",
+        "structure.pitch_bearing_balls", "structure.pitch_bearing_ball_mm",
+        "structure.pitch_bearing_pitch_diameter_mm", "structure.pitch_bearing_cage_swing_deg",
+        "structure.pitch_bearing_ball_spacing_deg",
+        "structure.pitch_bearing_recirculation_ratio",
+        "structure.pitch_bearing_recirculation_travel_deg", "structure.pitch_bearing_load_N",
+        "structure.pitch_bearing_static_safety", "structure.pitch_bearing_static_safety_floor",
+        "structure.pitch_bearing_oscillation_hz", "structure.pitch_bearing_friction_W",
+        "structure.pitch_bearing_plain_alternative_W",
+    ], "week4: numbers.json carries every structural key added after week 4 opened")
+    ok &= require_positive(data, [
+        "performance.motor_input_W", "performance.belt_ratio", "performance.motor_rpm",
+        "performance.motor_torque_Nm", "performance.motor_input_current_A",
+        "performance.motor_derate", "performance.motor_current_frac_180s",
+        "performance.motor_power_frac_180s", "performance.pack_voltage_nominal_V",
+        "performance.pack_voltage_loaded_V", "performance.motor_speed_ceiling_rpm",
+        "performance.motor_speed_rule", "performance.motor_rpm_frac_ceiling",
+        "performance.thrust_floor_stacked_N", "performance.blade_tip_deflection_mm",
+        "performance.blade_twist_deg",
+    ], "week4: numbers.json carries the drive schema")
+    ok &= require_positive(data, [
+        "pitch.carrier_torque_Nm", "pitch.gear_step_up", "pitch.servo_torque_Nm",
+        "pitch.servo_stall_torque_Nm", "pitch.servo_travel_deg", "pitch.servo_torque_margin",
+        "pitch.carrier_gear_mm", "pitch.servo_gear_mm", "pitch.servo_mass_g",
+        "pitch.transmission_angle_min_deg", "pitch.transmission_angle_max_deg",
+        "pitch.axis_keepout_mm", "pitch.neighbour_clearance_mm",
+        "pitch.carrier_radial_force_N", "pitch.swept_outer_radius_mm",
+        "pitch.swept_inner_radius_mm", "pitch.slew_time_s", "pitch.actuator_draw_W",
+        "pitch.blade_pitch_inertia_kgm2", "pitch.blade_cg_pct_chord",
+        "pitch.pitch_bearing_travel_deg", "pitch.peak_blade_moment_Nm",
+        "pitch.peak_link_force_N",
+    ], "week4: numbers.json carries the pitch mechanism schema")
+    ok &= require_positive(data, [
+        "packaging.envelope_length_mm", "packaging.envelope_width_mm",
+        "packaging.envelope_height_mm", "packaging.swept_diameter_mm",
+        "results.bom_bought_inr", "results.bom_tooling_inr", "results.bom_total_inr",
+        "results.bom_longest_lead_weeks",
+    ], "week4: numbers.json carries the packaging and cost schema")
+    ok &= require_integer(data, ["packaging.mount_points", "pitch.actuator_count"],
+                          "week4: mount points and actuators come in whole units",
+                          minimum=MIN_MOUNT_POINTS)
     ov = num(data, "structure.overspeed_factor")
     if ov:
         ok &= report(ov >= MIN_OVERSPEED,
@@ -1985,7 +2789,11 @@ def week4(data):
          "the overspeed centrifugal load follows from the declared overspeed squared"),
     ]:
         if computed in r:
-            ok &= report(close(num(data, stated), r[computed], DISPLAY_TOL),
+            # TOL, not DISPLAY_TOL. Each of these compares a stored value against a figure
+            # derived from the PREVIOUS stored value, so the chain is four links long and a
+            # 2 percent allowance at every link compounds. Four shaves of 1.95 percent took
+            # a true 1.428 overspeed margin to a reported 1.505 and every link passed.
+            ok &= report(close(num(data, stated), r[computed]),
                          f"week4: {label}",
                          f"computed {r[computed]:.4g}, stated {dotted(data, stated)}")
 
@@ -2017,14 +2825,21 @@ def week4(data):
     mb = num(data, "structure.blade_mass_kg")
     if None not in (R, rpm, mb):
         fc = mb * (rpm * 2 * math.pi / 60) ** 2 * R
-        ok &= report(close(num(data, "structure.centrifugal_load_N"), fc, DISPLAY_TOL),
+        ok &= report(close(num(data, "structure.centrifugal_load_N"), fc),
                      "week4: centrifugal load reproduces from blade mass, speed and radius",
                      f"computed {fc:.1f} N")
 
+    ok &= check_selected_drive_carried(data)
+    ok &= check_bom(data)
     ok &= check_pitch_bearing_duty(data)
     ok &= check_drive_margin(data)
     ok &= check_solver_order(data)
     ok &= check_blade_sensitivity(data)
+    ok &= check_structure_recompute(data)
+    ok &= check_bearing_rating(data)
+    ok &= check_blade_sweeps(data)
+    ok &= check_motor_current(data)
+    ok &= check_pitch_authority(data)
 
     for rel, heads in [
         ("stage-1/design/05-mass-and-tw.md",
@@ -2099,6 +2914,7 @@ def week5(data):
     ok &= check_declared_numbers("stage-1/submission/cycloprop-stage1.md", data)
 
     ok &= check_numeric_coverage("stage-1/submission/cycloprop-stage1.md", data)
+    ok &= check_design_coverage(data)
 
     # The PDF has to be this document. Its own required sections and a few of its declared
     # values are the cheapest identity evidence that survives a rebuild.
@@ -2129,6 +2945,18 @@ WEEKS = {1: week1, 2: week2, 3: week3, 4: week4, 5: week5}
 
 
 AUDIT_MARKER = "AUDIT-COMPLETE"
+
+# A marker has to OPEN a line, after any list bullet or markdown emphasis. Searching a whole
+# file for the substring is how `stage-1/audit/week-4.md` satisfied its own audit gate by
+# quoting the marker inside a sentence about the marker, and how four progress files reading
+# "write STATUS: WEEK-COMPLETE once it is finished" all counted as done. D59 fixed this in
+# the human gate and nowhere else; this is the sweep.
+MARKER_OPENS = r"^[ \t]*(?:[-*+][ \t]*)?(?:\*{1,2}|_{1,2})?"
+
+
+def marker_written(text, marker):
+    """True when the marker is asserted rather than merely mentioned."""
+    return re.search(MARKER_OPENS + re.escape(marker), text, re.M) is not None
 HUMAN_GATE_MARKERS = ["REGISTRATION-CONFIRMED", "ELIGIBILITY-CHECKED",
                       "ROSTER-CONFIRMED", "SENDER-CONFIRMED",
                       "TECHNICAL-READ-COMPLETE"]
@@ -2149,8 +2977,9 @@ def check_audits_exist(target):
         p = ROOT / "stage-1" / "audit" / f"week-{w}.md"
         if not p.is_file():
             missing.append(f"week {w} has no audit file")
-        elif AUDIT_MARKER not in p.read_text(encoding="utf-8"):
-            missing.append(f"week {w} audit has no {AUDIT_MARKER}")
+        elif not marker_written(p.read_text(encoding="utf-8"), AUDIT_MARKER):
+            missing.append(f"week {w} audit does not assert {AUDIT_MARKER} at the start of "
+                           "a line")
     return report(not missing, "every completed week carries a finished audit",
                   "; ".join(missing[:4]) if missing else f"{len(done)} week(s) audited")
 
@@ -2184,7 +3013,7 @@ def done_set():
     if PROGRESS_DIR.is_dir():
         for p in PROGRESS_DIR.glob("week-*.md"):
             m = re.search(r"week-(\d+)", p.name)
-            if m and DONE_MARKER in p.read_text(encoding="utf-8"):
+            if m and marker_written(p.read_text(encoding="utf-8"), DONE_MARKER):
                 out.add(int(m.group(1)))
     return out
 
