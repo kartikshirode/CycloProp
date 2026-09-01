@@ -23,6 +23,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import check as gates       # noqa: E402  the fixture builds its blade the way the gate reads it
+
 CHECK = Path(__file__).resolve().parent / "check.py"
 REPO = CHECK.parent.parent
 REPO_NUMBERS = REPO / "stage-1" / "design" / "numbers.json"
@@ -67,10 +70,20 @@ def honest_numbers():
     ap_pub = thrust / pl_ref
     spread = abs(ap - ap_pub) / ap
 
+    # The blade is no longer a chosen number. check.py integrates the published section
+    # and recomputes the allowable from it, so a fixture that asserts 108 g and a made up
+    # allowable is not an honest tree any more, it is a tree that would fail. It builds
+    # itself from the same section instead, and the attacks below move one piece at a time.
+    moduli = {"blade_skin_modulus_GPa": 60.0, "blade_foam_modulus_MPa": 70.0,
+              "blade_foam_shear_MPa": 19.0}
+    seed = {"geometry": {"chord_m": c, "span_m": S}, "structure": dict(moduli)}
+    bl = gates.blade_section(seed)
+    blade_line_g = round(nb * bl["mass_g"], 4)
+
     budget = [
-        {"item": "blades, 3 off", "mass_g": 108.0, "refines": "blades",
+        {"item": "blades, 3 off", "mass_g": blade_line_g, "refines": "blades",
          "basis": "cfrp skin over foam core, volume times density with a layup allowance"},
-        {"item": "endplates and frame", "mass_g": 74.0, "refines": "frame and endplates",
+        {"item": "endplates and frame", "mass_g": 33.0, "refines": "frame and endplates",
          "basis": "scaled from the Benedict quad rotor structure at this diameter"},
         {"item": "pitch linkage and offset disk", "mass_g": 33.0, "refines": "pitch mechanism",
          "basis": "part count times unit mass from the four bar layout drawing"},
@@ -98,9 +111,10 @@ def honest_numbers():
     fc = blade_mass * omega ** 2 * R
 
     envelope = [
-        {"item": "blades", "nominal_g": 108.0, "scaling_class": "geometry", "conservative_g": 122.0,
+        {"item": "blades", "nominal_g": blade_line_g, "scaling_class": "geometry",
+         "conservative_g": round(blade_line_g * 1.12, 4),
          "basis": "cfrp skin over foam core, volume times density with a layup allowance"},
-        {"item": "frame and endplates", "nominal_g": 74.0, "scaling_class": "geometry", "conservative_g": 83.0,
+        {"item": "frame and endplates", "nominal_g": 33.0, "scaling_class": "geometry", "conservative_g": 37.0,
          "basis": "scaled from the Benedict quad rotor structure at this diameter"},
         {"item": "pitch mechanism", "nominal_g": 33.0, "scaling_class": "geometry", "conservative_g": 38.0,
          "basis": "part count times unit mass from the four bar layout drawing"},
@@ -124,7 +138,13 @@ def honest_numbers():
     # Laid out the way tools/structure.py derives them so the honest tree passes.
     derate, ratio_belt, v_nom, res_ohm, kv_sel = 0.80, 2.0, 22.2, 0.05, 400
     m_in_W = shaft / (eff[0] * eff[1])
-    m_in_A = m_in_W / v_nom
+    # Current follows the torque the motor shaft has to make, through Kt, with the idle
+    # current the datasheet publishes added on. Input power over pack voltage is the draw
+    # of an ideal resistor and it runs low by roughly the efficiency.
+    shaft_dem = shaft / omega
+    motor_dem = shaft_dem / (ratio_belt * eff[0])
+    idle_A = 0.9
+    m_in_A = motor_dem / (9.5493 / kv_sel) + idle_A
     m_rpm = rpm * ratio_belt
     peak_W, peak_A = 320.0 / derate, 67.0 / derate
     v_load = v_nom - m_in_A * res_ohm
@@ -133,7 +153,6 @@ def honest_numbers():
     # Structural demands derived from the design rather than asserted beside it.
     ratio, lever, load_factor = 2.0, S / 4, 4.0
     overspeed = 1.2
-    shaft_dem = shaft / omega
     blade_dem = thrust / nb * lever * load_factor
     # Centrifugal bending is the larger of the two spanwise loads on a cyclorotor and it
     # goes as the square of rotor speed, so an honest section is sized on both of them
@@ -143,14 +162,58 @@ def honest_numbers():
     cf_dem = fc * lever
     fc_over = fc * overspeed ** 2
     combined_over = (blade_dem + cf_dem) * overspeed ** 2
-    blade_all, shaft_all = combined_over * 2.0, shaft_dem * 3.0
-    link_dem, link_all = 42.0, 95.0
-    att_all = fc_over * 2.2
+    blade_all = bl["allow_Nm"]
 
-    # Skin wrinkling over the foam is what limits the section, at half the cube root of the
-    # three moduli. Stated in the fixture so the gate has something to recompute against.
+    # Shaft, horn and link allowables all come off published sections now, so the fixture
+    # takes them from the same place rather than picking a multiple of the demand.
+    sh = gates.thin_tube(gates.SHAFT_OD_M, gates.SHAFT_WALL_M)
+    shaft_all = gates.SPAR_TAU_PA * sh["j_m4"] / (gates.SHAFT_OD_M / 2.0)
+    shaft_bend = 2.0
+    tau_comb = math.hypot(shaft_bend * (gates.SHAFT_OD_M / 2.0) / sh["i_m4"] / 2.0,
+                          shaft_dem * (gates.SHAFT_OD_M / 2.0) / sh["j_m4"])
+    horn_m, link_m = 0.0244, 0.105
+    link_all = min(gates.AL_SIGMA_PA * gates.HORN_W_M * gates.HORN_T_M ** 2 / 6.0 / horn_m,
+                   gates.ROD_END_STATIC_N,
+                   math.pi ** 2 * gates.SPAR_E_PA
+                   * gates.thin_tube(gates.LINK_OD_M, gates.LINK_WALL_M)["i_m4"] / link_m ** 2)
+    link_dem = 42.0
+    # Two pitch bearings hold each blade and the rating they are held to is the one ISO 76
+    # gives for this ball complement, not a supplier listing.
+    brg_c0 = gates.ISO76_F0 * 7 * 1.5875 ** 2
+    att_all = 2 * brg_c0
+
     e_skin, e_foam, g_foam = 60.0, 70.0, 19.0
-    wrinkle = 0.5 * (e_skin * 1e9 * e_foam * 1e6 * g_foam * 1e6) ** (1.0 / 3.0) / 1e6
+    wrinkle = bl["wrinkle_Pa"] / 1e6
+
+    # The two sensitivity sweeps, run here the way check.py runs them.
+    band_low = 0.5
+    band_worst = min(gates.blade_section(seed, skin_factor=band_low
+                                        + (1.0 - band_low) * i / 200.0)["allow_Nm"]
+                     for i in range(201)) / combined_over
+    _lo, _hi = 0.02, 1.0
+    for _ in range(60):
+        _mid = 0.5 * (_lo + _hi)
+        _b = gates.blade_section(seed, foam_factor=_mid)
+        _d = (blade_dem + _b["mass_g"] / 1000.0 * omega ** 2 * R * lever) * overspeed ** 2
+        if _b["allow_Nm"] / _d < 1.5:
+            _lo = _mid
+        else:
+            _hi = _mid
+    knockdown = 0.5 * (_lo + _hi)
+    dg_e, dg_g, dg_rho = 36.0, 13.0, 32.0
+    dg_b = gates.blade_section(seed, foam_factor=dg_e / e_foam, foam_rho=dg_rho)
+    dg_sec = dg_b["section"]
+    dg_ei = (e_skin * 1e9 * gates.BLADE_SKIN_AREAL_KG_M2 / gates.BLADE_SKIN_RHO
+             * dg_sec["skin_y2_ds_m3"]
+             + gates.SPAR_E_PA * gates.thin_tube(gates.BLADE_SPAR_DIA_FRAC * c,
+                                                 gates.BLADE_SPAR_WALL_M)["i_m4"]
+             + dg_e * 1e6 * dg_sec["i_chord_m4"] * gates.BLADE_FOAM_FILL)
+    dg_wr = 0.5 * (e_skin * 1e9 * dg_e * 1e6 * dg_g * 1e6) ** (1.0 / 3.0)
+    dg_allow = min(min(dg_wr, gates.SKIN_SIGMA_PA) * dg_ei / (e_skin * 1e9 * dg_sec["y_max_m"]),
+                   gates.SPAR_SIGMA_PA * dg_ei
+                   / (gates.SPAR_E_PA * gates.BLADE_SPAR_DIA_FRAC * c / 2.0))
+    dg_dem = (blade_dem + dg_b["mass_g"] / 1000.0 * omega ** 2 * R * lever) * overspeed ** 2
+    dg_margin = dg_allow / dg_dem
 
     # Pitch bearing oscillating duty, laid out the way tools/structure.py computes it. The
     # bearing swings 80 degrees once a revolution instead of turning, so the cage moves a
@@ -178,6 +241,47 @@ def honest_numbers():
     model = [amp * math.cos(math.radians(a - 90.0 - phase)) for a, _ in pts]
     rms = math.sqrt(sum((p - m) ** 2 for (_, p), m in zip(pts, model)) / len(pts))
 
+    # Deflection, twist and wind up all come off the two stiffnesses the section gives.
+    ptm = 2.5
+    peak_blade = thrust / nb * ptm
+    tip_defl_mm = 5.0 * peak_blade * S ** 3 / (384.0 * bl["ei_Nm2"]) * 1000.0
+    twist_deg = math.degrees(peak_blade * (35.0 - 25.0) / 100.0 * c * S / (8.0 * bl["gj_Nm2"]))
+    peak_moment = 2.0
+    windup_deg = math.degrees(peak_moment * S / (2.0 * bl["gj_Nm2"]))
+
+    # The gear pair steps the carrier angle up, so the servo supplies more torque than the
+    # carrier and not less, and the margin is taken on half of stall.
+    carrier_t, step_up, servo_travel, stall_t = 0.10, 1.5, 240.0, 0.40
+    servo_t = carrier_t * step_up / 2
+    servo_margin = stall_t * 0.5 / servo_t
+
+    bom = [
+        {"item": "outrunner A", "category": "drive", "qty": 1, "unit_cost_inr": 8000,
+         "line_cost_inr": 8000, "lead_time_weeks": 3, "make_or_buy": "buy",
+         "source": "distributor listing, priced at list level", "priced_date": "1 August 2026"},
+        {"item": "brushless controller", "category": "drive", "qty": 1,
+         "unit_cost_inr": 3000, "line_cost_inr": 3000, "lead_time_weeks": 2,
+         "make_or_buy": "buy", "source": "distributor listing, priced at list level",
+         "priced_date": "1 August 2026"},
+        {"item": "pitch servos", "category": "hardware", "qty": 2, "unit_cost_inr": 1500,
+         "line_cost_inr": 3000, "lead_time_weeks": 2, "make_or_buy": "buy",
+         "source": "distributor listing, priced at list level", "priced_date": "1 August 2026"},
+        {"item": "carbon and foam stock", "category": "material", "qty": 1,
+         "unit_cost_inr": 6000, "line_cost_inr": 6000, "lead_time_weeks": 2,
+         "make_or_buy": "buy", "source": "composite supplier list price, landed",
+         "priced_date": "1 August 2026"},
+        {"item": "blade moulds", "category": "tooling", "qty": 2, "unit_cost_inr": 5000,
+         "line_cost_inr": 10000, "lead_time_weeks": 4, "make_or_buy": "make",
+         "source": "shop rate for a machined aluminium mould pair",
+         "priced_date": "1 August 2026"},
+        {"item": "machined fittings", "category": "fabricated", "qty": 1,
+         "unit_cost_inr": 7000, "line_cost_inr": 7000, "lead_time_weeks": 3,
+         "make_or_buy": "make", "source": "shop rate for CNC job work against a drawing",
+         "priced_date": "1 August 2026"},
+    ]
+    bom_bought = sum(r["line_cost_inr"] for r in bom if r["make_or_buy"] == "buy")
+    bom_made = sum(r["line_cost_inr"] for r in bom if r["make_or_buy"] == "make")
+
     sensitivity = [
         {"thrust_N": t,
          "mass_ceiling_g": math.floor(t / (2.5 * G) * 1000.0),
@@ -189,7 +293,7 @@ def honest_numbers():
     return {
         "geometry": {"radius_m": R, "chord_m": c, "span_m": S, "blades": nb,
                      "airfoil": "NACA 0020", "pitch_amplitude_deg": amp,
-                     "pitch_axis_pct_chord": 25},
+                     "pitch_axis_pct_chord": 35},
         "operating": {"rpm": rpm, "tip_speed_ms": u, "reynolds": u * c / NU},
         "performance": {"thrust_N": thrust, "blade_area_coeff": ct,
                         "blade_area_coeff_low": ct_low, "thrust_N_conservative": t_cons,
@@ -201,6 +305,11 @@ def honest_numbers():
                         "figure_of_merit": fm, "power_loading_ref_N_per_W": pl_ref,
                         "aero_power_W_published": ap_pub, "power_spread": spread,
                         "blade_deflection_thrust_loss": defl_loss,
+                        "blade_load_peak_to_mean": ptm,
+                        "blade_tip_deflection_mm": tip_defl_mm,
+                        "blade_twist_deg": twist_deg,
+                        "motor_torque_Nm": motor_dem,
+                        "motor_idle_current_A": idle_A,
                         "motor_input_W": m_in_W, "motor_input_current_A": m_in_A,
                         "motor_rpm": m_rpm, "belt_ratio": ratio_belt,
                         "motor_derate": derate,
@@ -241,7 +350,9 @@ def honest_numbers():
              "continuous_current_A": 67.0, "continuous_torque_Nm": 9.5493 / 400 * 67.0,
              "max_power_180s_W": 320.0 / derate, "peak_current_180s_A": 67.0 / derate,
              "internal_resistance_ohm": res_ohm,
-             "mass_g": 62.0, "selected": True},
+             "mass_g": 62.0, "selected": True,
+             "basis": "supplier listing for an outrunner in this power class",
+             "verdict": "selected, covers the design point on its continuous rating"},
             {"name": "outrunner B", "continuous_power_W": 400.0, "kv": 350,
              "continuous_current_A": 77.0, "continuous_torque_Nm": 9.5493 / 350 * 77.0,
              "max_power_180s_W": 400.0 / derate, "peak_current_180s_A": 77.0 / derate,
@@ -261,15 +372,34 @@ def honest_numbers():
                   "actuator_count": 2, "actuator_mass_g": 18.0,
                   "side_force_tilt_deg": 28.0, "peak_lateral_force_N": peak_lat,
                   "pitch_bearing_travel_deg": 80.0,
+                  "horn_m": horn_m, "pitch_link_m": link_m,
+                  "construction_angle_deg": -110.0,
+                  "carrier_torque_Nm": carrier_t, "gear_step_up": step_up,
+                  "servo_torque_Nm": servo_t, "servo_stall_torque_Nm": stall_t,
+                  "servo_travel_deg": servo_travel, "servo_torque_margin": servo_margin,
+                  "carrier_gear_mm": 40.0, "servo_gear_mm": 60.0, "servo_mass_g": 9.0,
+                  "transmission_angle_min_deg": 60.0, "transmission_angle_max_deg": 120.0,
+                  "axis_keepout_mm": 0.5, "neighbour_clearance_mm": 40.0,
+                  "carrier_radial_force_N": 60.0,
+                  "swept_outer_radius_mm": 190.0, "swept_inner_radius_mm": 95.0,
+                  "slew_time_s": 0.2, "actuator_draw_W": act_p,
+                  "blade_pitch_inertia_kgm2": 1.5e-05, "blade_cg_pct_chord": 39.0,
+                  "peak_blade_moment_Nm": peak_moment,
                   # The pitch link load crosses from tools/linkage.py into
                   # tools/structure.py, so the two sides have to agree or the solvers ran
                   # in the wrong order.
                   "peak_link_force_N": link_dem},
         "packaging": {"envelope_length_mm": 400, "envelope_width_mm": 300,
-                      "envelope_height_mm": 300, "mount_points": 4},
+                      "envelope_height_mm": 300, "mount_points": 4,
+                      "swept_diameter_mm": 380.0},
+        "bom": bom,
         "structure": {"blade_mass_kg": blade_mass, "centrifugal_load_N": fc,
                       "blade_root_bending_Nm": blade_dem, "shaft_torque_Nm": shaft_dem,
                       "blade_allowable_Nm": blade_all, "shaft_allowable_Nm": shaft_all,
+                      "blade_ei_Nm2": bl["ei_Nm2"], "blade_gj_Nm2": bl["gj_Nm2"],
+                      "blade_windup_deg": windup_deg, "shaft_bending_Nm": shaft_bend,
+                      "motor_shaft_torque_Nm": motor_dem,
+                      "carrier_phase_jitter_deg": 0.15,
                       "blade_margin": blade_all / blade_dem,
                       "shaft_margin": shaft_all / shaft_dem,
                       "transmission_ratio": ratio,
@@ -288,7 +418,7 @@ def honest_numbers():
                       # Combined bending and torsion is always worse than torsion alone.
                       # check.py floors this one without recomputing it, because the shaft
                       # section properties are not in numbers.json.
-                      "shaft_combined_margin": shaft_all / shaft_dem * 0.8,
+                      "shaft_combined_margin": gates.SPAR_TAU_PA / tau_comb,
                       # The oscillating duty on the pitch bearings. The fixture computes
                       # it the way tools/structure.py does so the honest tree passes, and
                       # the attacks below break one link at a time.
@@ -312,12 +442,16 @@ def honest_numbers():
                       "blade_skin_modulus_GPa": e_skin, "blade_foam_modulus_MPa": e_foam,
                       "blade_foam_shear_MPa": g_foam,
                       "blade_wrinkle_stress_MPa": wrinkle,
-                      "blade_allow_skin_Nm": blade_all,
-                      "blade_allow_spar_Nm": blade_all * 2.5,
-                      "blade_skin_band_low": 0.5,
-                      "blade_skin_band_worst_margin": blade_all / combined_over * 0.99,
-                      "blade_foam_knockdown_at_floor": 0.67,
-                      "blade_foam_downgrade_margin": blade_all / combined_over * 0.78},
+                      "blade_allow_skin_Nm": bl["allow_skin_Nm"],
+                      "blade_allow_spar_Nm": bl["allow_spar_Nm"],
+                      "blade_skin_band_low": band_low,
+                      "blade_skin_band_worst_margin": band_worst,
+                      "blade_foam_knockdown_at_floor": knockdown,
+                      "blade_foam_downgrade_margin": dg_margin,
+                      "blade_foam_downgrade_blade_g": dg_b["mass_g"],
+                      "blade_foam_downgrade_modulus_MPa": dg_e,
+                      "blade_foam_downgrade_shear_MPa": dg_g,
+                      "blade_foam_downgrade_density_kgm3": dg_rho},
         "mass_envelope_g": envelope,
         "mass_budget_g": budget,
         "sources": {
@@ -331,7 +465,10 @@ def honest_numbers():
                 "blade_root_bending_Nm": "thrust per blade over a quarter span lever with a peak to mean factor of 2",
                 "shaft_torque_Nm": "shaft power divided by rotor angular speed at the design point",
                 "pitch_link_load_N": "four bar link load from the offset disk reaction at peak pitching moment"}},
-        "results": {"total_mass_g": total, "weight_N": total / 1000 * G,
+        "results": {"bom_bought_inr": bom_bought, "bom_tooling_inr": bom_made,
+                    "bom_total_inr": bom_bought + bom_made,
+                    "bom_longest_lead_weeks": max(r["lead_time_weeks"] for r in bom),
+                    "total_mass_g": total, "weight_N": total / 1000 * G,
                     "thrust_to_weight": thrust / (total / 1000 * G),
                     "mass_envelope_g": env_nom, "mass_g_conservative": m_cons,
                     "thrust_to_weight_conservative": t_cons / (m_cons / 1000 * G)},
@@ -589,9 +726,15 @@ case("conservative coefficient equal to nominal is rejected", False, thin_conser
 def _measured(d, sigma=0.3151, c_over_r=0.66, coeff=None, drop=()):
     """Append a measured coefficient scenario for this design's own shape family. The
     fixture geometry is sigma 0.3151 and c/R 0.66, so the defaults match it."""
+    cf = (d["performance"]["blade_area_coeff"] * 1.1 if coeff is None else coeff)
     row = {"name": "Kellen 2019 config 8", "evidence_class": "measured",
-           "blade_area_coeff": d["performance"]["blade_area_coeff"] * 1.1
-           if coeff is None else coeff,
+           "blade_area_coeff": cf,
+           # Figure of merit and thrust coefficient came off one rotor at one operating
+           # point, so the row carries both. This design takes a coefficient below the
+           # measured one, and the figure of merit that follows is the measured one scaled
+           # by that ratio to the power of one and a half.
+           "figure_of_merit": round(d["performance"]["figure_of_merit"]
+                                    / (d["performance"]["blade_area_coeff"] / cf) ** 1.5, 6),
            "solidity": sigma, "chord_to_radius": c_over_r,
            "basis": "measured on a three bladed NACA 0020 rotor at the same solidity "
                     "and chord to radius, read off the published sweep"}
@@ -2093,11 +2236,284 @@ def loop_residual(rows, R, e, a, l, alpha0, phi_deg=90.0):
     return worst
 
 
+# --------------------------------------------------------------------------------------
+# The 1 September gates. Every one of these passed before the gate beside it was written,
+# and most of them are the review's own findings turned into fixtures.
+
+
+def blade_allowable_raised(d):
+    """Raise the blade allowable and every margin that hangs off it, leaving the section
+    and the moduli where they are. The old gate compared the allowable against two other
+    stored numbers, so raising all three together was free."""
+    st = d["structure"]
+    for k in ("blade_allowable_Nm", "blade_allow_skin_Nm", "blade_allow_spar_Nm"):
+        st[k] *= 1.30
+    for k in ("blade_margin", "blade_combined_margin", "blade_combined_margin_overspeed",
+              "blade_skin_band_worst_margin", "blade_foam_downgrade_margin"):
+        st[k] *= 1.30
+    return d
+
+
+case("a blade allowable raised above its own section is rejected", False,
+     blade_allowable_raised)
+
+
+def foam_a_thousand_times_softer(d):
+    """Foam three orders of magnitude softer, with the wrinkling stress moved consistently
+    so the one gate that did recompute stays satisfied. The allowable stays put, because
+    nothing connected the section to it, and the blade still reported a 2.0 overspeed
+    margin."""
+    st = d["structure"]
+    st["blade_foam_modulus_MPa"] /= 1000.0
+    st["blade_foam_shear_MPa"] /= 1000.0
+    st["blade_wrinkle_stress_MPa"] /= 100.0
+    return d
+
+
+case("foam a thousand times softer with the allowable held is rejected", False,
+     foam_a_thousand_times_softer)
+
+
+def shaft_allowable_inflated(d):
+    st = d["structure"]
+    st["shaft_allowable_Nm"] *= 1.5
+    st["shaft_margin"] = st["shaft_allowable_Nm"] / st["shaft_torque_Nm"]
+    return d
+
+
+case("a shaft allowable that does not come from the tube is rejected", False,
+     shaft_allowable_inflated)
+
+
+def link_allowable_inflated(d):
+    st = d["structure"]
+    st["pitch_link_allowable_N"] *= 1.5
+    st["pitch_link_margin"] = st["pitch_link_allowable_N"] / st["pitch_link_load_N"]
+    return d
+
+
+case("a pitch link allowable that does not come from the horn is rejected", False,
+     link_allowable_inflated)
+
+
+def attachment_on_an_unnamed_listing(d):
+    """A supplier listing 24 percent above what ISO 76 gives for this ball complement. It
+    carries the tightest margin in the module and no supplier is named."""
+    st = d["structure"]
+    st["blade_attachment_allowable_N"] = 2 * 270.0
+    st["blade_attachment_margin"] = 540.0 / st["centrifugal_load_N"]
+    st["blade_attachment_margin_overspeed"] = 540.0 / st["centrifugal_load_overspeed_N"]
+    st["pitch_bearing_static_safety"] = 270.0 / st["pitch_bearing_load_N"]
+    return d
+
+
+case("an attachment rating above what ISO 76 gives is rejected", False,
+     attachment_on_an_unnamed_listing)
+
+
+def current_from_power_over_volts(d):
+    """The quotient a spreadsheet reaches for. It is the draw of an ideal resistor and it
+    runs low by roughly the efficiency, which is exactly the direction that flatters a
+    drive selection."""
+    p = d["performance"]
+    amps = p["motor_input_W"] / p["pack_voltage_nominal_V"]
+    p["motor_input_current_A"] = amps
+    sel = [x for x in d["drive_candidates"] if x.get("selected")][0]
+    p["motor_current_frac_180s"] = amps / sel["peak_current_180s_A"]
+    p["pack_voltage_loaded_V"] = (p["pack_voltage_nominal_V"]
+                                  - amps * sel["internal_resistance_ohm"])
+    p["motor_speed_ceiling_rpm"] = sel["kv"] * p["pack_voltage_loaded_V"]
+    p["motor_rpm_frac_ceiling"] = p["motor_rpm"] / p["motor_speed_ceiling_rpm"]
+    return d
+
+
+case("motor current taken as input power over pack voltage is rejected", False,
+     current_from_power_over_volts)
+
+
+def idle_current_dropped(d):
+    p = d["performance"]
+    p["motor_input_current_A"] -= p.pop("motor_idle_current_A")
+    sel = [x for x in d["drive_candidates"] if x.get("selected")][0]
+    p["motor_current_frac_180s"] = p["motor_input_current_A"] / sel["peak_current_180s_A"]
+    p["pack_voltage_loaded_V"] = (p["pack_voltage_nominal_V"] - p["motor_input_current_A"]
+                                  * sel["internal_resistance_ohm"])
+    p["motor_speed_ceiling_rpm"] = sel["kv"] * p["pack_voltage_loaded_V"]
+    p["motor_rpm_frac_ceiling"] = p["motor_rpm"] / p["motor_speed_ceiling_rpm"]
+    return d
+
+
+case("dropping the published idle current from the draw is rejected", False,
+     idle_current_dropped)
+
+
+def torque_above_the_continuous_rating(d):
+    sel = [x for x in d["drive_candidates"] if x.get("selected")][0]
+    tq = sel["continuous_torque_Nm"] * 1.15
+    d["structure"]["motor_shaft_torque_Nm"] = tq
+    d["performance"]["motor_torque_Nm"] = tq
+    d["performance"]["motor_input_current_A"] = (tq / (9.5493 / sel["kv"])
+                                                 + d["performance"]["motor_idle_current_A"])
+    return d
+
+
+case("a motor shaft torque above the continuous rating is rejected", False,
+     torque_above_the_continuous_rating)
+
+
+def servo_torque_divided_by_the_ratio(d):
+    """The gear pair steps the carrier angle up, so it steps the servo torque up too. This
+    divides, which is the direction that makes a 1.04 margin read 2.33."""
+    p = d["pitch"]
+    p["servo_torque_Nm"] = p["carrier_torque_Nm"] / p["gear_step_up"] / p["actuator_count"]
+    p["servo_torque_margin"] = p["servo_stall_torque_Nm"] * 0.5 / p["servo_torque_Nm"]
+    return d
+
+
+case("a servo torque divided by the gear ratio instead of multiplied is rejected", False,
+     servo_torque_divided_by_the_ratio)
+
+
+def servo_margin_on_full_stall(d):
+    p = d["pitch"]
+    p["servo_torque_margin"] = p["servo_stall_torque_Nm"] / p["servo_torque_Nm"]
+    return d
+
+
+case("a servo margin taken on full stall instead of half is rejected", False,
+     servo_margin_on_full_stall)
+
+
+def transmission_angle_too_tight(d):
+    d["pitch"]["transmission_angle_max_deg"] = 145.0
+    return d
+
+
+case("a four-bar transmission angle inside 40 degrees is rejected", False,
+     transmission_angle_too_tight)
+
+
+def fm_held_while_the_coefficient_is_cut(d):
+    """Take the thrust coefficient below the rotor it was measured on and keep that rotor's
+    figure of merit. The two came off one operating point and they are not independent, so
+    this spends the thrust conservatism a second time as a power optimism."""
+    d = _measured(d)
+    src = d["coefficient_scenarios"][-1]
+    d["performance"]["figure_of_merit"] = src["figure_of_merit"]
+    d["performance"]["aero_power_W"] = (d["performance"]["ideal_power_W"]
+                                        / src["figure_of_merit"])
+    return d
+
+
+case("a figure of merit held while the coefficient is cut is rejected", False,
+     fm_held_while_the_coefficient_is_cut, upto=2, week=2)
+
+
+def one_line_covering_two_components(d):
+    """One budget line named for two components at once. Under a substring search over the
+    joined names this satisfied motor AND mount, so a module with no motor in it passed the
+    gate whose only job is to stop that."""
+    for b in d["mass_budget_g"]:
+        if b["item"] == "motor":
+            b["item"] = "motor mount bracket and fasteners"
+        elif b["item"] == "mounting hardware and fasteners":
+            b["item"] = "harness and fasteners"
+    return d
+
+
+case("one budget line standing in for two components is rejected", False,
+     one_line_covering_two_components)
+
+
+def drive_selected_but_not_carried(d):
+    """A 900 g motor selected, and the budget still carrying the 62 g one. mass_g was
+    required by the row shape and read by nothing."""
+    for x in d["drive_candidates"]:
+        if x.get("selected"):
+            x["mass_g"] = 900.0
+    return d
+
+
+case("a selected drive the budget does not carry is rejected", False,
+     drive_selected_but_not_carried)
+
+
+def bom_line_cost_does_not_multiply(d):
+    d["bom"][2]["line_cost_inr"] = 1500
+    return d
+
+
+case("a BOM line cost that does not multiply out is rejected", False,
+     bom_line_cost_does_not_multiply)
+
+
+def bom_total_asserted(d):
+    d["results"]["bom_total_inr"] = 20000
+    return d
+
+
+case("a BOM total that does not sum the rows is rejected", False, bom_total_asserted)
+
+
+def bom_source_says_nothing(d):
+    d["bom"][0]["source"] = "a shop"
+    return d
+
+
+case("a BOM row whose source names no origin is rejected", False, bom_source_says_nothing)
+
+
+def candidate_tw_inflated(d):
+    """The winner's own thrust to weight, raised. Neither column was ever recomputed from
+    the row's own mass and thrust, so the worst of three could be declared the winner."""
+    for x in d["configuration_candidates"]:
+        if x.get("selected"):
+            x["module_tw_conservative"] *= 1.25
+            x["module_tw"] *= 1.25
+    return d
+
+
+case("a candidate thrust to weight that does not come from its own row is rejected", False,
+     candidate_tw_inflated, upto=2, week=2)
+
+
+def chain_shaved_four_times(d):
+    """Four links, each shaved by 1.95 percent, each comparing against the previous stored
+    value. Under the old 2 percent allowance every link passed and the overspeed margin came
+    out 5 percent better than the geometry supports."""
+    st = d["structure"]
+    st["blade_mass_kg"] *= 0.9805
+    st["centrifugal_load_N"] *= 0.9805 ** 2
+    st["blade_centrifugal_bending_Nm"] *= 0.9805 ** 3
+    st["centrifugal_load_overspeed_N"] *= 0.9805 ** 3
+    return d
+
+
+case("a structural chain shaved 1.95 percent at every link is rejected", False,
+     chain_shaved_four_times)
+
+
+def swept_diameter_deleted(d):
+    """Delete the key and the gate that reads it vanishes with it. Week 2 protects its block
+    with a schema list and the later blocks did not copy the pattern."""
+    d["packaging"].pop("swept_diameter_mm")
+    return d
+
+
+case("deleting a stored key to make its gate disappear is rejected", False,
+     swept_diameter_deleted)
+
+
 def linkage_selftests():
     """Read-only checks that the stored week 3 numbers still come from the mechanism.
 
-    Returns a list of (name, ok, detail). Skipped with an empty list if the repo does not
-    carry a solved linkage yet, so the suite still runs on a tree from before week 3.
+    Returns a list of (name, ok, detail). A tree with no numbers.json at all is genuinely
+    before week 3 and skips, which is the one case this may be silent about.
+
+    A tree that HAS a numbers.json and is missing a link dimension does not skip. It used to:
+    the whole suite returned an empty list and reported success, so deleting one of the five
+    dimensions switched off the four-bar closure check and nothing said so. Three of those
+    five were required by no gate either, which is now fixed in week3.
     """
     if not REPO_NUMBERS.is_file():
         return []
@@ -2106,8 +2522,13 @@ def linkage_selftests():
     rows = d.get("pitch_schedule") or []
     need = ("offset_m", "horn_m", "pitch_link_m", "construction_angle_deg",
             "phase_delay_deg")
-    if not rows or any(p.get(k) is None for k in need):
-        return []
+    absent = [k for k in need if p.get(k) is None]
+    if not rows or absent:
+        return [("the four-bar closure check has the dimensions it needs", False,
+                 ("no pitch_schedule rows" if not rows else
+                  "pitch is missing " + ", ".join(absent))
+                 + ", so the closure check cannot run and this is a failure rather than "
+                   "a skip")]
 
     args = (g["radius_m"], p["offset_m"], p["horn_m"], p["pitch_link_m"],
             p["construction_angle_deg"])
@@ -2388,13 +2809,20 @@ def main():
               ("--all fails when the highest progress file is deleted", 4, None, False),
               ("--all fails when a middle progress file is deleted", 3, None, False),
               ("--all fails when a completed week has no audit", None, 2, False),
-              ("--all fails on two NEXT-WEEK markers", None, None, False, "double")]
+              ("--all fails on two NEXT-WEEK markers", None, None, False, "double"),
+              # The marker sweep. Both of these passed a whole-file substring search, which
+              # is how an audit file could satisfy its own gate by explaining the marker.
+              ("--all fails when a progress file only quotes the done marker",
+               None, None, False, "quote-done"),
+              ("--all fails when an audit only quotes the audit marker",
+               None, None, False, "quote-audit")]
     for name, drop, no_audit, want_pass, *extra in probes:
+        mode = extra[0] if extra else None
         tmp = tempfile.mkdtemp(prefix="cyclo-gate-")
         try:
             build(tmp, honest_numbers(), 4)
             hand = ["# Handoff", "", "NEXT-WEEK: 5", ""]
-            if extra and extra[0] == "double":
+            if mode == "double":
                 hand += ["NEXT-WEEK: 3", ""]
             (Path(tmp) / "handoff.md").write_text("\n".join(hand), encoding="utf-8")
             prog = Path(tmp) / "stage-1" / "progress"
@@ -2404,11 +2832,19 @@ def main():
             for w in range(1, 5):
                 if w == drop:
                     continue
+                done_line = "STATUS: WEEK-COMPLETE"
+                if mode == "quote-done" and w == 3:
+                    done_line = ("The week is closed once somebody writes "
+                                 "STATUS: WEEK-COMPLETE at the top of this file.")
                 (prog / f"week-{w}.md").write_text(
-                    f"# Week {w}\n\nSTATUS: WEEK-COMPLETE\n", encoding="utf-8")
+                    f"# Week {w}\n\n{done_line}\n", encoding="utf-8")
+                audit_line = "AUDIT-COMPLETE"
+                if mode == "quote-audit" and w == 4:
+                    audit_line = ("The protocol asks for a sign off line reading "
+                                  "AUDIT-COMPLETE and this file does not carry one.")
                 if w != no_audit:
                     (audit / f"week-{w}.md").write_text(
-                        f"# Week {w} audit\n\nAUDIT-COMPLETE\n", encoding="utf-8")
+                        f"# Week {w} audit\n\n{audit_line}\n", encoding="utf-8")
             got_pass, out = run_all(tmp)
             ok = got_pass == want_pass
             ANNOUNCED.append(1)
