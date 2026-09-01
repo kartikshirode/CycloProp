@@ -1424,3 +1424,51 @@ a marker buried inside a sentence within the block.
 
 Nothing about the project's state changed. Four markers were outstanding before this and five
 are outstanding now, which is the honest count and always was.
+
+## D60: the pitch bearing carries an oscillating duty rule, and the ball bearing stays
+
+1 September 2026, after week 4.
+
+Week 4 left an open item saying the pitch bearings swing 80 degrees under a steady 110 N, that
+this is a fretting duty, and that a static rating says nothing about it. It was carried as a
+Stage 2 problem. It was carried wrongly, because the tightest margin in the whole module,
+blade attachment at 1.69 under overspeed, is exactly that static rating. Leaving the duty
+unquantified meant the number sizing the module rested on a criterion nobody had checked
+applied.
+
+**What the calculation says.** With the outer ring stationary the cage turns at `(1 - d/Dm)/2`
+of the inner ring angle. For the 693ZZ that is 7 balls of 1.5875 mm on a 5.5 mm pitch circle,
+so 80 degrees of pitch travel moves the ball set 28.45 degrees against a ball spacing of 51.43.
+The ratio is 0.5533. Under 1.0 every ball stays inside its own arc for the life of the machine,
+which is the false brinelling regime, and full recirculation would need 144.6 degrees of
+travel. No cyclorotor pitch schedule asks for that, so the regime cannot be tuned out.
+
+The ball count is the soft input and the conclusion survives it. At 6 balls the ratio is 0.474
+and at 8 it is 0.632, both well under 1.0, and a complement large enough to reach 1.0 would need
+20.6 mm of ball around a 17.3 mm pitch circle. `check.py` now gates that fit, so the cheap way
+to claim recirculation is closed.
+
+**What the rule is.** A bearing that never recirculates carries a static safety factor floor of
+2.0 at the OPERATING load, not the declared overspeed. Wear accumulates at the speed the machine
+runs at; overspeed is a strength case and it already has its own floor of 1.5. The design sits at
+2.44, so it clears. The 2.0 is a declared rule in the same class as `overspeed_factor`, stated
+rather than derived, and the gate refuses a floor a later week lowers.
+
+Being honest about which case binds: at the frozen 1.20 overspeed the 1.5 strength floor asks
+more of the rating than the 2.0 wear floor does, so today the strength case governs and the wear
+floor is not the active constraint. That is not a reason to leave it out. It is the constraint
+that catches a future week trading overspeed down and taking the wear case with it, which is
+precisely the trade nobody would notice.
+
+**Why the ball bearing stays.** The alternative that is immune to the wear mode is a PTFE fabric
+lined plain bearing, which is what an oscillating aerospace joint uses. Six of them cost 8.92 W
+of friction against 0.167 W for the ball bearings, better than fifty times, and at 40.08 Hz the
+liner is running 167 mm past the shaft every second. The sliding rate is what kills it here, not
+the load. So the ball bearing stays, on the 2.44 safety factor plus an anti fretting grease, and
+if a Stage 2 bench run frets anyway the fix is a larger bearing before it is a different type.
+
+**What this does not close.** A computed regime is not a tested one. Stage 2 still owes a run to
+failure at speed under the real load with the flight grease, and this entry moves the item from
+"unquantified" to "quantified and still untested" rather than closing it.
+
+Ten new gates and six new self-tests, 138 to 144. Nothing was loosened.

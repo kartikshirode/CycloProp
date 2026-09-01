@@ -131,6 +131,51 @@ The offset post takes 53.22 N of radial pull from the three links converging on 
 0.05 mm of backlash across the 40 mm carrier gear is 0.143 degrees of carrier, inside the 25
 degrees of authority the side force uncertainty already reserves.
 
+## Pitch bearing oscillating duty
+
+The tightest margin in the module is a bearing static rating, and a static rating is the wrong
+yardstick for a bearing that never turns. Each blade hangs on two 693ZZ bearings that swing
+through 80 degrees once a revolution while the centrifugal pull holds its direction in the
+spider arm. Fixed load, oscillating rings, small amplitude. That is the arrangement false
+brinelling is named after, so the duty is worked out here rather than left to the catalogue.
+
+Two numbers decide whether the balls ever roll onto fresh raceway. With the outer ring held
+still the cage turns at half of one minus the ball diameter over the pitch diameter, which for
+7 balls of 1.5875 mm on a 5.5 mm pitch circle is a little over a third. Eighty degrees of blade
+pitch therefore moves the ball set by 28.45 degrees. The balls sit 51.43 degrees apart. The
+ratio is 0.5533, and anything under 1.0 means every ball spends the life of the machine inside
+its own arc, grease stops being dragged back into the contact, and the bearing wears where it
+sits instead of failing in fatigue.
+
+Full recirculation would need 144.6 degrees of pitch travel. No cyclorotor schedule asks for
+that and ours gives 80, so the regime is not something a pitch amplitude change can escape. It
+has to be carried.
+
+What carries it is load. At 2404.79 rpm each bearing takes 110.73 N, half the 221.464 N
+centrifugal pull, and the pair is rated at 540 N, so the static safety factor at the operating
+point is 2.44 against a declared floor of 2.0. The floor is the same class of judgement as the
+overspeed factor: a stated rule rather than a measurement, applied because a contact that never
+moves has no second chance at a soft spot. It is gated, and the gate also refuses a floor that
+a later week lowers.
+
+Worth being plain about which of the two cases is actually binding. At the frozen 1.20
+overspeed the 1.5 strength floor already asks more of the rating than the 2.0 wear floor does,
+so the strength case governs today and blade attachment at 1.69 stays the number that sizes the
+joint. The wear floor starts to bite only if a later week drops the overspeed, which is exactly
+the trade it exists to catch.
+
+Friction settles the alternative. Six deep groove bearings at a swing rate set by 40.08 Hz give
+back 0.167 W, under a tenth of a percent of rotor shaft power, which is why it is not a line in
+the power budget. A PTFE fabric lined plain bearing is immune to the wear mode above and is what
+an oscillating aerospace joint uses, and the same six joints would cost 8.92 W instead. That is
+better than fifty times the friction, and the sliding distance at 40.08 Hz is what turns it
+around: a plain bearing that would be untroubled at ten swings a minute is running 167 mm of
+liner past the shaft every second here.
+
+So the ball bearing stays, on a static safety factor of 2.44 and an anti fretting grease behind
+the shields. If a Stage 2 bench run shows fretting anyway, the fix is a larger bearing before it
+is a different bearing type, and the conservative mass column has room for one.
+
 ## Frame and mount load path
 
 Blade, spider arm, hub boss, shaft, main bearing, bearing block, frame tube, mount lug. The
@@ -177,9 +222,10 @@ otherwise.
 - **Fatigue.** The blade sees a fully reversed bending cycle at 40 Hz and the pitch link a
   reversed axial cycle at the same rate. At 2405 rpm a 3 minute run is 7,200 cycles and an hour
   is 144,000. Nothing here has been checked against an S-N curve
-- **Oscillating bearing life.** The pitch bearings swing 80 degrees under a steady 110 N. That
-  is a fretting duty, and a static rating says nothing about it. It needs a supplier's
-  oscillating derate or a bench test
+- **Oscillating bearing life.** The regime is now computed rather than flagged, and the pitch
+  bearings sit at 0.5533 of full recirculation on a static safety factor of 2.44. What is still
+  missing is the only thing that settles it, which is a run to failure at speed under the real
+  load, with the grease that will be in the flight bearing
 - **Modal response.** Blade first bending and first torsion, shaft whirl and frame modes have
   not been calculated. The 3 per revolution excitation at 120 Hz is the forcing to check against
 - **Balance sensitivity.** A rotor with 31.75 g blades at 110 mm needs a stated balance
@@ -219,6 +265,20 @@ otherwise.
 - structure.pitch_link_allowable_N = 349.727
 - structure.pitch_link_margin = 3.3015
 - structure.carrier_phase_jitter_deg = 0.1432
+- structure.pitch_bearing_balls = 7
+- structure.pitch_bearing_ball_mm = 1.5875
+- structure.pitch_bearing_pitch_diameter_mm = 5.5
+- structure.pitch_bearing_cage_swing_deg = 28.4545
+- structure.pitch_bearing_ball_spacing_deg = 51.4286
+- structure.pitch_bearing_recirculation_ratio = 0.5533
+- structure.pitch_bearing_recirculation_travel_deg = 144.592
+- structure.pitch_bearing_load_N = 110.7318
+- structure.pitch_bearing_static_safety = 2.4383
+- structure.pitch_bearing_static_safety_floor = 2.0
+- structure.pitch_bearing_oscillation_hz = 40.0798
+- structure.pitch_bearing_friction_W = 0.1673
+- structure.pitch_bearing_plain_alternative_W = 8.9234
+- pitch.pitch_bearing_travel_deg = 80.0
 - pitch.carrier_radial_force_N = 53.22
 - pitch.carrier_torque_Nm = 0.1389
 - pitch.peak_blade_moment_Nm = 2.2058
