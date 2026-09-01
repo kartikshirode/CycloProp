@@ -50,14 +50,23 @@ import structure                                          # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 NUMBERS = ROOT / "stage-1" / "design" / "numbers.json"
 
-# The horn is Kellen's ratio scaled to this radius: L1 9 in and L4 2 in on his built
-# cyclocopter, printed page 55. The pitch link is not. Kellen's 9.133 in works out at
-# 111.6 mm here and the sweep under --sweep shows it four times worse on the torque the
-# vectoring actuator has to hold, with a transmission angle 18 degrees tighter. 105 mm is
-# the value that sweep picks. L2 is variable on Kellen's vehicle, a linear servo sets it,
-# so the offset here is solved rather than scaled.
-HORN_OVER_RADIUS = 2.0 / 9.0
-LINK_OVER_RADIUS = 105.0 / 110.0
+# The horn started as Kellen's ratio scaled to this radius, L1 9 in and L4 2 in on his
+# built cyclocopter, printed page 55, and the link was chosen off the sweep under --sweep.
+# Both moved on 1 September, because the sweep was reading the wrong thing.
+#
+# A transmission angle of 143 degrees is as bad as one of 37. The useful quantity is the
+# deviation from a right angle, so the constraint is on min(mu, 180 - mu), and the old
+# 24.4 by 105.0 row folds to 36.77 degrees while its printed minimum of 58.58 looked
+# comfortable. 18.0 by 108.0 is what the corrected sweep picks and it is better on every
+# column at once: the worst folded angle is 44.34 degrees, the carrier torque the actuator
+# holds falls from 0.1389 to 0.1363 Nm, and the schedule fits the harmonic to 1.141 degrees
+# rather than 1.195. Nothing was traded for it.
+#
+# The pitch link force rises with the shorter horn, and the horn's own bending allowable
+# rises in exactly the same proportion, so the pitch link margin does not move. L2 is
+# variable on Kellen's vehicle, a linear servo sets it, so the offset here is solved.
+HORN_OVER_RADIUS = 18.0 / 110.0
+LINK_OVER_RADIUS = 108.0 / 110.0
 SWEEP_HORN_MM = (18.0, 20.0, 22.0, 24.4, 26.0, 30.0, 36.0)
 SWEEP_LINK_MM = (100.0, 105.0, 108.0, 111.6, 118.0)
 TRANSMISSION_FLOOR_DEG = 40.0     # standard four-bar practice, and the sweep's constraint
@@ -66,6 +75,7 @@ TRANSMISSION_FLOOR_DEG = 40.0     # standard four-bar practice, and the sweep's 
 # reference the model reconstruction is checked against, and it is carried as a constant
 # rather than read from numbers.json because --write replaces that table with the week 3
 # one. Reading the live table made the script pass once and then disable itself.
+WEEK2_PUBLISHED_THRUST_N = 18.0   # the design point the table below was published at
 WEEK2_PUBLISHED_LOADS = [
     (0, 0.0), (10, 0.7483), (20, 2.8299), (30, 5.7943), (40, 9.0109), (50, 11.8165),
     (60, 13.6651), (70, 14.243), (80, 13.521), (90, 11.7337), (100, 9.2966), (110,
@@ -97,13 +107,20 @@ def blade_parts_g(chord_m, span_m):
     return {"foam": bl["m_foam_g"], "skin": bl["m_skin_g"], "spar": bl["m_spar_g"],
             "bond and fittings": bl["m_close_out_g"]}
 
-# Actuator, Corona DS-929MG class. Supplier listing rather than a manufacturer datasheet,
-# the same evidence class as four of the five week 2 drive rows.
-SERVO_MASS_G = 12.5
-SERVO_STALL_TORQUE_NM = 0.216     # 2.2 kgf.cm at 6 V
+# Actuator, a 20 g class digital metal gear servo. Supplier listing rather than a
+# manufacturer datasheet, the same evidence class as four of the five week 2 drive rows.
+#
+# It used to be a 12.5 g class part at 2.2 kgf.cm, and that was sized against a servo
+# torque computed with the gear ratio applied backwards. The gear pair steps the carrier
+# ANGLE up, which is what the phase authority already claims, and angle amplification at
+# the output is torque multiplication at the input. Corrected, the small servo holds 96
+# percent of half its stall torque against a ripple that reverses three times a revolution.
+# This one holds 53 percent of half stall. It costs 7.5 g each. See D67.
+SERVO_MASS_G = 20.0
+SERVO_STALL_TORQUE_NM = 0.3825    # 3.9 kgf.cm at 6 V
 SERVO_TRAVEL_DEG = 80.0           # 40 degrees per side over a 400 us pulse excursion
-SERVO_SPEED_S_PER_60DEG = 0.11    # at 6 V
-SERVO_CURRENT_A = 0.24            # at 6 V
+SERVO_SPEED_S_PER_60DEG = 0.13    # at 6 V
+SERVO_CURRENT_A = 0.35            # at 6 V
 SERVO_COUNT = 2                   # both drive the phasing carrier, 180 degrees apart
 SERVO_USABLE_FRACTION = 0.50      # holding torque allowed against the stall figure
 
@@ -532,7 +549,12 @@ def solve(data, balanced=False):
     hold = max(abs(t) for t in torque)
     radial = max(abs(t) for t in radial_series) * 1.0
     step_up = SERVO_GEAR_MM / CARRIER_GEAR_MM
-    servo_torque = hold / step_up / SERVO_COUNT
+    # Multiplied, not divided. Line 538 below turns SERVO_TRAVEL_DEG into
+    # SERVO_TRAVEL_DEG * step_up of carrier phase, so the carrier turns further than the
+    # servo does, and a gear pair that amplifies angle at the output multiplies torque at
+    # the input. Dividing here reported 0.0463 Nm where the servos each supply 0.1022, and
+    # turned an actuator margin of 1.04 into 2.33.
+    servo_torque = hold * step_up / SERVO_COUNT
 
     r_out, r_in = swept_radii(chord, axis_frac, rows, R)
     authority = SERVO_TRAVEL_DEG * step_up
@@ -602,8 +624,10 @@ def report(s):
     g = s["grashof"]
     print(f"  Grashof {g['grashof']}, s+l {g['s_plus_l_mm']:.2f} <= p+q "
           f"{g['p_plus_q_mm']:.2f}, ground is the shortest link {g['shortest_is_ground']}")
+    worst = min(s["transmission_min_deg"], 180.0 - s["transmission_max_deg"])
     print(f"  transmission angle {s['transmission_min_deg']:.2f} to "
-          f"{s['transmission_max_deg']:.2f} deg")
+          f"{s['transmission_max_deg']:.2f} deg, worst deviation from a right angle "
+          f"leaves {worst:.2f}")
     print(f"  pitch bearing travel {s['pitch_travel_deg']:.2f} deg")
     print(f"  pitch link closest approach to the rotor axis {s['axis_gap_mm']:.3f} mm")
     print(f"  pitch link closest approach to a neighbouring pitch axis "
@@ -669,7 +693,10 @@ def sweep(data):
                 continue
             smin = min(math.sin(math.radians(s["transmission_min_deg"])),
                        math.sin(math.radians(s["transmission_max_deg"])))
-            ok = s["transmission_min_deg"] >= TRANSMISSION_FLOOR_DEG
+            # The folded angle, not the printed minimum. 143 degrees is as far from a right
+            # angle as 37 is, and the column that says so was already being computed and
+            # then ignored by the verdict beside it.
+            ok = smin >= math.sin(math.radians(TRANSMISSION_FLOOR_DEG))
             print(f"{a_mm:6.1f} {l_mm:7.1f} {s['e'] * 1000:7.2f} "
                   f"{s['transmission_min_deg']:7.2f} {s['transmission_max_deg']:7.2f} "
                   f"{smin:8.4f} {s['carrier_torque_Nm']:9.4f} "
@@ -683,6 +710,11 @@ def check_week2_model(data):
     Checked against `WEEK2_PUBLISHED_LOADS` and never against the live table, because
     `--write` replaces the live one and an earlier version of this function compared the
     reconstruction with its own output. That made the script run exactly once.
+
+    Scaled to the thrust the stored table was published at rather than to the design point,
+    so the check reads the SHAPE of the distribution. It compared against the live design
+    thrust until 1 September, which meant moving the design point failed a check about
+    whether the aerodynamic model still reproduces, and those are different questions.
     """
     o, p, g = data["operating"], data["performance"], data["geometry"]
     az = [a for a, _ in WEEK2_PUBLISHED_LOADS]
@@ -690,7 +722,7 @@ def check_week2_model(data):
     sched = [g["pitch_amplitude_deg"] * math.sin(math.radians(x)) for x in az]
     _, fy, raw = cycle_resultant(sched, az, o["tip_speed_ms"],
                                  p["induced_velocity_ms"], 90.0)
-    scale = (p["thrust_N"] / g["blades"]) / fy
+    scale = (WEEK2_PUBLISHED_THRUST_N / g["blades"]) / fy
     got = [r * scale * math.sin(math.radians(x)) for r, x in zip(raw, az)]
     return max(abs(x - y) for x, y in zip(got, stored))
 

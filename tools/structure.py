@@ -86,10 +86,69 @@ ROOT_FITTING_OD_M = 0.014
 ROOT_FITTING_LEN_M = 0.010
 BOND_LINE_G_PER_BLADE = 1.35
 
+# Six mass lines used to be asserted rather than drawn, and the review found every one of
+# them. They are geometry now, so the number moves when the part does.
+#
+# The hub boss is the worst of the six: it was a 20 mm outer diameter over a 14 mm bore,
+# on a 16 mm shaft. That part cannot be made. It is 22 over 16 at the same 3 mm wall, and
+# it carries the two clamp ears a split boss needs to grip a shaft at all.
+BOSS_OD_M = 0.022
+BOSS_LEN_M = 0.016
+BOSS_EAR_M = (0.014, 0.010, 0.005)      # one clamp ear, two per boss
+
+# Bearing block, from the housing the basis already describes. No cutout is claimed and
+# none is taken: 34 by 28 by 9 mm around a 24 mm bore leaves 2 mm of wall at the sides,
+# which is not a part with room to lighten.
+BLOCK_M = (0.034, 0.028, 0.009)
+BLOCK_BORE_M = 0.024
+
+# Motor plate, with the belt slot and the three lightening holes the basis claims. The
+# 8.00 g it used to carry is under half of the solid plate.
+PLATE_M = (0.055, 0.045, 0.0025)
+PLATE_SLOT_M2 = 0.025 * 0.006
+PLATE_HOLE_M, PLATE_HOLES = 0.012, 3
+
+# Root attachment clevis. Strength is nowhere near the driver here, so minimum machinable
+# section is, and the part is drawn rather than guessed at.
+BRACKET_BASE_M = (0.016, 0.012, 0.0025)
+BRACKET_LUG_M = (0.012, 0.009, 0.0025)
+BRACKET_PIN_M = 0.003
+
+# The shaft plugs have to reach outside the tube to make the 15 mm journal the main
+# bearings run on, and no allowance for that was being carried.
+SHAFT_JOURNAL_OD_M = 0.015
+SHAFT_JOURNAL_LEN_M = 0.006
+
+# The harness carries current out and back. One conductor was priced.
+WIRE_G_PER_M = 16.0
+WIRE_RUN_M = 0.600
+WIRE_CONDUCTORS = 2
+WIRE_SIGNAL_G = 6.00
+
 # Bearings and catalogue hardware. Masses and ratings are supplier listings, the same
 # evidence class as four of the five week 2 motor rows.
-PITCH_BEARING = {"name": "693ZZ, 3 by 8 by 4 mm", "mass_g": 1.30, "c0_N": 270.0,
+PITCH_BEARING = {"name": "693ZZ, 3 by 8 by 4 mm", "mass_g": 1.30, "c0_listed_N": 270.0,
                  "bore_mm": 3.0, "od_mm": 8.0, "ball_mm": 1.5875, "balls": 7}
+
+# The listing above is a supplier page with no supplier named, and it carries the tightest
+# margin in the module. ISO 76 gives the basic static radial rating of a single row deep
+# groove ball bearing as f0 times the ball count times the ball diameter squared, with
+# f0 = 12.3 for this type at zero contact angle, and every input to that is a number this
+# design already publishes. It comes out at 217 N against the 270 N listed, so the design
+# is held to the computed figure and the listing is recorded beside it. See D67.
+ISO76_F0 = 12.3
+PITCH_BEARING["c0_N"] = ISO76_F0 * PITCH_BEARING["balls"] * PITCH_BEARING["ball_mm"] ** 2
+
+# On the computed rating one bearing at each of the blade's two root stations does not
+# clear the floor: 434 N against a 319 N overspeed pull is a margin of 1.36 against 1.5,
+# and the oscillating static safety lands at 1.96 against a declared 2.0. A second bearing
+# at each station fixes both and costs 1.3 g apiece. It fits without redrawing anything,
+# because the root fitting is already 10 mm long and two 4 mm wide bearings sit inside
+# that. Two bearings on one pin do not share a radial load perfectly, so the pair is taken
+# at 90 percent of twice one rating rather than at twice it. See D67.
+PITCH_BEARING_STATIONS = 2                 # one at each spider, per blade
+PITCH_BEARINGS_PER_STATION = 2
+PITCH_BEARING_SHARE = 0.90                 # load sharing inside the pair
 
 # The pitch bearing does not rotate. It swings through pitch_bearing_travel_deg once per
 # revolution under a centrifugal pull whose direction is fixed in the arm, which is the
@@ -122,11 +181,13 @@ PULLEY_OVERHANG_M = 0.030      # drive bearing to belt pulley mid plane
 BELT_SHAFT_LOAD_FACTOR = 1.4   # HTD shaft load against effective tension
 
 # Belt drive, 3.5 to 1 on HTD-3M.
+# 68 over 16, a 4.25 to 1 reduction. Week 2 chose 56 over 16 against a motor torque that
+# was 15 percent light, and the corrected torque does not fit the motor at that ratio.
 MOTOR_TEETH = 16
-ROTOR_TEETH = 56
+ROTOR_TEETH = 68
 BELT_PITCH_MM = 3.0
 BELT_WIDTH_MM = 9.0
-BELT_LEN_MM = 300.0
+BELT_LEN_MM = 375.0            # longer centre distance and a 68 tooth rotor pulley
 BELT_G_PER_100MM = 3.4
 
 # Spider arms, six of them, one per blade end.
@@ -250,16 +311,27 @@ def build(data):
 
     # ---------------------------------------------------------------- mass budget
     arm_g = ARM_W_M * ARM_T_M * R * cfrp["rho"] * 1000.0
-    boss = tube(0.020, 0.003)
-    boss_g = boss["area_m2"] * 0.016 * al["rho"] * 1000.0
-    bracket_g = 3.00
+    boss = tube(BOSS_OD_M, (BOSS_OD_M - SHAFT_OD_M) / 2.0)
+    ear_g = BOSS_EAR_M[0] * BOSS_EAR_M[1] * BOSS_EAR_M[2] * al["rho"] * 1000.0
+    boss_g = boss["area_m2"] * BOSS_LEN_M * al["rho"] * 1000.0 + 2 * ear_g
+    bracket_g = (BRACKET_BASE_M[0] * BRACKET_BASE_M[1] * BRACKET_BASE_M[2]
+                 + 2 * BRACKET_LUG_M[0] * BRACKET_LUG_M[1] * BRACKET_LUG_M[2]) \
+        * al["rho"] * 1000.0
+    block_g = ((BLOCK_M[0] * BLOCK_M[1] - math.pi / 4.0 * BLOCK_BORE_M ** 2)
+               * BLOCK_M[2] * al["rho"] * 1000.0)
+    plate_g = ((PLATE_M[0] * PLATE_M[1] - PLATE_SLOT_M2
+                - PLATE_HOLES * math.pi / 4.0 * PLATE_HOLE_M ** 2)
+               * PLATE_M[2] * al["rho"] * 1000.0)
+    harness_g = WIRE_RUN_M * WIRE_CONDUCTORS * WIRE_G_PER_M + WIRE_SIGNAL_G
     link_tube = tube(LINK_OD_M, LINK_WALL_M)
     link_g = link_tube["area_m2"] * float(data["pitch"]["pitch_link_m"]) * cfrp["rho"] * 1000.0
     horn_g = HORN_WIDTH_M * HORN_THICK_M * float(data["pitch"]["horn_m"]) * al["rho"] * 1000.0
     shaft = tube(SHAFT_OD_M, SHAFT_WALL_M)
     shaft_tube_g = shaft["area_m2"] * SHAFT_LEN_M * cfrp["rho"] * 1000.0
     plug_area = math.pi / 4.0 * (shaft["id_m"] - 0.0005) ** 2
-    plug_g = plug_area * (SHAFT_PLUG_DRIVE_LEN_M + SHAFT_PLUG_CARRIER_LEN_M) * al["rho"] * 1000.0
+    journal_v = math.pi / 4.0 * SHAFT_JOURNAL_OD_M ** 2 * SHAFT_JOURNAL_LEN_M
+    plug_g = ((plug_area * (SHAFT_PLUG_DRIVE_LEN_M + SHAFT_PLUG_CARRIER_LEN_M)
+               + 2 * journal_v) * al["rho"] * 1000.0)
     frame_tube = tube(0.008, 0.001)
     frame_tube_g = frame_tube["area_m2"] * 0.340 * cfrp["rho"] * 1000.0
 
@@ -295,15 +367,28 @@ def build(data):
          f"CFRP bar of {ARM_W_M * 1000:.0f} by {ARM_T_M * 1000:.1f} mm section over the "
          f"{R * 1000:.0f} mm rotor radius, two spiders of three arms"),
         ("rotor hub bosses, 2 off", 2 * boss_g, "rotor frame and hubs", "machined",
-         "7075-T6 boss, 20 mm outer diameter, 14 mm bore, 16 mm long, clamping each "
-         "spider to the shaft"),
+         f"7075-T6 split boss, {BOSS_OD_M * 1000:.0f} mm outer diameter over the "
+         f"{SHAFT_OD_M * 1000:.0f} mm shaft at a {(BOSS_OD_M - SHAFT_OD_M) / 2 * 1000:.0f} "
+         f"mm wall, {BOSS_LEN_M * 1000:.0f} mm long, with two clamp ears of "
+         f"{BOSS_EAR_M[0] * 1000:.0f} by {BOSS_EAR_M[1] * 1000:.0f} by "
+         f"{BOSS_EAR_M[2] * 1000:.0f} mm carrying the pinch screws"),
         ("root attachment brackets, 6 off", 6 * bracket_g, "rotor frame and hubs", "machined",
-         "7075-T6 clevis carrying the blade root fitting into the spider arm, sized on "
-         "the recomputed centrifugal pull at the declared overspeed"),
+         f"7075-T6 clevis carrying the blade root fitting into the spider arm, "
+         f"{BRACKET_BASE_M[0] * 1000:.0f} by {BRACKET_BASE_M[1] * 1000:.0f} mm base and "
+         f"two lugs of {BRACKET_LUG_M[0] * 1000:.0f} by {BRACKET_LUG_M[1] * 1000:.0f} mm, "
+         f"all at {BRACKET_BASE_M[2] * 1000:.1f} mm. The overspeed pull leaves a net "
+         f"section stress under 30 MPa, so minimum machinable section sets this and not "
+         f"strength"),
 
-        ("pitch bearings, 6 off", 6 * PITCH_BEARING["mass_g"], "pitch mechanism", "catalogue",
-         f"{PITCH_BEARING['name']}, supplier listing, static rating "
-         f"{PITCH_BEARING['c0_N']:.0f} N each, two per blade"),
+        (f"pitch bearings, {nb * PITCH_BEARING_STATIONS * PITCH_BEARINGS_PER_STATION} off",
+         nb * PITCH_BEARING_STATIONS * PITCH_BEARINGS_PER_STATION * PITCH_BEARING["mass_g"],
+         "pitch mechanism", "catalogue",
+         f"{PITCH_BEARING['name']}, supplier listing for the mass, "
+         f"{PITCH_BEARINGS_PER_STATION} at each of the "
+         f"{PITCH_BEARING_STATIONS} root stations on every blade. The static rating is "
+         f"the ISO 76 figure of {PITCH_BEARING['c0_N']:.0f} N computed from the "
+         f"{PITCH_BEARING['balls']} balls of {PITCH_BEARING['ball_mm']} mm this bearing "
+         f"carries, not the {PITCH_BEARING['c0_listed_N']:.0f} N the listing claims"),
         ("pitch links with rod ends, 3 off", nb * (link_g + 2 * ROD_END["mass_g"]),
          "pitch mechanism", "catalogue",
          f"CFRP tube of {LINK_OD_M * 1000:.0f} mm outer diameter and "
@@ -334,21 +419,26 @@ def build(data):
         ("shaft end plugs, 2 off", plug_g, "rotor shaft", "machined",
          f"7075-T6 plugs bonded into the tube, {SHAFT_PLUG_DRIVE_LEN_M * 1000:.0f} mm at "
          f"the drive end and {SHAFT_PLUG_CARRIER_LEN_M * 1000:.0f} mm at the carrier end, "
-         f"turned to the 15 mm bearing journals"),
+         f"each reaching {SHAFT_JOURNAL_LEN_M * 1000:.0f} mm past the tube to make the "
+         f"{SHAFT_JOURNAL_OD_M * 1000:.0f} mm journal the main bearings run on"),
 
         ("main bearings, 2 off", 2 * MAIN_BEARING["mass_g"], "main bearings", "catalogue",
          f"{MAIN_BEARING['name']} deep groove, supplier listing, one at each rotor "
          f"station on the shaft end plugs"),
 
-        ("bearing blocks, 2 off", 16.00, "frame and mounting hardware", "machined",
-         "7075-T6 housing, 34 by 28 by 9 mm with a 24 mm bore, bolted to the frame tubes "
-         "and carrying the main bearings"),
+        ("bearing blocks, 2 off", 2 * block_g, "frame and mounting hardware", "machined",
+         f"7075-T6 housing, {BLOCK_M[0] * 1000:.0f} by {BLOCK_M[1] * 1000:.0f} by "
+         f"{BLOCK_M[2] * 1000:.0f} mm around a {BLOCK_BORE_M * 1000:.0f} mm bore, bolted "
+         f"to the frame tubes and carrying the main bearings. Solid: 2 mm of wall at the "
+         f"sides leaves nothing to lighten"),
         ("frame tubes, 4 off", 4 * frame_tube_g, "frame and mounting hardware", "calculated",
          "CFRP tube of 8 mm outer diameter and 1 mm wall, 340 mm long, spanning the "
          "packaged envelope between the two bearing blocks"),
-        ("motor mount plate", 8.00, "frame and mounting hardware", "machined",
-         "2.5 mm 7075-T6 plate, 55 by 45 mm with the belt slot and lightening cutouts, "
-         "carrying the MN5006 and taking the belt reaction"),
+        ("motor mount plate", plate_g, "frame and mounting hardware", "machined",
+         f"{PLATE_M[2] * 1000:.1f} mm 7075-T6 plate, {PLATE_M[0] * 1000:.0f} by "
+         f"{PLATE_M[1] * 1000:.0f} mm, less a {PLATE_SLOT_M2 * 1e6:.0f} mm2 belt slot and "
+         f"{PLATE_HOLES} lightening holes of {PLATE_HOLE_M * 1000:.0f} mm, carrying the "
+         f"motor and taking the belt reaction"),
         ("airframe mount lugs, 4 off", 7.20, "frame and mounting hardware", "machined",
          "7075-T6 lug at each of the four mount points named in the packaging document, "
          "1.8 g each"),
@@ -360,12 +450,13 @@ def build(data):
          "T-Motor Antigravity MN5006 KV450 from the supplier datasheet, 106 g including "
          "leads, the only week 2 drive row read off a manufacturer sheet"),
 
-        ("rotor belt pulley, 56 tooth", rotor_pulley_g, "transmission", "machined",
+        (f"rotor belt pulley, {ROTOR_TEETH} tooth", rotor_pulley_g, "transmission",
+         "machined",
          f"6061-T6 HTD-3M pulley, {rotor_pd_mm:.1f} mm pitch diameter, 10 mm rim with a "
          f"lightened 2 mm web, on the shaft drive end"),
         ("motor belt pulley, 16 tooth", motor_pulley_g, "transmission", "machined",
-         f"6061-T6 HTD-3M pulley, {motor_pd_mm:.1f} mm pitch diameter, giving the 3.5 to "
-         f"1 ratio week 2 selected"),
+         f"6061-T6 HTD-3M pulley, {motor_pd_mm:.1f} mm pitch diameter, giving the "
+         f"{ROTOR_TEETH / MOTOR_TEETH:.2f} to 1 ratio the corrected motor torque needs"),
         ("drive belt", belt_g, "transmission", "catalogue",
          f"HTD-3M toothed belt, {BELT_WIDTH_MM:.0f} mm wide and {BELT_LEN_MM:.0f} mm "
          f"long, supplier listing at {BELT_G_PER_100MM} g per 100 mm"),
@@ -373,21 +464,27 @@ def build(data):
          "idler pulley on an eccentric bracket at the motor plate, setting belt "
          "pretension at build and holding it with one screw"),
 
-        ("esc, 40 A 6S class", 19.50, "esc", "catalogue",
-         "brushless controller rated above the 20.61 A the design point draws, supplier "
-         "listing, 19.5 g with leads and heatshrink"),
+        (f"esc, 40 A {PACK_CELLS}S class", 19.50, "esc", "catalogue",
+         f"brushless controller rated above the current the design point draws and above "
+         f"the {PACK_CELLS * CELL_NOMINAL_V:.1f} V nominal pack, supplier listing, 19.5 g "
+         f"with leads and heatshrink"),
 
-        ("vectoring actuator servos, 2 off", 25.00, "vectoring actuator", "catalogue",
-         "two Corona DS-929MG class digital metal gear servos at 12.5 g, supplier "
-         "listing, driving the phasing carrier 180 degrees apart"),
+        (f"vectoring actuator servos, {int(data['pitch']['actuator_count'])} off",
+         float(data["pitch"]["actuator_mass_g"]), "vectoring actuator", "catalogue",
+         f"{int(data['pitch']['actuator_count'])} digital metal gear servos at "
+         f"{float(data['pitch']['servo_mass_g']):.1f} g, supplier listing, driving the "
+         f"phasing carrier 180 degrees apart. Sized on the corrected servo torque of "
+         f"{float(data['pitch']['servo_torque_Nm']):.4f} Nm each"),
 
         ("pitch offset controller", 8.50, "pitch offset controller", "catalogue",
          "Matek F411-WSE class flight controller board, supplier listing, 8.5 g against "
          "the 8.0 g week 2 carried, which is the debt week 3 left open"),
 
-        ("module wiring harness", 15.60, "module wiring harness", "allowance",
-         "14 AWG silicone power leads over 600 mm at 16 g/m, plus servo and signal "
-         "wiring and the connectors at the module boundary"),
+        ("module wiring harness", harness_g, "module wiring harness", "allowance",
+         f"14 AWG silicone power leads at {WIRE_G_PER_M:.0f} g/m over "
+         f"{WIRE_RUN_M * 1000:.0f} mm, {WIRE_CONDUCTORS} conductors because current goes "
+         f"out and comes back, plus {WIRE_SIGNAL_G:.1f} g of servo and signal wiring and "
+         f"the connectors at the module boundary"),
 
         ("fasteners and threaded inserts", 14.00, "fasteners and bonded joints", "allowance",
          "40 M3 screws, washers and threaded inserts at the frame, bearing block, motor "
@@ -445,7 +542,9 @@ def build(data):
     link_allow = min(horn_allow_N, ROD_END["static_N"], link_buckling_N)
     link_load = float(data["pitch"]["peak_link_force_N"])
 
-    attach_allow = 2 * PITCH_BEARING["c0_N"]
+    brg_per_blade = PITCH_BEARING_STATIONS * PITCH_BEARINGS_PER_STATION
+    attach_allow = (brg_per_blade * PITCH_BEARING["c0_N"]
+                    * (PITCH_BEARING_SHARE if PITCH_BEARINGS_PER_STATION > 1 else 1.0))
 
     # Blade torsional wind up under the centrifugal pitching moment. The blade is driven
     # in pitch from one end only, so the far end lags, and that lag is a real part of the
@@ -523,7 +622,7 @@ def bearing_duty(data, b):
     # Load per bearing at the operating point, not at the declared overspeed. Overspeed is
     # a strength case and it is already gated on the static rating. Wear is a duty case and
     # it accumulates at the speed the machine actually runs at.
-    load_N = b["fc_N"] / 2.0
+    load_N = b["fc_N"] / (PITCH_BEARING_STATIONS * PITCH_BEARINGS_PER_STATION)
     s0 = brg["c0_N"] / load_N
 
     rev_hz = float(data["operating"]["rpm"]) / 60.0
@@ -532,7 +631,8 @@ def bearing_duty(data, b):
     mean_rate = (2.0 / math.pi) * amp_rad * omega          # mean |dtheta/dt| over a cycle
     ball_torque = 0.5 * BALL_FRICTION_MU * load_N * brg["bore_mm"] / 1000.0
     plain_torque = PLAIN_LINER_MU * load_N * brg["bore_mm"] / 2000.0
-    count = 2 * int(data["geometry"]["blades"])
+    count = (PITCH_BEARING_STATIONS * PITCH_BEARINGS_PER_STATION
+             * int(data["geometry"]["blades"]))
     shaft_power = b["shaft_power_W"]
     return {
         "balls": brg["balls"],
@@ -637,8 +737,14 @@ def blade_sensitivity(data, b):
 
 
 MOTOR_DERATE = 0.80
-PACK_CELLS = 6
+
+# 8S, not 6S. The battery sits outside the module boundary, so pack voltage is an interface
+# this module declares rather than a part it carries, and at 6S no motor on the shortlist
+# can deliver the corrected shaft power at all: the cap is 0.9 * 20.95 V * 20.8 A = 392 W
+# of mechanical output against 406 W wanted, and no gear ratio moves that line. See D67.
+PACK_CELLS = 8
 CELL_NOMINAL_V = 3.70
+MOTOR_IDLE_CURRENT_A = 0.9      # evidence row E12, and it was being left out of the draw
 MOTOR_SPEED_RULE = 0.90
 TW_FLOOR = 2.5
 
@@ -666,26 +772,62 @@ def drive_margin(data):
             sel = c
     if sel is None:
         raise SystemExit("no drive candidate is marked selected")
-    amps, watts = float(perf["motor_input_current_A"]), float(perf["motor_input_W"])
+
+    # Current comes from torque. It used to be motor_input_W over pack voltage, which is
+    # the draw of an ideal resistor at unity power factor and runs low by roughly the
+    # efficiency, in the direction that flatters a drive selection. Kt is 9.5493 over KV,
+    # and the idle current the datasheet publishes is part of the draw.
+    b = build(data)
+    kt = 9.5493 / float(sel["kv"])
+    torque = b["motor_torque_Nm"]
+    amps = torque / kt + MOTOR_IDLE_CURRENT_A
+    watts = b["shaft_power_W"] / (float(data["efficiency"]["transmission"])
+                                  * float(data["efficiency"]["motor"]))
     v_nom = PACK_CELLS * CELL_NOMINAL_V
     v_load = v_nom - amps * float(sel["internal_resistance_ohm"])
     ceiling = float(sel["kv"]) * v_load
+    rotor_rpm = float(data["operating"]["rpm"])
+    motor_rpm = rotor_rpm * float(perf["belt_ratio"])
 
-    # Thrust floor. The stacked case is the coefficient haircut and the mass growth applied
-    # together, and it is the one that pins the design point from below.
+    # What a motor can actually deliver, and it is the sentence the drive selection turns
+    # on. Under a speed rule s and a continuous current Ic, mechanical output is capped at
+    # s * V_loaded * Ic, because 2*pi/60 times 9.5493 is exactly 1 and KV cancels out of
+    # the product of torque and speed. Gearing moves the operating point along that line
+    # and cannot move the line. A drive that falls short needs pack volts or motor amps,
+    # and nothing else will do.
+    mech_cap_W = MOTOR_SPEED_RULE * v_load * float(sel["continuous_current_A"])
+    mech_need_W = b["shaft_power_W"] / float(data["efficiency"]["transmission"])
+
+    # Thrust floors. The design case is the one the competition requires and the one the
+    # design point is pinned to from below. The stacked case is the coefficient haircut and
+    # the mass growth applied together, and since 1 September it no longer clears, so what
+    # is carried is the gap rather than a claim. See D67.
     haircut = float(perf["blade_area_coeff_low"]) / float(perf["blade_area_coeff"])
-    m_cons = float(data["results"]["mass_g_conservative"]) / 1000.0
+    m_nom = b["total_g"] / 1000.0
+    m_cons = b["total_cons_g"] / 1000.0
     floor_N = TW_FLOOR * m_cons * G / haircut
+    close_g = m_cons * 1000.0 - float(perf["thrust_N"]) * haircut / (TW_FLOOR * G) * 1000.0
     return {
         "derate": MOTOR_DERATE,
+        "motor_torque_Nm": torque,
+        "amps": amps,
+        "idle_A": MOTOR_IDLE_CURRENT_A,
+        "motor_input_W": watts,
         "current_frac": amps / float(sel["peak_current_180s_A"]),
         "power_frac": watts / float(sel["max_power_180s_W"]),
+        "torque_frac": torque / float(sel["continuous_torque_Nm"]),
+        "pack_cells": PACK_CELLS,
         "pack_v_nominal": v_nom,
         "pack_v_loaded": v_load,
         "speed_ceiling_rpm": ceiling,
         "speed_rule": MOTOR_SPEED_RULE,
-        "speed_frac": float(perf["motor_rpm"]) / ceiling,
+        "speed_frac": motor_rpm / ceiling,
+        "motor_rpm": motor_rpm,
+        "mech_cap_W": mech_cap_W,
+        "mech_need_W": mech_need_W,
         "thrust_floor_N": floor_N,
+        "thrust_floor_nominal_N": TW_FLOOR * m_nom * G,
+        "mass_to_close_stacked_g": close_g,
     }
 
 
@@ -718,17 +860,26 @@ BOM = [
     # (item, category, qty, unit_cost_inr, lead_weeks, make_or_buy, source)
     ("T-Motor Antigravity MN5006 KV450", "drive", 1, 8500, 3, "buy",
      "Quadkopters, New Delhi, manufacturer datasheet price"),
-    ("40 A 6S brushless controller", "drive", 1, 3200, 2, "buy", "Robu.in, Pune"),
-    ("Corona DS-929MG class servo", "drive", 2, 1450, 2, "buy", "Robu.in, Pune"),
+    ("40 A 8S brushless controller", "drive", 1, 3600, 2, "buy",
+     "Robu.in, Pune, catalogue listing for a 40 A 8S capable controller"),
+    ("20 g class digital metal gear servo", "drive", 2, 1900, 2, "buy",
+     "Robu.in, Pune, catalogue listing for a 3.9 kgf.cm metal gear servo"),
     ("Matek F411-WSE class controller board", "drive", 1, 3900, 3, "buy",
-     "Quadkopters, New Delhi"),
-    ("693ZZ miniature bearing", "hardware", 6, 60, 1, "buy", "local bearing house, Mumbai"),
-    ("MR128ZZ miniature bearing", "hardware", 2, 90, 1, "buy", "local bearing house, Mumbai"),
-    ("61802 deep groove bearing", "hardware", 2, 240, 1, "buy", "local bearing house, Mumbai"),
-    ("M3 aluminium bodied rod end", "hardware", 6, 180, 2, "buy", "Robu.in, Pune"),
-    ("HTD-3M belt, 9 mm wide, 300 mm", "drive", 1, 420, 2, "buy", "Powergear, Coimbatore"),
-    ("HTD-3M pulley blank, 16 tooth", "drive", 1, 650, 2, "buy", "Powergear, Coimbatore"),
-    ("HTD-3M pulley blank, 56 tooth", "drive", 1, 1250, 2, "buy", "Powergear, Coimbatore"),
+     "Quadkopters, New Delhi, catalogue listing for the board class"),
+    ("693ZZ miniature bearing", "hardware", 12, 60, 1, "buy",
+     "local bearing house, Mumbai, counter price for the size"),
+    ("MR128ZZ miniature bearing", "hardware", 2, 90, 1, "buy",
+     "local bearing house, Mumbai, counter price for the size"),
+    ("61802 deep groove bearing", "hardware", 2, 240, 1, "buy",
+     "local bearing house, Mumbai, counter price for the size"),
+    ("M3 aluminium bodied rod end", "hardware", 6, 180, 2, "buy",
+     "Robu.in, Pune, catalogue listing for an M3 ball rod end"),
+    ("HTD-3M belt, 9 mm wide, 375 mm", "drive", 1, 470, 2, "buy",
+     "Powergear, Coimbatore, catalogue listing per belt length"),
+    ("HTD-3M pulley blank, 16 tooth", "drive", 1, 650, 2, "buy",
+     "Powergear, Coimbatore, catalogue listing per tooth count"),
+    ("HTD-3M pulley blank, 68 tooth", "drive", 1, 1600, 2, "buy",
+     "Powergear, Coimbatore, catalogue listing per tooth count"),
     ("Rohacell 51 IG block, 300 by 150 by 20 mm", "material", 1, 2600, 4, "buy",
      "importer landed price, no Indian stockist found"),
     ("60 gsm carbon twill, 1 m2", "material", 1, 1400, 2, "buy", "Composites Today, Chennai"),
@@ -738,17 +889,20 @@ BOM = [
      "Huntsman distributor, Mumbai"),
     ("CFRP tube stock, four diameters", "material", 1, 2900, 3, "buy",
      "Carbon Fiber India, Coimbatore"),
-    ("7075-T6 bar and plate stock", "material", 1, 2200, 2, "buy", "metal stockist, Mumbai"),
-    ("6061-T6 bar stock", "material", 1, 700, 1, "buy", "metal stockist, Mumbai"),
+    ("7075-T6 bar and plate stock", "material", 1, 2200, 2, "buy",
+     "metal stockist, Mumbai, over the counter rate per kilogram"),
+    ("6061-T6 bar stock", "material", 1, 700, 1, "buy",
+     "metal stockist, Mumbai, over the counter rate per kilogram"),
     ("M3 fasteners, washers and threaded inserts", "hardware", 1, 900, 1, "buy",
      "fastener stockist, Mumbai"),
-    ("silicone wire, connectors and heatshrink", "hardware", 1, 800, 1, "buy", "Robu.in, Pune"),
+    ("silicone wire, connectors and heatshrink", "hardware", 1, 900, 1, "buy",
+     "Robu.in, Pune, catalogue listing for 14 AWG silicone cable and XT connectors"),
     ("blade mould, two halves from tooling board", "tooling", 1, 9000, 3, "make",
      "CNC job work against the section drawing"),
     ("spider arms and root brackets, CNC job work", "fabricated", 1, 6500, 2, "make",
      "CNC job work, 7075 and CFRP plate"),
     ("bearing blocks and motor mount plate, CNC job work", "fabricated", 1, 4800, 2, "make",
-     "CNC job work, 7075 plate"),
+     "CNC job work against the block and plate drawings, 7075"),
     ("carrier ring gear and servo sector gear", "fabricated", 1, 5500, 3, "make",
      "gear cutting job work, 6061"),
     ("rotor assembly and balancing jig", "tooling", 1, 3000, 2, "make",
@@ -956,6 +1110,13 @@ def write(data, b, m):
         "pitch_bearing_load_N": round(bd["load_N"], 4),
         "pitch_bearing_static_safety": round(bd["s0"], 4),
         "pitch_bearing_static_safety_floor": PITCH_BEARING_S0_FLOOR,
+        "pitch_bearings_per_blade": (PITCH_BEARING_STATIONS
+                                     * PITCH_BEARINGS_PER_STATION),
+        "pitch_bearing_stations": PITCH_BEARING_STATIONS,
+        "pitch_bearing_share": (PITCH_BEARING_SHARE
+                                if PITCH_BEARINGS_PER_STATION > 1 else 1.0),
+        "pitch_bearing_c0_iso_N": round(PITCH_BEARING["c0_N"], 3),
+        "pitch_bearing_c0_listed_N": PITCH_BEARING["c0_listed_N"],
         "pitch_bearing_oscillation_hz": round(bd["oscillation_hz"], 4),
         "pitch_bearing_friction_W": round(bd["friction_W"], 4),
         "pitch_bearing_plain_alternative_W": round(bd["plain_friction_W"], 4),
@@ -969,6 +1130,9 @@ def write(data, b, m):
         "blade_skin_band_worst_margin": round(bs["skin_band_worst_margin"], 4),
         "blade_foam_knockdown_at_floor": round(bs["foam_knockdown_at_floor"], 4),
         "blade_foam_downgrade_margin": round(bs["foam_downgrade_margin"], 4),
+        "blade_foam_downgrade_modulus_MPa": FOAM_DOWNGRADE["E"] / 1e6,
+        "blade_foam_downgrade_shear_MPa": FOAM_DOWNGRADE["Gm"] / 1e6,
+        "blade_foam_downgrade_density_kgm3": FOAM_DOWNGRADE["rho"],
         "blade_foam_downgrade_blade_g": round(bs["foam_downgrade_blade_g"], 4),
         "torque_reference": (
             "rotor shaft, downstream of the 3.5 to 1 belt reduction. The motor shaft "
@@ -1075,14 +1239,23 @@ def write(data, b, m):
     perf = data["performance"]
     dm = drive_margin(data)
     perf["motor_derate"] = dm["derate"]
+    perf["motor_torque_Nm"] = round(dm["motor_torque_Nm"], 5)
+    perf["motor_idle_current_A"] = dm["idle_A"]
+    perf["motor_input_current_A"] = round(dm["amps"], 4)
+    perf["motor_input_W"] = round(dm["motor_input_W"], 3)
     perf["motor_current_frac_180s"] = round(dm["current_frac"], 4)
     perf["motor_power_frac_180s"] = round(dm["power_frac"], 4)
+    perf["motor_torque_frac_continuous"] = round(dm["torque_frac"], 4)
+    perf["pack_cells"] = dm["pack_cells"]
     perf["pack_voltage_nominal_V"] = round(dm["pack_v_nominal"], 3)
     perf["pack_voltage_loaded_V"] = round(dm["pack_v_loaded"], 4)
     perf["motor_speed_ceiling_rpm"] = round(dm["speed_ceiling_rpm"], 1)
     perf["motor_speed_rule"] = dm["speed_rule"]
     perf["motor_rpm_frac_ceiling"] = round(dm["speed_frac"], 4)
+    perf["motor_mech_capacity_W"] = round(dm["mech_cap_W"], 3)
+    perf["motor_mech_required_W"] = round(dm["mech_need_W"], 3)
     perf["thrust_floor_stacked_N"] = round(dm["thrust_floor_N"], 4)
+    perf["thrust_floor_nominal_N"] = round(dm["thrust_floor_nominal_N"], 4)
     perf["blade_tip_deflection_mm"] = round(b["tip_defl_mm"], 4)
     perf["blade_twist_deg"] = round(b["aero_twist_deg"], 4)
     res = data["results"]
@@ -1092,6 +1265,10 @@ def write(data, b, m):
     res["mass_g_conservative"] = round(b["total_cons_g"], 2)
     res["thrust_to_weight_conservative"] = round(
         float(perf["thrust_N_conservative"]) / (b["total_cons_g"] / 1000.0 * G), 4)
+    res["mass_to_close_stacked_g"] = round(dm["mass_to_close_stacked_g"], 2)
+    # Week 2's own name for the same fact, so the two cannot drift apart.
+    res["mass_target_week4_g"] = round(
+        float(perf["thrust_N_conservative"]) / (TW_FLOOR * G) * 1000.0, 2)
     res["bom_bought_inr"] = sum(r["line_cost_inr"] for r in rows if r["make_or_buy"] == "buy")
     res["bom_tooling_inr"] = sum(r["line_cost_inr"] for r in rows if r["make_or_buy"] == "make")
     res["bom_total_inr"] = res["bom_bought_inr"] + res["bom_tooling_inr"]
