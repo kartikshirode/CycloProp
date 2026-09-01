@@ -1569,6 +1569,128 @@ def check_budget_continuity(data):
     return ok
 
 
+MOTOR_SPEED_RULE_MAX = 0.90
+
+
+def check_drive_margin(data):
+    """What the 0.80 continuous derate costs, gated rather than argued.
+
+    The derate has no source. It cannot be given one from inside the project, so the thing
+    to hold instead is the consequence, and there are four parts to that.
+
+    One derate for every candidate. A shortlist where the winner is derated at 0.80 and the
+    losers at 0.70 is a rigged comparison, and nothing stopped it before.
+
+    The fraction of the published 180 second current the design draws is the derate at
+    which the selection breaks even. It is gated against the datasheet figure so it cannot
+    drift, and it is the number that says how much of the risk is real.
+
+    The design point cannot be lowered to relieve the drive. The stacked thrust to weight
+    case needs thrust_floor_stacked_N, no lower row of the sensitivity table clears it, and
+    the floor is recomputed here from the conservative mass rather than read.
+
+    Speed is the fourth piece and it is older. The 90 percent rule week 2 screened belt
+    ratios with, the one that emptied the 100 mm radius row, was written into prose and
+    checked nowhere until now."""
+    ok = True
+    drives = dotted(data, "drive_candidates")
+    derate = num(data, "performance.motor_derate")
+    if not isinstance(drives, list) or not drives or derate is None:
+        return report(False, "week4: the drive derate and the candidate list are stated",
+                      "performance.motor_derate or drive_candidates is missing")
+    bad = []
+    for x in drives:
+        if not isinstance(x, dict):
+            continue
+        name = x.get("name", "?")
+        for peak, cont, unit in [("max_power_180s_W", "continuous_power_W", "W"),
+                                 ("peak_current_180s_A", "continuous_current_A", "A")]:
+            pv, cv = x.get(peak), x.get(cont)
+            if not all(isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0
+                       for v in (pv, cv)):
+                bad.append(f"{name} has no {peak} and {cont}")
+            elif not close(cv, pv * derate, DISPLAY_TOL):
+                bad.append(f"{name}: {cv} {unit} against {pv * derate:.3f} {unit} "
+                           f"at the declared derate")
+    ok &= report(not bad, "week4: every candidate is derated by the one declared factor",
+                 "; ".join(bad[:3]) if bad else f"{len(drives)} candidates at {derate}")
+
+    sel = [x for x in drives if isinstance(x, dict) and x.get("selected") is True]
+    if len(sel) == 1:
+        d = sel[0]
+        amps = num(data, "performance.motor_input_current_A")
+        watts = num(data, "performance.motor_input_W")
+        cf = num(data, "performance.motor_current_frac_180s")
+        pf = num(data, "performance.motor_power_frac_180s")
+        peak_a, peak_w = d.get("peak_current_180s_A"), d.get("max_power_180s_W")
+        if None not in (amps, watts, cf, pf) and peak_a and peak_w:
+            ok &= report(close(cf, amps / peak_a, DISPLAY_TOL),
+                         "week4: the current fraction of the 180 second peak reproduces",
+                         f"{amps} A of {peak_a} A gives {amps / peak_a:.4f}, stated {cf}")
+            ok &= report(close(pf, watts / peak_w, DISPLAY_TOL),
+                         "week4: the power fraction of the 180 second maximum reproduces",
+                         f"{watts} W of {peak_w} W gives {watts / peak_w:.4f}, stated {pf}")
+            # The break even derate IS the current fraction. Once the declared derate falls
+            # under it the selection no longer covers the design point.
+            ok &= report(derate >= cf,
+                         "week4: the declared derate still covers the design point",
+                         f"derate {derate} against a break even of {cf:.4f}, "
+                         f"{(derate - cf) * 100:.2f} points of room")
+
+        # Speed. KV times the pack voltage after the resistive drop, and the design has to
+        # sit under the declared fraction of it.
+        v_nom = num(data, "performance.pack_voltage_nominal_V")
+        v_load = num(data, "performance.pack_voltage_loaded_V")
+        ceil = num(data, "performance.motor_speed_ceiling_rpm")
+        rule = num(data, "performance.motor_speed_rule")
+        frac = num(data, "performance.motor_rpm_frac_ceiling")
+        rpm = num(data, "performance.motor_rpm")
+        res, kv = d.get("internal_resistance_ohm"), d.get("kv")
+        if None not in (v_nom, v_load, ceil, rule, frac, rpm, amps) and res and kv:
+            ok &= report(close(v_load, v_nom - amps * res, DISPLAY_TOL),
+                         "week4: the loaded pack voltage reproduces from the resistive drop",
+                         f"{v_nom} V less {amps * res:.4f} V gives {v_nom - amps * res:.4f} V")
+            ok &= report(close(ceil, kv * v_load, DISPLAY_TOL),
+                         "week4: the motor speed ceiling reproduces from KV and that voltage",
+                         f"computed {kv * v_load:.1f} rpm, stated {ceil}")
+            ok &= report(close(frac, rpm / ceil, DISPLAY_TOL),
+                         "week4: the speed fraction reproduces",
+                         f"{rpm} of {ceil} rpm gives {rpm / ceil:.4f}, stated {frac}")
+            ok &= report(rule <= MOTOR_SPEED_RULE_MAX,
+                         "week4: the motor speed rule is no looser than "
+                         f"{MOTOR_SPEED_RULE_MAX}", f"declared {rule}")
+            ok &= report(frac < rule, "week4: the design sits under the motor speed rule",
+                         f"{frac:.4f} against {rule}")
+
+    # The thrust floor. This is the gate that stops the design point being lowered to give
+    # the drive room, which is the cheapest way out of everything above and would take the
+    # stacked thrust to weight case with it.
+    floor = num(data, "performance.thrust_floor_stacked_N")
+    thrust = num(data, "performance.thrust_N")
+    lo = num(data, "performance.blade_area_coeff_low")
+    nom = num(data, "performance.blade_area_coeff")
+    mc = num(data, "results.mass_g_conservative")
+    if None not in (floor, thrust, lo, nom, mc):
+        want = TW_MINIMUM * (mc / 1000.0) * G / (lo / nom)
+        ok &= report(close(floor, want, DISPLAY_TOL),
+                     "week4: the stacked thrust floor reproduces from the conservative mass",
+                     f"computed {want:.4f} N, stated {floor}")
+        ok &= report(thrust >= floor,
+                     "week4: the design thrust clears the stacked thrust floor",
+                     f"{thrust} N against {floor} N")
+        rows = dotted(data, "thrust_sensitivity")
+        if isinstance(rows, list):
+            below = [r.get("thrust_N") for r in rows
+                     if isinstance(r, dict)
+                     and isinstance(r.get("thrust_N"), (int, float))
+                     and r["thrust_N"] < thrust]
+            clear = [t for t in below if t >= floor]
+            report(True, "week4: no lower sensitivity row clears the stacked floor"
+                   if not clear else "week4: a lower sensitivity row would also clear",
+                   f"{len(below)} row(s) below the design point, {len(clear)} of them clear")
+    return ok
+
+
 PITCH_BEARING_S0_FLOOR = 2.0
 BEARING_FRICTION_MAX_FRAC = 0.01
 
@@ -1794,6 +1916,7 @@ def week4(data):
                      f"computed {fc:.1f} N")
 
     ok &= check_pitch_bearing_duty(data)
+    ok &= check_drive_margin(data)
 
     for rel, heads in [
         ("stage-1/design/05-mass-and-tw.md",
