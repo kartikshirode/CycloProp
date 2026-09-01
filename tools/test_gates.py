@@ -147,6 +147,11 @@ def honest_numbers():
     link_dem, link_all = 42.0, 95.0
     att_all = fc_over * 2.2
 
+    # Skin wrinkling over the foam is what limits the section, at half the cube root of the
+    # three moduli. Stated in the fixture so the gate has something to recompute against.
+    e_skin, e_foam, g_foam = 60.0, 70.0, 19.0
+    wrinkle = 0.5 * (e_skin * 1e9 * e_foam * 1e6 * g_foam * 1e6) ** (1.0 / 3.0) / 1e6
+
     # Pitch bearing oscillating duty, laid out the way tools/structure.py computes it. The
     # bearing swings 80 degrees once a revolution instead of turning, so the cage moves a
     # third of that and every ball stays inside its own arc. The fixture is honest, which
@@ -299,7 +304,20 @@ def honest_numbers():
                       "pitch_bearing_static_safety_floor": 2.0,
                       "pitch_bearing_oscillation_hz": rpm / 60.0,
                       "pitch_bearing_friction_W": brg_fric,
-                      "pitch_bearing_plain_alternative_W": brg_fric * 53.0},
+                      "pitch_bearing_plain_alternative_W": brg_fric * 53.0,
+                      # Which material property the blade allowable turns on. The wrinkling
+                      # stress is recomputed by the gate from the three moduli beside it;
+                      # the two sweeps are floored, because they need the integrated
+                      # section that lives in tools/structure.py.
+                      "blade_skin_modulus_GPa": e_skin, "blade_foam_modulus_MPa": e_foam,
+                      "blade_foam_shear_MPa": g_foam,
+                      "blade_wrinkle_stress_MPa": wrinkle,
+                      "blade_allow_skin_Nm": blade_all,
+                      "blade_allow_spar_Nm": blade_all * 2.5,
+                      "blade_skin_band_low": 0.5,
+                      "blade_skin_band_worst_margin": blade_all / combined_over * 0.99,
+                      "blade_foam_knockdown_at_floor": 0.67,
+                      "blade_foam_downgrade_margin": blade_all / combined_over * 0.78},
         "mass_envelope_g": envelope,
         "mass_budget_g": budget,
         "sources": {
@@ -1127,6 +1145,62 @@ def asserted_speed_ceiling(d):
 
 case("a motor speed ceiling that KV and the pack do not give is rejected", False,
      asserted_speed_ceiling)
+
+
+def asserted_wrinkling_stress(d):
+    """The wrinkling stress written down 20 percent high, with nothing else moved. It is the
+    stress that sets the blade allowable and it used to live only inside the solver, where a
+    material change could not be seen from outside."""
+    d["structure"]["blade_wrinkle_stress_MPa"] *= 1.2
+    return d
+
+
+case("a skin wrinkling stress the three moduli do not give is rejected", False,
+     asserted_wrinkling_stress)
+
+
+def spar_claimed_to_govern(d):
+    """A spar allowable stated below the skin one, so the reported blade allowable is no
+    longer the weaker of the two. Both numbers stay positive and plausible."""
+    d["structure"]["blade_allow_spar_Nm"] = d["structure"]["blade_allow_skin_Nm"] * 0.5
+    return d
+
+
+case("a blade allowable that is not the weaker of the two paths is rejected", False,
+     spar_claimed_to_govern)
+
+
+def skin_band_dips_under_the_floor(d):
+    """A skin modulus band whose worst point falls under 1.5 while the design point itself
+    is comfortable. This is the shape a real material substitution has, and the design point
+    margin alone cannot see it."""
+    d["structure"]["blade_skin_band_worst_margin"] = 1.3
+    return d
+
+
+case("a skin modulus band that dips under the floor is rejected", False,
+     skin_band_dips_under_the_floor)
+
+
+def foam_downgrade_breaks_the_blade(d):
+    """The lighter foam grade a shop substitutes when the specified one is off the shelf,
+    taking the blade under the floor. Nothing about the design point changes."""
+    d["structure"]["blade_foam_downgrade_margin"] = 1.42
+    return d
+
+
+case("a foam grade substitution that breaks the blade is rejected", False,
+     foam_downgrade_breaks_the_blade)
+
+
+def narrow_skin_band(d):
+    """A band swept from 0.95 of the published modulus, which finds nothing and reports a
+    healthy worst case. The band has to reach far enough down to be worth sweeping."""
+    d["structure"]["blade_skin_band_low"] = 0.95
+    return d
+
+
+case("a skin modulus band too narrow to find anything is rejected", False, narrow_skin_band)
 
 
 def solvers_run_backwards(d):
