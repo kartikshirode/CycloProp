@@ -1569,6 +1569,91 @@ def check_budget_continuity(data):
     return ok
 
 
+PITCH_BEARING_S0_FLOOR = 2.0
+BEARING_FRICTION_MAX_FRAC = 0.01
+
+
+def check_pitch_bearing_duty(data):
+    """The tightest margin in the module is a bearing static rating, and a static rating is
+    the wrong yardstick for a bearing that swings instead of turning.
+
+    Every number here is recomputed from catalogue geometry and the frozen pitch travel, so
+    the regime cannot be asserted in prose and left there. The gate with teeth is the last
+    one: a bearing whose cage swing falls short of the ball spacing never rolls onto fresh
+    raceway, and once that is true the static safety factor at the OPERATING load has to
+    clear 2.0 rather than the 1.5 the strength cases carry. The floor itself is gated too,
+    because a floor a later week can lower is not a floor."""
+    ok = True
+    g = lambda k: num(data, "structure." + k)
+    balls, ball_mm, pd = g("pitch_bearing_balls"), g("pitch_bearing_ball_mm"),         g("pitch_bearing_pitch_diameter_mm")
+    swing, spacing = g("pitch_bearing_cage_swing_deg"), g("pitch_bearing_ball_spacing_deg")
+    ratio, crit = g("pitch_bearing_recirculation_ratio"), g("pitch_bearing_recirculation_travel_deg")
+    travel = num(data, "pitch.pitch_bearing_travel_deg")
+    if None in (balls, ball_mm, pd, swing, spacing, ratio, crit, travel):
+        return report(False, "week4: the pitch bearing oscillating duty is stated",
+                      "structure is missing one of the pitch_bearing_ fields")
+
+    cage_ratio = (1.0 - ball_mm / pd) / 2.0
+    ok &= report(close(swing, cage_ratio * travel, DISPLAY_TOL),
+                 "week4: the cage swing follows from the ball geometry and the pitch travel",
+                 f"computed {cage_ratio * travel:.4f} deg, stated {swing}")
+    ok &= report(close(spacing, 360.0 / balls, DISPLAY_TOL),
+                 "week4: the ball spacing follows from the ball count",
+                 f"computed {360.0 / balls:.4f} deg over {balls:.0f} balls")
+    # Ball count is the one soft input, and inflating it is the cheap way to claim the
+    # bearing recirculates. The balls have to fit around the pitch circle, so the claim
+    # is bounded by geometry rather than taken on trust.
+    ok &= report(balls * ball_mm <= math.pi * pd,
+                 "week4: the ball complement fits around the pitch circle",
+                 f"{balls:.0f} balls of {ball_mm} mm need {balls * ball_mm:.2f} mm "
+                 f"of a {math.pi * pd:.2f} mm pitch circle")
+    ok &= report(close(ratio, swing / spacing, DISPLAY_TOL),
+                 "week4: the recirculation ratio is cage swing over ball spacing",
+                 f"computed {swing / spacing:.4f}, stated {ratio}")
+    ok &= report(close(crit, spacing / cage_ratio, DISPLAY_TOL),
+                 "week4: the travel that would give full recirculation is stated",
+                 f"{crit:.1f} deg against {travel:.1f} deg of mechanism travel")
+
+    # Load per bearing, and the static safety factor built on it. Both are derived from
+    # numbers the rest of week 4 already gates, so a bearing swap cannot move one alone.
+    fc, allow = g("centrifugal_load_N"), g("blade_attachment_allowable_N")
+    load, s0 = g("pitch_bearing_load_N"), g("pitch_bearing_static_safety")
+    if None not in (fc, allow, load, s0):
+        ok &= report(close(load, fc / 2.0, DISPLAY_TOL),
+                     "week4: the pitch bearing load is half the centrifugal pull",
+                     f"computed {fc / 2.0:.4f} N per bearing, two per blade")
+        ok &= report(close(s0, allow / 2.0 / load, DISPLAY_TOL),
+                     "week4: the static safety factor reproduces from the rating and the load",
+                     f"computed {allow / 2.0 / load:.4f}, stated {s0}")
+
+    floor = g("pitch_bearing_static_safety_floor")
+    ok &= report(floor is not None and floor >= PITCH_BEARING_S0_FLOOR,
+                 "week4: the oscillating static safety floor is at least 2.0",
+                 f"declared {floor}" if floor is not None else "not declared")
+    if ratio < 1.0 and floor is not None and s0 is not None:
+        ok &= report(s0 >= floor,
+                     "week4: a bearing that never recirculates clears the oscillating floor",
+                     f"{s0:.4f} against {floor}, ratio {ratio:.4f} of full recirculation")
+    else:
+        report(True, "week4: the pitch bearing recirculates, so the strength floor governs",
+               f"ratio {ratio:.4f}")
+
+    # Friction stays out of the power budget only while it is small enough to round away.
+    # If a bearing change pushes it past a percent of shaft power it becomes a budget line.
+    fw, pw = g("pitch_bearing_friction_W"), num(data, "performance.aero_power_W")
+    tare = num(data, "performance.tare_power_W")
+    if None not in (fw, pw, tare):
+        frac = fw / (pw + tare)
+        ok &= report(frac < BEARING_FRICTION_MAX_FRAC,
+                     "week4: pitch bearing friction is small enough to leave out of the budget",
+                     f"{fw:.4f} W, {frac * 100:.3f} percent of {pw + tare:.2f} W of shaft power")
+    alt = g("pitch_bearing_plain_alternative_W")
+    ok &= report(alt is not None and fw is not None and alt > fw,
+                 "week4: the plain bearing fallback is costed against the ball bearing",
+                 f"{alt} W against {fw} W" if alt is not None else "not costed")
+    return ok
+
+
 def week4(data):
     ok = True
     budget = dotted(data, "mass_budget_g")
@@ -1707,6 +1792,8 @@ def week4(data):
         ok &= report(close(num(data, "structure.centrifugal_load_N"), fc, DISPLAY_TOL),
                      "week4: centrifugal load reproduces from blade mass, speed and radius",
                      f"computed {fc:.1f} N")
+
+    ok &= check_pitch_bearing_duty(data)
 
     for rel, heads in [
         ("stage-1/design/05-mass-and-tw.md",
