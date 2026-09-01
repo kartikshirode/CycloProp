@@ -554,6 +554,59 @@ def bearing_duty(data, b):
     }
 
 
+MOTOR_DERATE = 0.80
+PACK_CELLS = 6
+CELL_NOMINAL_V = 3.70
+MOTOR_SPEED_RULE = 0.90
+TW_FLOOR = 2.5
+
+
+def drive_margin(data):
+    """How much of the drive the design point actually uses, and what the 0.80 derate costs.
+
+    T-Motor publishes Max Power and Peak Current for 180 seconds. Week 2 turned both into
+    continuous figures by multiplying by 0.80 and then sized against those. The derate has
+    no source: the problem statement asks for no endurance, so nothing sets it. What can be
+    done without a source is bound the consequence, and that is what this computes.
+
+    The fraction of the 180 second current the design draws is the same number as the
+    derate at which the selection breaks even, so one figure answers both questions. Below
+    it the selected motor no longer covers the design point, and the thrust sensitivity
+    table has no lower row to fall back to, because the stacked thrust to weight case needs
+    more thrust than any of them delivers. That floor is computed here too.
+
+    Speed is the other half. The rule week 2 screened belt ratios with, that motor speed
+    stays under 90 percent of what the pack can turn it at after the resistive drop, was
+    written into prose and enforced nowhere. It is a stored fraction now."""
+    perf, sel = data["performance"], None
+    for c in data["drive_candidates"]:
+        if c.get("selected"):
+            sel = c
+    if sel is None:
+        raise SystemExit("no drive candidate is marked selected")
+    amps, watts = float(perf["motor_input_current_A"]), float(perf["motor_input_W"])
+    v_nom = PACK_CELLS * CELL_NOMINAL_V
+    v_load = v_nom - amps * float(sel["internal_resistance_ohm"])
+    ceiling = float(sel["kv"]) * v_load
+
+    # Thrust floor. The stacked case is the coefficient haircut and the mass growth applied
+    # together, and it is the one that pins the design point from below.
+    haircut = float(perf["blade_area_coeff_low"]) / float(perf["blade_area_coeff"])
+    m_cons = float(data["results"]["mass_g_conservative"]) / 1000.0
+    floor_N = TW_FLOOR * m_cons * G / haircut
+    return {
+        "derate": MOTOR_DERATE,
+        "current_frac": amps / float(sel["peak_current_180s_A"]),
+        "power_frac": watts / float(sel["max_power_180s_W"]),
+        "pack_v_nominal": v_nom,
+        "pack_v_loaded": v_load,
+        "speed_ceiling_rpm": ceiling,
+        "speed_rule": MOTOR_SPEED_RULE,
+        "speed_frac": float(perf["motor_rpm"]) / ceiling,
+        "thrust_floor_N": floor_N,
+    }
+
+
 def margins(b):
     return {
         "blade_margin": b["blade"]["m_allow_Nm"] / b["m_aero_Nm"],
@@ -831,6 +884,30 @@ def write(data, b, m):
     data["mass_budget_g"] = b["rows"]
     rows = bom_rows()
     data["bom"] = rows
+    psrc = data["sources"].setdefault("performance", {})
+    psrc.update({
+        "motor_derate": (
+            "0.80 applied to the T-Motor 180 second Max Power and Peak Current to get a "
+            "continuous figure. It has no source and the problem statement asks for no "
+            "endurance, so nothing outside the design sets it. What is bounded instead is "
+            "the consequence: motor_current_frac_180s is the derate at which the selected "
+            "motor stops covering the design point"),
+        "motor_current_frac_180s": (
+            "design point current over the published 180 second peak. It doubles as the "
+            "break even derate, because the selection holds exactly while the derate stays "
+            "above the fraction being drawn. For a demonstration inside 180 seconds it is "
+            "the headroom on the datasheet number itself"),
+        "motor_speed_ceiling_rpm": (
+            "KV times the pack voltage after the resistive drop at the working current, on "
+            "6 cells at 3.70 V nominal. motor_speed_rule is the 90 percent of it that week "
+            "2 screened belt ratios against, which is the rule that emptied the 100 mm "
+            "radius row and which lived in prose until now"),
+        "thrust_floor_stacked_N": (
+            "design thrust the stacked downside needs to hold thrust to weight 2.5, from "
+            "the conservative mass and the coefficient haircut. It is what stops the design "
+            "point being lowered to relieve the drive: no row of thrust_sensitivity below "
+            "the design point clears it"),
+    })
     src = data["sources"].setdefault("structure", {})
     src.update({
         "blade_root_bending_Nm": (
@@ -885,6 +962,16 @@ def write(data, b, m):
             "this is a declared case rather than a derived one"),
     })
     perf = data["performance"]
+    dm = drive_margin(data)
+    perf["motor_derate"] = dm["derate"]
+    perf["motor_current_frac_180s"] = round(dm["current_frac"], 4)
+    perf["motor_power_frac_180s"] = round(dm["power_frac"], 4)
+    perf["pack_voltage_nominal_V"] = round(dm["pack_v_nominal"], 3)
+    perf["pack_voltage_loaded_V"] = round(dm["pack_v_loaded"], 4)
+    perf["motor_speed_ceiling_rpm"] = round(dm["speed_ceiling_rpm"], 1)
+    perf["motor_speed_rule"] = dm["speed_rule"]
+    perf["motor_rpm_frac_ceiling"] = round(dm["speed_frac"], 4)
+    perf["thrust_floor_stacked_N"] = round(dm["thrust_floor_N"], 4)
     perf["blade_tip_deflection_mm"] = round(b["tip_defl_mm"], 4)
     perf["blade_twist_deg"] = round(b["aero_twist_deg"], 4)
     res = data["results"]

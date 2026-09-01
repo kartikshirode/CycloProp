@@ -43,7 +43,16 @@
     "belt_ratio": 3.5,
     "motor_rpm": 8416.8,
     "motor_torque_Nm": 0.4361,
-    "motor_input_current_A": 20.611
+    "motor_input_current_A": 20.611,
+    "motor_derate": 0.8,
+    "motor_current_frac_180s": 0.7927,
+    "motor_power_frac_180s": 0.704,
+    "pack_voltage_nominal_V": 22.2,
+    "pack_voltage_loaded_V": 20.9633,
+    "motor_speed_ceiling_rpm": 9433.5,
+    "motor_speed_rule": 0.9,
+    "motor_rpm_frac_ceiling": 0.8922,
+    "thrust_floor_stacked_N": 17.6768
   },
   "efficiency": {
     "transmission": 0.93,
@@ -1171,7 +1180,11 @@
       "power_loading_ref_N_per_W": "Benedict 2010 twin-cyclorotor at its operating point, printed p.232: at the operating thrust of 1.5 N (per rotor), the power loading of the rotor was 0.062 N/W. The quad reaches 0.076 N/W on printed p.236, so 0.062 is the lower of the two measured routes and it is the one used",
       "blade_deflection_thrust_loss": "Bounded from above by the computed blade section, not derived from it: EI 66.8 Nm2 gives 0.086 mm of tip deflection and GJ 9.6 Nm2 gives 0.054 degrees of twist, so the section alone supports well under 1 percent. The 5 percent is carried as a floor over build tolerance, bond line variation and unsteady effects the section does not model",
       "figure_of_merit": "Kellen 2019 section 3.3, read off the thesis rather than a summary: the peak figure of merit was found to be 0.6, on a 3-bladed cyclorotor with a 5.5in chord, 22in. span, and 8.25 in radius. Reading CT/sigma off Fig 3.25 and CP/sigma off Fig 3.26 for that rotor and closing FM = CT^1.5/(sqrt(2)*CP) gives 0.595, so the stated value reproduces to 0.8 percent",
-      "reynolds": "134,074 at the design point, inside the 100,000 to 300,000 band Kellen measured this shape family across, and Kellen's own optimum rotor sits at 186,000. The 100,000 ceiling D25 rested on comes from Shrestha and Benedict and still bounds the Benedict-derived nominal, but the shape family now carries a measured coefficient bracketing the design point. See D37"
+      "reynolds": "134,074 at the design point, inside the 100,000 to 300,000 band Kellen measured this shape family across, and Kellen's own optimum rotor sits at 186,000. The 100,000 ceiling D25 rested on comes from Shrestha and Benedict and still bounds the Benedict-derived nominal, but the shape family now carries a measured coefficient bracketing the design point. See D37",
+      "motor_derate": "0.80 applied to the T-Motor 180 second Max Power and Peak Current to get a continuous figure. It has no source and the problem statement asks for no endurance, so nothing outside the design sets it. What is bounded instead is the consequence: motor_current_frac_180s is the derate at which the selected motor stops covering the design point",
+      "motor_current_frac_180s": "design point current over the published 180 second peak. It doubles as the break even derate, because the selection holds exactly while the derate stays above the fraction being drawn. For a demonstration inside 180 seconds it is the headroom on the datasheet number itself",
+      "motor_speed_ceiling_rpm": "KV times the pack voltage after the resistive drop at the working current, on 6 cells at 3.70 V nominal. motor_speed_rule is the 90 percent of it that week 2 screened belt ratios against, which is the rule that emptied the 100 mm radius row and which lived in prose until now",
+      "thrust_floor_stacked_N": "design thrust the stacked downside needs to hold thrust to weight 2.5, from the conservative mass and the coefficient haircut. It is what stops the design point being lowered to relieve the drive: no row of thrust_sensitivity below the design point clears it"
     },
     "structure": {
       "blade_root_bending_Nm": "aerodynamic bending at mid span. The blade is held at both spiders, so a uniformly distributed peak load gives a lever of span over 8, 36.30 mm. The load is thrust per blade times the 4.0 peak to mean factor D16 sets, which is the top of the published 3 to 4 range because that range is simulated. The rerun week 3 model gives 2.501 and is not used here",
