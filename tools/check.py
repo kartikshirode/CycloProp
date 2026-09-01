@@ -1586,6 +1586,65 @@ def check_budget_continuity(data):
     return ok
 
 
+SKIN_BAND_MAX = 0.60           # the band has to reach at least this far down
+
+
+def check_blade_sensitivity(data):
+    """Which material property the blade allowable turns on, held to what was computed.
+
+    The wrinkling stress comes out of three moduli, so it is recomputed here from the three
+    that are stored beside it. It used to live only inside tools/structure.py, where a
+    material allowable could be changed and nothing outside would notice.
+
+    The two sweeps cannot be recomputed without the integrated section, so they are floored
+    the way shaft_combined_margin is. What they say is that the blade is limited by its foam
+    rather than by its laminate: over a 2 to 1 band on the skin modulus the overspeed margin
+    barely moves, while a third off the foam takes it to the floor. Both floors and the
+    realistic grade substitution are gated, so a later material change cannot quietly spend
+    the robustness that finding measured."""
+    ok = True
+    g = lambda k: num(data, "structure." + k)
+    wr, es = g("blade_wrinkle_stress_MPa"), g("blade_skin_modulus_GPa")
+    ef, gf = g("blade_foam_modulus_MPa"), g("blade_foam_shear_MPa")
+    if None in (wr, es, ef, gf):
+        return report(False, "week4: the blade allowable states the moduli it rests on",
+                      "structure is missing one of the blade modulus fields")
+    want = 0.5 * (es * 1e9 * ef * 1e6 * gf * 1e6) ** (1.0 / 3.0) / 1e6
+    ok &= report(close(wr, want, DISPLAY_TOL),
+                 "week4: the skin wrinkling stress reproduces from the three moduli",
+                 f"computed {want:.4f} MPa, stated {wr}")
+
+    a_skin, a_spar = g("blade_allow_skin_Nm"), g("blade_allow_spar_Nm")
+    allow = g("blade_allowable_Nm")
+    if None not in (a_skin, a_spar, allow):
+        ok &= report(close(allow, min(a_skin, a_spar), DISPLAY_TOL),
+                     "week4: the blade allowable is the weaker of the skin and the spar",
+                     f"skin {a_skin} Nm, spar {a_spar} Nm, stated {allow}")
+        ok &= report(a_skin < a_spar,
+                     "week4: the skin governs the blade, not the spar",
+                     f"{a_skin} Nm against {a_spar} Nm, a factor of {a_spar / a_skin:.2f}")
+
+    low, worst = g("blade_skin_band_low"), g("blade_skin_band_worst_margin")
+    ok &= report(low is not None and low <= SKIN_BAND_MAX,
+                 f"week4: the skin modulus band reaches at least {SKIN_BAND_MAX} of published",
+                 f"swept from {low}" if low is not None else "no band declared")
+    ok &= report(worst is not None and worst >= MIN_MARGIN,
+                 "week4: the blade clears the floor anywhere in that band",
+                 f"worst {worst} against {MIN_MARGIN}"
+                 if worst is not None else "not swept")
+
+    kd = g("blade_foam_knockdown_at_floor")
+    ok &= report(kd is not None and 0.0 < kd < 1.0,
+                 "week4: the delivered foam has room before the blade reaches the floor",
+                 f"the floor arrives at {kd} of the published foam moduli"
+                 if kd is not None else "not computed")
+    dg = g("blade_foam_downgrade_margin")
+    ok &= report(dg is not None and dg >= MIN_MARGIN,
+                 "week4: the blade survives the lighter foam grade a shop would substitute",
+                 f"{dg} against {MIN_MARGIN}" if dg is not None else "not computed")
+    return ok
+
+
 def check_solver_order(data):
     """The two solvers have a run order and this is what enforces it.
 
@@ -1965,6 +2024,7 @@ def week4(data):
     ok &= check_pitch_bearing_duty(data)
     ok &= check_drive_margin(data)
     ok &= check_solver_order(data)
+    ok &= check_blade_sensitivity(data)
 
     for rel, heads in [
         ("stage-1/design/05-mass-and-tw.md",
