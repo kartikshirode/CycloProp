@@ -154,7 +154,7 @@ A drive is only accepted if three things hold at once, not one. Power: the motor
 W is 88 percent of the MN5006's 520 W continuous. Torque: at 3.5 to 1 through a 93 percent belt
 the motor sees 0.436 Nm, which is 99 percent of its 0.441 Nm continuous, and that is the tight
 one. Speed: the rotor turns 2405 rpm so the motor turns 8417, and a 6S pack driving a KV450
-against 60 mOhm at the working current can reach 9435, so the motor sits at 89 percent of
+against 60 mOhm at the working current can reach 9433.5, so the motor sits at 89 percent of
 available with throttle headroom left. Input current is 20.6 A of the 20.8 A the derate allows.
 
 3.5 to 1 is the only ratio that works at this radius. A lower ratio puts the motor over its
@@ -164,6 +164,46 @@ is the reason the radius is where it is.
 Two caveats. The MN5006 figures were read off the manufacturer's datasheet PDF; the other four
 came from supplier listings and week 4 confirms them. And a 3.5 to 1 belt means a rotor pulley
 of roughly 50 mm pitch diameter, which packages easily inside a 220 mm rotor.
+
+### What the derate is worth
+
+The 0.80 is the softest number in this document. T-Motor publishes Max Power and Peak Current
+for 180 seconds, week 2 multiplied both by 0.80 to get something continuous, and nothing
+outside the project sets that factor. The problem statement asks for no endurance at all, so
+there is no duty to size it against. It cannot be given a source from in here. What it can be
+given is a bound on what it costs, and that bound is now computed and gated rather than argued.
+
+Start with what the design actually draws. Motor input is 0.704 of the published 180 second
+power and 0.7927 of the published 180 second current. Current is the tighter of the two, and
+0.7927 is the more useful number than it first looks, because it is also the derate at which
+the selection breaks even. Above it the MN5006 covers the design point and below it the motor
+does not. The declared 0.80 sits just over that line.
+
+So the question is what happens if the true continuous derate turns out to be 0.75. The obvious
+answer, back the design point down a row, does not work. The stacked thrust to weight case
+needs 17.6768 N of design thrust to hold 2.5, and no row of the sensitivity table below 18 N
+reaches it. The 16 N row misses on the stacked case even though it has plenty of drive room.
+The second answer, a larger motor, does not work either: motor mass is a power class item in
+the growth budget, the conservative column has 12.5 g in hand, and the next size up in this
+family costs several times that. Neither exit is open, which is the honest shape of the risk.
+
+That sounds worse than it is, and the reason is the duty. 0.7927 is the fraction of a 180
+second rating, so for any demonstration that fits inside three minutes the datasheet figure is
+the one that applies and there is a fifth of it spare. The 0.80 continuous rule is a
+conservatism we imposed on ourselves for indefinite running that nothing asks for. It stays,
+because a rotor module that can only hold thrust for three minutes is a poor answer to a hover
+requirement, but it is not the case that decides whether the module works.
+
+What closes it is measurement, and it is cheap: a dynamometer run on the actual motor at the
+actual current, early enough in Stage 2 that a drive change is still affordable. That is the
+first drive gate in the Stage 2 plan.
+
+One older rule moved into the data at the same time. Belt ratios were screened in week 2 on
+motor speed staying under 90 percent of what the pack can turn the motor at, allowing for the
+resistive drop, and that rule is what emptied the 100 mm radius row. It lived in prose. The
+pack sits at 22.2 V nominal and 20.9633 V loaded, the ceiling is 9433.5 rpm, the design is at
+0.8922 of it, and the gate now refuses both a rule looser than 0.9 and a ceiling that KV and
+the loaded voltage do not give.
 
 ## Sensitivity
 
@@ -223,5 +263,14 @@ ran in week 4 against a budget built from drawn sections and catalogue parts.
 - performance.motor_rpm = 8417.0
 - performance.motor_torque_Nm = 0.4361
 - performance.motor_input_current_A = 20.611
+- performance.motor_derate = 0.8
+- performance.motor_current_frac_180s = 0.7927
+- performance.motor_power_frac_180s = 0.704
+- performance.pack_voltage_nominal_V = 22.2
+- performance.pack_voltage_loaded_V = 20.9633
+- performance.motor_speed_ceiling_rpm = 9433.5
+- performance.motor_speed_rule = 0.9
+- performance.motor_rpm_frac_ceiling = 0.8922
+- performance.thrust_floor_stacked_N = 17.6768
 - operating.tip_speed_ms = 27.7012
 - efficiency.motor = 0.84
