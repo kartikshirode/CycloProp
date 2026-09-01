@@ -48,10 +48,26 @@ mixed bond line with an uncontrolled thickness and no post cure.
 **Where this evidence is thin.** These are published typical values for the material classes,
 taken from manufacturer data for the class and not from a certificate for a specific batch. No
 coupon has been tested. For 7075-T6 and 6061-T6 that is a small risk, since both are stocked to
-a standard. For the foam, the laminate and the paste it is a real one, because cured laminate
-properties depend on the layup and on the resin fraction a hand wet layup achieves, and a 15
-percent shortfall on the skin modulus would move the blade allowable by about as much. Coupon
-testing is Stage 2 work and it is listed at the end.
+a standard. For the foam, the laminate and the paste it is a real one, because cured properties
+depend on the layup and on the resin fraction a hand wet layup achieves.
+
+Which of the two is worth testing first was worked out rather than assumed, and the answer is not
+the one this section carried until now. Skin wrinkling over the foam sets the blade allowable, at
+half the cube root of the three moduli, and the allowable moment is that stress times EI over the
+skin modulus. Lower the skin modulus and the wrinkling stress falls as its cube root while EI over
+the skin modulus rises, because the spar and the foam terms stay where they are. Sweep the skin
+from 0.5 of its published value to all of it and the worst overspeed margin anywhere in that band
+is 1.9587, against 1.9681 at the published value. Under 3 percent across a 2 to 1 range.
+
+The foam is the sensitive one, because its modulus and its shear modulus both sit inside the same
+cube root. Knock the pair down together and the allowable moves as the two thirds power, and the
+overspeed margin reaches 1.5 at 0.6689 of the published foam properties. The realistic version of
+that is a grade substitution rather than a shortfall, and it is milder: on Rohacell 31 IG instead
+of 51 IG the blade weighs 28.057 g rather than 31.75, so the centrifugal demand falls with the
+allowable and the overspeed margin lands at 1.5443. It still clears.
+
+So the blade is a foam limited structure, not a laminate limited one, and both floors are gated.
+Coupon testing is Stage 2 work and it is listed at the end.
 
 ## Manufacturing
 
@@ -194,8 +210,11 @@ and once as a per line growth rate over the top of it.
 
 ## What Stage 2 owes this section
 
-- **Coupon data.** Cured laminate modulus and areal mass from a test panel made the way the
-  blade is made, plus a bond shear coupon. The skin modulus is what the blade allowable turns on
+- **Coupon data, foam first.** A sandwich wrinkling coupon on the delivered foam, because the
+  blade allowable moves as the two thirds power of the foam properties and reaches its floor at
+  0.6689 of them. Then the certificate for the delivered grade. The laminate panel comes after,
+  for areal mass and for the deflection and wind up numbers, since a skin shortfall barely
+  touches the strength margin. Plus a bond shear coupon
 - **Real quotations.** Every price here is indicative. The 5 lines above 4500 INR need written
   quotes, and the gear cutting needs a shop that has seen the drawing
 - **A balance tolerance.** The jig is budgeted. The acceptance number behind it is not calculated
@@ -219,3 +238,14 @@ and once as a per line growth rate over the top of it.
 - structure.blade_combined_margin = 2.8341
 - structure.blade_combined_margin_overspeed = 1.9681
 - structure.pitch_link_margin = 3.3015
+- structure.blade_wrinkle_stress_MPa = 215.2638
+- structure.blade_allow_skin_Nm = 25.2528
+- structure.blade_allow_spar_Nm = 63.1857
+- structure.blade_skin_modulus_GPa = 60.0
+- structure.blade_foam_modulus_MPa = 70.0
+- structure.blade_foam_shear_MPa = 19.0
+- structure.blade_skin_band_low = 0.5
+- structure.blade_skin_band_worst_margin = 1.9587
+- structure.blade_foam_knockdown_at_floor = 0.6689
+- structure.blade_foam_downgrade_margin = 1.5443
+- structure.blade_foam_downgrade_blade_g = 28.057

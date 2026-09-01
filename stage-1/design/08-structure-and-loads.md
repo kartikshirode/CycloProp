@@ -214,6 +214,41 @@ The spread is the point. Two margins sit under 2 and everything else is over 3, 
 module is sized by the blade attachment and by the blade in combined bending, and that the
 places to spend effort in Stage 2 are those two joints rather than the shaft or the frame.
 
+## What the blade allowable actually turns on
+
+Two of the eight margins sit under 2 and both of them are the blade, so it is worth knowing
+which material property they rest on. The answer is not the one this project assumed for four
+weeks.
+
+Skin wrinkling over the foam sets the section, at 0.5 times the cube root of the skin modulus,
+the foam modulus and the foam shear modulus. That comes out at 215.2638 MPa, well under the 400
+MPa the laminate itself would take, and the allowable moment is that stress times EI over the
+skin modulus and the distance to the extreme fibre. Skin governs at 25.2528 Nm against 63.1857
+Nm for the spar, so the spar is not close.
+
+Now drop the skin modulus. The wrinkling stress falls as its cube root. EI over the skin modulus
+rises, because the spar term and the foam term stay exactly where they are and only their share
+of the total grows. The two nearly cancel. Swept from 0.5 of the published class value to all of
+it, the worst overspeed margin found anywhere in the band is 1.9587, against 1.9681 at the
+published value. Under 3 percent across a 2 to 1 range, and the worst point sits in the middle of
+the band rather than at the bottom of it.
+
+The foam is the sensitive input, because both of its moduli sit inside the same cube root. Knock
+them down together and the allowable moves as the two thirds power. The overspeed margin reaches
+1.5 at 0.6689 of the published foam properties, so a third off the delivered foam is what it
+takes.
+
+The realistic version of that is a grade substitution rather than a shortfall, and it is gentler
+than the sweep suggests. On Rohacell 31 IG instead of 51 IG the blade weighs 28.057 g rather than
+31.75, so the centrifugal demand falls along with the allowable and the overspeed margin lands at
+1.5443. A shop that cannot get the specified grade can build the blade out of the lighter one and
+stay above the floor. That is worth knowing before somebody has to decide it on a Friday.
+
+So the blade is foam limited. Stage 2's first coupon is a sandwich wrinkling test on the
+delivered foam, not the laminate panel that looked like the obvious answer, and the laminate
+panel still earns its place for areal mass and for the deflection and wind up numbers, which do
+move with the skin modulus.
+
 ## What Stage 2 has to do
 
 A static beam check is not a structural qualification and this document does not pretend
@@ -278,6 +313,17 @@ otherwise.
 - structure.pitch_bearing_oscillation_hz = 40.0798
 - structure.pitch_bearing_friction_W = 0.1673
 - structure.pitch_bearing_plain_alternative_W = 8.9234
+- structure.blade_wrinkle_stress_MPa = 215.2638
+- structure.blade_allow_skin_Nm = 25.2528
+- structure.blade_allow_spar_Nm = 63.1857
+- structure.blade_skin_modulus_GPa = 60.0
+- structure.blade_foam_modulus_MPa = 70.0
+- structure.blade_foam_shear_MPa = 19.0
+- structure.blade_skin_band_low = 0.5
+- structure.blade_skin_band_worst_margin = 1.9587
+- structure.blade_foam_knockdown_at_floor = 0.6689
+- structure.blade_foam_downgrade_margin = 1.5443
+- structure.blade_foam_downgrade_blade_g = 28.057
 - pitch.pitch_bearing_travel_deg = 80.0
 - pitch.carrier_radial_force_N = 53.22
 - pitch.carrier_torque_Nm = 0.1389
