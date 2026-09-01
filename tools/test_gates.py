@@ -255,7 +255,11 @@ def honest_numbers():
                   "phase_authority_deg": 360.0, "schedule_rms_residual_deg": rms,
                   "actuator_count": 2, "actuator_mass_g": 18.0,
                   "side_force_tilt_deg": 28.0, "peak_lateral_force_N": peak_lat,
-                  "pitch_bearing_travel_deg": 80.0},
+                  "pitch_bearing_travel_deg": 80.0,
+                  # The pitch link load crosses from tools/linkage.py into
+                  # tools/structure.py, so the two sides have to agree or the solvers ran
+                  # in the wrong order.
+                  "peak_link_force_N": link_dem},
         "packaging": {"envelope_length_mm": 400, "envelope_width_mm": 300,
                       "envelope_height_mm": 300, "mount_points": 4},
         "structure": {"blade_mass_kg": blade_mass, "centrifugal_load_N": fc,
@@ -1125,6 +1129,21 @@ case("a motor speed ceiling that KV and the pack do not give is rejected", False
      asserted_speed_ceiling)
 
 
+def solvers_run_backwards(d):
+    """What tools/structure.py leaves behind when it runs before tools/linkage.py: the pitch
+    link load from before the blade moved, sitting beside the one linkage.py then solved.
+    Every margin on that load still reproduces from it, so the only witness is that the two
+    sides of the handover disagree."""
+    d["structure"]["pitch_link_load_N"] *= 0.95
+    d["structure"]["pitch_link_margin"] = (d["structure"]["pitch_link_allowable_N"]
+                                           / d["structure"]["pitch_link_load_N"])
+    return d
+
+
+case("a numbers.json written with the solvers run backwards is rejected", False,
+     solvers_run_backwards)
+
+
 def conservative_column_off_the_envelope(d):
     """The refined conservative column and the week 2 conservative envelope 28 percent
     apart. Every nominal line still sits inside its own 25 percent band, the stated scalar
@@ -1879,6 +1898,109 @@ case("a submission carrying a pandoc front matter block passes", True,
      upto=5, week=5, tweak=front_matter_on_the_submission)
 
 
+def pdf_selftests():
+    """Read the built submission back the way check.py does.
+
+    xelatex sets "off" as one ligature glyph and pypdf returns it that way, so a gate
+    string carrying a double f would miss on a perfectly good PDF. The contents page also
+    puts a space inside "Team" from kerning while the body heading extracts cleanly. Both
+    are handled in check.py rather than worked around at each call site, and this is the
+    check that they stay handled. Reads the real file and never writes."""
+    pdf = REPO / "stage-1" / "submission" / "cycloprop-stage1.pdf"
+    if not pdf.is_file():
+        return [("the built submission is present to read back", False, "no PDF")]
+    sys.path.insert(0, str(CHECK.parent))
+    import check as chk
+    pages, text = chk.pdf_text(pdf)
+    left = [g for g in chk.LIGATURES if g in text]
+    out = [("the PDF reader hands back no ligature glyphs", not left,
+            "clean" if not left else f"{len(left)} glyph(s) survived")]
+    out.append(("a double f word is findable in the extracted text", "off" in text,
+                "found" if "off" in text else "the ligature is still one character"))
+    flat = "".join(text.split()).lower()
+    want = "".join("Team capability and execution plan".split()).lower()
+    out.append(("a heading broken by kerning still matches", want in flat,
+                f"{pages} pages read"))
+    return out
+
+
+def solver_selftests():
+    """Rerun the two solvers against copies of the repository and see what comes back.
+
+    `numbers.json` is written by tools/linkage.py and then by tools/structure.py, in that
+    order, because linkage.py imports the blade build-up from structure.py and structure.py
+    reads the pitch link load back. The order was resolved by hand, written into two
+    docstrings, and checked nowhere.
+
+    Three things get checked. The pair reproduces the committed file byte for byte, which
+    catches a hand edit and a stale run at once. From that converged file the reverse order
+    reproduces it too, because each script is sitting on its own fixed point, so a
+    reproducibility check on its own would say the order does not matter. Move the chord two
+    millimetres and it does: the reverse order leaves structure.pitch_link_load_N at the
+    value from before the blade moved while pitch.peak_link_force_N carries the new one.
+    That gap is what check_solver_order reads, and the third case is that the gate sees it.
+
+    Both scripts resolve their paths from __file__, so each copy keeps the shape of the
+    repository. Nothing here writes to the real one."""
+    out = []
+    real = REPO_NUMBERS.read_bytes()
+    tmp = tempfile.mkdtemp(prefix="cyclo-solver-")
+
+    def run_pair(where, order, chord=None):
+        root = Path(tmp) / where
+        (root / "tools").mkdir(parents=True)
+        (root / "stage-1" / "design").mkdir(parents=True)
+        for f in ("linkage.py", "structure.py"):
+            shutil.copy2(CHECK.parent / f, root / "tools" / f)
+        target = root / "stage-1" / "design" / "numbers.json"
+        if chord is None:
+            target.write_bytes(real)
+        else:
+            d = json.loads(real.decode("utf-8"))
+            d["geometry"]["chord_m"] = chord
+            target.write_text(json.dumps(d, indent=2, ensure_ascii=False) + chr(10),
+                              encoding="utf-8", newline=chr(10))
+        for script in order:
+            r = subprocess.run([sys.executable, str(root / "tools" / script), "--write"],
+                               capture_output=True, text=True)
+            if r.returncode != 0:
+                return None, f"{script} exited {r.returncode}: {r.stderr.strip()[:120]}"
+        return target, None
+
+    try:
+        fwd, err = run_pair("converged-forward", ("linkage.py", "structure.py"))
+        same = err is None and fwd.read_bytes() == real
+        out.append(("the two solvers reproduce numbers.json byte for byte", same,
+                    err or ("identical" if same else "differs from the committed file")))
+
+        rev, err = run_pair("converged-reverse", ("structure.py", "linkage.py"))
+        same = err is None and rev.read_bytes() == real
+        out.append(("from a converged file the order makes no difference", same,
+                    err or ("identical, which is why reproducibility is not the test"
+                            if same else "differs")))
+
+        moved, err = run_pair("moved-reverse", ("structure.py", "linkage.py"), chord=0.0740)
+        gap = None
+        if err is None:
+            d = json.loads(moved.read_text(encoding="utf-8"))
+            gap = (d["structure"]["pitch_link_load_N"], d["pitch"]["peak_link_force_N"])
+        caught = gap is not None and abs(gap[0] - gap[1]) > 1e-6
+        out.append(("with the chord moved, the wrong order leaves a gap the gate reads",
+                    caught, err or (f"{gap[0]} N beside {gap[1]} N" if gap else "no gap")))
+
+        ok_fwd, err = run_pair("moved-forward", ("linkage.py", "structure.py"), chord=0.0740)
+        clean = None
+        if err is None:
+            d = json.loads(ok_fwd.read_text(encoding="utf-8"))
+            clean = (d["structure"]["pitch_link_load_N"], d["pitch"]["peak_link_force_N"])
+        agreed = clean is not None and abs(clean[0] - clean[1]) < 1e-6
+        out.append(("with the chord moved, the documented order closes it", agreed,
+                    err or (f"{clean[0]} N on both sides" if clean else "no values")))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    return out
+
+
 def loop_residual(rows, R, e, a, l, alpha0, phi_deg=90.0):
     """Worst distance by which the pitch link fails to reach the offset pivot.
 
@@ -2224,7 +2346,7 @@ def main():
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
-    extra = linkage_selftests()
+    extra = linkage_selftests() + solver_selftests() + pdf_selftests()
     for name, ok, detail in extra:
         ANNOUNCED.append(1)
         print(("ok    " if ok else "BROKE ") + name + f"   [{detail}]")
