@@ -201,7 +201,8 @@ load model first, against the `WEEK2_PUBLISHED_LOADS` constant and never against
 because `--write` replaces that table and an earlier version compared the reconstruction with its
 own output. `BLADE_PARTS_G` is gone since week 4: the blade build-up is imported from
 tools/structure.py, so run this script first and structure.py second whenever the blade section
-moves. Nothing enforces that order. See D48.
+moves. `check_solver_order` in check.py enforces that now, by reading whether the pitch link load
+this script solved is the one structure.py stored. See D48 and D62.
 
 ### stage-1/design/03-pitch-and-vectoring.md
 Required Stage 1 item 3 and the whole 15 percent kinematics and vectoring criterion. Topology,
@@ -246,11 +247,14 @@ Used by: check.py at week 5, which reads it with pypdf and looks for this submis
 Gotcha: rebuild it whenever the source changes, with
 `pandoc stage-1/submission/cycloprop-stage1.md --from=markdown --pdf-engine=xelatex --toc
 --number-sections -o stage-1/submission/cycloprop-stage1.pdf`. A stale PDF passes the page count
-and fails the string check. Two extraction traps found reading it back: pypdf returns one ff
-ligature character wherever the text says "off", so a must_contain string with a double f would
-miss, and the contents entry extracts as "T eam capability" from kerning while the body heading
-extracts cleanly. Check the xelatex log for overfull lines after any edit; a long unbreakable
-token such as the organiser address beside a code span caused the two that were fixed.
+and fails the string check. Two extraction traps were found reading it back and both are handled
+in check.py now rather than at each call site: pypdf returns one ff ligature character wherever
+the text says "off", which `pdf_text` expands, and the contents entry extracts as "T eam
+capability" from kerning while the body heading extracts cleanly, which `check_pdf` survives by
+comparing with the whitespace taken out. `pdf_selftests` in tools/test_gates.py reads the real
+file back and holds both. Check the xelatex log for overfull lines after any edit; a long
+unbreakable token such as the organiser address beside a code span caused the two that were
+fixed.
 
 ### stage-1/submission/email-draft.md
 The staged submission email. Drafted, never sent, per D5. Carries the recipient, a subject line,
@@ -283,8 +287,11 @@ prints the costed table and `--balance` prices the chordwise balance D43 left op
 Used by: run by hand; tools/linkage.py imports `blade_parts_g` from it for the pitch loads
 Gotcha: geometry, speed and thrust are read back out of numbers.json and no week 4 number is
 ever read back in, so a rerun cannot confirm its own output. Run tools/linkage.py --write first
-when the blade section moves, then this, which reads the pitch link load back; nothing enforces
-that order. It writes with `newline="\n"` and `ensure_ascii=False` to match linkage.py, and it
+when the blade section moves, then this, which reads the pitch link load back. The wrong order
+leaves structure.pitch_link_load_N holding the value from before the blade moved while
+pitch.peak_link_force_N carries the new one, and `check_solver_order` reads that gap. From an
+already converged file both orders reproduce it byte for byte, which is why reproducibility alone
+is not the test. It writes with `newline="\n"` and `ensure_ascii=False` to match linkage.py, and it
 must: it writes the same file second, so the platform default here put CRLF back into a file
 linkage.py had just written LF and git normalised the evidence away. `--balance` calls
 `linkage.solve` through a deferred import, because linkage imports this module at load time, and

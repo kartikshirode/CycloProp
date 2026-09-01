@@ -1516,3 +1516,42 @@ rather than a piece of writing, and they now say what the commits say.
 
 Thirteen new gates and five new self-tests, 144 to 149. The submission and its PDF are rebuilt,
 still 21 pages, and the xelatex log has no overfull lines.
+
+## D62: the solver run order is a gate, and the PDF reader stops lying about ligatures
+
+1 September 2026, after week 4.
+
+Two open items closed, both of the kind that costs an hour at the worst possible moment.
+
+**The run order.** `tools/linkage.py --write` then `tools/structure.py --write`, because
+linkage.py imports the blade build-up from structure.py and structure.py reads the pitch link
+load back. It was resolved by hand, written into two docstrings and a codemap entry, and
+enforced nowhere. The obvious test, rerun the pair and see whether the file reproduces, turns
+out to prove nothing: from the converged file both orders reproduce it byte for byte, because
+each script is sitting on its own fixed point. That is worth knowing and it is why the debt
+survived four weeks looking harmless.
+
+Move the chord two millimetres and the difference appears. The reverse order leaves
+`structure.pitch_link_load_N` at 105.93 N, the value from before the blade moved, while
+`pitch.peak_link_force_N` carries the new 111.3 N. They cannot disagree in a file written in the
+right order, because the second script copies the first one across. So the gate is one equality
+and it runs on every week 4 check with no subprocess.
+
+**The ligature trap.** xelatex sets "off" as a single glyph and pypdf hands it back that way, so
+any gate string carrying a double f fails on a correctly built PDF. The contents page also puts
+a space inside "Team" from kerning while the same heading in the body extracts cleanly. Both
+were found reading the PDF back during the week 5 preparation pass and both were written down as
+warnings for whoever did the final rebuild. A warning in a file is not a fix. `pdf_text` expands
+the ligatures now and `check_pdf` compares with the whitespace removed rather than merely
+collapsed, and `pdf_selftests` reads the real document back to hold it.
+
+Comparing without whitespace is a small loosening and it is deliberate. The strings being matched
+are whole section titles, so dropping spaces cannot make an unrelated document look like this
+one, and the failure it prevents is a gate rejecting a good PDF on the last day.
+
+**Also.** `stage-1/organiser-email.md` is cut to what is still true. Its two live questions moved
+into the submission email in D57 and the page had gone on describing a mail nobody is sending. It
+also pointed at `.codex/weekly-loop.md` as the source of the blocked trigger, which has not been
+the execution contract since D28.
+
+Four new gates and eight new self-tests, 149 to 157.
