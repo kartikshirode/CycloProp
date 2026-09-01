@@ -649,12 +649,23 @@ def section_under(text, keyword):
     return out if capturing or out else None
 
 
+LIGATURES = {"\ufb00": "ff", "\ufb01": "fi", "\ufb02": "fl", "\ufb03": "ffi",
+             "\ufb04": "ffl", "\ufb05": "st", "\ufb06": "st"}
+
+
 def pdf_text(path):
     """Read with pypdf rather than shelling out to pdfinfo, which resolves to whatever
-    happens to be on PATH and is not guaranteed to be a working poppler build."""
+    happens to be on PATH and is not guaranteed to be a working poppler build.
+
+    xelatex sets ligatures as single glyphs and pypdf hands them back that way, so the
+    word "off" comes out as one character followed by an f and no search for it can
+    match. Expanding them here means the caller never has to know."""
     import pypdf
     reader = pypdf.PdfReader(str(path))
-    return len(reader.pages), "\n".join(pg.extract_text() or "" for pg in reader.pages)
+    text = "\n".join(pg.extract_text() or "" for pg in reader.pages)
+    for glyph, plain in LIGATURES.items():
+        text = text.replace(glyph, plain)
+    return len(reader.pages), text
 
 
 def check_pdf(rel, min_pages=4, must_contain=()):
@@ -671,8 +682,14 @@ def check_pdf(rel, min_pages=4, must_contain=()):
     ok = report(pages >= min_pages, f"{rel} is a readable PDF with {min_pages}+ pages",
                 f"{pages} pages")
     if must_contain:
-        flat = " ".join(text.split()).lower()
-        absent = [s for s in must_contain if " ".join(s.split()).lower() not in flat]
+        # Compared with the whitespace taken out entirely, not merely collapsed. Kerning
+        # puts a space inside a word on the contents page, so "Team capability" extracts
+        # as "T eam capability" there while the same heading in the body comes out clean.
+        # A gate that fails on a correctly built PDF is worse than one that tolerates a
+        # space, and the strings being matched are long enough that dropping whitespace
+        # cannot make an unrelated document look like this one.
+        flat = "".join(text.split()).lower()
+        absent = [s for s in must_contain if "".join(s.split()).lower() not in flat]
         ok &= report(not absent, f"{rel} is built from this submission, not another document",
                      f"{len(absent)} expected string(s) absent: "
                      + "; ".join(absent[:4]) if absent else "")
@@ -1569,6 +1586,36 @@ def check_budget_continuity(data):
     return ok
 
 
+def check_solver_order(data):
+    """The two solvers have a run order and this is what enforces it.
+
+    tools/linkage.py imports the blade build-up from tools/structure.py, and structure.py
+    reads the pitch link load that linkage.py solved. So linkage.py goes first. The order
+    was resolved by hand, written into two docstrings, and checked nowhere, which week 4
+    carried as an open item.
+
+    Running them the wrong way round leaves a fingerprint. structure.py picks up the pitch
+    link load from before the blade moved, writes it into structure.pitch_link_load_N, and
+    then linkage.py overwrites pitch.peak_link_force_N with the new one. The two disagree,
+    and they cannot disagree in a file written in the right order because the second script
+    copies the first one across. Perturb the chord by two millimetres and the reverse order
+    leaves 105.93 N beside 111.3 N.
+
+    From a converged file both orders reproduce it byte for byte, since each script is at
+    its own fixed point, so a reproducibility check alone would say the order does not
+    matter. It matters the moment anything moves."""
+    link = num(data, "structure.pitch_link_load_N")
+    peak = num(data, "pitch.peak_link_force_N")
+    if link is None or peak is None:
+        return report(False, "week4: the pitch link load crosses between the two solvers",
+                      "structure.pitch_link_load_N or pitch.peak_link_force_N is missing")
+    return report(close(link, peak, DISPLAY_TOL),
+                  "week4: the solvers ran in the documented order",
+                  f"structure has {link} N against the {peak} N linkage solved. "
+                  "Run tools/linkage.py --write first, then tools/structure.py --write"
+                  if not close(link, peak, DISPLAY_TOL) else f"{link} N on both sides")
+
+
 MOTOR_SPEED_RULE_MAX = 0.90
 
 
@@ -1917,6 +1964,7 @@ def week4(data):
 
     ok &= check_pitch_bearing_duty(data)
     ok &= check_drive_margin(data)
+    ok &= check_solver_order(data)
 
     for rel, heads in [
         ("stage-1/design/05-mass-and-tw.md",
