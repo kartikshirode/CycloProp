@@ -427,7 +427,10 @@ def build(root, data, upto=4):
              ("structure.shaft_margin", rnd(st["shaft_margin"], 3)),
              ("structure.centrifugal_load_N", rnd(st["centrifugal_load_N"], 2))])
     if upto >= 5:
-        doc(g / "07-team-and-execution.md", ["Team capability", "Execution plan", "Stage 2"])
+        doc(g / "07-team-and-execution.md", ["Team capability", "Execution plan", "Stage 2"],
+            [("geometry.radius_m", data["geometry"]["radius_m"]),
+             ("operating.rpm", rnd(data["operating"]["rpm"], 2)),
+             ("performance.thrust_N", rnd(data["performance"]["thrust_N"], 2))])
         sub = d / "stage-1" / "submission"
         submission_doc(sub / "cycloprop-stage1.md", data)
         build_pdf_from(sub / "cycloprop-stage1.md", sub / "cycloprop-stage1.pdf")
@@ -1579,6 +1582,30 @@ case("criteria named beside the table instead of in it is rejected", False,
      upto=5, week=5, tweak=criteria_named_only_in_prose)
 
 
+def stub_item_seven(root, data):
+    """Three headings and nothing under them. This passed week 5 until item 7 got the
+    substance floor every other design document already had."""
+    (root / "stage-1" / "design" / "07-team-and-execution.md").write_text(
+        chr(10).join(["# Team capability", "", "## Execution plan", "", "## Stage 2", ""]),
+        encoding="utf-8")
+
+
+case("item 7 as three headings and no content is rejected", False, upto=5, week=5,
+     tweak=stub_item_seven)
+
+
+def item_seven_number_off(root, data):
+    """A declared value that is not the one in numbers.json."""
+    p = root / "stage-1" / "design" / "07-team-and-execution.md"
+    p.write_text(p.read_text(encoding="utf-8").replace(
+        f"- geometry.radius_m = {data['geometry']['radius_m']}",
+        f"- geometry.radius_m = {data['geometry']['radius_m'] * 1.5}"), encoding="utf-8")
+
+
+case("item 7 declaring a number numbers.json does not have is rejected", False,
+     upto=5, week=5, tweak=item_seven_number_off)
+
+
 def front_matter_on_the_submission(root, data):
     """The real submission opens with a pandoc header, and `geometry: margin=25mm` in it
     used to be reported as a length the design had not justified. Whole-week version of
@@ -1836,6 +1863,15 @@ def main():
              fm + chr(10) + "The module produces 999 N of thrust.", False),
             ("the same margin setting in the body is a claim and fails",
              "The page is set with margin=25mm in the body text.", False),
+            # An opening delimiter with no closing one is not front matter, so the setting
+            # under it is read as a claim and fails. Without this rule a stray rule on line
+            # 1 hides a whole document.
+            ("an unterminated opening delimiter is not front matter",
+             chr(10).join(["---", "geometry: margin=25mm", "", "Body text follows."]), False),
+            # No blank line under the closing delimiter. If the block length were one line
+            # long the body line would be skipped and this would pass.
+            ("the line straight under the closing delimiter is still body",
+             fm.rstrip(chr(10)) + chr(10) + "The module produces 999 N of thrust.", False),
         ]
         for name, text, want_pass in probes:
             (Path(tmp) / "t.md").write_text(text, encoding="utf-8")
@@ -1860,11 +1896,18 @@ def main():
         # word, thrust_N_conservative, mass_g_conservative, is still a force and still a
         # mass, and while the match ran only at the end of the key the submission's own
         # conservative thrust could not trace to the number that produced it.
+        amp = data["geometry"]["pitch_amplitude_deg"]
         probes = [("produces 400 N of thrust", False), ("Envelope is 400 mm long.", True),
                   ("A force of -10 N acts.", False), ("At least 10 N.", True),
                   ("| 999 N |", False),
                   (f"The conservative case gives "
-                   f"{data['performance']['thrust_N_conservative']:.2f} N.", True)]
+                   f"{data['performance']['thrust_N_conservative']:.2f} N.", True),
+                  # Angles written as words. "deg" sat before "degrees" in the alternation,
+                  # so the matcher took the short branch, failed its own lookahead on the
+                  # "r", and read no angle in the document at all.
+                  ("The blade pitches 999 degrees.", False),
+                  ("A 999 degree amplitude.", False),
+                  (f"The blade pitches plus or minus {amp} degrees.", True)]
         for text, want_pass in probes:
             (Path(tmp) / "t.md").write_text(text, encoding="utf-8")
             chk.FAILURES.clear()

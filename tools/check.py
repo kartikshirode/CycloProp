@@ -487,7 +487,8 @@ KEY_UNITS = [("_Nm", ("torque", 1.0)), ("_ms", ("speed", 1.0)), ("_mm", ("length
              ("_m", ("length", 1.0))]
 PROSE_UNITS = {"kW": ("power", 1000.0), "kg": ("mass", 1000.0), "mm": ("length", 0.001),
                "Nm": ("torque", 1.0), "m/s": ("speed", 1.0), "rpm": ("rot", 1.0),
-               "deg": ("angle", 1.0), "N": ("force", 1.0), "W": ("power", 1.0),
+               "degrees": ("angle", 1.0), "degree": ("angle", 1.0), "deg": ("angle", 1.0),
+               "N": ("force", 1.0), "W": ("power", 1.0),
                "g": ("mass", 1.0), "m": ("length", 1.0)}
 
 # The one dimensioned constant that belongs in prose without being a computed value.
@@ -497,9 +498,13 @@ COVERAGE_ALLOW = {(10.0, "force")}
 # pattern walked straight past.
 # The decimal grammar covers 999, 999.5, .999, 999. and 9.99e2, because every form the
 # matcher did not recognise was a number nobody was checking.
+# "degrees" and "degree" come before "deg" in the alternation and it matters: the regex
+# takes the first branch that matches, so with "deg" first, "40 degrees" matched "deg",
+# failed the lookahead on the "r", and left the number unaudited. The submission writes
+# angles out in words, so that one ordering hid every angle claim in the document.
 UNIT_NUM = re.compile(
     r"(?<![\w.])(-?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*"
-    r"(kW|kg|mm|Nm|m/s|rpm|deg|N|W|g|m)(?![\w/])")
+    r"(kW|kg|mm|Nm|m/s|rpm|degrees|degree|deg|N|W|g|m)(?![\w/])")
 # An escape has to say why it exists, and the ceiling counts the NUMBERS it hides rather
 # than the markers themselves. One marker can cover a whole line or a whole table, so
 # counting markers measured the wrong thing.
@@ -1735,6 +1740,10 @@ def week5(data):
     ok = True
     ok &= require_headings("stage-1/design/07-team-and-execution.md",
                            ["Team capability", "Execution plan", "Stage 2"])
+    # Every other design document carries a substance floor and a declaration check. Item 7
+    # had only its headings, so three heading lines and nothing under them passed week 5.
+    ok &= require_substance("stage-1/design/07-team-and-execution.md")
+    ok &= check_declared_numbers("stage-1/design/07-team-and-execution.md", data)
 
     sub = ROOT / "stage-1" / "submission" / "cycloprop-stage1.md"
     if not report(sub.is_file(), "week5: submission source exists"):
@@ -1757,7 +1766,7 @@ def week5(data):
         pipes = [l.strip() for l in block if l.strip().startswith("|")]
         sep = [l for l in pipes if set(l) <= set("|- :") and "-" in l]
         ok &= report(bool(sep), "week5: the criteria map is a real markdown table",
-                     "no header separator row")
+                     fail_detail="no header separator row")
         rows = [l for l in pipes if l not in sep]
         data_rows = rows[1:] if sep else []
         ok &= report(len(data_rows) >= len(CRITERIA_KEYS),
