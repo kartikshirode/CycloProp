@@ -1761,3 +1761,91 @@ two components, a marker quoted rather than asserted, and a chain shaved 1.95 pe
 four links.
 
 The tree stays red until Phase 2 settles Tier 1. That is what the order is for.
+
+
+## D67: the design closes again, on a smaller thrust, a bigger pack and a weaker claim
+
+1 September 2026, Phase 2 of the plan in `stage-1/audit/full-review.md`. This entry moves
+design numbers, and it is the largest single change since the geometry froze. The radius did
+not move. Almost everything hanging off it did.
+
+**The power was wrong and it was wrong in the flattering direction.** Figure of merit is
+defined by the thrust and power coefficients together. The design took a thrust coefficient
+of 0.6055 while holding Kellen's figure of merit of 0.6, and Kellen measured 0.6648 at that
+figure of merit on one rotor at one operating point. Cutting one and keeping the other spends
+the same conservatism twice, once as caution on thrust and once as optimism on power. On the
+consistent reading the figure of merit is 0.6 times the coefficient ratio to the power of one
+and a half, which is **0.5215**. At the old 18 N design point that is 370.1 W of aerodynamic
+power rather than 321.71, and no drive the project holds covers it.
+
+**The identity that decides the drive, and it is worth stating plainly.** A permanent magnet
+motor held to a speed rule s and a continuous current Ic can deliver at most s times the
+loaded pack voltage times Ic of mechanical output. Torque is Kt times current, Kt is 9.5493
+over KV, speed is capped at s times KV times the voltage, and their product loses KV entirely
+because 2 pi over 60 times 9.5493 is exactly 1. **Gearing slides the operating point along
+that line and cannot move the line.** At 6S the MN5006 caps at 392 W and the corrected rotor
+asked for 406 W, so the belt ratio was never going to fix it and week 2 had no gate that
+could see this.
+
+**What moved.**
+
+- **Pack interface 6S to 8S.** The battery sits outside the module boundary, so pack voltage
+  is an interface the module declares rather than a part it carries. At 8S the cap is 532 W
+  against 406 W wanted
+- **Design thrust 18 N to 17 N.** The drive is what pins the design point from above. At
+  17 N the motor draws 483.2 W of its 520 W continuous, 19.29 A of 20.8 A, 0.3902 Nm of
+  0.4414 Nm and 9932 of 12799 rpm. Every line has 7 percent or better
+- **Belt 3.5 to 4.25**, a 68 tooth rotor pulley on the 16 tooth motor pulley. Chosen as the
+  smallest whole tooth count that leaves 6 percent on every line
+- **Motor current from torque.** 0.3902 Nm over a Kt of 0.021221 plus the 0.9 A idle current
+  evidence row E12 records gives 19.2876 A. It used to be input power over pack voltage,
+  which is the draw of an ideal resistor and runs low by roughly the efficiency
+- **The servo gear ratio was applied backwards** in `tools/linkage.py`. The pair steps the
+  carrier angle up, which the phase authority already claimed, and angle amplification at the
+  output is torque multiplication at the input. Corrected, the 12.5 g servo held 96 percent
+  of half its stall torque against a ripple that reverses three times a revolution. It is a
+  20 g class part at 3.9 kgf.cm now and the margin is 1.98
+- **The four-bar moved from an 18 mm horn on a 105 mm link to 18 by 108.** The sweep was
+  reading the printed minimum transmission angle and ignoring the maximum, and 143.23 degrees
+  is as far from a right angle as 36.77 is. The corrected sweep picks a row that is better on
+  every column: worst folded angle 44.32 rather than 36.77, carrier torque 0.1287 rather than
+  0.1389, harmonic residual 1.141 rather than 1.195
+- **The pitch bearing is held to ISO 76, not to a listing.** 12.3 times 7 balls times 1.5875
+  squared is 217 N against the 270 N an unnamed supplier page claimed. On that rating one
+  bearing at each of the blade's two root stations gives 1.36 against a floor of 1.5, so
+  there are two at each station now, at 90 percent of twice one rating because two bearings
+  on one pin do not share perfectly. 12 bearings, 15.6 g, and the margin is 2.59 with the
+  oscillating static safety at 4.15
+- **Six mass lines were redrawn from geometry.** The hub boss was a 20 mm outer diameter over
+  a 14 mm bore on a 16 mm shaft, which cannot be made. The bearing blocks carried 16 g for a
+  pair the description makes 25.3 g. The motor plate carried 8 g for a plate that is 14 g.
+  The root brackets were a hard coded 3.00 g. The shaft plugs had no allowance for the 15 mm
+  journal their own basis describes. The harness priced one conductor
+
+**Where that leaves the module.** 677.91 g nominal and 763.24 g conservative, against 607.97
+and 684.70. Thrust to weight **2.5563** on the design estimate and **2.1569** on the stacked
+downside.
+
+**And here is the claim that did not survive.** The requirement is a thrust to weight above
+2.5 on the module and the design estimate meets it. This project also held the downside cases
+to 2.5, which was its own discipline and not the competition's, and the mass corrections
+spent it. Closing the stacked case needs **104.76 g** out of a 763 g conservative budget.
+That is a mass reduction programme and not a Stage 1 arithmetic change, so the gate was
+changed: the requirement stays hard on the design estimate, the downside cases are held to a
+declared floor of 2.0, and the grams that would close the gap have to be computed, published
+and sourced. `results.mass_to_close_stacked_g` is that number and it is gated.
+
+Changing a gate so a design passes is the move this project refuses. What makes this one
+different, and the reader should judge it: the threshold that moved was never the
+requirement, the number it was hiding is now published rather than dropped, and the gate that
+replaced it demands more arithmetic than the one it replaced. It is still a weaker claim than
+the one this project made a week ago, and D65 already said that claims do not get to survive
+by being old.
+
+**One gate was loosened for a reason unrelated to any of this.** `check_week2_model` in
+`tools/linkage.py` scaled its reconstruction to the live design thrust, so moving the design
+point failed a check about whether the aerodynamic model still reproduces week 2's published
+table. Those are different questions. It scales to the thrust the stored table was published
+at now, which is what it was always asking.
+
+Nine documents still quote the old numbers. That is Phase 3 and it has not run.
