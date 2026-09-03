@@ -292,6 +292,17 @@ It is written into two documents as an open item and nothing is drawn for it.
 
 ### Phase 4: add what is missing
 
+**Executed 4 September 2026. See D69.** All seven items done. `tools/figures.py` renders the
+seven figures and `check_figures` holds them to `numbers.json`. Packaging, virtual camber, the
+CAD clause, the structural heading and confidentiality are all in the submission. R48 was
+measured rather than asserted: thrust and power went from 10.2 percent of the report to 14.4 and
+is now its largest section, and Appendix A is no longer the largest.
+
+Drawing the design found four more errors and two of them are Phase 3 misses rather than new
+work: the submission's structural section and the whole of Appendix A were never brought onto the
+corrected design point, so Phase 3 was reported complete while the report still answered on 18 N
+and a 6S pack below its own sources section.
+
 23. **R43, the figures.** `tools/figures.py` rendering from `numbers.json` so every figure is
     reproducible and gated the same way every number is. matplotlib 3.11.1 and numpy are
     installed and the data is already stored: 37 pitch schedule rows, 36 azimuthal load rows, the
@@ -305,6 +316,13 @@ It is written into two documents as an open item and nothing is drawn for it.
 27. **R47.** Promote the structural work to a visible heading. R48, R49 as cheap wins
 
 ### Phase 5: records and steering
+
+**Executed 4 September 2026. See D69.** R51 to R62 done. The marker count went to five in all
+four files that disagreed with the code, `human-gate.md` now lists the exact strings to type, the
+calendar is a record rather than a forecast three weeks out of date, the journal has entries for
+the four sessions that had none, and the week 2 debt ledger is reconciled line by line in the
+handoff with the D30 instruction that went to nobody answered rather than reassigned. R63 is
+carried into Phase 6 with R39, R42 and R50, which no phase had picked up.
 
 28. R51 to R63. Mechanical, and the marker count and the human gate wording matter most because
     the only person who can unblock this project reads that file

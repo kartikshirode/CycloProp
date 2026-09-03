@@ -1910,3 +1910,82 @@ move.
 **Where it stands.** 269 gates pass on the cumulative tree and 187 self-tests behave as
 expected. Week 5 passes everything except the human gate, which is five markers that need a
 person and which nothing here will write. The PDF is rebuilt at 24 pages.
+
+
+## D69: the figures go in, and drawing the design found four more things wrong with it
+
+4 September 2026, Phases 4 and 5 of the plan in `stage-1/audit/full-review.md`.
+
+**The figures, R43.** `tools/figures.py` renders seven from `numbers.json`: module general
+arrangement, four-bar kinematics, pitch schedule, azimuthal blade load, thrust vector map, blade
+section and mass breakdown. It takes the four-bar from `tools/linkage.py` and the blade section
+from `tools/check.py` rather than redrawing either, so the geometry a reader sees is the geometry
+the gates already hold. Each figure records the stored values it drew into `figures/manifest.json`
+and `check_figures` reads them back, so a figure rendered before a number moved fails the way a
+stale sentence does. Nine self-tests, one per way a figure can lie, including one that catches a
+figure placed in the source but missing from the built attachment.
+
+**Drawing the design is a way of testing it, and four things failed.**
+
+1. **The submission's structural section was never corrected by Phase 3.** Seven stale margins in
+   the table, two empty demand cells, a claim that two margins sit under 2 when neither does, and
+   the blade attachment still named as the tightest joint after duplexing had taken it off that
+   spot. Phase 3 corrected all of this in `08-structure-and-loads.md` and in the handoff, reached
+   the sources section of the submission and stopped. Phase 3 was reported as complete and it was
+   not
+2. **Appendix A and the claims table were the same.** Answering on 18 N, a 6S pack, a stacked
+   thrust to weight of 2.5457, an attachment margin of 1.6933 and a foam knockdown of 0.6689.
+   That is the design as it stood before Phase 2 moved it, sitting under a body that had been
+   corrected
+3. **The sensitivity table named the wrong binding line on the two rows below the design point.**
+   13 N said speed at 74 percent; speed is 66 and current binds at 73. 16 N said speed at 86;
+   speed is 77 and current binds at 85. Both are hand written percentages that no gate read, and
+   both survived the pass that corrected exactly this on the 18 N and 20 N rows. Every row carries
+   all four fractions as fields now and `check_sensitivity_drive` recomputes them from the row's
+   own ratio, torque and current
+4. **`09-packaging-and-integration.md` carried two different envelopes.** The interface table said
+   364.4 by 316.5 by 362.5 and the build-up above it said 316.1 and 362.1, with the swept radii
+   from before the linkage moved. They agreed to within display tolerance, which is why nothing
+   failed. `check_packaging_envelope` adds the six allowances up now, and those allowances are
+   stored rather than living as constants inside a solver
+
+**Two figure captions were wrong before anyone else could read them.** The vector map said 120
+degrees of phase authority buys 9.078 degrees of thrust tilt. It does not: `side_force_tilt_deg`
+is the lag between the resultant and the offset direction at zero command, and the map spans the
+full 120 degrees one to one, with the magnitude flat at 17.0000 N because the load model is
+rotationally equivariant. The linkage diagram printed a pitch of plus 353.6 degrees at one
+azimuth from a missing wrap. Both were caught by looking at the picture.
+
+**R44 to R49.** Packaging is folded into the submission as a subsection of item 1 with the
+envelope build-up and the moving envelope. A virtual camber paragraph sits in item 4, used as the
+defence of the coefficient transfer rather than as a confession: at a chord to radius of 0.66 the
+effect is larger here than at Benedict's 0.43, and it is already inside Kellen's measured number
+because he measured the same shape family. One paragraph says why the CAD clause is read as
+programme level and what is offered against that reading. The structural work is a top-level
+heading now instead of a subsection under materials, and it gained the bearing duty analysis and a
+statement of the four analyses that are missing. Confidentiality is claimed in one line.
+
+R48 was effort against weight and it is answered by measurement rather than by assertion. Thrust
+and power was 10.2 percent of the report and Appendix A was the largest section. Thrust and power
+is now the largest at 14.4 percent, which is the section carrying two 15 percent criteria, and
+Appendix A is second at 12.5.
+
+**R62, the shortlist that was one and not three.** Week 2's plan asked for three shortlists and
+delivered one. Recorded now rather than left silent: the motor was shortlisted properly, five
+candidates screened against power, torque, current and speed. The ESC and the transmission were
+not. Both have named catalogue parts today, a 40 A 8S capable controller and HTD-3M pulley blanks
+and belt, and both are priced in the bill of materials, but neither went through a comparison and
+neither should be described as selected. The reduction was affordable because neither is close to
+a limit and because the drive is what binds. It is written down so that a Stage 2 reader knows
+which of the three was actually chosen and which two were merely specified.
+
+**R51, the marker count, settled in favour of the code.** Four files said week 5 blocks on four
+markers and the code blocks on five. Loosening a hard block to match its own documentation is the
+wrong direction, so the four files were corrected. `human-gate.md` also now lists the five exact
+strings a person has to type, including the two that are not the word CONFIRMED.
+
+**Where it stands.** 204 self-tests and every gate on the cumulative tree passes. Week 5 fails on
+the human gate alone, with three of five markers outstanding. The report is 30 pages, up from 24,
+and that is over the 15 page target the plan set for itself when no organiser limit was supplied.
+No organiser limit exists, so this is recorded rather than acted on, and the page question rides
+at the end of the staged email.
