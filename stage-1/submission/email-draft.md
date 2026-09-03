@@ -32,14 +32,15 @@ answers it, a claims and risk table, and an appendix of examiner questions with
 answers.
 
 The module is a single cycloidal rotor with three blades, passive four-bar cyclic
-pitch and thrust vectoring by rotation of the pitch offset. Design thrust is 18.0 N
-against the 10 N requirement, and thrust to weight is 3.018 at the design point,
-falling to 2.5457 when the conservative mass budget and the low thrust coefficient
-are applied together.
+pitch and thrust vectoring by rotation of the pitch offset. Design thrust is 17.0 N
+against the 10 N requirement, and thrust to weight is 2.5563 at the design point,
+above the 2.5 target. It falls to 2.1569 when the conservative mass budget and the
+low thrust coefficient are applied together, and the report says what closing that
+would take rather than leaving it implied.
 
 One question, if it is easy to answer. The problem statement does not state a page
 limit or a file naming convention for the Stage 1 report, so the attachment is
-named for the module and the main body is kept to 15 pages with the appendices
+named for the module and the main body runs to 19 pages with the two appendices
 after it. If either is wrong for your process, we will resend in whatever form
 you prefer.
 

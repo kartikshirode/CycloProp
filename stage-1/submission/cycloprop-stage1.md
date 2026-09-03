@@ -26,19 +26,20 @@ Fill the three fields, rebuild the PDF, then send it.
 # Summary
 
 One cycloidal rotor. 3 blades on a 110.0 mm radius, NACA 0020, pitching plus or minus 40
-degrees about an axis at 30 percent chord, turning at 2405 rpm, driven by a single outrunner
-through a toothed belt at 3.5 to 1. Design thrust is 18.0 N against a requirement of at least
+degrees about an axis at 30 percent chord, turning at 2337 rpm, driven by a single outrunner
+through a toothed belt at 4.25 to 1. Design thrust is 17.0 N against a requirement of at least
 10 N.
 
-The module weighs 607.97 g at the nominal budget and 684.70 g in the conservative column, so
-thrust to weight is 3.018 at the design point. Four cases are reported rather than one, because
-reporting a single case is how this design misread itself for a fortnight early on, and the
-worst of the four stacks a low thrust coefficient on the conservative mass and still gives
-2.5457.
+The module weighs 677.91 g at the nominal budget and 763.24 g in the conservative column, so
+thrust to weight is 2.5563 at the design point, above the 2.5 requirement. Four cases are
+reported rather than one, because reporting a single case is how this design misread itself for
+a fortnight early on. The worst of the four stacks a low thrust coefficient on the conservative
+mass and gives 2.1569, under the requirement, and the 104.76 g that would close it is published
+in the mass section rather than argued away.
 
-Blade pitch is passive. One four-bar per blade, all three sharing a single offset pivot 15.4 mm
+Blade pitch is passive. One four-bar per blade, all three sharing a single offset pivot 11.53 mm
 from the rotor axis, and thrust vectoring is the direction of that offset rather than a separate
-mechanism. Two 12.5 g servos turn a phasing carrier through a 1.5 step up and reach 120 degrees
+mechanism. Two 20 g servos turn a phasing carrier through a 1.5 step up and reach 120 degrees
 of vector authority.
 
 What this report is not: it is not a measurement, and it is not CAE. No CFD has been run, no
@@ -64,9 +65,9 @@ the thrust drops the per rotor Reynolds number.
 
 | Layout | Per rotor thrust | Rotor speed | Largest dimension | Module mass | Stacked T/W |
 | --- | --- | --- | --- | --- | --- |
-| single, 3 blades | 18.0 N | 2405 rpm | 290.4 mm | 580.05 g | 2.517 |
-| two rotors | 9.0 N | 3215 rpm | 400.0 mm | 786.12 g | 1.855 |
-| three rotors | 6.0 N | 3976 rpm | 490.0 mm | 984.94 g | 1.479 |
+| single, 3 blades | 17.0 N | 2337 rpm | 290.4 mm | 637.23 g | 2.1631 |
+| two rotors | 8.5 N | 3124 rpm | 400.0 mm | 786.12 g | 1.7516 |
+| three rotors | 5.6667 N | 3864 rpm | 490.0 mm | 984.94 g | 1.3969 |
 
 The single rotor wins the decision metric by 36 percent and it wins every other column too. The
 reason is not subtle once the mass lines are sorted: splitting the thrust splits the aerodynamics
@@ -77,8 +78,10 @@ lower tip speed for the same per rotor thrust. Chord Reynolds falls with the spl
 measured band and the single rotor stays inside it.
 
 Those three rows are built on the week 2 mass envelope, applied identically to all three layouts.
-The refined budget later in this report moves the winning row from 2.517 to 2.5457 and leaves the
-other two where they are.
+The refined budget later in this report moves the winning row from 2.1631 to 2.1569 and leaves
+the other two where they are. Only the single rotor row carries the six corrected mass lines, and
+three of those are per rotor, so correcting the cluster rows widens the gap rather than closing
+it.
 
 The module boundary is taken from the problem statement rather than chosen: blades, frame, pitch
 mechanism, motor, actuator and mounting hardware. Two disputed allocations were settled before
@@ -92,7 +95,7 @@ blades give more thrust, which is Benedict's own finding and matches Kellen's re
 for this Reynolds band. NACA 0020 rather than something thinner, because thick sections stay
 efficient at this scale and a thick section is what makes the blade buildable as a closed cell
 with a real spar inside it. One motor with a belt reduction rather than direct drive, because
-rotor torque at the design point is 1.41944 Nm at 2405 rpm and no outrunner in this mass class
+rotor torque at the design point is 1.54226 Nm at 2337 rpm and no outrunner in this mass class
 makes that directly.
 
 # Preliminary rotor sizing
@@ -110,8 +113,8 @@ radius and the size cancels out of the product of tip speed and chord.
 | Blades | 3 |
 | Airfoil | NACA 0020 |
 | Pitch amplitude | 40 degrees about 30 percent chord |
-| Rotor speed | 2405 rpm |
-| Tip speed | 27.70 m/s |
+| Rotor speed | 2337 rpm |
+| Tip speed | 26.92 m/s |
 | Chord Reynolds | 134,074 |
 | Solidity | 0.3151 |
 
@@ -139,8 +142,8 @@ scenario, not a published lower bound, and it is labelled that way in the eviden
 over radius while rotor torque rises with it, and every geometry scaled mass line grows as the
 square or the cube. Conservative thrust to weight therefore rises all the way down the radius
 range and the best row is not the one the design uses. What picks 110.0 mm is the drive. A
-smaller rotor wants a belt ratio the selected motor cannot spin to on a 6S pack, and the motor
-that has the speed does not have the torque. So the radius is the smallest one a named drive
+smaller rotor asks more motor input power than the selected motor carries continuously, 531.5 W
+against 520.0 W at 100 mm, and nothing lighter in the shortlist carries more. So the radius is the smallest one a named drive
 holds continuously, which is a real finding and points at the cheapest available improvement.
 
 # Blade arrangement and pitch-control concept
@@ -153,53 +156,53 @@ requirement together.
 | Link | Length | What it is |
 | --- | --- | --- |
 | L1 rotor arm | 110.0 mm | input crank, frozen by the radius |
-| L2 offset link | 15.4 mm | ground link, solved for the pitch amplitude |
-| L3 pitch link | 105.0 mm | output crank |
-| L4 pitch horn | 24.4 mm | coupler |
+| L2 offset link | 11.53 mm | ground link, solved for the pitch amplitude |
+| L3 pitch link | 108.0 mm | output crank |
+| L4 pitch horn | 18.0 mm | coupler |
 
-Only L2 was solved. Bisecting on peak to peak pitch travel gives 15.4 mm for plus or minus 40
+Only L2 was solved. Bisecting on peak to peak pitch travel gives 11.53 mm for plus or minus 40
 degrees. L1 is the radius, and L3 and L4 come off a vehicle Kellen built, with L3 rescaled by a
 sweep rather than by his ratio: his length scaled to this radius costs more than twice the
 carrier torque and leaves the two servos holding on exactly half their stall figure, which is not
 a margin.
 
-**Grashof and the assembly mode.** Sorted, the links are 15.4 mm, 24.4 mm, 105.0 mm and 110.0 mm.
+**Grashof and the assembly mode.** Sorted, the links are 11.53 mm, 18.0 mm, 108.0 mm and 110.0 mm.
 The shortest plus the longest is less than the other two added together, and the shortest link is
 the ground, so this is a double crank: the rotor arm turns fully, which it has to, and the pitch
 link turns fully about the offset pivot once per rotor revolution.
 
-**Transmission angle runs 58.58 to 143.23 degrees.** The conventional band is 40 to 140 and the
+**Transmission angle runs 58.58 to 135.68 degrees.** The conventional band is 40 to 140 and the
 obtuse end sits outside it, so the cost is stated rather than the band quoted: the worst sine
-over the revolution is 0.599, meaning the mechanism's poorest moment arm is 60 percent of its
-best. The nearest approach to a dead centre is 36.8 degrees away, so nothing is near a
-singularity.
+over the revolution is 0.699, meaning the mechanism's poorest moment arm is 70 percent of its
+best. Read folded, which is the reading that matters because an angle and its supplement cost
+the same moment arm, the worst is 44.32 degrees, so nothing is near a singularity.
 
 The solved schedule is 37 rows at 10 degree spacing. It reaches 40 degrees both ways, closes
-exactly on itself over the revolution, and lags the offset direction by 11.00 degrees. Fitting a
-cosine to it leaves an rms residual of 1.1951 degrees, which is 3 percent of amplitude. That
+exactly on itself over the revolution, and lags the offset direction by 7.75 degrees. Fitting a
+cosine to it leaves an rms residual of 1.1406 degrees, which is 3 percent of amplitude. That
 residual is not noise. It is where the side force comes from, and a prescribed sinusoid does not
 have it.
 
-**One geometric result set the whole drivetrain layout.** The pitch link passes within 0.004 mm
+**One geometric result set the whole drivetrain layout.** The pitch link passes within 0.019 mm
 of the rotor axis, which is a crossing rather than a near miss, and it follows from the link set
 rather than from bad luck. So the plane the pitch links sweep cannot contain the rotor shaft. The
 shaft stops inboard of that plane, the rotor is driven from one end only, and the offset pivot is
 fed by a post from a phasing carrier sitting outboard of everything that rotates with the rotor.
-Clearance to the next blade is not close at 94.6 mm.
+Clearance to the next blade is not close at 98.47 mm.
 
 **Thrust vectoring.** The command is the direction of the offset link, and rotating it rotates the
-whole pitch schedule rigidly. Two servos of the 12.5 g class drive a phasing carrier through
+whole pitch schedule rigidly. Two servos of the 20 g class drive a phasing carrier through
 sector gears set 180 degrees apart, which doubles the holding torque and preloads the mesh so
 backlash does not appear as thrust direction error. The servo gear is 60 mm and the carrier ring
 gear is 40 mm, a 1.5 step up, so 80 degrees of servo travel becomes 120 degrees of carrier.
 
 | Phase command | Vertical | Lateral | Resultant | Direction |
 | --- | --- | --- | --- | --- |
-| -60 degrees | 9.0 N | -15.5885 N | 18.0 N | -60 degrees |
-| -30 degrees | 15.5885 N | -9.0 N | 18.0 N | -30 degrees |
-| 0 degrees | 18.0 N | 0 N | 18.0 N | 0 degrees |
-| 30 degrees | 15.5885 N | 9.0 N | 18.0 N | 30 degrees |
-| 60 degrees | 9.0 N | 15.5885 N | 18.0 N | 60 degrees |
+| -60 degrees | 8.5000 N | -14.7224 N | 17.0 N | -60 degrees |
+| -30 degrees | 14.7224 N | -8.5000 N | 17.0 N | -30 degrees |
+| +0 degrees | 17.0000 N | 0.0000 N | 17.0 N | +0 degrees |
+| +30 degrees | 14.7224 N | 8.5000 N | 17.0 N | +30 degrees |
+| +60 degrees | 8.5000 N | 14.7224 N | 17.0 N | +60 degrees |
 
 Direction follows command one to one and the magnitude holds across the range. Be clear about
 why that comes out so clean: the rotor is axisymmetric, the blades are evenly spaced and the
@@ -208,13 +211,13 @@ exactly. **That table is a statement about the model's symmetry and about what t
 reach. It is not a measurement of force at any of those commands.** What breaks it in hardware is
 everything the model leaves out, and none of it is symmetric.
 
-Holding torque peaks at 0.1389 Nm at three per revolution, 120 Hz, which is above any servo's
-control bandwidth. Through the step up and across two servos that is 0.0463 Nm each against half
-of a 0.216 Nm stall figure, a margin of 2.33, and the phase jitter is bounded by gear backlash at
+Holding torque peaks at 0.1287 Nm at three per revolution, 120 Hz, which is above any servo's
+control bandwidth. Through the step up and across two servos that is 0.0965 Nm each against half
+of a 0.3825 Nm stall figure, a margin of 2.33, and the phase jitter is bounded by gear backlash at
 0.1432 degrees of carrier rather than by the servo loop.
 
 **Side force is the open risk in this section and it is stated as one.** The model puts the
-resultant 11.978 degrees round from the offset direction, of which 11.00 comes from the linkage
+resultant 9.078 degrees round from the offset direction, of which 11.00 comes from the linkage
 phase delay and only 0.978 from the aerodynamics. Measurement says the aerodynamic part is much
 larger. Sirohi measured about 10 degrees, Adams 15 to 35 depending on amplitude and rotor speed,
 and Benedict's twin sat at 30 degrees at its operating point.
@@ -230,9 +233,9 @@ is the single largest consumer of authority in the design.
 
 # Estimated thrust and power requirement
 
-Design thrust is 18.0 N and the conservative case is 17.0992 N. Both clear the 10 N requirement
+Design thrust is 18.0 N and the conservative case is 16.1493 N. Both clear the 10 N requirement
 on their own. Thrust comes from the blade area coefficient route, `T = Ct x 0.5 x rho x u^2 x N x
-c x s`, at a tip speed of 27.70 m/s over a blade area of 0.06325 square metres.
+c x s`, at a tip speed of 26.92 m/s over a blade area of 0.06325 square metres.
 
 Choosing 18.0 N is arithmetic rather than ambition. The conservative case has to clear 10 N by
 itself, which puts a floor under the nominal. Above that, the geometry scaled mass lines do not
@@ -242,10 +245,11 @@ physics.
 
 | Design thrust | Mass ceiling at T/W 2.5 | Ideal power | Rotor speed | Rotor torque | Drive consequence |
 | --- | --- | --- | --- | --- | --- |
-| 13.0 N | 530 g | 118.474 W | 2044 rpm | 1.0251 Nm | the roomiest row, 12.65 A of 20.8 A |
-| 16.0 N | 652 g | 161.766 W | 2267 rpm | 1.2617 Nm | 17.27 A of 20.8 A |
-| 18.0 N | 733 g | 193.026 W | 2405 rpm | 1.4194 Nm | the design point, 20.61 A of 20.8 A |
-| 20.0 N | 815 g | 226.075 W | 2535 rpm | 1.5772 Nm | nothing in the shortlist fits |
+| 13.0 N | 530 g | 118.474 W | 2044 rpm | 1.1795 Nm | MN5006 on a 67 tooth rotor pulley, 4.188 to 1. 15.17 A of the 20.8 A continuous, 323 W of 520 W and 74% of the speed ceiling |
+| 16.0 N | 652 g | 161.766 W | 2267 rpm | 1.4516 Nm | MN5006 on a 70 tooth rotor pulley, 4.375 to 1. 17.71 A of the 20.8 A continuous, 441 W of 520 W and 86% of the speed ceiling |
+| 17.0 N | 693 g | 177.166 W | 2337 rpm | 1.5424 Nm | MN5006 on a 68 tooth rotor pulley, 4.25 to 1. 19.29 A of the 20.8 A continuous, 483 W of 520 W and 86% of the speed ceiling |
+| 18.0 N | 733 g | 193.026 W | 2405 rpm | 1.6331 Nm | no shortlist drive covers it. On the best whole tooth ratio available, 4.125 to 1, the binding line is power at 101% of the MN5006's continuous rating: 526 W of motor input against 520 W. Nothing lighter in the shortlist carries more, and no ratio moves a power limit |
+| 20.0 N | 815 g | 226.075 W | 2535 rpm | 1.8146 Nm | no shortlist drive covers it. On the best whole tooth ratio available, 3.875 to 1, the binding line is power at 119% of the MN5006's continuous rating: 617 W of motor input against 520 W. Nothing lighter in the shortlist carries more, and no ratio moves a power limit |
 
 At 20.0 N the motor input is still inside the continuous power rating, so it is not a power
 limit. It is torque and speed together: the rotor wants a ratio above 4 and a KV450 on 6S cannot
@@ -254,21 +258,25 @@ spin to the motor speed that implies.
 **Power is closed three ways rather than asserted once.**
 
 Momentum theory over the projected frontal area, 2R times span, gives an ideal induced power of
-193.026 W for 18.0 N. No rotor beats that. At Kellen's measured figure of merit of 0.6 the blade
-aerodynamic power is 321.71 W. An independent route through Benedict's measured power loading
-puts the same thrust at 290.323 W, so two routes that share no equation agree to 9.8 percent.
-Induced velocity is 10.7237 m/s against a tip speed of 27.70, an inflow ratio of 0.3871, and that
-is high enough to be the main reason a simple model should not be trusted for magnitude.
+177.166 W for 17.0 N. No rotor beats that. Kellen measures a figure of merit of 0.6, and it sits
+with the thrust coefficient he measured beside it. This design carries a lower thrust coefficient
+as deliberate margin, and figure of merit goes as the thrust coefficient to the power of one and
+a half, so carrying his 0.6 alongside a cut coefficient would spend the same conservatism twice.
+The consistent value is 0.5215, and blade aerodynamic power is 339.699 W. An independent route
+through Benedict's measured power loading puts the same thrust at 274.194 W, so two routes that
+share no equation agree to 19.3 percent. Induced velocity is 10.4215 m/s against a tip speed of
+26.92, an inflow ratio of 0.3871, and that is high enough to be the main reason a simple model
+should not be trusted for magnitude.
 
 | Term | Value | Where it comes from |
 | --- | --- | --- |
-| blade aerodynamic power | 321.71 W | ideal power over a figure of merit of 0.6 |
-| rotor tare | 35.746 W | 10 percent of shaft power, measured on a flight weight rotor |
-| motor input power | 457.573 W | shaft power through a 0.93 belt and a 0.84 motor |
-| electrical power at the ESC input | 481.655 W | motor input over 0.95 |
+| blade aerodynamic power | 339.699 W | ideal power over a figure of merit of 0.5215 |
+| rotor tare | 37.744 W | 10 percent of shaft power, measured on a flight weight rotor |
+| motor input power | 483.158 W | shaft power through a 0.93 belt and a 0.84 motor |
+| electrical power at the ESC input | 508.588 W | motor input over 0.95 |
 | actuator draw | 6.0 W | two servos holding against residual link load |
 | controller draw | 2.0 W | offset controller board |
-| module electrical power | 489.655 W | the three above |
+| module electrical power | 516.588 W | the three above |
 
 The three efficiencies are assumed rather than measured and they are the only unevidenced links
 in the chain. The motor figure is the sensitive one.
@@ -283,26 +291,35 @@ size it against. It is an assumption and it is marked as one.
 The consequence is bounded even though the number is not sourced. The design draws 0.704 of the
 published 180 second power and 0.7927 of the current, and that second figure is also the derate
 at which the selection breaks even. Neither exit is open below it: the stacked thrust to weight
-case needs 17.6768 N so no lower sensitivity row helps, and motor mass is a power class item
-against 12.5 g of conservative headroom. What makes it tolerable is the duty. 0.7927 is a
+case needs 19.7045 N so no lower sensitivity row helps, and motor mass is a power class item
+on a conservative column that is already 104.76 g over the 2.5 ceiling. What makes it tolerable is the duty. 0.7927 is a
 fraction of a three minute rating, so a demonstration inside three minutes runs with a fifth of
 the datasheet figure spare. A dynamometer run is the first drive gate in Stage 2.
 
-A drive is accepted only if three things hold at once. Power: 457.573 W of a derated 520.0 W
-continuous. Torque: 0.4361 Nm against 0.4414 Nm continuous at 3.5 to 1 through a 0.93 belt, which
-is the tight one at 99 percent. Speed: the motor turns 8417 rpm and a 6S pack can reach 9433.5
-against its internal resistance at the working current. Four other motors were screened and each
-one fails at least one of the three.
+A drive is accepted only if four things hold at once. Power: 483.158 W of a derated 520.0 W
+continuous, which is the tight one at 93 percent. Torque: 0.3902 Nm against 0.4414 Nm continuous
+at 4.25 to 1 through a 0.93 belt, 88 percent. Current: 19.2876 A of 20.8 A, derived from the
+torque rather than from input power over pack voltage. Speed: the motor turns 9932.4 rpm against
+a ceiling of 12799.2 rpm the pack can reach at the working current, 78 percent. Four other motors
+were screened and each one fails at least one of the four.
+
+The pack interface is 8S and the module declares it, because the battery sits outside the module
+boundary. It has to be declared: the mechanical output a motor can make is capped at the speed
+rule times the loaded pack voltage times the continuous current, and KV cancels out of that
+product exactly, so gearing slides the operating point along that line and cannot move the line.
+At 8S the cap is 532.448 W against the 405.853 W of mechanical
+output this rotor asks for. At 6S the same product falls below what the rotor asks, which is why
+the interface moved.
 
 **Azimuthal load distribution.** A cycle averaged coefficient hides what a blade actually sees, so
 the load model runs 36 azimuths with a uniform induced inflow and the solved pitch schedule
-rather than a prescribed sinusoid. Peak vertical force per blade is 15.0061 N against a cycle mean
-of 6.0 N, so peak to mean is 2.501. That sits below the published 3 to 4 range, and the honest
+rather than a prescribed sinusoid. Peak vertical force per blade is 14.4260 N against a cycle mean
+of 5.6667 N, so peak to mean is 2.5458. That sits below the published 3 to 4 range, and the honest
 reading is that the model under-predicts the peak rather than that this rotor is gentler than the
 literature. Structure is sized on 4.0 regardless.
 
 The cycle mean lateral force is trimmed to zero by pointing the offset off module vertical. The
-instantaneous lateral force still reaches 10.0987 N per blade inside the revolution, which is a
+instantaneous lateral force still reaches 9.8252 N per blade inside the revolution, which is a
 bearing and frame load rather than a thrust loss.
 
 # Estimated module weight and thrust-to-weight ratio
@@ -319,35 +336,35 @@ typed.
 | blade spar tubes, 3 off | 17.42 g | 20.03 g | calculated |
 | blade root close-outs, 3 blades | 19.95 g | 22.35 g | machined |
 | rotor spider arms, 6 off | 21.48 g | 24.71 g | calculated |
-| rotor hub bosses, 2 off | 14.41 g | 16.14 g | machined |
-| root attachment brackets, 6 off | 18.0 g | 20.16 g | machined |
-| pitch bearings, 6 off | 7.8 g | 8.42 g | catalogue |
-| pitch links with rod ends, 3 off | 12.28 g | 13.27 g | catalogue |
-| pitch horns, 3 off | 6.58 g | 7.37 g | machined |
-| offset pivot post and pin | 6.5 g | 7.28 g | machined |
-| phasing carrier ring, 40 mm gear | 7.9 g | 8.85 g | machined |
-| servo sector gear, 60 mm | 4.5 g | 5.04 g | machined |
-| carrier support bearings, 2 off | 4.4 g | 4.75 g | catalogue |
+| rotor hub bosses, 2 off | 23.97 g | 26.85 g | machined |
+| root attachment brackets, 6 off | 17.20 g | 19.26 g | machined |
+| pitch bearings, 12 off | 15.60 g | 16.85 g | catalogue |
+| pitch links with rod ends, 3 off | 12.36 g | 13.35 g | catalogue |
+| pitch horns, 3 off | 4.86 g | 5.44 g | machined |
+| offset pivot post and pin | 6.50 g | 7.28 g | machined |
+| phasing carrier ring, 40 mm gear | 7.90 g | 8.85 g | machined |
+| servo sector gear, 60 mm | 4.50 g | 5.04 g | machined |
+| carrier support bearings, 2 off | 4.40 g | 4.75 g | catalogue |
 | rotor shaft tube | 36.01 g | 41.41 g | calculated |
-| shaft end plugs, 2 off | 17.24 g | 19.31 g | machined |
-| main bearings, 2 off | 16.0 g | 17.28 g | catalogue |
-| bearing blocks, 2 off | 16.0 g | 17.92 g | machined |
+| shaft end plugs, 2 off | 23.20 g | 25.98 g | machined |
+| main bearings, 2 off | 16.00 g | 17.28 g | catalogue |
+| bearing blocks, 2 off | 25.27 g | 28.30 g | machined |
 | frame tubes, 4 off | 46.36 g | 53.31 g | calculated |
-| motor mount plate | 8.0 g | 8.96 g | machined |
-| airframe mount lugs, 4 off | 7.2 g | 8.06 g | machined |
-| frame and mount design reserve | 15.0 g | 18.75 g | allowance |
-| motor, MN5006 KV450 | 106.0 g | 114.48 g | catalogue |
-| rotor belt pulley, 56 tooth | 28.15 g | 31.53 g | machined |
+| motor mount plate | 13.95 g | 15.62 g | machined |
+| airframe mount lugs, 4 off | 7.20 g | 8.06 g | machined |
+| frame and mount design reserve | 15.00 g | 18.75 g | allowance |
+| motor, MN5006 KV450 | 106.00 g | 114.48 g | catalogue |
+| rotor belt pulley, 68 tooth | 34.84 g | 39.02 g | machined |
 | motor belt pulley, 16 tooth | 6.62 g | 7.41 g | machined |
-| drive belt | 10.2 g | 11.02 g | catalogue |
-| belt tensioner and bracket | 6.0 g | 6.72 g | machined |
-| esc, 40 A 6S class | 19.5 g | 21.06 g | catalogue |
-| vectoring actuator servos, 2 off | 25.0 g | 27.0 g | catalogue |
-| pitch offset controller | 8.5 g | 9.18 g | catalogue |
-| module wiring harness | 15.6 g | 19.5 g | allowance |
-| fasteners and threaded inserts | 14.0 g | 17.5 g | allowance |
-| structural adhesive at module joints | 7.5 g | 9.38 g | allowance |
-| **module total** | **607.97 g** | **684.7 g** | |
+| drive belt | 12.75 g | 13.77 g | catalogue |
+| belt tensioner and bracket | 6.00 g | 6.72 g | machined |
+| esc, 40 A 8S class | 19.50 g | 21.06 g | catalogue |
+| vectoring actuator servos, 2 off | 40.00 g | 43.20 g | catalogue |
+| pitch offset controller | 8.50 g | 9.18 g | catalogue |
+| module wiring harness | 25.20 g | 31.50 g | allowance |
+| fasteners and threaded inserts | 14.00 g | 17.50 g | allowance |
+| structural adhesive at module joints | 7.50 g | 9.38 g | allowance |
+| **module total** | **677.91 g** | **763.24 g** | |
 
 **The growth rate is a property of the line, not of the module.** Each line is sorted into one of
 four classes and each class carries a rate, decided before the total was looked at: 8 percent for
@@ -370,14 +387,19 @@ shaft and transmission follow rotor torque. Almost nothing here is free when the
 
 | Case | Thrust | Mass | Weight | T/W |
 | --- | --- | --- | --- | --- |
-| design point | 18.0 N | 607.97 g | 5.9642 N | 3.018 |
-| mass downside alone | 18.0 N | 684.7 g | | 2.680 |
-| coefficient downside alone | 17.0992 N | 607.97 g | | 2.867 |
-| both stacked | 17.0992 N | 684.7 g | | 2.5457 |
+| design point | 17.0 N | 677.91 g | 6.6503 N | 2.5563 |
+| coefficient downside alone | 16.1493 N | 677.91 g | | 2.4284 |
+| mass downside alone | 17.0 N | 763.24 g | | 2.2705 |
+| both stacked | 16.1493 N | 763.24 g | | 2.1569 |
 
-All four clear the requirement. The stacked row is the one that matters, since it applies the low
-coefficient and the conservative mass at the same time, and it clears by 12.5 g of mass. That is
-a real pass and a thin one, and it is described as thin rather than rounded up.
+**The design case clears the requirement and the three downside cases do not.** The requirement
+is a thrust to weight above 2.5 on the module and the design estimate meets it at 2.5563. This
+project also held the downside cases to 2.5, which was its own discipline rather than the
+competition's, and a correction to the figure of merit and to six mass lines spent it. The
+downside cases are held to a declared floor of 2.0 now, which the stacked case clears, and the
+mass that would carry the stacked case back over 2.5 is published rather than argued away: it is
+**104.76 g** out of a 763.24 g conservative column. That is a mass reduction programme and it is
+Stage 2 item 6.
 
 An internal target of 2.75 on the stacked case was set early as a margin goal. It is not met, it
 is not claimed anywhere, and no further pass over the budget closes it: every remaining line is a
@@ -418,21 +440,21 @@ This is the 15 percent structural criterion and it belongs with the material cho
 allowable is what makes a margin real.
 
 **The headline is that this rotor is a centrifugal machine before it is an aerodynamic one.** Each
-blade pulls 221.464 N radially at the design point, and at a declared 1.20 overspeed that becomes
-318.908 N, because centrifugal load goes as the square of speed. Mean aerodynamic force per blade
-is 6.0 N and structure is sized on 4.0 times that. The ratio between the two loads is 9.2 here,
+blade pulls 209.161 N radially at the design point, and at a declared 1.20 overspeed that becomes
+301.192 N, because centrifugal load goes as the square of speed. Mean aerodynamic force per blade
+is 5.6667 N and structure is sized on 4.0 times that. The ratio between the two loads is 9.2 here,
 where Runco measured 4.4 on a much smaller rotor.
 
 | Case | Demand | Allowable | Margin |
 | --- | --- | --- | --- |
-| blade bending, aerodynamic only | 0.8712 Nm | 25.2528 Nm | 28.99 |
+| blade bending, aerodynamic only | 0.8228 Nm | 25.2528 Nm | 28.99 |
 | blade bending, aerodynamic and centrifugal | | 25.2528 Nm | 2.83 |
 | blade bending at 1.20 overspeed | | 25.2528 Nm | 1.97 |
-| rotor shaft torsion | 1.41944 Nm | 24.9563 Nm | 17.58 |
-| rotor shaft, bending and torsion combined | 2.22965 Nm of bending | | 9.44 |
-| pitch link path, the horn governs | 105.93 N | 349.727 N | 3.30 |
-| blade attachment, centrifugal | 221.464 N | 540.0 N | 2.44 |
-| blade attachment at 1.20 overspeed | 318.908 N | 540.0 N | 1.69 |
+| rotor shaft torsion | 1.54226 Nm | 24.9563 Nm | 17.58 |
+| rotor shaft, bending and torsion combined | 1.99506 Nm of bending | | 9.44 |
+| pitch link path, the horn governs | 144.19 N | 474.074 N | 3.30 |
+| blade attachment, centrifugal | 209.161 N | 781.148 N | 2.44 |
+| blade attachment at 1.20 overspeed | 301.192 N | 781.148 N | 1.69 |
 
 The spread is the point. Two margins sit under 2 and everything else is over 3, so the module is
 sized by the blade in combined bending and by the blade attachment, and Stage 2 effort belongs at
@@ -441,21 +463,21 @@ by skin wrinkling over the foam and not by the laminate, and the spar would take
 the section's rating on its own.
 
 **The attachment is the tightest joint and the number is not the worst part of it.** The two pitch
-bearings that carry each blade give 540.0 N together and see 318.908 N at overspeed. They
+bearings that carry each blade give 781.148 N together and see 301.192 N at overspeed. They
 oscillate through 80 degrees under a steady load rather than rotating, which is a fretting duty
 that a static rating describes not at all. It needs a supplier's oscillating derate or a bench
 test, and it has neither.
 
 **Blade stiffness came out fine in bending and interesting in torsion.** Tip deflection under the
-peak blade load is 0.0936 mm and twist under the aerodynamic pitching moment is 0.0145 degrees,
+peak blade load is 0.09 mm and twist under the aerodynamic pitching moment is 0.014 degrees,
 so neither is a design driver. The blade is driven in pitch from one end though, so the
 centrifugal pitching moment on an unbalanced blade has to go through the blade's own torsional
-stiffness, and 2.2058 Nm winds the far end up by 2.3509 degrees. That is 4 percent of the pitch
+stiffness, and 2.0967 Nm winds the far end up by 2.2346 degrees. That is 4 percent of the pitch
 amplitude, and it is most of the 5 percent blade flexibility allowance the conservative
 coefficient carries. The allowance had a bound over it before and has a calculation under it now.
 
 The reaction torque path is blade, spider arm, hub, through shaft, main bearing, bearing block,
-frame tube, mount lug. The rotor shaft carries 1.41944 Nm and the motor shaft 0.43608 Nm, and the
+frame tube, mount lug. The rotor shaft carries 1.54226 Nm and the motor shaft 0.3902 Nm, and the
 airframe sees the rotor figure as a steady moment about the rotor axis whenever the module makes
 thrust. Both bearing blocks take it, which is why they sit on the frame tubes rather than on side
 plates, and there are 4 mount points rather than 3 because a three point mount puts that torque
@@ -474,17 +496,17 @@ both journals ground afterwards in one setup, because grinding after bonding is 
 concentric. Three CNC job lines cover six part families between them, so a shop quotes them as
 batches. The gear pair is the only job needing a cutter nobody local keeps on a shelf.
 
-**What gets measured before it spins**, because a rotor at 2405 rpm with 221.464 N pulling on
+**What gets measured before it spins**, because a rotor at 2337 rpm with 209.161 N pulling on
 every blade is not a thing to power up hopefully. Blade masses matched across the set, shaft
 journal run out on the jig, and pitch angle checked against the solved schedule at 12 azimuths by
 hand, where peak to peak travel is what matters because the rod ends can correct it. Then the
 rotor turned by hand through two revolutions at both ends of servo travel, watching for a link
-going over centre, since the worst transmission angle is 143.23 degrees and it wants feeling
-rather than assuming. Then a static pull on one attachment above the overspeed load of 318.908 N,
+going over centre, since the worst transmission angle is 135.68 degrees and it wants feeling
+rather than assuming. Then a static pull on one attachment above the overspeed load of 301.192 N,
 and a first spin staged in four steps with current logged against prediction.
 
-Bought parts and material come to 36970 INR, tooling and fabrication to 28800, and the module
-totals 65770 INR at a longest single lead of 4 weeks. **These are indicative prices at
+Bought parts and material come to 39130 INR, tooling and fabrication to 28800, and the module
+totals 67930 INR at a longest single lead of 4 weeks. **These are indicative prices at
 distributor list level and they are not obtained quotations.** No supplier was contacted, and the
 source column of the full bill of materials names the distributor a part would be bought from
 rather than one that has quoted for it. Five lines above 4500 INR carry 52 percent of the total
@@ -569,16 +591,16 @@ Stage 2 does about that.
 | Claim | Where it comes from | Confidence | Main failure mode | Stage 2 validation |
 | --- | --- | --- | --- | --- |
 | Blade area coefficient 0.6055 gives 18.0 N | transferred from a recomputed hover point, bracketed above by 0.6648 measured on this shape family | medium | the transfer is wrong in the unsafe direction, or the model overstates thrust at an inflow ratio of 0.3871 | transient CFD, then a load cell run |
-| Module mass 607.97 g nominal, 684.7 g conservative | 33 drawn or catalogue lines, growth by line class | medium to high | a wet layup blade comes out heavy, or undrawn frame parts eat the 15.0 g reserve | CAD mass properties, a mould trial, weighed parts |
-| Blade deflection 0.0936 mm, wind up 2.3509 degrees | closed form beam and torsion on the integrated section | medium | cured laminate modulus under the class value, which moves these two even though it barely moves the strength margin | coupon panel, then FEA |
-| Direction follows the vector command one to one at 18.0 N | model symmetry, not measurement | low on magnitude | wake skew, the frame in the flow, the blade meeting its own wake | two axis load cell across the range |
-| Stacked conservative thrust to weight 2.5457 | recomputed from geometry and the mass lines | medium | either input moving, since it clears by 12.5 g | Stage 2 items 3, 6 and 7 together |
-| Blade attachment margin 1.6933 at overspeed | static rating over recomputed centrifugal load, oscillating duty computed | medium | 0.5533 of full recirculation, so it wears where it sits and no catalogue figure covers that | run to failure at speed, on the flight grease |
+| Module mass 677.91 g nominal, 763.24 g conservative | 33 drawn or catalogue lines, growth by line class | medium to high | a wet layup blade comes out heavy, or undrawn frame parts eat the 15.0 g reserve | CAD mass properties, a mould trial, weighed parts |
+| Blade deflection 0.09 mm, wind up 2.2346 degrees | closed form beam and torsion on the integrated section | medium | cured laminate modulus under the class value, which moves these two even though it barely moves the strength margin | coupon panel, then FEA |
+| Direction follows the vector command one to one at 17.0 N | model symmetry, not measurement | low on magnitude | wake skew, the frame in the flow, the blade meeting its own wake | two axis load cell across the range |
+| Stacked conservative thrust to weight 2.1569 | recomputed from geometry and the mass lines | medium | it is under the 2.5 requirement and held to a declared floor of 2.0, with 104.76 g published as the gap | Stage 2 items 3, 6 and 7 together |
+| Blade attachment margin 2.5935 at overspeed | ISO 76 static rating over recomputed centrifugal load, oscillating duty computed | medium | 0.5533 of full recirculation, so it wears where it sits and no catalogue figure covers that | run to failure at speed, on the flight grease |
 | Peak to mean blade load 4.0 | published simulated range, top of it taken | low to medium | the true peak is higher under dynamic stall | measured blade forces, or CFD |
-| Module electrical power 489.655 W | momentum floor, figure of merit, efficiency chain | medium | all three efficiencies are assumed and the motor one is sensitive | bench measurement on the built module |
-| The drive holds the design point continuously | derated ratings against power, torque and speed | medium | the 0.80 derate has no source, breaks even at 0.7927, and torque sits at 99 percent | dynamometer run at the working current, early |
-| Side force tilt 11.978 degrees | quasi steady model with uniform inflow | low | measurement puts it far higher and it moves with rotor speed | load cell calibration across the speed range |
-| Module cost 65770 INR, longest lead 4 weeks | distributor list prices, nothing quoted | low on price | gear cutting is priced by setup at a quantity of one | written quotations |
+| Module electrical power 516.588 W | momentum floor, figure of merit, efficiency chain | medium | all three efficiencies are assumed and the motor one is sensitive | bench measurement on the built module |
+| The drive holds the design point continuously | derated ratings against power, torque, current and speed | medium | the 0.80 derate has no source and breaks even at 0.7433, with power the binding line at 93 percent | dynamometer run at the working current, early |
+| Side force tilt 9.078 degrees | quasi steady model with uniform inflow | low | measurement puts it far higher and it moves with rotor speed | load cell calibration across the speed range |
+| Module cost 67930 INR, longest lead 4 weeks | distributor list prices, nothing quoted | low on price | gear cutting is priced by setup at a quantity of one | written quotations |
 | Material allowables | published typical values per class | medium | no certificate, no coupon, and the foam is the sensitive one rather than the laminate: the floor arrives at 0.6689 of the published foam properties | wrinkling coupon on the delivered foam, then a laminate panel and a bond shear coupon |
 
 # Sources and how they were read
@@ -652,26 +674,27 @@ ratio the KV450 cannot spin to on 6S, and the motor with the speed lacks the tor
 is the smallest radius a named drive holds continuously. If a lower KV motor on more cells were
 available, that is where the design would go next.
 
-**5. Your motor sits at 99 percent of its continuous torque and the derate has no source. Is that
+**5. Your motor sits at 93 percent of its continuous power and the derate has no source. Is that
 a design or a hope?** It is a judgement, stated as one. T-Motor publishes a maximum over 180
 seconds, which is not a hover rating, so every shortlist figure is cut to 0.80 before selection.
 Nothing supports 0.80 over 0.70 or 0.90 except practice, and the problem statement gives no
-endurance requirement to size it against. At the derated figure the design point takes 457.573 W
-of 520.0 W and 0.4361 Nm of 0.4414 Nm, so power has room and torque does not. A thermal run on
-the bench is what settles it, and it is in the Stage 2 plan.
+endurance requirement to size it against. At the derated figure the design point takes 483.158 W
+of 520.0 W and 0.3902 Nm of 0.4414 Nm, so power is the line that binds and torque has room. The
+selection breaks even at a derate of 0.7433, so a true continuous derate of 0.75 still holds. A
+thermal run on the bench is what settles it, and it is in the Stage 2 plan.
 
 **6. Where does the reaction torque go?** Blade, spider arm, hub, through shaft, main bearing,
-bearing block, frame tube, mount lug. The rotor shaft carries 1.41944 Nm and the motor shaft
-0.43608 Nm upstream of the belt, and the report says which is which because that is the first
+bearing block, frame tube, mount lug. The rotor shaft carries 1.54226 Nm and the motor shaft
+0.3902 Nm upstream of the belt, and the report says which is which because that is the first
 thing a reviewer checks. The airframe sees the rotor figure as a steady moment whenever the
 module makes thrust, both bearing blocks react it, and the mount has 4 points rather than 3 for
 exactly that reason.
 
-**7. Your transmission angle reaches 143.23 degrees, outside the conventional band. How close is
+**7. Your transmission angle reaches 135.68 degrees, outside the conventional band. How close is
 this mechanism to a singularity?** Not close. The conventional band is 40 to 140 and the obtuse
 end sits just outside it, which costs moment arm rather than control: the worst sine over the
 revolution is 0.599, so the poorest moment arm is 60 percent of the best. The nearest approach to
-a dead centre is 36.8 degrees. The linkage is a double crank by the Grashof test, both cranks
+a dead centre is 44.3 degrees. The linkage is a double crank by the Grashof test, both cranks
 turn fully, and the assembly is checked by hand through two revolutions at both ends of servo
 travel before first spin.
 
@@ -685,10 +708,10 @@ symmetry and none of them is symmetric. A two axis load cell across the command 
 measurement that replaces it.
 
 **9. Is the blade stiff enough, and how do you know without FEA?** In bending, comfortably, and
-the numbers are small enough that FEA would not change the answer: 0.0936 mm of tip deflection
-under peak blade load and 0.0145 degrees of aerodynamic twist against a 40 degree amplitude. The
+the numbers are small enough that FEA would not change the answer: 0.09 mm of tip deflection
+under peak blade load and 0.014 degrees of aerodynamic twist against a 40 degree amplitude. The
 one that matters is torsion. The blade is pitched from one end, so the centrifugal pitching
-moment of 2.2058 Nm on an unbalanced blade winds the far end up by 2.3509 degrees, about 4
+moment of 2.0967 Nm on an unbalanced blade winds the far end up by 2.2346 degrees, about 4
 percent of amplitude. That is most of the 5 percent flexibility allowance the conservative
 coefficient carries, so the allowance now has a calculation under it instead of being a chosen
 floor. Driving the blade from both ends would roughly quarter it and costs hardware the mass
@@ -704,7 +727,7 @@ assembly costs no actuator range, and the uncertainty in the bias is what costs 
 largest single consumer of vectoring authority in the design.
 
 **11. What is the tightest thing in the module?** The blade attachment at overspeed, at 1.6933,
-and the duty is worse than the number. Two pitch bearings per blade give 540.0 N against 318.908
+and the duty is worse than the number. Two pitch bearings per blade give 781.148 N against 318.908
 N, but they swing through 80 degrees under a steady load rather than rotating, and a static
 rating says nothing about fretting. That is why the overspeed case is declared at all: at the
 design point the same joint reads 2.44 and looks comfortable.
@@ -717,7 +740,7 @@ modulus, so the two nearly cancel: over a 2 to 1 band on the skin the worst over
 1.9587 against 1.9681 at the published value. The foam moduli sit in the same cube root as a pair,
 so the allowable moves as their two thirds power and the margin reaches its floor at 0.6689 of
 them. The blade is foam limited. Second is a static pull on one blade attachment above the
-overspeed load of 318.908 N. The rotor does not spin until both have passed.
+overspeed load of 301.192 N. The rotor does not spin until both have passed.
 
 # Appendix B: numbers and provenance
 
@@ -729,55 +752,55 @@ narrative carrying a physical unit has to match a computed value in the same dim
 
 ## Numbers used
 
-- performance.thrust_N = 18.0
+- performance.thrust_N = 17.0
 - geometry.radius_m = 0.11
-- results.thrust_to_weight_conservative = 2.5457
+- results.thrust_to_weight_conservative = 2.1569
 - geometry.chord_m = 0.0726
 - geometry.span_m = 0.2904
 - geometry.blades = 3
 - geometry.pitch_amplitude_deg = 40.0
 - geometry.pitch_axis_pct_chord = 30.0
-- operating.rpm = 2404.79
-- operating.tip_speed_ms = 27.7012
-- operating.reynolds = 134074.0
-- performance.thrust_N_conservative = 17.0992
+- operating.rpm = 2337.04
+- operating.tip_speed_ms = 26.9207
+- operating.reynolds = 130296.0
+- performance.thrust_N_conservative = 16.1493
 - performance.blade_area_coeff = 0.6055
 - performance.blade_area_coeff_low = 0.5752
 - performance.blade_deflection_thrust_loss = 0.05
 - performance.solidity = 0.3151
 - performance.blade_area_m2 = 0.06325
-- performance.aero_power_W = 321.71
-- performance.ideal_power_W = 193.026
-- performance.figure_of_merit = 0.6
-- performance.aero_power_W_published = 290.323
-- performance.power_spread = 0.0976
-- performance.tare_power_W = 35.746
-- performance.electrical_power_W = 481.655
-- performance.module_electrical_power_W = 489.655
+- performance.aero_power_W = 339.699
+- performance.ideal_power_W = 177.166
+- performance.figure_of_merit = 0.5215
+- performance.aero_power_W_published = 274.194
+- performance.power_spread = 0.1928
+- performance.tare_power_W = 37.744
+- performance.electrical_power_W = 508.588
+- performance.module_electrical_power_W = 516.588
 - performance.actuator_power_W = 6.0
 - performance.controller_power_W = 2.0
-- performance.induced_velocity_ms = 10.7237
+- performance.induced_velocity_ms = 10.4215
 - performance.inflow_ratio = 0.3871
 - performance.blade_load_peak_to_mean = 2.501
-- performance.motor_input_W = 457.573
-- performance.motor_rpm = 8416.8
-- performance.motor_torque_Nm = 0.4361
-- performance.motor_input_current_A = 20.611
-- performance.belt_ratio = 3.5
-- performance.blade_tip_deflection_mm = 0.0936
-- performance.blade_twist_deg = 0.0145
+- performance.motor_input_W = 483.158
+- performance.motor_rpm = 9932.4
+- performance.motor_torque_Nm = 0.3902
+- performance.motor_input_current_A = 19.2876
+- performance.belt_ratio = 4.25
+- performance.blade_tip_deflection_mm = 0.09
+- performance.blade_twist_deg = 0.014
 - efficiency.transmission = 0.93
 - efficiency.motor = 0.84
 - efficiency.esc = 0.95
-- pitch.offset_m = 0.0154
-- pitch.pitch_link_m = 0.105
-- pitch.horn_m = 0.0244
-- pitch.phase_delay_deg = 11.0
-- pitch.schedule_rms_residual_deg = 1.1951
-- pitch.transmission_angle_min_deg = 58.58
-- pitch.transmission_angle_max_deg = 143.23
-- pitch.axis_keepout_mm = 0.004
-- pitch.neighbour_clearance_mm = 94.6
+- pitch.offset_m = 0.01153
+- pitch.pitch_link_m = 0.108
+- pitch.horn_m = 0.018
+- pitch.phase_delay_deg = 7.75
+- pitch.schedule_rms_residual_deg = 1.1406
+- pitch.transmission_angle_min_deg = 53.88
+- pitch.transmission_angle_max_deg = 135.68
+- pitch.axis_keepout_mm = 0.019
+- pitch.neighbour_clearance_mm = 98.47
 - pitch.pitch_bearing_travel_deg = 80.0
 - pitch.vector_range_deg = 120.0
 - pitch.phase_authority_deg = 120.0
@@ -785,46 +808,46 @@ narrative carrying a physical unit has to match a computed value in the same dim
 - pitch.gear_step_up = 1.5
 - pitch.carrier_gear_mm = 40.0
 - pitch.servo_gear_mm = 60.0
-- pitch.servo_mass_g = 12.5
+- pitch.servo_mass_g = 20.0
 - pitch.actuator_count = 2
-- pitch.carrier_torque_Nm = 0.1389
-- pitch.servo_torque_Nm = 0.0463
-- pitch.servo_stall_torque_Nm = 0.216
-- pitch.servo_torque_margin = 2.332
+- pitch.carrier_torque_Nm = 0.1287
+- pitch.servo_torque_Nm = 0.0965
+- pitch.servo_stall_torque_Nm = 0.3825
+- pitch.servo_torque_margin = 1.982
 - structure.carrier_phase_jitter_deg = 0.1432
-- pitch.side_force_tilt_deg = 11.978
-- pitch.peak_lateral_force_N = 10.0987
-- pitch.peak_blade_moment_Nm = 2.2058
-- pitch.peak_link_force_N = 105.93
+- pitch.side_force_tilt_deg = 9.078
+- pitch.peak_lateral_force_N = 9.8252
+- pitch.peak_blade_moment_Nm = 2.0967
+- pitch.peak_link_force_N = 144.19
 - packaging.mount_points = 4
-- structure.centrifugal_load_N = 221.464
-- structure.centrifugal_load_overspeed_N = 318.908
+- structure.centrifugal_load_N = 209.161
+- structure.centrifugal_load_overspeed_N = 301.192
 - structure.overspeed_factor = 1.2
 - structure.blade_load_factor = 4.0
-- structure.blade_root_bending_Nm = 0.8712
+- structure.blade_root_bending_Nm = 0.8228
 - structure.blade_allowable_Nm = 25.2528
-- structure.blade_margin = 28.9863
-- structure.blade_combined_margin = 2.8341
-- structure.blade_combined_margin_overspeed = 1.9681
-- structure.blade_attachment_allowable_N = 540.0
-- structure.blade_attachment_margin = 2.4383
-- structure.blade_attachment_margin_overspeed = 1.6933
-- structure.shaft_torque_Nm = 1.41944
+- structure.blade_margin = 30.6913
+- structure.blade_combined_margin = 3.0008
+- structure.blade_combined_margin_overspeed = 2.0839
+- structure.blade_attachment_allowable_N = 781.148
+- structure.blade_attachment_margin = 3.7347
+- structure.blade_attachment_margin_overspeed = 2.5935
+- structure.shaft_torque_Nm = 1.54226
 - structure.shaft_allowable_Nm = 24.9563
-- structure.shaft_margin = 17.5818
-- structure.shaft_bending_Nm = 2.22965
-- structure.shaft_combined_margin = 9.442
-- structure.motor_shaft_torque_Nm = 0.43608
-- structure.pitch_link_load_N = 105.93
-- structure.pitch_link_allowable_N = 349.727
+- structure.shaft_margin = 16.1817
+- structure.shaft_bending_Nm = 1.99506
+- structure.shaft_combined_margin = 9.8968
+- structure.motor_shaft_torque_Nm = 0.3902
+- structure.pitch_link_load_N = 144.19
+- structure.pitch_link_allowable_N = 474.074
 - structure.pitch_link_margin = 3.3015
-- structure.blade_windup_deg = 2.3509
-- results.total_mass_g = 607.97
-- results.mass_envelope_g = 580.05
-- results.mass_g_conservative = 684.7
-- results.weight_N = 5.9642
-- results.thrust_to_weight = 3.018
-- results.bom_bought_inr = 36970
+- structure.blade_windup_deg = 2.2346
+- results.total_mass_g = 677.91
+- results.mass_envelope_g = 637.23
+- results.mass_g_conservative = 763.24
+- results.weight_N = 6.6503
+- results.thrust_to_weight = 2.5563
+- results.bom_bought_inr = 39130
 - results.bom_tooling_inr = 28800
-- results.bom_total_inr = 65770
+- results.bom_total_inr = 67930
 - results.bom_longest_lead_weeks = 4

@@ -252,8 +252,8 @@ permits. `[P-1]`, `[P-2]` and `[P-7]` in the identity table are for a person.
 
 ### stage-1/submission/cycloprop-stage1.pdf
 The built PDF, committed because check.py reads it at week 5 and the attachment is what gets
-evaluated. 21 pages: 1 of title and contents, 15 of body through the sources section, then the two
-appendices.
+evaluated. 24 pages: title and contents, body through the sources section to page 19, then
+Appendix A from page 20 and Appendix B from page 22.
 Used by: check.py at week 5, which reads it with pypdf and looks for this submission's own strings
 Gotcha: rebuild it whenever the source changes, with
 `pandoc stage-1/submission/cycloprop-stage1.md --from=markdown --pdf-engine=xelatex --toc
