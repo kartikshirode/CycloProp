@@ -195,7 +195,7 @@
       "hardware_count": 1,
       "drive": "T-Motor Antigravity MN5006 KV450",
       "drive_covers_design_point": true,
-      "largest_dimension_mm": 364.4,
+      "largest_dimension_mm": 290.4,
       "module_mass_g": 637.23,
       "module_mass_conservative_g": 761.05,
       "thrust_N": 17.0,
@@ -601,12 +601,12 @@
     {
       "link": "L3 pitch link, offset pivot to horn tip",
       "length_mm": 108.0,
-      "role": "output crank, scaled 9.133/9 off Kellen's built vehicle"
+      "role": "output crank, chosen by the sweep in tools/linkage.py once the transmission angle was read folded. See D67"
     },
     {
       "link": "L4 pitch horn, blade pitch axis to link pin",
       "length_mm": 18.0,
-      "role": "coupler, scaled 2/9 off Kellen's built vehicle"
+      "role": "coupler, chosen by the same sweep. Kellen's 2 in on a 9 in radius would scale to 24.4 mm here and the sweep does not pick it. See D67"
     },
     {
       "link": "pitch link closest approach to the rotor axis",
