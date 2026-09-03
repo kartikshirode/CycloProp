@@ -435,6 +435,34 @@ Used by: the evidence ledger, and week 1's own gate checks two of its headings
 Gotcha: superseded in two places by week 2 and annotated in place rather than rewritten. Its
 first-cut sizing table is a 10 N design point, not the 18 N one week 2 carries. See D26.
 
+### tools/figures.py
+Renders the seven Stage 1 figures from numbers.json into stage-1/submission/figures/, as vector
+PDFs with fixed metadata so a re-render is not a diff. Nothing is drawn by hand: the four-bar
+comes from tools/linkage.py and the blade section from tools/check.py, so a figure carries the
+geometry the gates already hold. `--list` names them and the values each one draws without
+rendering.
+Used by: run by hand after any change to numbers.json; the submission places all seven and
+check_figures in check.py reads the manifest back
+Gotcha: every figure records the dotted numbers.json paths it drew into figures/manifest.json,
+and check_figures compares them against the live file, so a figure rendered before a number moved
+fails a gate. Regenerating is the only way through, which means running this script is part of
+moving a number and not an afterthought. Two captions were wrong on the first render and both
+were caught by looking at the picture rather than by a gate: side_force_tilt_deg is the lag
+between the resultant and the offset direction at zero command and not the vectoring range, and
+the linkage pitch needs wrap180 or one azimuth prints +353.6 degrees. Pandoc needs
+`--resource-path=stage-1/submission` or the image paths do not resolve.
+
+### stage-1/submission/figures/
+Seven rendered PDFs and manifest.json. The manifest is the contract between the drawings and the
+data: id, title, file, caption and the stored values the figure drew.
+Used by: the submission places each file by path, pandoc embeds them, check_figures holds them to
+numbers.json, and check_pdf requires each caption's opening slice to come back out of the built
+attachment
+Gotcha: a figure existing on disk and a figure reaching the reader are different things, and only
+the PDF can tell you which happened, which is why the caption probe is separate from the file
+reference check. xelatex hyphenates a long caption word across a line, so check_pdf reads the
+attachment both with the hyphen and without it.
+
 ### tools/hpc/
 Seven job scripts that measure the Baramati cluster and stand up a CFD stack on it. survey.sh
 and survey2.sh read the login node; probe.slurm and probe2.slurm run on a compute node and

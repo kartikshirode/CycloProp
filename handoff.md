@@ -34,7 +34,9 @@ clear. See D58, D60 to D63 and D66, and "What is left of week 5" below.
 3. **[stage-1/progress/week-4.md](stage-1/progress/week-4.md)** is where the design stands and
    what week 5 inherits. [week-3.md](stage-1/progress/week-3.md) is the mechanism record and
    [week-2.md](stage-1/progress/week-2.md) the feasibility one
-4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 66 entries.
+4. **[stage-1/decisions.md](stage-1/decisions.md)** is what has been frozen and why. 69 entries.
+   Read D67, D68 and D69 first: D67 moved the design point to 17 N and the pack to 8S, D68 is the
+   document pass that followed it, and D69 is the figures and the four errors drawing them found.
    D60 to D63 are the 1 September hardening pass and none of them moved a design number. D65
    opens Tier 1 of the review and D66 is the gate pass that made the tree fail on purpose.
    D30 unblocked week 2, D35 closed the stacked case, D38 to D45 are week 3, and D46 to D53 are
@@ -144,7 +146,19 @@ the substance of what is left, per D55.
 rebuild the PDF, add the markers, read the PDF end to end, and write the week 5 progress file
 and audit. Nothing in it needs either solver. If one is ever needed, the order is
 `tools/linkage.py --write` then `tools/structure.py --write`, and `numbers.json` reproduces byte
-for byte from that pair.
+for byte from that pair. If a number moves, `python tools/figures.py` has to run too, because
+seven figures record the values they drew and a gate reads them back.
+
+The PDF build needs the figures on its path now:
+
+```
+pandoc stage-1/submission/cycloprop-stage1.md --from=markdown --pdf-engine=xelatex --toc
+--number-sections --resource-path=stage-1/submission -o stage-1/submission/cycloprop-stage1.pdf
+```
+
+It is 30 pages and carries seven figures. That is over the 15 page target the plan set for itself
+when no organiser limit was supplied, and no organiser limit exists. The question rides at the
+end of the staged email.
 
 ## What the preparation pass changed
 
@@ -202,6 +216,17 @@ route is different and probably paid.
 
 **Four of the five motor rows and the servo are still supplier listings** rather than datasheet
 PDFs, which is E13 in the ledger. Same reason.
+
+## The one finding six phases did not close
+
+**Mass is not recomputed from geometry for 29 of the 33 budget lines.** The four blade lines are,
+the motor line is pinned to the selected drive's catalogue mass, and the two mass lists are held
+to 25 percent of each other. The rest are held by a basis string and a growth rule. Cut those 29
+lines to 0.8, scale the envelope and the drive mass beside them and follow the arithmetic, and the
+gates that fail are all documents quoting the old number rather than physics. This is the
+1 September review's own headline finding surviving the whole fix plan, it is not closable by a
+gate whose author also writes the data, and what closes it is a drawn section or a weighed part.
+[stage-1/audit/phase-6-reaudit.md](stage-1/audit/phase-6-reaudit.md) has the reproduction.
 
 ## The human gate
 
