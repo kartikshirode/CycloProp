@@ -432,9 +432,16 @@ def honest_numbers():
                   # tools/structure.py, so the two sides have to agree or the solvers ran
                   # in the wrong order.
                   "peak_link_force_N": link_dem},
-        "packaging": {"envelope_length_mm": 400, "envelope_width_mm": 300,
-                      "envelope_height_mm": 300, "mount_points": 4,
-                      "swept_diameter_mm": 380.0},
+        # Envelope as a sum of its parts, the way the gate reads it back. The width is
+        # the swept diameter plus a frame tube each side, the height adds the motor stack
+        # under the rotor, and the length is the span plus the axial hardware.
+        "packaging": {"envelope_length_mm": S * 1000.0 + 2.0 * (8.0 + 12.0) + 16.0 + 18.0,
+                      "envelope_width_mm": 380.0 + 2.0 * 10.0,
+                      "envelope_height_mm": 380.0 + 2.0 * 10.0 + 46.0,
+                      "mount_points": 4, "swept_diameter_mm": 380.0,
+                      "side_plate_mm": 8.0, "bearing_block_mm": 12.0,
+                      "phasing_carrier_mm": 16.0, "pulley_and_belt_mm": 18.0,
+                      "frame_clearance_mm": 10.0, "motor_stack_mm": 46.0},
         "bom": bom,
         "structure": {"blade_mass_kg": blade_mass, "centrifugal_load_N": fc,
                       "blade_root_bending_Nm": blade_dem, "shaft_torque_Nm": shaft_dem,
@@ -1917,6 +1924,26 @@ case("a sensitivity row whose torque fraction ignores the belt is rejected", Fal
      torque_fraction_off_the_ratio, week=2)
 
 
+def envelope_not_the_sum(d):
+    """The submission carried this for a fortnight: an interface table saying one envelope
+    and a build-up above it saying another."""
+    d["packaging"]["envelope_width_mm"] = d["packaging"]["envelope_width_mm"] * 0.94
+    return d
+
+
+case("a packaged envelope that is not the sum of its named parts is rejected", False,
+     envelope_not_the_sum, week=3)
+
+
+def allowance_deleted(d):
+    del d["packaging"]["motor_stack_mm"]
+    return d
+
+
+case("a packaging allowance deleted from the schema is rejected", False,
+     allowance_deleted, week=3)
+
+
 # ---- round 7: schema added by review with no gate behind it --------------------
 
 def empty_candidate_list(d):
@@ -2474,6 +2501,23 @@ def pdf_selftests():
     want = "".join("Team capability and execution plan".split()).lower()
     out.append(("a heading broken by kerning still matches", want in flat,
                 f"{pages} pages read"))
+    # A caption long enough to be hyphenated across a line, read back through check_pdf
+    # rather than by hand, because the hyphen rule lives there.
+    figs = json.loads((REPO / "stage-1" / "submission" / "figures" /
+                       "manifest.json").read_text(encoding="utf-8"))["figures"]
+    probes = [chk.figure_probe(f["caption"]) for f in figs]
+    hyphenated = [p for p in probes
+                  if "".join(p.split()).lower() not in flat]
+    chk.set_root(REPO)
+    quiet = chk.report
+    chk.report = lambda ok, *a, **k: ok
+    try:
+        found = chk.check_pdf("stage-1/submission/cycloprop-stage1.pdf",
+                              must_contain=probes)
+    finally:
+        chk.report = quiet
+    out.append(("every figure caption survives hyphenation on the way back", found,
+                f"{len(probes)} captions, {len(hyphenated)} of them broken across a line"))
     return out
 
 

@@ -846,8 +846,14 @@ def check_pdf(rel, min_pages=4, must_contain=()):
         # A gate that fails on a correctly built PDF is worse than one that tolerates a
         # space, and the strings being matched are long enough that dropping whitespace
         # cannot make an unrelated document look like this one.
-        flat = "".join(text.split()).lower()
-        absent = [s for s in must_contain if "".join(s.split()).lower() not in flat]
+        # Two readings, because xelatex breaks a long word across a line and leaves a
+        # hyphen in it. Dropping that hyphen finds "conservative" again; keeping it finds
+        # a real compound like thrust-to-weight that happened to break at its own hyphen.
+        # A string has to miss both to count as absent.
+        flats = ["".join(text.split()).lower(),
+                 "".join(text.replace("-\n", "").split()).lower()]
+        absent = [s for s in must_contain
+                  if not any("".join(s.split()).lower() in f for f in flats)]
         ok &= report(not absent, f"{rel} is built from this submission, not another document",
                      f"{len(absent)} expected string(s) absent: "
                      + "; ".join(absent[:4]) if absent else "")
@@ -1745,11 +1751,46 @@ def week3(data):
                          f"{min(uniq):.0f} to {max(uniq):.0f} deg")
         ok &= check_pitch_motion(data, az, pitches)
 
+    ok &= check_packaging_envelope(data)
+
     rel = "stage-1/design/09-packaging-and-integration.md"
     ok &= require_headings(rel, ["Package envelope", "Mounting", "Drivetrain",
                                  "Interfaces", "Numbers used"])
     ok &= require_substance(rel, 300)
     ok &= check_declared_numbers(rel, data)
+    return ok
+
+
+PACKAGING_ALLOWANCES = ["side_plate_mm", "bearing_block_mm", "phasing_carrier_mm",
+                        "pulley_and_belt_mm", "frame_clearance_mm", "motor_stack_mm"]
+
+
+def check_packaging_envelope(data):
+    """The report publishes the envelope as a sum of named parts. This adds them up.
+
+    Every one of those parts used to be a bare millimetre figure in the prose, traceable to
+    nothing, which is also why the submission could carry one envelope in its interface
+    table and a different one in the build-up above it for a fortnight."""
+    ok = require_positive(data, [f"packaging.{k}" for k in PACKAGING_ALLOWANCES],
+                          "week3: every packaging allowance is a stored number")
+    span = num(data, "geometry.span_m")
+    parts = {k: num(data, f"packaging.{k}") for k in PACKAGING_ALLOWANCES}
+    swept = num(data, "packaging.swept_diameter_mm")
+    got = {k: num(data, f"packaging.envelope_{k}_mm") for k in ("length", "width", "height")}
+    if span is None or swept is None or None in parts.values() or None in got.values():
+        return report(False, "week3: the envelope can be recomputed from its parts")
+
+    want = {
+        "length": span * 1000.0 + 2.0 * (parts["side_plate_mm"] + parts["bearing_block_mm"])
+                  + parts["phasing_carrier_mm"] + parts["pulley_and_belt_mm"],
+        "width": swept + 2.0 * parts["frame_clearance_mm"],
+    }
+    want["height"] = want["width"] + parts["motor_stack_mm"]
+    bad = [f"{k} {got[k]} mm, the parts give {want[k]:.1f} mm"
+           for k in want if not close(got[k], want[k], DISPLAY_TOL)]
+    ok &= report(not bad, "week3: the packaged envelope is the sum of its named parts",
+                 "; ".join(bad) if bad else
+                 f"{want['length']:.1f} by {want['width']:.1f} by {want['height']:.1f} mm")
     return ok
 
 
