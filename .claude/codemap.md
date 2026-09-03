@@ -434,3 +434,15 @@ research round.
 Used by: the evidence ledger, and week 1's own gate checks two of its headings
 Gotcha: superseded in two places by week 2 and annotated in place rather than rewritten. Its
 first-cut sizing table is a 10 N design point, not the 18 N one week 2 carries. See D26.
+
+### tools/hpc/
+Seven job scripts that measure the Baramati cluster and stand up a CFD stack on it. survey.sh
+and survey2.sh read the login node; probe.slurm and probe2.slurm run on a compute node and
+establish that there is outbound internet and no cgroup cap; foam-install.slurm builds the
+OpenFOAM env; mpi-comm2.slurm proves MPI communication rather than just MPI launch;
+foam-final.slurm applies the Pstream symlink and runs the case serial and on 4, 8 and 16 ranks.
+Used by: nothing in the gate tree. Stage 1 needs no compute, and these exist so Stage 2 does
+not repeat the search
+Gotcha: they must stay LF, which .gitattributes enforces, because CRLF makes sbatch refuse the
+file. mpi-comm2.slurm needs MPICH_CC set to the system gcc, and every finding they produced is
+written up in _compute.md rather than left in the logs.
