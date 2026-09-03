@@ -260,6 +260,11 @@ Expect the tree to be red at the end of this phase. That is the point.
 
 ### Phase 2: settle Tier 1 and make the tree green again
 
+**Executed 1 September 2026. See D67.** All five items done. The tree did not go green here: the
+solvers and the data were corrected and the nine design documents were left quoting the numbers
+they replaced, which is Phase 3. The design point moved to 17 N, the pack interface to 8S, and
+the stacked conservative thrust to weight fell under the requirement to 2.1569.
+
 15. **R1.** Adopt one self-consistent reading of thrust and power. Recommendation below
 16. **R3.** Invert the servo torque calculation, then resize the actuator or the gear pair
 17. **R2.** Recompute current from torque, add the idle current, restate the derate break even
@@ -270,6 +275,17 @@ Expect the tree to be red at the end of this phase. That is the point.
     every number that moved
 
 ### Phase 3: correct the documents
+
+**Executed 3 September 2026. See D68.** 126 declarations across the nine design documents, 64 in
+the submission, and eight tables regenerated from `numbers.json` rather than edited. The
+submission's untraced narrative numbers went from 123 to zero. `check.py --all` passes 269 gates
+and `test_gates.py` passes 187 self-tests. Week 5 passes everything except the human gate, which
+needs a person.
+
+Six things turned up that Phase 2 did not put there and they are listed in D68. The one that
+matters most is item 6 there: the pitch offset controller is rated 6 to 30 V and the 8S pack
+Phase 2 declared reaches 33.6 V charged, so the module needs a step-down or a different board.
+It is written into two documents as an open item and nothing is drawn for it.
 
 21. R6 to R24, in one pass per document, then rebuild the submission and the PDF
 22. R22 is inside `numbers.json` and needs the solver's source strings changed, not the file
