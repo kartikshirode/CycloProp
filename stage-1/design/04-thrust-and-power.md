@@ -242,9 +242,9 @@ is D10. Ideal power on every row is computed over the same projected area, so th
 
 | Design thrust | Mass ceiling at T/W 2.5 | Ideal power | rpm | Rotor torque | Drive consequence |
 | --- | --- | --- | --- | --- | --- |
-| 13 N | 530 g | 118.5 W | 2044 | 1.179 Nm | MN5006 at 4.188 to 1, 15.17 A of 20.8 A, worst line 74 percent. The roomiest row |
-| 16 N | 652 g | 161.8 W | 2267 | 1.452 Nm | MN5006 at 4.375 to 1, 17.71 A of 20.8 A, worst line 86 percent |
-| 17 N | 693 g | 177.2 W | 2337 | 1.542 Nm | MN5006 at 4.25 to 1, 19.29 A of 20.8 A, worst line 93 percent. The design point |
+| 13 N | 530 g | 118.5 W | 2044 | 1.179 Nm | MN5006 at 4.188 to 1, 15.17 A of 20.8 A, worst line current at 73 percent. The roomiest row |
+| 16 N | 652 g | 161.8 W | 2267 | 1.452 Nm | MN5006 at 4.375 to 1, 17.71 A of 20.8 A, worst line current at 85 percent |
+| 17 N | 693 g | 177.2 W | 2337 | 1.542 Nm | MN5006 at 4.25 to 1, 19.29 A of 20.8 A, worst line power at 93 percent. The design point |
 | 18 N | 733 g | 193.0 W | 2405 | 1.633 Nm | nothing fits. 526 W of motor input against 520 W continuous |
 | 20 N | 815 g | 226.1 W | 2535 | 1.815 Nm | nothing fits. 617 W against 520 W |
 

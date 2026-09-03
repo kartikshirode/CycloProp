@@ -9,8 +9,8 @@ solution actually produces rather than on the bare rotor circle.
 Start with what the blades sweep, because that is bigger than the rotor. The blade pitches plus
 or minus 40 degrees about an axis at 30 percent chord, so 70 percent of a 72.6 mm chord swings
 outboard of the pitch axis. Sampling the NACA 0020 outline at every rotor position gives an
-outer swept radius of 148.03 mm and an inner one of 86.54 mm, so the swept annulus is 61.5 mm
-thick and the swept diameter is 296.1 mm against a rotor diameter of 220.
+outer swept radius of 148.25 mm and an inner one of 86.92 mm, so the swept annulus is 61.33 mm
+thick and the swept diameter is 296.5 mm against a rotor diameter of 220.
 
 That is worth flagging against week 2. The packaging rule in `01-configuration.md` compares
 layouts on rotor count times 2R plus 20 mm of clearance plus 40 mm of frame, which put the
@@ -26,13 +26,13 @@ The module envelope is a sum of named parts, not an estimate:
 | Direction | Build-up | Total |
 | --- | --- | --- |
 | Along the rotor axis | 290.4 mm span, two 8 mm side plates, two 12 mm bearing blocks, 16 mm phasing carrier at the non-drive end, 18 mm pulley and belt at the drive end | 364.4 mm |
-| Across the rotor, in plane | 296.1 mm swept diameter plus 10 mm of frame tube each side | 316.1 mm |
-| Across the rotor, vertical | the same 316.1 mm plus a 46 mm motor stack under the rotor | 362.1 mm |
+| Across the rotor, in plane | 296.5 mm swept diameter plus 10 mm of frame tube each side | 316.5 mm |
+| Across the rotor, vertical | the same 316.5 mm plus a 46 mm motor stack under the rotor | 362.5 mm |
 
 Largest dimension is 364.4 mm, along the rotor axis, and the span is what drives it.
 
 Inside that, the moving envelope has three parts an integrator has to keep clear. The blade
-sweep is the 86.54 to 148.03 mm annulus over the full 360 degrees. The pitch link sweep is a
+sweep is the 86.92 to 148.25 mm annulus over the full 360 degrees. The pitch link sweep is a
 disc of 148 mm radius in one plane at the non-drive end, and that plane has to be empty on the
 axis: the links pass within 0.019 mm of the rotor centreline, so nothing coaxial can sit in it.
 The phasing carrier sweeps a 40 mm ring in the plane immediately outboard of that, and it moves
@@ -73,12 +73,12 @@ offset link points at 90 degrees of azimuth.
 ```
                         frame tube
                     +-------------------+
-                    |   . - - - - - .   |   <-- outer swept radius 148.03
+                    |   . - - - - - .   |   <-- outer swept radius 148.25
                     | .   blade 1     . |
                     |.   /             .|
         mount lug -->|  /   inner swept  |<-- mount lug
                     |. /    radius       |
-                    | /     86.54       .|
+                    | /     86.92       .|
                     |/    O <-- rotor axis, and 15.4 to the offset pivot E
                     |\   / \             |
                     | \ /   \           .|
@@ -87,7 +87,7 @@ offset link points at 90 degrees of azimuth.
                     | blade 2  blade 3  |
                     |   . - - - - - .   |
                     +-------------------+
-                    |<-- 316.1 across -->|
+                    |<-- 316.5 across -->|
                               |
                         46 motor stack
                               |
@@ -97,7 +97,7 @@ offset link points at 90 degrees of azimuth.
 ```
 
 The three pitch links converge on E. The link belonging to the blade furthest from E is the one
-that crosses the axis at O, and the swept annulus between 86.54 and 148.03 mm is what the frame
+that crosses the axis at O, and the swept annulus between 86.92 and 148.25 mm is what the frame
 tubes have to stay outside.
 
 
@@ -178,12 +178,12 @@ it. `03-pitch-and-vectoring.md` has what that costs.
 ## Numbers used
 
 - packaging.envelope_length_mm = 364.4
-- packaging.envelope_width_mm = 316.1
-- packaging.envelope_height_mm = 362.1
+- packaging.envelope_width_mm = 316.5
+- packaging.envelope_height_mm = 362.5
 - packaging.mount_points = 4
-- packaging.swept_diameter_mm = 296.1
-- pitch.swept_outer_radius_mm = 148.03
-- pitch.swept_inner_radius_mm = 86.54
+- packaging.swept_diameter_mm = 296.5
+- pitch.swept_outer_radius_mm = 148.25
+- pitch.swept_inner_radius_mm = 86.92
 - pitch.axis_keepout_mm = 0.019
 - pitch.vector_range_deg = 120.0
 - geometry.span_m = 0.2904
