@@ -502,8 +502,10 @@ def fig_blade_section():
     wrinkle = dotted(d, "structure.blade_wrinkle_stress_MPa")
     combined = dotted(d, "structure.blade_combined_Nm")
     chord_mm = chord * 1000.0
-    spar_od = check.BLADE_SPAR_DIA_FRAC * chord_mm
-    wall = check.BLADE_SPAR_WALL_M * 1000.0
+    # Both come out of numbers.json now rather than out of a constant in check.py, so the
+    # dimensions this drawing publishes are held to the same source as everything else.
+    spar_od = dotted(d, "structure.blade_spar_od_mm")
+    wall = dotted(d, "structure.blade_spar_wall_mm")
 
     fig, ax = plt.subplots(figsize=(6.6, 2.3))
     ax.set_aspect("equal")
@@ -541,7 +543,9 @@ def fig_blade_section():
               "structure.blade_ei_Nm2": ei, "structure.blade_gj_Nm2": gj,
               "structure.blade_allowable_Nm": allow,
               "structure.blade_wrinkle_stress_MPa": wrinkle,
-              "structure.blade_combined_Nm": combined}
+              "structure.blade_combined_Nm": combined,
+              "structure.blade_spar_od_mm": spar_od,
+              "structure.blade_spar_wall_mm": wall}
     cap = (f"Blade section. {dotted(d, 'geometry.airfoil')} at {chord_mm:.1f} mm chord on "
            f"a {spar_od:.3f} mm spar tube at {axis * 100:.0f} percent chord, which is also "
            f"the pitch axis. EI {ei:.3f} Nm2 and GJ {gj:.4f} Nm2 come from this section, "

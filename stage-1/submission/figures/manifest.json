@@ -96,7 +96,9 @@
     "structure.blade_gj_Nm2": 7.8058,
     "structure.blade_allowable_Nm": 25.2528,
     "structure.blade_wrinkle_stress_MPa": 215.2638,
-    "structure.blade_combined_Nm": 8.4153
+    "structure.blade_combined_Nm": 8.4153,
+    "structure.blade_spar_od_mm": 8.712,
+    "structure.blade_spar_wall_mm": 0.5
    }
   },
   {
