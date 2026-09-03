@@ -739,6 +739,9 @@ def write_numbers(data, s):
         "schedule_rms_residual_deg": round(s["rms_residual_deg"], 4),
         "transmission_angle_min_deg": round(s["transmission_min_deg"], 2),
         "transmission_angle_max_deg": round(s["transmission_max_deg"], 2),
+        "transmission_angle_worst_folded_deg": round(
+            min(min(s["transmission_min_deg"], 180.0 - s["transmission_min_deg"]),
+                min(s["transmission_max_deg"], 180.0 - s["transmission_max_deg"])), 2),
         "axis_keepout_mm": round(s["axis_gap_mm"], 3),
         "neighbour_clearance_mm": round(s["neighbour_gap_mm"], 2),
         "pitch_bearing_travel_deg": round(s["pitch_travel_deg"], 2),

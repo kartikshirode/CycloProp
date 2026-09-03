@@ -585,7 +585,8 @@
     "swept_inner_radius_mm": 86.92,
     "carrier_gear_mm": 40.0,
     "servo_gear_mm": 60.0,
-    "servo_mass_g": 20.0
+    "servo_mass_g": 20.0,
+    "transmission_angle_worst_folded_deg": 44.32
   },
   "linkage_dimensions": [
     {
