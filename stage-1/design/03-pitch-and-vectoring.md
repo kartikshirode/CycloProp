@@ -2,7 +2,7 @@
 
 Required Stage 1 item 3, and the whole of the 15 percent kinematics and vectoring criterion.
 Geometry is frozen from week 2 and nothing here moves it: 110 mm radius, 72.6 mm chord, 290.4
-mm span, 3 blades, NACA 0020, plus or minus 40 degrees about a 30 percent chord axis at 2405
+mm span, 3 blades, NACA 0020, plus or minus 40 degrees about a 30 percent chord axis at 2337
 rpm. What week 3 adds is a linkage that produces that pitch amplitude, the schedule it actually
 produces rather than the one week 2 assumed, and what happens to the thrust vector when the
 mechanism is commanded.
@@ -17,7 +17,7 @@ is reproducible rather than asserted.
 Passive cyclic pitch, one four-bar per blade, and all three sharing a common offset pivot. That
 is the architecture week 2 screened in and this week confirms it. The reason is mass: per-blade
 actuators would put three servos and three controllers inside a module whose conservative mass
-already sits 4.8 g under the ceiling, and there is nothing to take them out of.
+already sits 104.8 g over the 2.5 ceiling since D67, and there is nothing to take them out of.
 
 The topology is Kellen's, taken off a vehicle he built rather than invented here. His printed
 pages 13 and 55 name four fixed lengths. L1 is the rotor radius. L2 is an offset link from the
@@ -25,15 +25,16 @@ rotor axis to the offset pivot, and it is the control link: its length sets the 
 and its direction sets the phase. L3 is the pitch link. L4 is the horn from the blade pitch
 axis to the pitch link pin.
 
-Physically the three pitch links stack on one pin at the offset pivot, 15.4 mm off the rotor
+Physically the three pitch links stack on one pin at the offset pivot, 11.53 mm off the rotor
 axis. That pin is carried on a short post reaching in from a phasing carrier, which turns about
 the rotor axis on its own bearings outboard of the non-drive end plate. Two digital metal gear
-servos of the 12.5 g class drive the carrier through sector gears set 180 degrees apart, which
+servos of the 20 g class drive the carrier through sector gears set 180 degrees apart, which
 doubles the holding torque and preloads the mesh so backlash does not show up as thrust
-direction error. That is the week 2 envelope line for the vectoring actuator, spelled the same
-way, at the same 25 g. No line in the mass envelope moved this week.
+direction error. The envelope line for the vectoring actuator is 40 g and it moved in D67: week
+3 sized the servo against a holding torque with the gear ratio applied backwards, and the
+corrected torque needs a bigger part.
 
-The offset link length is a shimmed dimension set at build, not an actuator. It sees a 47.5 N
+The offset link length is a shimmed dimension set at build, not an actuator. It sees an 80.36 N
 peak radial pull from the three pitch links and it is structure, so week 4 sizes it.
 
 ## Kinematics
@@ -51,39 +52,41 @@ D = E - P, d the length of D and delta its direction,
 
 Two roots, and the sign is the assembly mode. The open branch is held for the whole revolution
 and the crossed one is its mirror image, which produces the same amplitude with the rotation
-reversed. Blade pitch is alpha minus psi minus a construction angle of -110.52 degrees, which
+reversed. Blade pitch is alpha minus psi minus a construction angle of -102.50 degrees, which
 is the fixed angle between the horn and the chord and is chosen so the cycle mean pitch is zero.
 
 | Link | Length | What it is |
 | --- | --- | --- |
 | L1 rotor arm | 110.0 mm | input crank, frozen by the week 2 radius |
-| L2 offset link | 15.4 mm | ground link, solved for the pitch amplitude |
-| L3 pitch link | 105.0 mm | output crank |
-| L4 pitch horn | 24.4 mm | coupler |
+| L2 offset link | 11.53 mm | ground link, solved for the pitch amplitude |
+| L3 pitch link | 108.0 mm | output crank |
+| L4 pitch horn | 18.0 mm | coupler |
 
-The horn is Kellen's 2 in on a 9 in radius, scaled. The pitch link is not. His 9.133 in scales
-to 111.6 mm here, and the sweep under `--sweep` puts that at 0.3240 Nm of carrier torque against
-0.1371 Nm at 105 mm, with a transmission angle 18 degrees tighter and a harmonic residual more
-than twice as large. At 111.6 mm the two servos hold the carrier on exactly half their stall
-torque, a margin of 1.000, which is not a margin. His rotor ran a different offset regime on a
-radius twice this one, so the ratio does not carry across and the sweep is what picked 105 mm.
+Neither the horn nor the pitch link is scaled from Kellen, and week 3 claimed the horn was.
+His 2 in on a 9 in radius scales to 24.4 mm here and the sweep does not pick it. The reason
+week 3 landed there is that its sweep printed the minimum transmission angle and ignored the
+maximum, and 143.23 degrees is exactly as far from a right angle as 36.77 is. Reading the
+angle folded, the sweep picks 18 mm on a 108 mm link, and that row is better on every column
+it prints: worst folded angle 44.32 degrees against 36.77, carrier torque 0.1287 Nm against
+0.1389, harmonic residual 1.1406 degrees against 1.1951. D67 records the correction.
 
-Only L2 was solved. Bisecting on the peak to peak pitch travel gives 15.40 mm for plus or minus
+Only L2 was solved. Bisecting on the peak to peak pitch travel gives 11.53 mm for plus or minus
 40 degrees, and the bracket is not arbitrary either: the horn tip circle has to meet the pitch
 link circle at every rotor position, which needs `R + e - a <= l <= R - e + a`, so e cannot
-exceed 24.4 mm on this link set.
+exceed 16.0 mm on this link set.
 
-**Grashof.** Sorted, the links are 15.4, 24.4, 105.0 and 110.0 mm. Shortest plus longest is
-125.4 mm against 129.4 for the other two, so the criterion holds, and the shortest link is the
+**Grashof.** Sorted, the links are 11.53, 18.0, 108.0 and 110.0 mm. Shortest plus longest is
+121.5 mm against 126.0 for the other two, so the criterion holds, and the shortest link is the
 ground. That makes it a double crank. The rotor arm turns fully, which it has to, and so does
 the pitch link about the offset pivot, one full revolution per rotor revolution.
 
 **Transmission angle**, taken at the horn tip between the horn and the pitch link, because its
-sine is the moment arm the pitch link force turns the blade on. It runs 58.58 to 143.23 degrees.
-The conventional band is 40 to 140 and the obtuse end sits 3.23 degrees outside it, so say what
-that costs instead of quoting the band: the worst sine over the revolution is 0.599, meaning the
-mechanism's poorest moment arm is 60 percent of its best. Nothing approaches a singularity. The
-nearest approach to a dead centre is 36.8 degrees away.
+sine is the moment arm the pitch link force turns the blade on. It runs 53.88 to 135.68 degrees
+and the conventional band is 40 to 140, so both ends are inside it now. Read folded, which is
+the reading that matters because an angle and its supplement cost the same moment arm, the
+worst is 44.32 degrees. The worst sine over the revolution is 0.699, meaning the mechanism's
+poorest moment arm is 70 percent of its best, and the nearest approach to a dead centre is
+44.3 degrees away.
 
 **Joint travel.** The blade pitch bearing sweeps 80.00 degrees. The pitch link bearing at the
 offset pin turns a full revolution each rotor revolution, so it is a continuously rotating joint
@@ -91,7 +94,7 @@ and not an oscillating one, which is a different bearing selection and a differe
 calculation for week 4.
 
 **Interference, and the one result that set the architecture.** The pitch link passes within
-0.004 mm of the rotor axis. That is not a near miss, it is a crossing: at the azimuth where the
+0.019 mm of the rotor axis. That is not a near miss, it is a crossing: at the azimuth where the
 horn tip, the rotor axis and the offset pivot line up, the straight line between the two pins
 runs through the middle of the rotor. It follows from `l - e` sitting inside the reachable band
 `R - a` to `R + a`, so it is a property of this link set and not bad luck. The consequence is
@@ -101,7 +104,7 @@ from a carrier sitting outboard where nothing rotates with the rotor. Kellen hit
 and solved it by bending L3 around the central hardware.
 
 Clearance to the next blade is not close: the nearest a pitch link comes to a neighbouring pitch
-axis is 94.6 mm.
+axis is 98.47 mm.
 
 ## Pitch schedule
 
@@ -110,61 +113,61 @@ above at the design command, evaluated on a 0.25 degree grid and sampled here.
 
 Azimuth is measured from the offset link, so 90 degrees is the direction the mechanism is
 commanded to point. That choice matters for reading the table: it makes the phase delay below a
-property of the linkage rather than of the aerodynamics, and it puts module vertical 11.98
+property of the linkage rather than of the aerodynamics, and it puts module vertical 9.08
 degrees further round.
 
 | Azimuth (deg) | Pitch (deg) |
 | --- | --- |
-| 0 | -8.0504 |
-| 10 | -1.9611 |
-| 20 | 4.3127 |
-| 30 | 10.6654 |
-| 40 | 16.9520 |
-| 50 | 22.9781 |
-| 60 | 28.4987 |
-| 70 | 33.2313 |
-| 80 | 36.8871 |
-| 90 | 39.2288 |
-| 100 | 40.1175 |
-| 110 | 39.5420 |
-| 120 | 37.6076 |
-| 130 | 34.4899 |
-| 140 | 30.3949 |
-| 150 | 25.5209 |
-| 160 | 20.0470 |
-| 170 | 14.1250 |
-| 180 | 7.8888 |
-| 190 | 1.4547 |
-| 200 | -5.0629 |
-| 210 | -11.5502 |
-| 220 | -17.8716 |
-| 230 | -23.8636 |
-| 240 | -29.3066 |
-| 250 | -33.9222 |
-| 260 | -37.3826 |
-| 270 | -39.3987 |
-| 280 | -39.8312 |
-| 290 | -38.7680 |
-| 300 | -36.4514 |
-| 310 | -33.1568 |
-| 320 | -29.1112 |
-| 330 | -24.4797 |
-| 340 | -19.3753 |
-| 350 | -13.8773 |
-| 360 | -8.0504 |
+| 0 | -6.4473 |
+| 10 | -0.1523 |
+| 20 | 6.2841 |
+| 30 | 12.7386 |
+| 40 | 19.0519 |
+| 50 | 25.0196 |
+| 60 | 30.3905 |
+| 70 | 34.8788 |
+| 80 | 38.1988 |
+| 90 | 40.1199 |
+| 100 | 40.5243 |
+| 110 | 39.4333 |
+| 120 | 36.9884 |
+| 130 | 33.3994 |
+| 140 | 28.8936 |
+| 150 | 23.6826 |
+| 160 | 17.9503 |
+| 170 | 11.8517 |
+| 180 | 5.5203 |
+| 190 | -0.9242 |
+| 200 | -7.3660 |
+| 210 | -13.6834 |
+| 220 | -19.7378 |
+| 230 | -25.3623 |
+| 240 | -30.3532 |
+| 250 | -34.4704 |
+| 260 | -37.4624 |
+| 270 | -39.1213 |
+| 280 | -39.3528 |
+| 290 | -38.2089 |
+| 300 | -35.8548 |
+| 310 | -32.4999 |
+| 320 | -28.3419 |
+| 330 | -23.5430 |
+| 340 | -18.2296 |
+| 350 | -12.5020 |
+| 360 | -6.4473 |
 
-Extrema are 40.12 degrees at 100 and -39.83 at 280, so peak to peak is 79.95 against the 80 the
-design asks for. On the finer grid the solved amplitude is 39.998 degrees and the peak sits at
-101.0. The revolution closes exactly, -8.0504 at both ends, which it has to for a mechanism and
-would not for a fitted curve.
+Extrema are 40.52 degrees at 100 and -39.35 at 280, so peak to peak is 79.88 against the 80 the
+design asks for. The revolution closes exactly, -6.4473 at both ends, which it has to for a
+mechanism and would not for a fitted curve.
 
-**Phase delay 11.00 degrees.** The pitch peak lags the offset direction by that much. It is not
+**Phase delay 7.75 degrees.** The pitch peak lags the offset direction by that much. It is not
 a free parameter and it is not the aerodynamic tilt further down; it falls out of the four-bar,
 because the offset pivot direction and the horn angle each contribute a term and the two are 90
-degrees apart in phase.
+degrees apart in phase. It was 11.00 degrees on the link set week 3 picked, and the corrected
+sweep in D67 brought it down.
 
-**Residual against the harmonic it approximates.** Fitting `40*cos(psi - 90 - 11.00)` leaves an
-rms of 1.1951 degrees over the 36 distinct azimuths, which is 3.0 percent of amplitude. That is
+**Residual against the harmonic it approximates.** Fitting `40*cos(psi - 90 - 7.75)` leaves an
+rms of 1.1406 degrees over the 36 distinct azimuths, which is 2.9 percent of amplitude. That is
 the number that says a real four-bar is not a cosine. Week 2's load model assumed it was, and
 the difference between the two is where the side force comes from.
 
@@ -176,7 +179,7 @@ rotate with it.
 
 **Phase authority is 120 degrees, and it comes from two pitch diameters.** The servo's published
 operating travel is 80 degrees, 40 per side. The carrier ring gear is 40 mm and cannot be much
-smaller, because it is a ring around the rotor axis that has to clear the offset post at 15.4 mm
+smaller, because it is a ring around the rotor axis that has to clear the offset post at 11.53 mm
 radius. The servo sector gear is 60 mm. That is a 1.5 step up, so 80 degrees of servo becomes
 120 degrees of carrier, and a bigger step up would need a sector gear bigger than the module can
 sensibly carry. This is the whole claim. There is no arrangement of these parts that reaches 360
@@ -184,37 +187,46 @@ degrees, and quoting 360 because the offset direction is an angle would be an as
 circle rather than about hardware.
 
 **Holding torque.** The three pitch links load the offset pin, and their moment about the rotor
-axis is what the carrier holds. It peaks at 0.1389 Nm and its cycle mean is under 0.001 Nm,
+axis is what the carrier holds. It peaks at 0.1287 Nm and its cycle mean is under 0.001 Nm,
 because the once per revolution content cancels across three blades at 120 degree spacing and
-what survives is a three per revolution ripple at 120 Hz. Through the 1.5 step up and across two
-servos that is 0.0463 Nm each, against half of a 0.216 Nm stall figure, so the margin is 2.33.
-Those figures moved by about 1 percent in week 4, when the blade the loads are taken on stopped
-being the week 2 estimate and became the drawn section. See D48.
+what survives is a three per revolution ripple at 117 Hz. The gear pair steps the carrier angle
+**up** by 1.5, and angle amplification at the output is torque multiplication at the input, so
+across two servos each one holds 0.0965 Nm. Week 3 divided by the ratio instead of multiplying
+and got 0.0463 Nm, which is what let a 12.5 g servo look adequate. Against half of a 0.3825 Nm
+stall figure, which is a 20 g class part at 3.9 kgf.cm, the margin is 1.98. D67 records the
+correction and D48 the smaller week 4 move that preceded it.
 
 **Travel, slew and draw.** Mechanical stops sit at the ends of the 120 degree carrier range.
-End to end takes 0.147 s at the published 0.11 s per 60 degrees, which is a vector command and
-not a control loop, so that is fast enough by a wide margin. Two servos at 0.24 A on 6 V draw
-2.88 W, inside the 6.0 W week 2 carried for them.
+End to end takes 0.173 s at the published 0.13 s per 60 degrees, which is a vector command and
+not a control loop, so that is fast enough by a wide margin. Two servos at 0.35 A on 6 V draw
+4.2 W, inside the 6.0 W week 2 carried for them.
 
-**The controller.** A Matek Systems F411-WSE class board, 8.5 g in a 28 by 28 by 14 mm case,
-with four servo outputs and a servo rail selectable to 5 or 6 V at 3.5 A continuous. It takes
-the 6S pack directly on a 6 to 30 V input, so the module needs no separate regulator, and 3.5 A
-covers two servos drawing 0.24 A each with room over. It is 0.5 g above the 8.0 g week 2
-nominal for the pitch offset controller and inside that line's 9.2 g conservative figure, which
-is a week 4 line to close rather than a week 3 mass change.
+**The controller, and an open item D67 created.** A Matek Systems F411-WSE class board, 8.5 g
+in a 28 by 28 by 14 mm case, with four servo outputs and a servo rail selectable to 5 or 6 V at
+3.5 A continuous. 3.5 A covers two servos drawing 0.35 A each with room over, and at 8.5 g it
+is 0.5 g above the 8.0 g nominal for the pitch offset controller and inside that line's 9.2 g
+conservative figure.
+
+Its input range is 6 to 30 V and that no longer covers the pack. This document used to say the
+board takes the pack directly and the module needs no separate regulator. On 6S that was true.
+D67 moved the declared pack interface to 8S, which is 29.6 V nominal and **33.6 V on a full
+charge**, so the board would sit 3.6 V over its rating at the top of every flight. The module
+therefore needs either a step-down ahead of the board or a controller rated past 34 V. Neither
+is a large part and neither is drawn, so this is an open item rather than a solved one, and the
+8.0 g line does not yet carry it. Stage 2 item 5 closes it.
 
 **Command to force.** Five commands across the authority, with vertical and lateral resolved in
 module axes and vertical taken along the design resultant.
 
 | Phase command (deg) | Servo angle (deg) | Vertical (N) | Lateral (N) | Resultant (N) | Direction (deg) |
 | --- | --- | --- | --- | --- | --- |
-| -60 | -40 | 9.000 | -15.588 | 18.000 | -60.0 |
-| -30 | -20 | 15.588 | -9.000 | 18.000 | -30.0 |
-| +0 | +0 | 18.000 | 0.000 | 18.000 | +0.0 |
-| +30 | +20 | 15.588 | 9.000 | 18.000 | +30.0 |
-| +60 | +40 | 9.000 | 15.588 | 18.000 | +60.0 |
+| -60 | -40 | 8.500 | -14.722 | 17.000 | -60.0 |
+| -30 | -20 | 14.722 | -8.500 | 17.000 | -30.0 |
+| +0 | +0 | 17.000 | 0.000 | 17.000 | +0.0 |
+| +30 | +20 | 14.722 | 8.500 | 17.000 | +30.0 |
+| +60 | +40 | 8.500 | 14.722 | 17.000 | +60.0 |
 
-Direction follows command one to one and magnitude holds at 18.000 N across the range, so
+Direction follows command one to one and magnitude holds at 17.000 N across the range, so
 `pitch.vector_range_deg` is set equal to the phase authority. Be clear about why that came out
 so clean. The rotor is axisymmetric, the three blades are evenly spaced, and the inflow in this
 model is a uniform vector that settles onto whatever direction the resultant points. Rotate the
@@ -227,9 +239,9 @@ magnitude, and none of them is symmetric.
 
 ## Side force
 
-The model puts the resultant 11.98 degrees round from the offset direction, in the direction of
-rotation. Of that, the pitch peak accounts for 11.00 and the aerodynamics for the remaining
-0.98, which is the honest split and the second number is small.
+The model puts the resultant 9.08 degrees round from the offset direction, in the direction of
+rotation. Of that, the pitch peak accounts for 7.75 and the aerodynamics for the remaining
+1.33, which is the honest split and the second number is small.
 
 The measured range is not small. Sirohi measured about 10 degrees, Adams 15 to 35 depending on
 amplitude and rpm, and Benedict's twin sat at 30 at its operating point, so the band the design
@@ -238,16 +250,16 @@ that band rather than low. It sweeps 2, 3, 4 and 5 bladed rotors at 35 and 40 de
 pitching amplitude from 400 to 2000 rpm, and his text states both trends in words: the tilt
 rises with rotational speed, and it rises with blade count. No number is taken off that figure,
 because the text extract we hold carries its axis and not its plotted values. This design runs 3
-blades at 40 degrees and 2405 rpm, past the top of that speed sweep, on both trends.
+blades at 40 degrees and 2337 rpm, past the top of that speed sweep, on both trends.
 
 So the model under-predicts, and it should. A quasi-steady blade element model with uniform
 inflow has no wake return, no shed vorticity and no dynamic stall hysteresis. All three feed the
-lateral component, which is why measurement gives 10 to 35 and arithmetic gives 0.98.
+lateral component, which is why measurement gives 10 to 35 and arithmetic gives 1.33.
 
 **How the design handles it.** The tilt is a bias, not a loss. Benedict measured his by rotating
 the whole rotor assembly by the phase angle until the resultant lay on the vertical axis, and
 the mechanism here does the same thing by construction: the phasing carrier's zero is indexed at
-assembly, so a known bias costs no actuator range at all. The stored 11.98 degrees is what the
+assembly, so a known bias costs no actuator range at all. The stored 9.08 degrees is what the
 model gives and it is the value the design carries into week 4, marked as a lower bound rather
 than a prediction.
 
@@ -269,7 +281,7 @@ schedule rather than a constant, and writing one measured angle into the design 
 correction would be wrong in both directions.
 
 **And the cycle mean is not the whole load.** Trimming the mean lateral force to zero leaves the
-instantaneous lateral force at up to 10.10 N per blade inside the revolution. It cancels over
+instantaneous lateral force at up to 9.83 N per blade inside the revolution. It cancels over
 the cycle and it does not cancel in the bearings, the offset post or the frame. Week 4 carries
 it.
 
@@ -277,12 +289,15 @@ it.
 
 - The blade centre of mass sits at 39.31 percent chord on the week 4 drawn section, aft of the
   30 percent pitch axis. That unbalance roughly doubles the peak blade pitching moment, to
-  2.2058 Nm, and puts 105.93 N in the pitch link. Running `--balanced` shows a chordwise balance
-  would take those to 1.0904 Nm and 74.62 N. The stored numbers are the unbalanced ones.
-  Week 4 priced the balance at 35.5 g across three blades and declined it, because that mass
-  takes the stacked conservative case to 2.406 and under the limit, while the pitch link path
-  carries the unbalanced load on a margin of 3.30. See D46
-- The three per revolution carrier ripple at 120 Hz is above any servo's control bandwidth. The
+  2.0967 Nm, and puts 144.19 N in the pitch link. Running `--balanced` shows a chordwise balance
+  would take those to 1.0177 Nm and 76.52 N. The stored numbers are the unbalanced ones.
+  Week 4 priced the balance at 35.5 g across three blades and declined it, and the reason it
+  gave has weakened. That reason was that the mass took the stacked conservative case under
+  2.5. The stacked case is under 2.5 anyway since D67, and 35.5 g takes it from 2.1569 to
+  2.0610, which still clears the declared floor of 2.0. What still declines the balance is the
+  structure: the pitch link path carries the unbalanced load on a margin of 3.29 against a 1.5
+  floor, so the mass buys nothing the design needs. See D46 and D67
+- The three per revolution carrier ripple at 117 Hz is above any servo's control bandwidth. The
   torque margin covers it statically. Week 4 bounded the phase jitter it produces by gear
   backlash instead of by the servo, at 0.14 degrees of carrier on 0.05 mm of backlash across the
   40 mm carrier gear, which is inside the 25 degrees of authority the side force uncertainty
@@ -293,39 +308,39 @@ it.
 
 ## Numbers used
 
-- pitch.offset_m = 0.0154
-- pitch.horn_m = 0.0244
-- pitch.pitch_link_m = 0.105
-- pitch.construction_angle_deg = -110.524
-- pitch.phase_delay_deg = 11.0
-- pitch.schedule_rms_residual_deg = 1.1951
-- pitch.transmission_angle_min_deg = 58.58
-- pitch.transmission_angle_max_deg = 143.23
-- pitch.axis_keepout_mm = 0.004
-- pitch.neighbour_clearance_mm = 94.6
+- pitch.offset_m = 0.01153
+- pitch.horn_m = 0.018
+- pitch.pitch_link_m = 0.108
+- pitch.construction_angle_deg = -102.496
+- pitch.phase_delay_deg = 7.75
+- pitch.schedule_rms_residual_deg = 1.1406
+- pitch.transmission_angle_min_deg = 53.88
+- pitch.transmission_angle_max_deg = 135.68
+- pitch.axis_keepout_mm = 0.019
+- pitch.neighbour_clearance_mm = 98.47
 - pitch.pitch_bearing_travel_deg = 80.0
 - pitch.phase_authority_deg = 120.0
 - pitch.vector_range_deg = 120.0
 - pitch.actuator_count = 2
-- pitch.actuator_mass_g = 25.0
+- pitch.actuator_mass_g = 40.0
 - pitch.servo_travel_deg = 80.0
 - pitch.gear_step_up = 1.5
 - pitch.carrier_gear_mm = 40.0
 - pitch.servo_gear_mm = 60.0
-- pitch.servo_mass_g = 12.5
-- pitch.carrier_torque_Nm = 0.1389
-- pitch.servo_torque_Nm = 0.0463
-- pitch.servo_stall_torque_Nm = 0.216
-- pitch.servo_torque_margin = 2.332
-- pitch.slew_time_s = 0.1467
-- pitch.actuator_draw_W = 2.88
-- pitch.carrier_radial_force_N = 53.22
-- pitch.side_force_tilt_deg = 11.978
-- pitch.peak_lateral_force_N = 10.0987
-- pitch.peak_blade_moment_Nm = 2.2058
-- pitch.peak_link_force_N = 105.93
+- pitch.servo_mass_g = 20.0
+- pitch.carrier_torque_Nm = 0.1287
+- pitch.servo_torque_Nm = 0.0965
+- pitch.servo_stall_torque_Nm = 0.3825
+- pitch.servo_torque_margin = 1.982
+- pitch.slew_time_s = 0.1733
+- pitch.actuator_draw_W = 4.2
+- pitch.carrier_radial_force_N = 80.36
+- pitch.side_force_tilt_deg = 9.078
+- pitch.peak_lateral_force_N = 9.8252
+- pitch.peak_blade_moment_Nm = 2.0967
+- pitch.peak_link_force_N = 144.19
 - pitch.blade_cg_pct_chord = 39.31
 - geometry.pitch_amplitude_deg = 40.0
 - geometry.radius_m = 0.11
-- performance.thrust_N = 18.0
+- performance.thrust_N = 17.0
 - performance.actuator_power_W = 6.0
