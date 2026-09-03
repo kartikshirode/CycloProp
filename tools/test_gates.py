@@ -1956,6 +1956,60 @@ case("a packaging allowance deleted from the schema is rejected", False,
      allowance_deleted, week=3)
 
 
+def derate_inside_the_defect_window(d):
+    """A declared derate that clears the current line and fails the power line.
+
+    The break even check read the current fraction because current was the binding line
+    when it was written. D67 moved it to power, so 0.7433 against 0.7418 was a window a
+    declared derate could sit inside while the line that actually binds failed. The fixture
+    window is wide enough to aim at.
+    """
+    p = d["performance"]
+    new = (p["motor_current_frac_180s"] + p["motor_power_frac_180s"]) / 2.0
+    p["motor_derate"] = new
+    for c in d["drive_candidates"]:
+        c["continuous_power_W"] = c["max_power_180s_W"] * new
+        c["continuous_current_A"] = c["peak_current_180s_A"] * new
+        c["continuous_torque_Nm"] = 9.5493 / c["kv"] * c["continuous_current_A"]
+    return d
+
+
+case("a derate that clears the current line and fails the power line is rejected", False,
+     derate_inside_the_defect_window, week=4)
+
+
+def stale_reynolds_in_the_report(root, data):
+    """The exact miss: a rotor sizing table left holding the Reynolds from before the radius
+    sweep settled. Three percent out, no unit on it, and invisible to every gate."""
+    p = root / "stage-1" / "submission" / "cycloprop-stage1.md"
+    t = p.read_text(encoding="utf-8")
+    stale = f"{data['operating']['reynolds'] * 1.03:,.0f}"
+    p.write_text(t.replace("## Numbers used",
+                           f"Chord Reynolds at the design point is {stale}.\n\n"
+                           "## Numbers used"), encoding="utf-8")
+    build_pdf_from(p, p.with_suffix(".pdf"))
+
+
+case("a report quoting a stale copy of its own Reynolds is rejected", False, upto=5,
+     week=5, tweak=stale_reynolds_in_the_report)
+
+
+def another_rotors_reynolds_is_fine(root, data):
+    """The same gate must not fire on a citation. Kellen's rotor really did run at 186,000
+    and the ledger says so on purpose."""
+    p = root / "stage-1" / "submission" / "cycloprop-stage1.md"
+    t = p.read_text(encoding="utf-8")
+    p.write_text(t.replace("## Numbers used",
+                           "Chord Reynolds on the measured rotor is 186,000 against this "
+                           f"design's {data['operating']['reynolds']:,.0f}.\n\n"
+                           "## Numbers used"), encoding="utf-8")
+    build_pdf_from(p, p.with_suffix(".pdf"))
+
+
+case("citing another rotor's Reynolds beside this one passes", True, upto=5, week=5,
+     tweak=another_rotors_reynolds_is_fine)
+
+
 # R63. Week 1's gate was five heading strings, so a settled section could lose the argument
 # under its own heading and stay green. These are the three ways it can lose it.
 

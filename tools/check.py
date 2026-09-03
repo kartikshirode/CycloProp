@@ -823,6 +823,55 @@ def check_design_coverage(data):
                   f"untraced numbers", f"{total} across {len(per)} documents")
 
 
+# A stale copy of your own Reynolds number reads like a different one. Anything inside this
+# band of the design point is a copy that did not get updated; anything outside it is
+# somebody else's rotor, and the ledger quotes several of those on purpose.
+REYNOLDS_STALE_BAND = 0.10
+# A trailing full stop ends a sentence, so it may follow the number. A digit after it
+# would make this a decimal and a different number.
+RE_TOKEN = re.compile(r"(?<![\w.])(\d{1,3}(?:,\d{3})+|\d{4,7})(?!\w|\.\d)")
+
+
+def check_reynolds_stated(data):
+    """Chord Reynolds carries no unit, so `check_numeric_coverage` never sees it. It audits
+    dimensioned numbers by design and that is the right scope, but it leaves the
+    dimensionless ones to whichever gate names them, and this one had none.
+
+    The submission carried 134,074 in its rotor sizing table and the evidence ledger carried
+    it twice, three weeks after the radius sweep settled the design at 130,296. Every gate
+    was green throughout.
+
+    A near miss is the tell. A document quoting a Reynolds within 10 percent of this
+    design's own is quoting a stale copy of it; the 186,000 and 31,600 the ledger cites are
+    other people's rotors and are nowhere near."""
+    want = num(data, "operating.reynolds")
+    if want is None:
+        return report(False, "the design states a chord Reynolds number")
+    bad = []
+    for rel in list(DESIGN_DOCS) + ["stage-1/submission/cycloprop-stage1.md"]:
+        p = ROOT / rel
+        if not p.is_file():
+            continue
+        for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
+            if "reynolds" not in line.lower():
+                continue
+            # A near miss that is deliberate gets the same escape every other near miss in
+            # this repository gets: an allow marker that has to say why. That is a written
+            # reason rather than a threshold tuned until the tree went green.
+            if allow_reason(line):
+                continue
+            for m in RE_TOKEN.finditer(line):
+                v = float(m.group(1).replace(",", ""))
+                if v <= 0 or close(v, want, DISPLAY_TOL):
+                    continue
+                if abs(v - want) / want <= REYNOLDS_STALE_BAND:
+                    bad.append(f"{rel}:{i} says {m.group(1)}, the design point is "
+                               f"{want:,.0f}")
+    return report(not bad, "every document quoting this design's Reynolds quotes the "
+                           "current one", "; ".join(bad[:4]) if bad else
+                  f"{want:,.0f} across {len(DESIGN_DOCS) + 1} documents")
+
+
 def section_under(text, keyword):
     """Lines under the first heading containing keyword, up to the next heading.
     Written as a line walk so the pattern carries no newline escapes."""
@@ -2149,12 +2198,16 @@ def check_drive_margin(data):
             ok &= report(close(pf, watts / peak_w, DISPLAY_TOL),
                          "week4: the power fraction of the 180 second maximum reproduces",
                          f"{watts} W of {peak_w} W gives {watts / peak_w:.4f}, stated {pf}")
-            # The break even derate IS the current fraction. Once the declared derate falls
-            # under it the selection no longer covers the design point.
-            ok &= report(derate >= cf,
+            # The break even derate is the WORST of the fractions, not the current one.
+            # This read the current fraction because current was the binding line when it
+            # was written. D67 moved the binding line to power, and 0.7433 against 0.7418
+            # is a window a declared derate could sit inside while the power line failed.
+            # Whichever line binds is the one the derate has to clear.
+            break_even, binds = max((cf, "current"), (pf, "power"))
+            ok &= report(derate >= break_even,
                          "week4: the declared derate still covers the design point",
-                         f"derate {derate} against a break even of {cf:.4f}, "
-                         f"{(derate - cf) * 100:.2f} points of room")
+                         f"derate {derate} against a break even of {break_even:.4f} on "
+                         f"{binds}, {(derate - break_even) * 100:.2f} points of room")
 
         # Speed. KV times the pack voltage after the resistive drop, and the design has to
         # sit under the declared fraction of it.
@@ -3350,6 +3403,7 @@ def week5(data):
 
     ok &= check_numeric_coverage("stage-1/submission/cycloprop-stage1.md", data)
     ok &= check_design_coverage(data)
+    ok &= check_reynolds_stated(data)
 
     figs_ok, probes = check_figures(data, text)
     ok &= figs_ok

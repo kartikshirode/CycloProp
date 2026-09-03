@@ -171,7 +171,7 @@ radius and the size cancels out of the product of tip speed and chord.
 | Pitch amplitude | 40 degrees about 30 percent chord |
 | Rotor speed | 2337 rpm |
 | Tip speed | 26.92 m/s |
-| Chord Reynolds | 134,074 |
+| Chord Reynolds | 130,296 |
 | Solidity | 0.3151 |
 
 Solidity sits inside the 0.30 to 0.40 band Kellen measured this shape family across, and the

@@ -247,7 +247,7 @@ positional so the same text in the body still fails. The 1 September hardening p
 - **Material allowables are published typical values for the class**, not batch certificates, and
   no coupon has been tested. The foam is the sensitive one and the laminate is not: over a 2 to 1
   band on the skin modulus the overspeed margin moves under 3 percent, while the blade reaches
-  its floor at 0.6689 of the published foam properties. Stage 2's first coupon is a wrinkling
+  its floor at 0.6144 of the published foam properties. Stage 2's first coupon is a wrinkling
   test on the delivered foam. See D63
 - **The 0.80 continuous derate still has no source** and cannot be given one from inside the
   project. What it has now is a bound: the selection breaks even at 0.7927, no lower thrust row

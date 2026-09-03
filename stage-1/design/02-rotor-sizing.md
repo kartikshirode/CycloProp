@@ -36,7 +36,7 @@ What survives is worth naming. The nominal coefficient still comes from a Benedi
 chord Reynolds of 31,600, and Shrestha is still the only support for carrying a value across
 that gap. Kellen bounds the shape family and the low case, and he is not the provenance of the
 nominal. Reynolds also has room underneath it: design thrust can fall to 15.76 N before the stacked
-case reaches its declared floor of 2.0, and Reynolds there is 125,500, still well inside
+case reaches its declared floor of 2.0, and Reynolds there is 125,500, still well inside <!-- allow: 125,500 is the chord Reynolds at 15.76 N, not at the design point. It sits near the design figure because the two thrusts are close, and it is a different operating point rather than a stale copy -->
 Kellen's band.
 
 Solidity comes out at 0.3151 on the definition the gate uses, blades times chord over the
