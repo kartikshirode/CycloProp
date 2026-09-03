@@ -255,10 +255,18 @@ def load_numbers():
 
 
 def dotted(data, path):
+    """A path into numbers.json. Integer segments index a list, so one row of a table can
+    be named: `vector_map.0.resultant_N` is the first row's resultant. Nothing else in the
+    tree needed that until the figure manifest started citing individual rows."""
     cur = data
     for part in path.split("."):
         if isinstance(cur, dict) and part in cur:
             cur = cur[part]
+        elif isinstance(cur, list) and part.lstrip("-").isdigit():
+            i = int(part)
+            if not -len(cur) <= i < len(cur):
+                return None
+            cur = cur[i]
         else:
             return None
     return cur
@@ -3004,6 +3012,89 @@ CRITERIA_KEYS = ["10 N thrust", "thrust-to-weight", "kinematic", "aerodynamic",
                  "structural", "manufactur", "packaging", "presentation"]
 
 
+FIGURES_DIR = "stage-1/submission/figures"
+FIGURES_MANIFEST = FIGURES_DIR + "/manifest.json"
+MIN_FIGURES = 7                # the seven R43 named
+MIN_FIGURE_BYTES = 4000        # below this it is not a drawing
+FIGURE_PROBE_CHARS = 45        # a caption slice long enough to identify one figure
+
+
+def figure_probe(caption):
+    """A distinctive opening slice of a caption. Short enough to survive the way a PDF
+    extractor breaks lines, long enough that finding it means the figure was placed rather
+    than that two common words happened to line up."""
+    out = ""
+    for part in caption.split(". "):
+        out = f"{out}. {part}" if out else part
+        if len(out) >= FIGURE_PROBE_CHARS:
+            break
+    return out
+
+
+def check_figures(data, text):
+    """R43. A figure is a number the reader can see, so it is held to numbers.json the same
+    way a sentence is.
+
+    tools/figures.py records, per figure, the stored values it drew. Reading those back
+    means a figure rendered before a number moved fails here instead of sitting in the
+    report contradicting the prose beside it. Regenerating is the only way through.
+
+    Returns (ok, probes). The probes go into the PDF identity check, because a figure that
+    exists on disk and is never placed in the attachment is not a figure the reader sees.
+    """
+    man = ROOT / FIGURES_MANIFEST
+    if not report(man.is_file(), "week5: the figures carry a manifest",
+                  fail_detail=f"{FIGURES_MANIFEST} is missing, run tools/figures.py"):
+        return False, []
+    try:
+        entries = json.loads(man.read_text(encoding="utf-8")).get("figures")
+    except json.JSONDecodeError as e:
+        return report(False, "week5: the figure manifest parses", str(e)), []
+    if not isinstance(entries, list) or not entries:
+        return report(False, "week5: the figure manifest lists figures"), []
+
+    ok = report(len(entries) >= MIN_FIGURES,
+                f"week5: the report carries {MIN_FIGURES} or more figures",
+                f"{len(entries)} in the manifest")
+
+    missing, thin, stale, unref, undeclared, probes = [], [], [], [], [], []
+    for e in entries:
+        rel = e.get("file", "")
+        cap = e.get("caption", "")
+        vals = e.get("values") or {}
+        fp = ROOT / "stage-1" / "submission" / rel
+        if not fp.is_file():
+            missing.append(rel)
+            continue
+        if fp.stat().st_size < MIN_FIGURE_BYTES:
+            thin.append(f"{rel} is {fp.stat().st_size} bytes")
+        if not vals:
+            undeclared.append(rel)
+        for key, drawn in vals.items():
+            live = snum(data, key)
+            if live is None:
+                stale.append(f"{rel} cites {key}, which numbers.json does not hold")
+            elif not close(live, drawn, DISPLAY_TOL):
+                stale.append(f"{rel} drew {key} as {drawn}, numbers.json says {live}")
+        if rel not in text:
+            unref.append(rel)
+        if cap:
+            probes.append(figure_probe(cap))
+
+    ok &= report(not missing, "week5: every figure in the manifest was rendered",
+                 "; ".join(missing[:4]) if missing else f"{len(entries)} files")
+    ok &= report(not thin, "week5: no figure is an empty page",
+                 "; ".join(thin[:4]) if thin else "")
+    ok &= report(not undeclared, "week5: every figure declares the values it drew",
+                 "; ".join(undeclared[:4]) if undeclared else "")
+    ok &= report(not stale, "week5: every figure was drawn from the current numbers.json",
+                 "; ".join(stale[:4]) if stale else
+                 f"{sum(len(e.get('values') or {}) for e in entries)} values checked")
+    ok &= report(not unref, "week5: every figure is placed in the submission",
+                 "; ".join(unref[:4]) if unref else "")
+    return ok, probes
+
+
 def week5(data):
     ok = True
     ok &= require_headings("stage-1/design/07-team-and-execution.md",
@@ -3051,6 +3142,9 @@ def week5(data):
     ok &= check_numeric_coverage("stage-1/submission/cycloprop-stage1.md", data)
     ok &= check_design_coverage(data)
 
+    figs_ok, probes = check_figures(data, text)
+    ok &= figs_ok
+
     # The PDF has to be this document. Its own required sections and a few of its declared
     # values are the cheapest identity evidence that survives a rebuild.
     want = list(REQUIRED_ITEMS)
@@ -3058,6 +3152,9 @@ def week5(data):
     if decl:
         for d in [m for m in (NUM_DECL.match(l) for l in decl.group(1).splitlines()) if m][:3]:
             want.append(d.group(2).rstrip("0").rstrip(".") if "." in d.group(2) else d.group(2))
+    # A figure that exists on disk and never reaches the attachment is a figure the reader
+    # does not see, so its caption has to come back out of the built PDF.
+    want += probes
     ok &= check_pdf("stage-1/submission/cycloprop-stage1.pdf", must_contain=want)
 
     ok &= check_human_gate()

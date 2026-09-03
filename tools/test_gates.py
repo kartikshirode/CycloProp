@@ -577,7 +577,51 @@ def make_pdf(path, pages):
     path.write_bytes(out.encode("latin-1"))
 
 
-def submission_doc(path, data, rows=None, items=None):
+FIGURE_SPECS = [
+    ("fig-arrangement", "Module general arrangement",
+     ["geometry.radius_m", "geometry.blades"]),
+    ("fig-linkage", "Four-bar pitch kinematics at four azimuths",
+     ["geometry.radius_m", "pitch.offset_m"]),
+    ("fig-pitch-schedule", "Blade pitch schedule against the sinusoid it is assumed to be",
+     ["geometry.pitch_amplitude_deg"]),
+    ("fig-blade-load", "Blade force against azimuth over one revolution",
+     ["performance.thrust_N", "vector_map.0.vertical_force_N"]),
+    ("fig-vector-map", "Thrust vector map across the phase authority",
+     ["pitch.vector_range_deg", "vector_map.4.lateral_force_N"]),
+    ("fig-blade-section", "Blade section on its spar tube and pitch axis",
+     ["geometry.chord_m", "geometry.pitch_axis_pct_chord"]),
+    ("fig-mass", "Module mass by group across the drawn budget",
+     ["results.thrust_to_weight", "results.total_mass_g"]),
+]
+
+
+def figure_set(sub_dir, data):
+    """Seven rendered figures and the manifest that holds them to numbers.json.
+
+    The files are real PDFs rather than touched-empty ones, because the gate has a floor on
+    size: a figure that renders as nothing is a figure nobody drew. Padding to clear that
+    floor is the fixture doing the same work matplotlib does on the real tree.
+    """
+    figs = sub_dir / "figures"
+    entries = []
+    for fid, cap, keys in FIGURE_SPECS:
+        pages = [[f"{cap}, sheet {i + 1}", gates.__doc__.splitlines()[0][:70]] * 8
+                 for i in range(4)]
+        make_pdf(figs / f"{fid}.pdf", pages)
+        vals = {}
+        for k in keys:
+            v = gates.dotted(data, k)
+            vals[k] = round(v, 6) if isinstance(v, float) else v
+        entries.append({"id": fid, "title": cap, "file": f"figures/{fid}.pdf",
+                        "caption": cap + ". Drawn from numbers.json by tools/figures.py.",
+                        "values": vals})
+    (figs / "manifest.json").write_text(
+        json.dumps({"_note": "fixture", "figures": entries}, indent=1) + chr(10),
+        encoding="utf-8")
+    return entries
+
+
+def submission_doc(path, data, rows=None, items=None, figures=()):
     """A submission that clears every week 5 gate. Nothing had ever built one, so the
     criteria map had never been exercised on a document meant to pass."""
     body = ["# CycloProp Stage 1 submission", ""]
@@ -588,6 +632,8 @@ def submission_doc(path, data, rows=None, items=None):
     for crit, where in (rows if rows is not None else CRITERIA_ROWS):
         body.append(f"| {crit} | {where} |")
     perf, geo = data["performance"], data["geometry"]
+    for e in figures:
+        body += [f"![{e['caption']}]({e['file']})", ""]
     body += ["", "## Numbers used", "",
              f"- performance.thrust_N = {rnd(perf['thrust_N'], 2)}",
              f"- geometry.radius_m = {geo['radius_m']}",
@@ -663,7 +709,7 @@ def build(root, data, upto=4):
              ("operating.rpm", rnd(data["operating"]["rpm"], 2)),
              ("performance.thrust_N", rnd(data["performance"]["thrust_N"], 2))])
         sub = d / "stage-1" / "submission"
-        submission_doc(sub / "cycloprop-stage1.md", data)
+        submission_doc(sub / "cycloprop-stage1.md", data, figures=figure_set(sub, data))
         build_pdf_from(sub / "cycloprop-stage1.md", sub / "cycloprop-stage1.pdf")
         (sub / "email-draft.md").write_text(
             "\n".join(["# Stage 1 submission email", "",
@@ -688,8 +734,14 @@ def build(root, data, upto=4):
 def build_pdf_from(md, pdf):
     """Stands in for the pandoc build: every heading and every declared number reaches the
     attachment, which is what the identity gate reads back."""
-    lines = [l.lstrip("# ").rstrip() for l in md.read_text(encoding="utf-8").splitlines()
-             if l.startswith("#") or l.strip().startswith("- ")]
+    lines = []
+    for l in md.read_text(encoding="utf-8").splitlines():
+        if l.startswith("#") or l.strip().startswith("- "):
+            lines.append(l.lstrip("# ").rstrip())
+        elif l.startswith("!["):
+            # pandoc renders the caption as text under the image, so the stand-in has to
+            # as well, or the identity gate could never see a figure reach the attachment.
+            lines.append(l[2:l.index("](")])
     pages = [lines[i:i + 6] or ["(blank)"] for i in range(0, max(len(lines), 1), 6)]
     while len(pages) < 4:
         pages.append(["CycloProp Stage 1, continued"])
@@ -2177,6 +2229,139 @@ def front_matter_on_the_submission(root, data):
 
 case("a submission carrying a pandoc front matter block passes", True,
      upto=5, week=5, tweak=front_matter_on_the_submission)
+
+
+# ---------------------------------------------------------------- R43, the figures
+# Seven attacks, one per way a figure can lie. The one that matters is the first: a
+# figure rendered before a number moved is a wrong drawing sitting beside correct prose,
+# and nothing in the repo could see it until this gate existed.
+
+
+def _manifest(root):
+    return root / "stage-1" / "submission" / "figures" / "manifest.json"
+
+
+def _read_manifest(root):
+    return json.loads(_manifest(root).read_text(encoding="utf-8"))
+
+
+def _write_manifest(root, m):
+    _manifest(root).write_text(json.dumps(m, indent=1) + chr(10), encoding="utf-8")
+
+
+def figure_drawn_on_a_stale_number(root, data):
+    """The figure was rendered, then the number under it moved. This is the whole reason
+    the manifest exists."""
+    m = _read_manifest(root)
+    vals = m["figures"][0]["values"]
+    key = next(iter(vals))
+    vals[key] = vals[key] * 1.35
+    _write_manifest(root, m)
+
+
+case("a figure drawn before its number moved is rejected", False, upto=5, week=5,
+     tweak=figure_drawn_on_a_stale_number)
+
+
+def figure_cites_a_key_that_is_gone(root, data):
+    m = _read_manifest(root)
+    vals = m["figures"][1]["values"]
+    vals["pitch.a_key_no_schema_holds"] = vals.pop(next(iter(vals)))
+    _write_manifest(root, m)
+
+
+case("a figure citing a key numbers.json does not hold is rejected", False, upto=5,
+     week=5, tweak=figure_cites_a_key_that_is_gone)
+
+
+def figure_declares_nothing(root, data):
+    """An entry with no values is a figure nothing can hold to the data."""
+    m = _read_manifest(root)
+    m["figures"][2]["values"] = {}
+    _write_manifest(root, m)
+
+
+case("a figure that declares no values is rejected", False, upto=5, week=5,
+     tweak=figure_declares_nothing)
+
+
+def figure_file_never_rendered(root, data):
+    (root / "stage-1" / "submission" / m_file(root, 3)).unlink()
+
+
+def m_file(root, i):
+    return _read_manifest(root)["figures"][i]["file"]
+
+
+case("a manifest entry whose file was never rendered is rejected", False, upto=5,
+     week=5, tweak=figure_file_never_rendered)
+
+
+def figure_is_an_empty_page(root, data):
+    """A PDF that opens and draws nothing satisfies "the file exists" and no reader."""
+    p = root / "stage-1" / "submission" / m_file(root, 4)
+    p.write_bytes(b"%PDF-1.4\n%%EOF\n")
+
+
+case("a figure rendered as an empty page is rejected", False, upto=5, week=5,
+     tweak=figure_is_an_empty_page)
+
+
+def figure_never_placed(root, data):
+    """Rendered, manifested, and never put in the report."""
+    md = root / "stage-1" / "submission" / "cycloprop-stage1.md"
+    target = m_file(root, 5)
+    keep = [l for l in md.read_text(encoding="utf-8").splitlines() if target not in l]
+    md.write_text(chr(10).join(keep), encoding="utf-8")
+    build_pdf_from(md, md.with_suffix(".pdf"))
+
+
+case("a figure the submission never places is rejected", False, upto=5, week=5,
+     tweak=figure_never_placed)
+
+
+def six_figures(root, data):
+    m = _read_manifest(root)
+    dropped = m["figures"].pop()
+    _write_manifest(root, m)
+    md = root / "stage-1" / "submission" / "cycloprop-stage1.md"
+    keep = [l for l in md.read_text(encoding="utf-8").splitlines()
+            if dropped["file"] not in l]
+    md.write_text(chr(10).join(keep), encoding="utf-8")
+    build_pdf_from(md, md.with_suffix(".pdf"))
+
+
+case("a report carrying six figures where seven are required is rejected", False,
+     upto=5, week=5, tweak=six_figures)
+
+
+def figure_placed_but_not_in_the_pdf(root, data):
+    """The image is in the source and the attachment was built before it went in. The
+    file reference check passes and the reader still sees nothing."""
+    md = root / "stage-1" / "submission" / "cycloprop-stage1.md"
+    target = m_file(root, 6)
+    keep = [l for l in md.read_text(encoding="utf-8").splitlines() if target not in l]
+    build_pdf_from_lines(keep, md.with_suffix(".pdf"))
+
+
+def build_pdf_from_lines(lines, pdf):
+    tmp = pdf.with_suffix(".stale.md")
+    tmp.write_text(chr(10).join(lines), encoding="utf-8")
+    build_pdf_from(tmp, pdf)
+    tmp.unlink()
+
+
+case("a figure placed in the source but missing from the attachment is rejected", False,
+     upto=5, week=5, tweak=figure_placed_but_not_in_the_pdf)
+
+
+def no_manifest_at_all(root, data):
+    _manifest(root).unlink()
+
+
+case("a submission with no figure manifest is rejected", False, upto=5, week=5,
+     tweak=no_manifest_at_all)
+
 
 
 def pdf_selftests():
