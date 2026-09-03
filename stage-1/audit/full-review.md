@@ -329,6 +329,20 @@ carried into Phase 6 with R39, R42 and R50, which no phase had picked up.
 
 ### Phase 6: re-audit
 
+**Executed 4 September 2026. See [phase-6-reaudit.md](phase-6-reaudit.md).** All five passes
+re-run. Seven findings: four fixed during the audit, one false positive that earned an escape
+marker, one standing hole and one that needs a person. The 33 quantity re-derivation reproduces
+exactly and no arithmetic moved.
+
+The two that matter. A break even derate was being measured against the line that stopped binding
+when D67 moved it, which is how the evidence ledger came to contradict the submission about the
+number that decides whether the drive is selectable. And mass is still not recomputed from
+geometry for 29 of the 33 lines, which is this review's own headline finding surviving all six
+phases; it is narrowed, it is not closed, and it is not closable by a gate whose author also
+writes the data.
+
+63 of the 64 findings are closed. The one that is not is the mass case.
+
 29. Rerun the five passes against the fixed tree. A fix nobody attacked is a fix nobody has
     tested
 
