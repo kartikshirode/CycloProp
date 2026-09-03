@@ -23,9 +23,9 @@ on the record now.
 | Material | Where | Density | Modulus | Allowable | The margin it sets |
 | --- | --- | --- | --- | --- | --- |
 | Rohacell 51 IG class PMI foam | blade core, 88 percent fill | 52 kg/m3 | 70 MPa, 19 MPa shear | 0.8 MPa | blade bending, through skin wrinkling |
-| 60 gsm 2x2 carbon twill, 2 plies | blade skin, 0.142 mm cured | 1550 kg/m3 | 60 GPa | 400 MPa | blade bending, 2.83 and 1.97 |
-| roll wrapped CFRP tube | spar, pitch links, rotor shaft, frame | 1550 kg/m3 | 130 GPa | 700 MPa, 55 MPa shear | shaft torsion 17.58, combined 9.44 |
-| 7075-T6 aluminium | horns, root fittings, brackets, blocks, lugs | 2810 kg/m3 | 71.7 GPa | 400 MPa | pitch link path, 3.30 |
+| 60 gsm 2x2 carbon twill, 2 plies | blade skin, 0.142 mm cured | 1550 kg/m3 | 60 GPa | 400 MPa | blade bending, 3.00 and 2.08 |
+| roll wrapped CFRP tube | spar, pitch links, rotor shaft, frame | 1550 kg/m3 | 130 GPa | 700 MPa, 55 MPa shear | shaft torsion 16.18, combined 9.90 |
+| 7075-T6 aluminium | horns, root fittings, brackets, blocks, lugs | 2810 kg/m3 | 71.7 GPa | 400 MPa | pitch link path, 3.29 |
 | 6061-T6 aluminium | pulleys, carrier ring gear, sector gear | 2700 kg/m3 | 68.9 GPa | 240 MPa | none, these are stiffness parts |
 | Araldite 2011 class epoxy paste | shaft plugs, root fittings, block bonds | 1050 kg/m3 | | 8 MPa shear | none yet, see below |
 
@@ -33,8 +33,9 @@ on the record now.
 what limits the blade, at 215.3 MPa, and that stress is half the cube root of the product of
 three moduli: the skin's 60 GPa and the core's 70 MPa and 19 MPa. Two of the three belong to the
 foam. Drop to a 32 kg/m3 grade and the wrinkling stress falls by roughly a quarter, which takes
-the combined blade margin at overspeed under the 1.5 floor. So the grade is part of the
-structure and a substitution means a recalculation.
+the combined blade margin at overspeed from 2.08 to 1.64. That still clears the 1.5 floor, and
+this section used to say it did not. The grade is part of the structure either way and a
+substitution means a recalculation, which is the point that survives.
 
 The laminate's own 400 MPa never gets reached. Neither does the spar's 700 MPa, which would
 carry 63.19 Nm on its own against the 25.2528 Nm the section is signed off at. Both are quoted
@@ -57,14 +58,14 @@ half the cube root of the three moduli, and the allowable moment is that stress 
 skin modulus. Lower the skin modulus and the wrinkling stress falls as its cube root while EI over
 the skin modulus rises, because the spar and the foam terms stay where they are. Sweep the skin
 from 0.5 of its published value to all of it and the worst overspeed margin anywhere in that band
-is 1.9587, against 1.9681 at the published value. Under 3 percent across a 2 to 1 range.
+is 2.0739, against 2.0839 at the published value. Under 1 percent across a 2 to 1 range.
 
 The foam is the sensitive one, because its modulus and its shear modulus both sit inside the same
 cube root. Knock the pair down together and the allowable moves as the two thirds power, and the
-overspeed margin reaches 1.5 at 0.6689 of the published foam properties. The realistic version of
+overspeed margin reaches 1.5 at 0.6144 of the published foam properties. The realistic version of
 that is a grade substitution rather than a shortfall, and it is milder: on Rohacell 31 IG instead
 of 51 IG the blade weighs 28.057 g rather than 31.75, so the centrifugal demand falls with the
-allowable and the overspeed margin lands at 1.5443. It still clears.
+allowable and the overspeed margin lands at 1.6351. It still clears.
 
 So the blade is a foam limited structure, not a laminate limited one, and both floors are gated.
 Coupon testing is Stage 2 work and it is listed at the end.
@@ -116,7 +117,7 @@ needs a cutter nobody local keeps on the shelf. Everything else is turning, mill
    motor plate along a slot
 7. ESC, controller, servos, harness
 
-**What gets measured before it spins.** A rotor at 2405 rpm with a 221 N pull on every blade is
+**What gets measured before it spins.** A rotor at 2337 rpm with a 209 N pull on every blade is
 not a thing to power up hopefully.
 
 - Blade masses matched inside 0.5 g across the set of 3. On the 110 mm radius that residual is
@@ -130,11 +131,12 @@ not a thing to power up hopefully.
   correct it
 - The rotor turned by hand through 2 full revolutions with the servos at each end of their
   travel, watching for a link going over centre. The worst transmission angle in the design is
-  143.23 degrees and it wants feeling rather than assuming
+  135.68 degrees, which is 44.32 degrees from a right angle read folded, and it wants feeling
+  rather than assuming
 - Belt tension by span deflection, and a static pull test on one blade attachment to 340 N,
-  which is above the overspeed centrifugal load of 318.908 N
-- First spin staged at 600, then 1200, then 1800, then 2405 rpm, with current draw logged at
-  every step against the predicted 20.61 A
+  which is above the overspeed centrifugal load of 301.192 N
+- First spin staged at 600, then 1200, then 1800, then 2337 rpm, with current draw logged at
+  every step against the predicted 19.29 A
 
 ## Cost
 
@@ -146,17 +148,17 @@ quoted for it. Confirming them is Stage 2 work and it is carried as a debt. The 
 
 | Item | Make or buy | Qty | Unit INR | Line INR | Lead | Likely source |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-Motor Antigravity MN5006 KV450 | buy | 1 | 8500 | 8500 | 3 wk | Quadkopters, New Delhi, at the datasheet part price |
-| 40 A 6S brushless controller | buy | 1 | 3200 | 3200 | 2 wk | Robu.in, Pune |
-| Corona DS-929MG class servo | buy | 2 | 1450 | 2900 | 2 wk | Robu.in, Pune |
+| T-Motor Antigravity MN5006 KV450 | buy | 1 | 8500 | 8500 | 3 wk | Quadkopters, New Delhi |
+| 40 A 8S brushless controller | buy | 1 | 3600 | 3600 | 2 wk | Robu.in, Pune |
+| 20 g class digital metal gear servo | buy | 2 | 1900 | 3800 | 2 wk | Robu.in, Pune |
 | Matek F411-WSE class controller board | buy | 1 | 3900 | 3900 | 3 wk | Quadkopters, New Delhi |
-| 693ZZ miniature bearing | buy | 6 | 60 | 360 | 1 wk | local bearing house, Mumbai |
+| 693ZZ miniature bearing | buy | 12 | 60 | 720 | 1 wk | local bearing house, Mumbai |
 | MR128ZZ miniature bearing | buy | 2 | 90 | 180 | 1 wk | local bearing house, Mumbai |
 | 61802 deep groove bearing | buy | 2 | 240 | 480 | 1 wk | local bearing house, Mumbai |
 | M3 aluminium bodied rod end | buy | 6 | 180 | 1080 | 2 wk | Robu.in, Pune |
-| HTD-3M belt, 9 mm wide, 300 mm | buy | 1 | 420 | 420 | 2 wk | Powergear, Coimbatore |
+| HTD-3M belt, 9 mm wide, 375 mm | buy | 1 | 470 | 470 | 2 wk | Powergear, Coimbatore |
 | HTD-3M pulley blank, 16 tooth | buy | 1 | 650 | 650 | 2 wk | Powergear, Coimbatore |
-| HTD-3M pulley blank, 56 tooth | buy | 1 | 1250 | 1250 | 2 wk | Powergear, Coimbatore |
+| HTD-3M pulley blank, 68 tooth | buy | 1 | 1600 | 1600 | 2 wk | Powergear, Coimbatore |
 | Rohacell 51 IG block, 300 by 150 by 20 mm | buy | 1 | 2600 | 2600 | 4 wk | importer landed price, no Indian stockist found |
 | 60 gsm carbon twill, 1 m2 | buy | 1 | 1400 | 1400 | 2 wk | Composites Today, Chennai |
 | epoxy laminating resin and hardener, 500 g | buy | 1 | 1600 | 1600 | 1 wk | Composites Today, Chennai |
@@ -165,17 +167,17 @@ quoted for it. Confirming them is Stage 2 work and it is carried as a debt. The 
 | 7075-T6 bar and plate stock | buy | 1 | 2200 | 2200 | 2 wk | metal stockist, Mumbai |
 | 6061-T6 bar stock | buy | 1 | 700 | 700 | 1 wk | metal stockist, Mumbai |
 | M3 fasteners, washers and threaded inserts | buy | 1 | 900 | 900 | 1 wk | fastener stockist, Mumbai |
-| silicone wire, connectors and heatshrink | buy | 1 | 800 | 800 | 1 wk | Robu.in, Pune |
+| silicone wire, connectors and heatshrink | buy | 1 | 900 | 900 | 1 wk | Robu.in, Pune |
 | blade mould, two halves from tooling board | make | 1 | 9000 | 9000 | 3 wk | CNC job work against the section drawing |
 | spider arms and root brackets, CNC job work | make | 1 | 6500 | 6500 | 2 wk | CNC job work, 7075 and CFRP plate |
-| bearing blocks and motor mount plate, CNC job work | make | 1 | 4800 | 4800 | 2 wk | CNC job work, 7075 plate |
+| bearing blocks and motor mount plate, CNC job work | make | 1 | 4800 | 4800 | 2 wk | CNC job work against the block and plate drawings, 7075 |
 | carrier ring gear and servo sector gear | make | 1 | 5500 | 5500 | 3 wk | gear cutting job work, 6061 |
 | rotor assembly and balancing jig | make | 1 | 3000 | 3000 | 2 wk | aluminium extrusion and a dial indicator mount |
 
-Bought parts and material come to 36970 INR, tooling and fabrication to 28800, and the module
-totals 65770 INR. Longest single lead is 4 weeks.
+Bought parts and material come to 39130 INR, tooling and fabrication to 28800, and the module
+totals 67930 INR. Longest single lead is 4 weeks.
 
-**The five lines above 4500 INR, and what each one rests on.** Together they are 52 percent of
+**The five lines above 4500 INR, and what each one rests on.** Together they are 50 percent of
 the total, so they are the ones worth defending. The motor at 8500 is the one component in the
 module read off a manufacturer's datasheet, and 8500 is the published Indian retail figure for
 that part. The blade mould at 9000 is a shop rate for machining 2 halves out of tooling board
@@ -184,9 +186,9 @@ CNC lines at 6500, 5500 and 4800 are shop rates for a batch of parts each. Of th
 pair is the one that could move most, because gear cutting at a quantity of one is priced by
 setup and not by metal.
 
-**Bought against made.** 56 percent of the money is bought parts and 44 percent is tooling and
+**Bought against made.** 58 percent of the money is bought parts and 42 percent is tooling and
 job work, and the split flatters the module a little: the mould and the jig are one time costs
-that a second unit does not pay. A second rotor costs about 53770 INR, because 12000 of that
+that a second unit does not pay. A second rotor costs about 55930 INR, because 12000 of that
 tooling does not repeat. The 3 CNC job lines do.
 
 **What drives the schedule.** The 4 week Rohacell import is the critical path and it is the only
@@ -197,12 +199,12 @@ above depends on the core moduli, so the fallback is a thicker skin and a rerun.
 
 ## Mass reserve
 
-The budget carries a visible 15.00 g reserve on the frame and mounting group, which is 2.5
-percent of the 607.97 g nominal module. It sits on that group because the frame is the least
+The budget carries a visible 15.00 g reserve on the frame and mounting group, which is 2.2
+percent of the 677.91 g nominal module. It sits on that group because the frame is the least
 developed part of the design and week 2 said so first, and it covers gussets, cable clamps, the
 servo bracket and the ESC tray. None of those is drawn.
 
-That reserve is separate from the conservative column. 684.7 g against 607.97 is 76.73 g of
+That reserve is separate from the conservative column. 763.24 g against 677.91 is 85.33 g of
 growth allowance, itemised line by line at a rate set by what each line is made of, and the
 thrust to weight requirement is tested against the conservative figure. The module therefore
 carries its uncertainty twice: once as an undrawn hardware allowance inside the nominal budget,
@@ -212,31 +214,31 @@ and once as a per line growth rate over the top of it.
 
 - **Coupon data, foam first.** A sandwich wrinkling coupon on the delivered foam, because the
   blade allowable moves as the two thirds power of the foam properties and reaches its floor at
-  0.6689 of them. Then the certificate for the delivered grade. The laminate panel comes after,
+  0.6144 of them. Then the certificate for the delivered grade. The laminate panel comes after,
   for areal mass and for the deflection and wind up numbers, since a skin shortfall barely
   touches the strength margin. Plus a bond shear coupon
 - **Real quotations.** Every price here is indicative. The 5 lines above 4500 INR need written
   quotes, and the gear cutting needs a shop that has seen the drawing
 - **A balance tolerance.** The jig is budgeted. The acceptance number behind it is not calculated
 - **A mould trial.** A first blade out of a wet layup mould usually comes out heavy, and the
-  blade lines are 15.7 percent of the module
+  blade lines are 14.0 percent of the module
 
 ## Numbers used
 
-- results.total_mass_g = 607.97
-- results.mass_g_conservative = 684.7
-- results.bom_bought_inr = 36970
+- results.total_mass_g = 677.91
+- results.mass_g_conservative = 763.24
+- results.bom_bought_inr = 39130
 - results.bom_tooling_inr = 28800
-- results.bom_total_inr = 65770
+- results.bom_total_inr = 67930
 - results.bom_longest_lead_weeks = 4
 - structure.blade_allowable_Nm = 25.2528
 - structure.blade_ei_Nm2 = 51.115
-- structure.blade_attachment_allowable_N = 540.0
-- structure.pitch_link_allowable_N = 349.727
+- structure.blade_attachment_allowable_N = 781.148
+- structure.pitch_link_allowable_N = 474.074
 - structure.shaft_allowable_Nm = 24.9563
-- structure.centrifugal_load_overspeed_N = 318.908
-- structure.blade_combined_margin = 2.8341
-- structure.blade_combined_margin_overspeed = 1.9681
+- structure.centrifugal_load_overspeed_N = 301.192
+- structure.blade_combined_margin = 3.0008
+- structure.blade_combined_margin_overspeed = 2.0839
 - structure.pitch_link_margin = 3.3015
 - structure.blade_wrinkle_stress_MPa = 215.2638
 - structure.blade_allow_skin_Nm = 25.2528
@@ -245,7 +247,7 @@ and once as a per line growth rate over the top of it.
 - structure.blade_foam_modulus_MPa = 70.0
 - structure.blade_foam_shear_MPa = 19.0
 - structure.blade_skin_band_low = 0.5
-- structure.blade_skin_band_worst_margin = 1.9587
-- structure.blade_foam_knockdown_at_floor = 0.6689
-- structure.blade_foam_downgrade_margin = 1.5443
+- structure.blade_skin_band_worst_margin = 2.0739
+- structure.blade_foam_knockdown_at_floor = 0.6144
+- structure.blade_foam_downgrade_margin = 1.6351
 - structure.blade_foam_downgrade_blade_g = 28.057
