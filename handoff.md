@@ -8,11 +8,17 @@ NEXT-WEEK: 5
 Weeks 1 to 4 are done. Geometry froze in week 2, the mechanism in week 3, and week 4 closed the
 structure, the refined mass budget and the materials and manufacturing case.
 
-**The gates are red and they are meant to be.** A five pass review on 1 September found 63
-things, and Phase 1 of the fix plan wrote the gates that expose the three which move the design.
-`python tools/check.py --all` fails 9 gates. None of them is a regression and every one is a
-finding waiting on Phase 2. Read `stage-1/audit/full-review.md` and D66 before touching anything,
-and do not make a gate pass by moving the number it reads.
+**The gates are green again and the design behind them is weaker than it was.** A five pass
+review on 1 September found 63 things. Phase 1 wrote the gates that expose the three which move
+the design, Phase 2 corrected the physics and Phase 3 corrected the documents. `python
+tools/check.py --all` passes 269 gates and `python tools/test_gates.py` passes 187 self-tests.
+
+What changed under them is the part to read rather than the pass count. The figure of merit was
+being read inconsistently with the thrust coefficient, so the design point came down from 18 N
+to 17 N, the pack interface went from 6S to 8S, and six mass lines were wrong for reasons of
+their own. The design case still clears thrust to weight 2.5. The three downside cases no longer
+do. Read D66, D67 and D68 and `stage-1/audit/full-review.md` before touching anything, and do
+not make a gate pass by moving the number it reads.
 
 **Week 5 has not run and this file does not say it has.** It is hard blocked by week H. A
 preparation pass on 31 August closed every week 5 gate that does not need a person, and a
@@ -57,13 +63,14 @@ is `.claude/weekly-loop.md` and only that file, per D28.
 ## Where the design stands
 
 One cyclorotor. 110 mm radius, 72.6 mm chord, 290.4 mm span, 3 blades, NACA 0020, pitching plus
-or minus 40 degrees about the 30 percent chord axis, turning at 2405 rpm, driven by one T-Motor
-MN5006 KV450 through a 3.5 to 1 toothed belt. 18 N of design thrust against a 10 N requirement.
+or minus 40 degrees about the 30 percent chord axis, turning at 2337 rpm, driven by one T-Motor
+MN5006 KV450 through a 4.25 to 1 toothed belt on a declared 8S pack. 17 N of design thrust
+against a 10 N requirement.
 
-The pitch mechanism is a passive four-bar per blade, all three sharing one offset pivot 15.4 mm
-off the rotor axis. Link lengths 110.0, 15.40, 105.0 and 24.4 mm. Two 12.5 g servos turn a
+The pitch mechanism is a passive four-bar per blade, all three sharing one offset pivot 11.53 mm
+off the rotor axis. Link lengths 110.0, 11.53, 108.0 and 18.0 mm. Two 20 g servos turn a
 phasing carrier through a 1.5 step up and give 120 degrees of phase authority. Packaged envelope
-364.4 by 316.1 by 362.1 mm on four mount points.
+364.4 by 316.5 by 362.5 mm on four mount points.
 
 The blade is a PMI foam core at 88 percent fill, two plies of 60 gsm carbon twill, a CFRP spar on
 the pitch axis and two bonded 7075-T6 root fittings. 31.75 g a blade. The shaft is a 16 mm CFRP
@@ -74,18 +81,23 @@ is how week 2 confused itself for a fortnight:
 
 | Case | Thrust | Mass | T/W |
 | --- | --- | --- | --- |
-| design point | 18.00 N | 607.97 g | 3.018 |
-| mass downside alone | 18.00 N | 684.70 g | 2.680 |
-| coefficient downside alone | 17.10 N | 607.97 g | 2.867 |
-| both stacked | 17.10 N | 684.70 g | 2.5457 |
+| design point | 17.00 N | 677.91 g | 2.5563 |
+| coefficient downside alone | 16.15 N | 677.91 g | 2.4284 |
+| mass downside alone | 17.00 N | 763.24 g | 2.2705 |
+| both stacked | 16.15 N | 763.24 g | 2.1569 |
 
-All four clear the hard limit of 2.5, and since week 4 the mass in that table is a 33 line budget
-of drawn sections and catalogue parts rather than an estimate. The stacked row clears by 12.5 g,
-where week 2 cleared by 4.8. That is the hard gate D30 moved into week 4 and it is passed.
+**One of the four clears the hard limit of 2.5 and three do not.** Before D67 all four cleared.
+The requirement is stated on the module and the design estimate meets it at 2.5563. Holding the
+downside cases to 2.5 as well was this project's own discipline, and the corrections spent it.
+The downside cases are held to a declared floor of 2.0 now, and the gate requires the closing
+mass to be computed and published: **104.76 g** out of a 763.24 g conservative column, or a
+target of 658.48 g. Since week 4 the mass in that table is a 33 line budget of drawn sections and
+catalogue parts rather than an estimate.
 
-The internal 2.75 target from D17 is still unmet and still not claimed. It wants the conservative
-column at 633.8 g, so the gap is 50.9 g. That is a target and not a limit, and no further pass
-over the budget closes it.
+The internal 2.75 target from D17 is further away than it was and still not claimed. It wants the
+conservative column at 598.6 g, so the gap is 164.6 g. Refinement no longer pays any of it back;
+it costs 2.19 g, because 38.49 g saved on growth allowance is less than the 40.68 g the nominal
+column gained.
 
 ## Structural state
 
@@ -95,18 +107,20 @@ section properties that live in `tools/structure.py` and not in `numbers.json`.
 
 | Case | Demand | Margin |
 | --- | --- | --- |
-| blade bending, aerodynamic only | 0.8712 Nm | 28.99 |
-| blade bending, aerodynamic and centrifugal | 8.9103 Nm | 2.83 |
-| blade bending at 1.20 overspeed | 12.8308 Nm | 1.97 |
-| rotor shaft torsion | 1.41944 Nm | 17.58 |
-| rotor shaft, bending and torsion combined | 5.83 MPa | 9.44 |
-| pitch link path, the horn governs | 105.93 N | 3.30 |
-| blade attachment, centrifugal | 221.464 N | 2.44 |
-| blade attachment at 1.20 overspeed | 318.908 N | 1.69 |
+| blade bending, aerodynamic only | 0.8228 Nm | 30.69 |
+| blade bending, aerodynamic and centrifugal | 8.4153 Nm | 3.00 |
+| blade bending at 1.20 overspeed | 12.1181 Nm | 2.08 |
+| rotor shaft torsion | 1.54226 Nm | 16.18 |
+| rotor shaft, bending and torsion combined | 5.56 MPa | 9.90 |
+| pitch link path, the horn governs | 144.19 N | 3.29 |
+| blade attachment, centrifugal | 209.161 N | 3.73 |
+| blade attachment at 1.20 overspeed | 301.192 N | 2.59 |
 
-The module is sized by the blade in combined bending and by the blade attachment, and everything
-else is over 3. Each blade pulls 221.464 N against a peak aerodynamic 24.00 N, so this is a
-centrifugal machine before it is an aerodynamic one. See D49.
+Two margins sit under 3 and both are the overspeed cases, so the declared 1.20 factor is what
+sizes this module rather than any operating load. The blade in combined bending is the tightest
+at 2.08, and it took that place from the blade attachment when D67 duplexed the pitch bearings.
+Each blade pulls 209.161 N against a peak aerodynamic 22.67 N, so this is a centrifugal machine
+before it is an aerodynamic one. See D49 and D68.
 
 ## What is left of week 5
 
@@ -212,13 +226,22 @@ positional so the same text in the body still fails. The 1 September hardening p
 
 ## Open items
 
-- **The blade attachment at 1.20 overspeed is 1.69 and it is the tightest margin in the module.**
-  The duty is computed now rather than flagged: the bearing sits at 0.5533 of full recirculation,
-  so it wears where it sits, and it carries a static safety factor of 2.44 at the operating load
-  against a declared floor of 2.0. What is still missing is a run to failure at speed on the
-  flight grease. See D60
+- **The blade attachment at 1.20 overspeed is 2.59 and it is no longer the tightest margin.**
+  It was 1.69 on a supplier listing of 270 N per bearing; ISO 76 on the bearing's own ball
+  complement gives 216.985 N, and duplexing to four bearings per blade at 90 percent sharing
+  gives 781 N. The duty is computed rather than flagged: the bearing sits at 0.5533 of full
+  recirculation, so it wears where it sits, and it carries a static safety factor of 4.15 at the
+  operating load against a declared floor of 2.0. What is still missing is a run to failure at
+  speed on the flight grease. See D60 and D67
+- **The stacked conservative thrust to weight is 2.1569, under the 2.5 requirement.** The design
+  estimate clears at 2.5563 and the downside cases are held to a declared floor of 2.0. Closing
+  the stacked case needs 104.76 g out of a 763.24 g conservative column, which is a Stage 2 mass
+  programme. See D67 and D68
+- **The pitch offset controller cannot take the declared pack.** The F411-WSE class board is
+  rated 6 to 30 V and 8S reaches 33.6 V charged. The module needs a step-down ahead of it or a
+  board rated past 34 V. Neither is drawn and no mass line carries it. See D68
 - **The BOM is priced and not quoted.** No supplier was contacted. The 5 lines above 4500 INR are
-  52 percent of the 65770 INR total and they need written quotes at Stage 2. See D52
+  50 percent of the 67930 INR total and they need written quotes at Stage 2. See D52
 - **Material allowables are published typical values for the class**, not batch certificates, and
   no coupon has been tested. The foam is the sensitive one and the laminate is not: over a 2 to 1
   band on the skin modulus the overspeed margin moves under 3 percent, while the blade reaches
