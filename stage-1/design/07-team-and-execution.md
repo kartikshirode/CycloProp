@@ -1,9 +1,9 @@
 # Team capability and execution plan
 
 Required Stage 1 item 7. Two halves. The execution plan, the capability structure and the gap
-analysis are written here from the work the repository already contains. The people, the
-institution, the prior projects, the tool licences and the weekly hours are not, and no agent
-may write them: inventing a team is fabrication and it is a blocked trigger in the loop config
+analysis are written here from the work the repository already contains. The member-level
+details, prior projects, tool licences and facility access are not complete, and no agent may
+invent them: that is a blocked trigger in the loop config
 under D5.
 
 So read this as a form with the arithmetic already done. **Structure comes from the repository,
@@ -17,18 +17,19 @@ neither. Those need no human input because the files are the evidence.
 
 ## What a person has to supply
 
-Nine placeholders. The submission cannot go out with any of them unfilled, and four of them are
-also week H items in `../human-gate.md`.
+Nine fields were tracked for the human handoff. The Competition ID and Team ID for P-7 are now
+supplied, while the remaining member details still need filling. Four of the fields are also
+week H items in `../human-gate.md`.
 
 | Tag | What is missing | Where it goes | Also a week H item |
 | --- | --- | --- | --- |
 | P-1 | Roster: how many people, and each one's role on this module | Roster, and the submission's item 7 | yes, ROSTER-CONFIRMED |
-| P-2 | Institution and programme for each member | Roster | no |
-| P-3 | Prior work behind each preference area claimed | Capability against the preference list | no |
+| P-2 | Institution and programme for each member | Roster | institution supplied, programmes still needed |
+| P-3 | Prior work behind each preference area claimed | Capability against the preference list | still needed |
 | P-4 | Which CAD, CFD, FEA and multibody tools are actually available, and on what licence | Stage 2 gates, and the tool column | no |
-| P-5 | Weekly hours each member can commit from 3 October | Execution plan | no |
+| P-5 | Weekly hours each member can commit from 3 October | Execution plan | 5 hours per week |
 | P-6 | Who sends the submission, from which address | Nowhere in this file. It is a week H marker | yes, SENDER-CONFIRMED |
-| P-7 | The registration reference the submission has to quote | The email draft and the report title block | yes, REGISTRATION-CONFIRMED |
+| P-7 | The Competition ID and Team ID the submission has to quote | The email draft and the report identity table | yes, REGISTRATION-CONFIRMED |
 | P-8 | Eligibility checked against the disqualification clause, for every member | Nowhere in this file. It is a week H marker | yes, ELIGIBILITY-CHECKED |
 | P-9 | Workshop, lab and test access: what exists and what has to be hired or borrowed | The route through the missing capability | no |
 
@@ -40,12 +41,16 @@ every hour of this at risk rather than just the section it sits in.
 
 ### Roster
 
-`[P-1]` `[P-2]`
+Kalash, 3 members, VPKBIET.
 
-One person as of 27 August 2026. If that is still true when the submission goes out, this
-section is written for a solo entry and it says so plainly. A solo entry with a real plan and
-honest scope reads better in a viva than five names nobody can stand behind, and the decision
-gate in the plan says the same thing.
+`[P-1]` still needs each member's name and role. `[P-2]` still needs the programme for each
+member.
+
+The roster count and institution are now supplied. The capability section stays open until the
+three member roles and programmes are written down.
+
+Competition ID: `CP-439436FADAD2`
+Team ID: `TM-5A7C41AF909`
 
 Team size is capped at 5 by the problem statement. Nothing in Stage 1 needed more than one
 person, and the Stage 2 item list below is where headcount starts to matter: CFD and FEA are
@@ -99,10 +104,9 @@ plan below submits on 1 December, a day early, the same margin Stage 1 uses. Sta
 land on 2 October and the grant that pays for Stage 2 work arrives after them, which is why
 quotations and coupon material sit in the first week rather than the third.
 
-`[P-5]` sets whether this calendar is real. Stage 1 was planned at roughly 84 focused hours
-after week 1 and it ran on one person. Stage 2 is a bigger package with two solver workstreams
-in it, and until weekly hours are written down the calendar below is an assumption rather than
-a schedule.
+`[P-5]` sets whether this calendar is real. The current commitment is 5 hours per week from
+3 October. Stage 2 is a bigger package with two solver workstreams in it, so the calendar below
+still needs the roster and role details before it becomes a schedule.
 
 ### Stage 2 deliverables and the weeks they land in
 
@@ -180,7 +184,7 @@ is worse and is still better than claiming a test nobody ran.
 ### What stops this plan
 
 - **Eligibility.** `[P-8]` Unchecked, and it can end the run at any stage
-- **Hours.** `[P-5]` One person at unstated hours against 11 deliverables in 9 weeks
+- **Hours.** `[P-5]` Five hours per week against 11 deliverables in 9 weeks
 - **Tool access.** `[P-4]` Three of the 11 items need a solver
 - **The foam lead time.** 4 weeks, no Indian source, and it gates the build plan rather than the report
 - **Test access.** `[P-9]` Nothing in the plan can measure anything without it
