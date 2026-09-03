@@ -34,7 +34,7 @@ Largest dimension is 364.4 mm, along the rotor axis, and the span is what drives
 Inside that, the moving envelope has three parts an integrator has to keep clear. The blade
 sweep is the 86.54 to 148.03 mm annulus over the full 360 degrees. The pitch link sweep is a
 disc of 148 mm radius in one plane at the non-drive end, and that plane has to be empty on the
-axis: the links pass within 0.004 mm of the rotor centreline, so nothing coaxial can sit in it.
+axis: the links pass within 0.019 mm of the rotor centreline, so nothing coaxial can sit in it.
 The phasing carrier sweeps a 40 mm ring in the plane immediately outboard of that, and it moves
 only on command, over 120 degrees.
 
@@ -63,7 +63,7 @@ which is what makes the drive single ended.
 ```
 
 The pitch plane sits between the non-drive bearing block and the phasing carrier. Nothing
-coaxial may occupy it, because the pitch links pass within 0.004 mm of the centreline.
+coaxial may occupy it, because the pitch links pass within 0.019 mm of the centreline.
 
 ### Layout in the rotor plane
 
@@ -109,13 +109,13 @@ steerable thrust, and a three point mount puts that torque into a triangle whose
 carries most of it.
 
 The reaction torque path runs: blade, spider arm, hub, through shaft, main bearing, bearing
-block, frame tube, mount lug. Motor torque is 0.4361 Nm at the motor shaft and the belt
-multiplies it by 3.5 into the rotor, so the frame sees that product as a steady moment about the
+block, frame tube, mount lug. Motor torque is 0.3902 Nm at the motor shaft and the belt
+multiplies it by 4.25 into the rotor, so the frame sees that product as a steady moment about the
 rotor axis whenever the module is producing thrust. Both bearing blocks take it, which is why
 they sit on the frame tubes and not on the side plates.
 
 Thrust reacts separately and it does not stay put. The resultant can be commanded anywhere
-across 120 degrees, so the mount lugs see 18.0 N swinging through that arc rather than a fixed
+across 120 degrees, so the mount lugs see 17.0 N swinging through that arc rather than a fixed
 vertical load, and the worst case for any one lug is not the vertical command. Week 4 sizes them
 on the swung case.
 
@@ -124,14 +124,19 @@ off the non-drive end without disturbing the rotor. The belt is reachable at the
 the motor in place. Blades come out individually once the pitch link is unpinned at the horn, so
 a damaged blade does not mean stripping the mechanism. The ESC and the offset controller board
 mount on the outside of the frame on the motor side, where they are in the rotor's own downwash.
-The controller is a Matek Systems F411-WSE class board, 28 by 28 by 14 mm and 8.5 g, taking the
-6S pack directly and feeding both servos off its own selectable 5 or 6 V rail at 3.5 A.
+The controller is a Matek Systems F411-WSE class board, 28 by 28 by 14 mm and 8.5 g, feeding
+both servos off its own selectable 5 or 6 V rail at 3.5 A. It used to take the pack directly.
+Its input range is 6 to 30 V and the declared pack is 8S, which reaches 33.6 V charged, so the
+module needs a step-down ahead of the board or a controller rated past 34 V. That part is not
+drawn and the 8.0 g line does not carry it. See D67 and `03-pitch-and-vectoring.md`.
 
 ## Drivetrain
 
-One T-Motor Antigravity MN5006 KV450 on a single stage HTD toothed belt at 3.5 to 1, turning at
-8417 rpm to give the rotor 2405. Motor input is 457.6 W at 20.61 A on a 6S pack, and the module
-draws 489.7 W once the actuator and controller allowances are added.
+One T-Motor Antigravity MN5006 KV450 on a single stage HTD-3M toothed belt at 4.25 to 1, 68
+teeth against 16, turning at 9932 rpm to give the rotor 2337. Motor input is 483.2 W at 19.29 A
+on an 8S pack, and the module draws 516.6 W once the actuator and controller allowances are
+added. The pack moved from 6S to 8S in D67, because a 6S MN5006 caps at 392 W of mechanical
+output against the 406 W the corrected rotor asks, and no belt ratio moves that cap.
 
 The belt sits at the drive end outboard of the bearing block, on the opposite end of the module
 from the pitch mechanism. That separation is deliberate and it falls out of the axis keep-out:
@@ -148,8 +153,8 @@ Mechanical, to the airframe:
 | Item | Definition |
 | --- | --- |
 | Mount pattern | 4 lugs, in the plane containing the rotor axis, taking thrust and reaction torque |
-| Envelope reserved | 364.4 by 316.1 by 362.1 mm, with the swept annulus kept clear |
-| Thrust vector | 18.0 N, steerable over 120 degrees in the plane normal to the rotor axis |
+| Envelope reserved | 364.4 by 316.5 by 362.5 mm, with the swept annulus kept clear |
+| Thrust vector | 17.0 N, steerable over 120 degrees in the plane normal to the rotor axis |
 | Reaction torque | steady, about the rotor axis, motor torque times the belt ratio |
 | Service faces | non-drive end for the pitch mechanism, drive end for the belt |
 
@@ -157,7 +162,7 @@ Electrical, to the vehicle:
 
 | Item | Definition |
 | --- | --- |
-| Power in | 6S pack, 489.7 W at the module boundary including actuators and controller |
+| Power in | 8S pack, 516.6 W at the module boundary including actuators and controller |
 | Motor phases | three, motor to ESC, inside the module |
 | ESC signal | one channel, throttle, sets rotor speed and therefore thrust magnitude |
 | Actuator signal | one channel, phase command, driving both servos in parallel |
@@ -179,17 +184,17 @@ it. `03-pitch-and-vectoring.md` has what that costs.
 - packaging.swept_diameter_mm = 296.1
 - pitch.swept_outer_radius_mm = 148.03
 - pitch.swept_inner_radius_mm = 86.54
-- pitch.axis_keepout_mm = 0.004
+- pitch.axis_keepout_mm = 0.019
 - pitch.vector_range_deg = 120.0
 - geometry.span_m = 0.2904
 - geometry.chord_m = 0.0726
-- performance.thrust_N = 18.0
-- performance.motor_rpm = 8416.8
-- performance.motor_torque_Nm = 0.4361
-- performance.motor_input_W = 457.573
-- performance.motor_input_current_A = 20.611
-- performance.belt_ratio = 3.5
-- performance.module_electrical_power_W = 489.655
+- performance.thrust_N = 17.0
+- performance.motor_rpm = 9932.4
+- performance.motor_torque_Nm = 0.3902
+- performance.motor_input_W = 483.158
+- performance.motor_input_current_A = 19.2876
+- performance.belt_ratio = 4.25
+- performance.module_electrical_power_W = 516.588
 - performance.actuator_power_W = 6.0
 - efficiency.transmission = 0.93
 - efficiency.motor = 0.84

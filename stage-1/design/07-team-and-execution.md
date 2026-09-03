@@ -89,7 +89,7 @@ needs and deliberately does not name a product, because claiming a licence that 
 is the same class of error as claiming a person.
 
 **Facilities are unstated.** `[P-9]` A mould, a vacuum bag setup, a CNC route, a balancing jig
-and somewhere safe to spin a rotor at 2405 rpm with 221.464 N pulling on each blade. Some of
+and somewhere safe to spin a rotor at 2337 rpm with 209.161 N pulling on each blade. Some of
 that is in the bill of materials as tooling. The room it happens in is not.
 
 ## Execution plan
@@ -173,7 +173,7 @@ of the three to close and it is the one to do first.
 
 **Testing.** This is the gap with no software route. `[P-9]` A coupon panel and a lap shear
 coupon need a layup bench and a test frame. A thrust measurement needs a load cell, a mount and
-a place where a rotor can be spun to 2405 rpm behind something solid. If none of that is
+a place where a rotor can be spun to 2337 rpm behind something solid. If none of that is
 available, Stage 2 says so and the report carries analysis where it wanted measurement, which
 is worse and is still better than claiming a test nobody ran.
 
@@ -187,7 +187,7 @@ is worse and is still better than claiming a test nobody ran.
 
 ## Numbers used
 
-- operating.rpm = 2404.79
-- structure.centrifugal_load_N = 221.464
+- operating.rpm = 2337.04
+- structure.centrifugal_load_N = 209.161
 - performance.inflow_ratio = 0.3871
 - results.bom_longest_lead_weeks = 4
