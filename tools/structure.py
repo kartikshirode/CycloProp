@@ -1125,6 +1125,10 @@ def write(data, b, m):
         "pitch_bearing_friction_W": round(bd["friction_W"], 4),
         "pitch_bearing_plain_alternative_W": round(bd["plain_friction_W"], 4),
         "blade_wrinkle_stress_MPa": round(bs["wrinkle_MPa"], 4),
+        # The section drawing publishes this, so it stops being a fraction times a
+        # chord that lives only in this file.
+        "blade_spar_od_mm": round(SPAR_DIA_FRAC * data["geometry"]["chord_m"] * 1000.0, 4),
+        "blade_spar_wall_mm": round(SPAR_WALL_M * 1000.0, 4),
         "blade_allow_skin_Nm": round(bs["allow_skin_Nm"], 4),
         "blade_allow_spar_Nm": round(bs["allow_spar_Nm"], 4),
         "blade_skin_modulus_GPa": bs["skin_modulus_GPa"],

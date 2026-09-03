@@ -797,6 +797,14 @@ def write_numbers(data, s):
         "envelope_height_mm": round(s["envelope_height_mm"], 1),
         "mount_points": MOUNT_POINTS,
         "swept_diameter_mm": round(2.0 * s["swept_outer_mm"], 1),
+        # The envelope is a sum of named parts, so the parts are stored beside the sum. The
+        # report quotes each one and had no way to trace them until they came out of here.
+        "side_plate_mm": SIDE_PLATE_MM,
+        "bearing_block_mm": BEARING_BLOCK_MM,
+        "phasing_carrier_mm": PHASING_CARRIER_MM,
+        "pulley_and_belt_mm": PULLEY_AND_BELT_MM,
+        "frame_clearance_mm": FRAME_CLEARANCE_MM,
+        "motor_stack_mm": MOTOR_STACK_MM,
     }
     # newline="\n" on purpose. .gitattributes declares eol=lf, and the default here is the
     # platform newline, which puts CRLF into a file every sibling document writes as LF.

@@ -817,7 +817,13 @@
     "envelope_width_mm": 316.5,
     "envelope_height_mm": 362.5,
     "mount_points": 4,
-    "swept_diameter_mm": 296.5
+    "swept_diameter_mm": 296.5,
+    "side_plate_mm": 8.0,
+    "bearing_block_mm": 12.0,
+    "phasing_carrier_mm": 16.0,
+    "pulley_and_belt_mm": 18.0,
+    "frame_clearance_mm": 10.0,
+    "motor_stack_mm": 46.0
   },
   "structure": {
     "blade_mass_kg": 0.031747,
@@ -885,7 +891,9 @@
     "blade_combined_Nm": 8.4153,
     "blade_combined_overspeed_Nm": 12.1181,
     "belt_tension_N": 47.501,
-    "shaft_side_load_N": 66.502
+    "shaft_side_load_N": 66.502,
+    "blade_spar_od_mm": 8.712,
+    "blade_spar_wall_mm": 0.5
   },
   "mass_envelope_g": [
     {
@@ -1292,7 +1300,8 @@
       "motor_current_frac": 0.7293,
       "motor_torque_frac": 0.6862,
       "binding_line": "current",
-      "binding_frac": 0.7293
+      "binding_frac": 0.7293,
+      "motor_torque_Nm": 0.3029
     },
     {
       "thrust_N": 16.0,
@@ -1312,7 +1321,8 @@
       "motor_current_frac": 0.8514,
       "motor_torque_frac": 0.8083,
       "binding_line": "current",
-      "binding_frac": 0.8514
+      "binding_frac": 0.8514,
+      "motor_torque_Nm": 0.3568
     },
     {
       "thrust_N": 17.0,
@@ -1332,7 +1342,8 @@
       "motor_current_frac": 0.9274,
       "motor_torque_frac": 0.8841,
       "binding_line": "power",
-      "binding_frac": 0.9292
+      "binding_frac": 0.9292,
+      "motor_torque_Nm": 0.3902
     },
     {
       "thrust_N": 18.0,
