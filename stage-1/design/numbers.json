@@ -880,7 +880,11 @@
     "pitch_bearing_stations": 2,
     "pitch_bearing_share": 0.9,
     "pitch_bearing_c0_iso_N": 216.985,
-    "pitch_bearing_c0_listed_N": 270.0
+    "pitch_bearing_c0_listed_N": 270.0,
+    "blade_combined_Nm": 8.4153,
+    "blade_combined_overspeed_Nm": 12.1181,
+    "belt_tension_N": 47.501,
+    "shaft_side_load_N": 66.502
   },
   "mass_envelope_g": [
     {
@@ -1234,7 +1238,11 @@
       "pitch_bearing_friction_W": "0.5 x mu x P x d summed over six bearings at the mean swing rate, mu taken at 0.0015 for a deep groove ball bearing. It is under a tenth of a percent of rotor shaft power, which is why it sits outside the power budget rather than inside it. The PTFE fabric lined plain bearing that would be immune to the wear mode costs pitch_bearing_plain_alternative_W instead, on a 0.08 liner friction coefficient, and that is the trade Stage 2 makes",
       "blade_skin_band_worst_margin": "worst blade_combined_margin_overspeed found sweeping the skin modulus from blade_skin_band_low of its published class value up to all of it. The sweep does not move blade mass, so only the allowable moves. The band is nearly flat because skin wrinkling falls as the cube root of the skin modulus while EI over the skin modulus rises, and the two almost cancel",
       "blade_foam_knockdown_at_floor": "factor on the foam modulus and shear modulus together at which blade_combined_margin_overspeed reaches 1.5. Both sit inside the same cube root, so the allowable moves as the two thirds power and the foam is the sensitive input rather than the laminate. Floored by the gate rather than recomputed by it, because it needs the integrated section",
-      "blade_foam_downgrade_margin": "blade_combined_margin_overspeed on Rohacell 31 IG instead of 51 IG, the substitution a shop makes when the specified grade is not on the shelf. A lighter grade cuts the demand as well as the allowable, so it is the honest version of a foam shortfall and it is milder than the knockdown above"
+      "blade_foam_downgrade_margin": "blade_combined_margin_overspeed on Rohacell 31 IG instead of 51 IG, the substitution a shop makes when the specified grade is not on the shelf. A lighter grade cuts the demand as well as the allowable, so it is the honest version of a foam shortfall and it is milder than the knockdown above",
+      "blade_combined_Nm": "aerodynamic and centrifugal bending added at mid span, which is the demand the blade is actually sized on. Reported because the two tightest margins in the module are this number and its overspeed twin against blade_allowable_Nm",
+      "blade_combined_overspeed_Nm": "the same sum at the declared overspeed, where both terms grow: aerodynamic bending with the square of speed and centrifugal bending with it as well",
+      "belt_tension_N": "effective belt tension, shaft_torque_Nm over the rotor pulley pitch radius. It fell when the ratio went to 4.25, because the same torque acts on a longer radius, which is why the shaft combined case improved as the torsional one got tighter",
+      "shaft_side_load_N": "belt_tension_N times the HTD shaft load factor, the radial pull the drive end bearing and the shaft overhang carry"
     },
     "efficiency": {
       "transmission": "Single stage toothed belt at 0.93. Assumed, not measured. Published belt drive efficiency runs 0.95 to 0.98 at these speeds, so this is on the pessimistic side of the range",

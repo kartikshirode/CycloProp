@@ -1082,11 +1082,15 @@ def write(data, b, m):
         "blade_gj_Nm2": round(b["blade"]["gj_Nm2"], 4),
         "blade_windup_deg": round(b["windup_deg"], 4),
         "blade_margin": round(b["blade"]["m_allow_Nm"] / b["m_aero_Nm"], 4),
+        "blade_combined_Nm": round(b["m_aero_Nm"] + b["m_cf_Nm"], 4),
+        "blade_combined_overspeed_Nm": round(b["m_aero_over_Nm"] + b["m_cf_over_Nm"], 4),
         "blade_combined_margin": round(m["blade_combined_margin"], 4),
         "blade_combined_margin_overspeed": round(m["blade_combined_margin_overspeed"], 4),
         "shaft_torque_Nm": round(b["shaft_torque_Nm"], 5),
         "shaft_allowable_Nm": round(b["shaft_allow_Nm"], 4),
         "shaft_margin": round(m["shaft_margin"], 4),
+        "belt_tension_N": round(b["belt_tension_N"], 3),
+        "shaft_side_load_N": round(b["shaft_side_load_N"], 3),
         "shaft_bending_Nm": round(b["shaft_bending_Nm"], 5),
         "shaft_combined_margin": round(m["shaft_combined_margin"], 4),
         "transmission_ratio": b["belt_ratio"],
@@ -1175,6 +1179,21 @@ def write(data, b, m):
             "load is thrust per blade times the 4.0 peak to mean factor D16 sets, which is "
             "the top of the published 3 to 4 range because that range is simulated. The "
             "rerun week 3 model gives 2.501 and is not used here"),
+        "blade_combined_Nm": (
+            "aerodynamic and centrifugal bending added at mid span, which is the demand the "
+            "blade is actually sized on. Reported because the two tightest margins in the "
+            "module are this number and its overspeed twin against blade_allowable_Nm"),
+        "blade_combined_overspeed_Nm": (
+            "the same sum at the declared overspeed, where both terms grow: aerodynamic "
+            "bending with the square of speed and centrifugal bending with it as well"),
+        "belt_tension_N": (
+            "effective belt tension, shaft_torque_Nm over the rotor pulley pitch radius. It "
+            "fell when the ratio went to 4.25, because the same torque acts on a longer "
+            "radius, which is why the shaft combined case improved as the torsional one got "
+            "tighter"),
+        "shaft_side_load_N": (
+            "belt_tension_N times the HTD shaft load factor, the radial pull the drive end "
+            "bearing and the shaft overhang carry"),
         "shaft_torque_Nm": (
             "aerodynamic power plus tare, divided by rotor angular speed at the design "
             "point. This is the rotor shaft, downstream of the belt reduction. It "

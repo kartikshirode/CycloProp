@@ -106,8 +106,8 @@ upstream and downstream of a reduction is the number a reviewer checks first.
 Torsional allowable is 24.96 Nm at 55 MPa of shear, so the torsional margin is 16.18. That is a
 large number and it is honest: the shaft diameter is set by the bearing bore, the pulley
 interface and lateral stiffness on a single ended drive, not by torque. The case that gets
-closer is bending. The 68 tooth rotor pulley at 64.9 mm pitch diameter takes 47.53 N of
-effective belt tension, 66.54 N of shaft side load at an HTD load factor of 1.4, and 30 mm of
+closer is bending. The 68 tooth rotor pulley at 64.9 mm pitch diameter takes 47.50 N of
+effective belt tension, 66.50 N of shaft side load at an HTD load factor of 1.4, and 30 mm of
 overhang from the drive bearing, giving 1.9951 Nm of bending. Combining that with torsion by
 maximum shear gives 5.56 MPa against 55, a margin of 9.90. The bigger pulley raised the torque
 and lowered the side load at the same time, because the tension is the torque over a longer
