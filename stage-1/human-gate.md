@@ -1,7 +1,7 @@
 # Week H: the human gate
 
 The tasks in this file are not loop work. An agent cannot do any of them and must not
-claim any of them are done. Week 5 is a hard block on all four.
+claim any of them are done. Week 5 is a hard block on all five.
 
 Each item is confirmed by adding its marker on its own line in the status block at the
 bottom. The markers are status only. **No personal details go in this file**, no names, no
@@ -49,8 +49,15 @@ claims. This fifth marker does not block the start of week 5. It blocks final st
 
 ## Status
 
-Add each marker below on its own line as it is confirmed. Week 5 fails until the first four
-are present, and final staging fails without the fifth.
+Replace each PENDING line below with its CONFIRMED form, on its own line, as you confirm
+it. Week 5 fails until all five are present. The gate reads whole lines under this heading and
+nothing above it, so the exact strings to type are:
+
+`REGISTRATION-CONFIRMED`, `ELIGIBILITY-CHECKED`, `ROSTER-CONFIRMED`, `SENDER-CONFIRMED`,
+`TECHNICAL-READ-COMPLETE`.
+
+Note that two of them are not the word CONFIRMED. Eligibility is CHECKED and the technical read
+is COMPLETE.
 
 REGISTRATION-CONFIRMED
 ELIGIBILITY-CHECKED

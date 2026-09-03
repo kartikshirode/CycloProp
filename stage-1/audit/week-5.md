@@ -56,14 +56,17 @@ week 2 envelope it replaced, so the submission was contradicting its own table t
 the claim. All three occurrences now read 8.5 g and the PDF is rebuilt. The auditor is also right
 about why no gate caught it: a retired envelope line is still a stored mass, so the value traced.
 
-**2. `TECHNICAL-READ-COMPLETE` is undetectable.** Reported and deliberately not changed, and D59
-carries the argument. The marker is unfindable because `human-gate.md` names it in prose while
-explaining what to replace, and an agent may not touch that file at all. Making the check
-line-based is the obvious fix and it is not an agent's call: it would make the fifth marker block
-the start of week 5, where `human-gate.md` and the plan both say it blocks final staging instead.
-Two documents disagree about when that marker bites and a person owns both. This is the same
-treatment the repository already gives the audit-exemption conflict between `check.py` and the
-loop config: report it, do not quietly pick a side.
+**2. `TECHNICAL-READ-COMPLETE` is undetectable.** Reported at the time and changed later the
+same day by D59, which is what this paragraph said had deliberately not happened. The finding
+stands as written: the marker was unfindable because `human-gate.md` named it in prose while
+explaining what to replace, so the substring search was satisfied by the instruction rather than
+by a person. D59 made every marker check line-based and swept the pattern.
+
+What was deferred here was not the fix but the question underneath it, which is when the fifth
+marker bites. `human-gate.md` said week 5 blocked on four markers and final staging on the fifth,
+while the code blocked week 5 on all five. Phase 5 of the fix plan settled that in favour of the
+code and corrected the four documents that disagreed with it, because the alternative was to
+loosen a hard block to match its own documentation. See R51 and D69.
 
 **3. Scope work delivered under a live blocked trigger.** Accepted as a declared deviation. The
 operator directed a preparation pass explicitly, and the block itself was never worked around: no

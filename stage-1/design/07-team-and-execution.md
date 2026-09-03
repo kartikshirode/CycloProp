@@ -141,7 +141,7 @@ stops being trustworthy and a CFD case stops converging quickly. If it slips, th
 ### Stage 2 gates
 
 Stage 1 ran on a gate script that recomputes the physics from stored geometry and fails on
-disagreement, and 128 self-tests behind it. That machinery carries straight into Stage 2 and it
+disagreement, and 204 self-tests behind it. That machinery carries straight into Stage 2 and it
 is cheaper to extend than to rebuild.
 
 - Every number in the Stage 2 report keeps tracing to `numbers.json`, and CFD and FEA outputs

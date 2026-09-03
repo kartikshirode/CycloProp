@@ -146,16 +146,24 @@ three papers.
 
 ## Calendar
 
-| Week | Dates | Days | Covers |
-| --- | --- | --- | --- |
-| 1 | 26 Aug to 1 Sep | 7 | Requirements and literature. Done |
-| H | by 1 Sep | human | Registration, eligibility, roster, tool access |
-| 2 | 2 to 8 Sep | 7 | Items 1, 2, 4. Configuration, sizing, thrust, power, feasibility envelope |
-| 3 | 9 to 15 Sep | 7 | Item 3 plus thrust vectoring and packaging |
-| 4 | 16 to 22 Sep | 7 | Items 5, 6 plus structural loads and strength |
-| 5 | 23 to 26 Sep | 4 | Item 7, assembly, PDF, staged for a human to send |
+This table was written as a forecast and is kept as a record of what actually happened,
+because the two diverged by three weeks and reading it as a forecast is how the slack got
+mistaken for pressure.
 
-Week 5 is the short one and it carries the deadline, so weeks 2 to 4 do not get to slip into it. Each has a fallback below that trades depth rather than pushing work forward.
+| Week | Planned | Landed | Covers |
+| --- | --- | --- | --- |
+| 1 | 26 Aug to 1 Sep | 26 to 29 Aug | Requirements and literature. Done |
+| H | by 1 Sep | partly done, 4 Sep | Registration, eligibility, roster, tool access. Two markers of five confirmed |
+| 2 | 2 to 8 Sep | 30 to 31 Aug | Items 1, 2, 4. Configuration, sizing, thrust, power, feasibility envelope. Done |
+| 3 | 9 to 15 Sep | 31 Aug | Item 3 plus thrust vectoring and packaging. Done |
+| 4 | 16 to 22 Sep | 31 Aug | Items 5, 6 plus structural loads and strength. Done |
+| 5 | 23 to 26 Sep | prepared 31 Aug, blocked since | Item 7, assembly, PDF, staged for a human to send |
+| review and fix | not planned | 1 to 4 Sep | Five pass review, 64 findings, six phase fix plan. Phases 1 to 5 executed |
+
+Weeks 2 to 4 landed on 30 and 31 August, three weeks ahead of the forecast, and the whole of
+that slack went into the review and the fix plan rather than into more scope. Week 5 is not a
+sprint carrying the deadline any more. It is one blocked item waiting on three human markers,
+with more than three weeks in hand.
 
 This plan needs about 84 focused hours after week 1: 26 in week 2, 18 in week 3, 24 in week
 4 and 16 in week 5. Week H has to replace that estimate with real availability. If fewer
@@ -500,7 +508,7 @@ Covers required item 7, then packages for a human to send.
 
 The PDF condition is no longer a byte count. The gate reads the attachment back with pypdf and requires it to carry this submission's seven section names and its declared values, because a file size cannot tell the difference between the right report and an unrelated one. The old wording asked for 50 kB and the earlier gate only asked for four readable pages, which between them accepted the competition's own problem statement as our submission.
 
-Week 5 also blocks on the four markers in [human-gate.md](human-gate.md). It cannot write a real capability section or stage a submission without them.
+Week 5 also blocks on all five markers in [human-gate.md](human-gate.md). It cannot write a real capability section or stage a submission without them.
 
 The audit must also find the claims table, the hostile-viva notes, complete citations and
 `TECHNICAL-READ-COMPLETE` in the human gate. The final audit owns these checks. `check.py`
@@ -547,11 +555,11 @@ Week 2 has to close the gap component by component with named hardware, blade co
 and a full mounting allocation. Full working in [literature.md](literature.md) and decisions
 D8, D11, D13 and D15.
 
-**Three papers are still unread**, one of them the only study in our Reynolds band. Kellen's
-measured coefficient is the highest-value pull for week 2. If it stays unavailable, the
-submission carries a labelled downside scenario and does not describe it as a published
-bound. Heimerl improves week 3 and 4 loads. Ramsey improves the blade mass and stiffness
-basis.
+**Kellen was retrieved on 31 August** and his measured coefficient is what the design is
+built against, so the highest-value pull is closed. Two papers are still unread. Heimerl would
+replace the 28 degree stall cap and the assumed peak to mean blade load, and Ramsey would give
+the blade mass and stiffness a measured basis instead of a class one. Neither blocks anything and
+both are named in the Stage 2 plan.
 
 **One person is doing this.** Confirmed 27 August. The full plan needs about 84 focused hours
 after week 1 and another project collides with week 3. Until real hours are written down,
