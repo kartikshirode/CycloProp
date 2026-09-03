@@ -1849,3 +1849,64 @@ table. Those are different questions. It scales to the thrust the stored table w
 at now, which is what it was always asking.
 
 Nine documents still quote the old numbers. That is Phase 3 and it has not run.
+
+
+## D68: the documents catch up, and six things turned up that D67 did not put there
+
+3 September 2026, Phase 3 of the plan in `stage-1/audit/full-review.md`. D67 moved the design
+point and left nine design documents and the whole submission quoting the numbers it replaced.
+This entry is what closing that found.
+
+**The mechanical half.** 126 declared numbers across the nine design documents and 64 more in
+the submission, plus eight tables regenerated from `numbers.json` rather than edited: the pitch
+schedule, the cluster comparison, the radius sweep, the thrust sensitivity, the vector map, the
+33 line mass budget, the bill of materials and the eight row margin table. Narrative numbers in
+the submission that trace to nothing went from 123 to zero.
+
+**Three claims inverted and each one is now stated rather than buried.**
+
+- **Three of the four thrust to weight cases miss 2.5.** Only the design estimate clears, at
+  2.5563. Every document that used to say all four clear now says which one does
+- **D11's screen on non-blade hardware is missed.** It wants under roughly 40 percent of the
+  mass ceiling and sits at 43. The numerator grew 15 g on the corrected drive and actuator
+  lines and the ceiling shrank 40 g when thrust fell to 17 N. Nothing gates on it
+- **The blade attachment is no longer the tightest joint in the module.** Duplexing the pitch
+  bearings took it from 1.69 to 2.59 at overspeed, and the blade in combined bending at 2.08 is
+  what sizes the design now. Both remaining sub-3 margins are overspeed cases, so the declared
+  1.20 factor is what governs rather than any operating load
+
+**Six errors that were not D67's.**
+
+1. **Phase 2 broke the packaging rule and nothing caught it.** It overwrote the selected row's
+   largest dimension with the built envelope, 364.4 mm, while the two cluster rows kept the
+   screening rule. D44 says the comparison holds because one rule reached every row. The rule
+   gives 290.4 mm and reproduces 400 and 490 for the clusters exactly, which is how the
+   regression was confirmed rather than assumed
+2. **`06-materials-and-manufacturing.md` claimed a foam substitution goes under the 1.5 floor.**
+   It does not and it never did: 1.6351 now and 1.5443 before, both over. The sensitivity is
+   real and the consequence was overstated
+3. **The 18 N and 20 N sensitivity rows named the wrong cap.** They said no drive covers them
+   and then quoted the mechanical output limit. Both are stopped by continuous power, 526 W and
+   617 W against 520 W
+4. **The 13 N row ran the motor at 19.29 A, as tight as the design point.** Phase 2 took the
+   first ratio with 6 percent of headroom rather than the best one. Choosing the ratio that
+   minimises the worst line puts 13 N at 15.17 A and leaves the design point unchanged
+5. **Four strings the solver writes carried numbers that had moved**, including a 6 cell pack
+   and a 270 N supplier listing. They name the field they depend on now
+6. **The controller cannot take the declared pack.** The F411-WSE class board is rated 6 to 30 V
+   and an 8S pack reaches 33.6 V charged. Two documents said the board takes the pack directly.
+   This one is D67's doing and D67 did not chase it, so it is written into
+   `03-pitch-and-vectoring.md` and `09-packaging-and-integration.md` as an open item with no
+   part drawn and no mass line carrying it
+
+**One gate was answered rather than moved.** The design document untraced count went from 210
+to 215 as the corrections added prose citing superseded values. The ratchet's own docstring says
+it can fall and cannot grow, so the fix was to store the four derived structural values the
+prose quotes, which are combined blade bending and its overspeed twin, belt tension and shaft
+side load. The two combined moments sit behind the two tightest margins in the module and were
+the worst four numbers in the tree to leave untraced. The count is 209 and the ceiling did not
+move.
+
+**Where it stands.** 269 gates pass on the cumulative tree and 187 self-tests behave as
+expected. Week 5 passes everything except the human gate, which is five markers that need a
+person and which nothing here will write. The PDF is rebuilt at 24 pages.
