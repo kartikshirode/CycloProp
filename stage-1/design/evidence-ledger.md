@@ -71,7 +71,7 @@ margin the design does not need. It is now held on purpose rather than by accide
 rather than two.** Our family gives a solidity of 0.3151, inside Kellen's 0.30 to 0.40, which
 is what D12 asks. The rotor the coefficient came from sits at a solidity of 0.276, so the
 transfer still runs into the band from outside it. The Reynolds axis is the one that moved. The
-design point at 134,000 is still above the 100,000 top of E11, but E17 and E18 put a measurement
+design point at 130,300 is still above the 100,000 top of E11, but E17 and E18 put a measurement
 of this exact shape family across 100,000 to 300,000, with the measured rotor itself at 186,000.
 The design point is inside a measured band now, even if the provenance of the nominal is not.
 D37 narrows D25 to that.
@@ -85,12 +85,22 @@ class downside, because a haircut I chose is not a published lower bound whateve
 next to it.
 
 **E4 and E5 were summary class doing load-bearing work and are not any more.** The figure of
-merit turns the momentum floor into the 321.7 W the whole power chain and the drive selection
-rest on, and until now it came from an abstract. Section 3.3 of the thesis states it directly
+merit turns the momentum floor into the 339.7 W the whole power chain and the drive selection
+rest on, and until now it came from an abstract. Section 3.3 of the thesis states 0.6 directly
 for the 3-bladed rotor with a 5.5in chord, 22in span and 8.25 in radius. It also survives an
 independent closure: taking CT/sigma from Fig 3.25 and CP/sigma from Fig 3.26 for that rotor and
 computing FM = CT^1.5/(sqrt(2)*CP) gives 0.595. The three shape numbers quoted from the old
 summary all check out against Table 2.1.
+
+**That closure is also what caught the error D67 corrects, so it is worth following through.**
+Kellen's 0.6 sits with the thrust coefficient he measured beside it, which E18 gives as 0.6648.
+This design carries 0.6055 instead, as deliberate margin under D36. The same identity that
+validates his 0.6 says what happens when the thrust coefficient is cut and the power coefficient
+is held: the figure of merit falls with the thrust coefficient to the power of one and a half.
+Carrying 0.6 alongside 0.6055 was spending the same conservatism twice, once as caution on
+thrust and once as optimism on power. The consistent value is 0.5215, and the design uses it.
+The evidence class does not change, because the reading is arithmetic on a value E4 already
+carried.
 
 **E18 is read off a plot, and that is worth being exact about.** Kellen tabulates none of this;
 CT/sigma exists only inside figures. The value came from the PDF's vector path data rather than
