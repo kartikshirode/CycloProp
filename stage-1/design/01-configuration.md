@@ -1,15 +1,20 @@
 # Configuration
 
-Required Stage 1 item 1. This is the frozen configuration for Stage 1, frozen at 18 N of design
-thrust and a 110 mm radius by D30, with 120 mm carried as the insurance radius. The design case
-clears thrust to weight 2.5 at 3.163 and each downside taken on its own clears it too. Since
-D35 the stacked downside clears it as well, and on the week 4 refined mass budget it stands at
-2.5457. What follows is the layout the comparison chose and the reasoning behind it.
+Required Stage 1 item 1. This is the frozen configuration for Stage 1, frozen at 17 N of design
+thrust and a 110 mm radius by D30, with 120 mm carried as the insurance radius. On the week 4
+refined budget the design case clears thrust to weight 2.5 at 2.5563. The three downside cases
+do not. The coefficient downside on its own gives 2.4284, the mass downside on its own 2.2705,
+and the two stacked together 2.1569. D67 is what changed that: it moved the design point from
+18 N to 17 N on a corrected figure of merit and it corrected six mass lines, and this is the
+price. The downside cases are held to a declared floor of 2.0 now, and the 104.76 g that would
+carry the stacked case back over 2.5 is published in
+[05-mass-and-tw.md](05-mass-and-tw.md) rather than argued away. What follows is the layout the
+comparison chose and the reasoning behind it.
 
 The module is one cyclorotor. Three blades, NACA 0020, chord at 0.66 of the radius, blade
 aspect ratio 4, pitching plus or minus 40 degrees about an axis at 30 percent of chord. The
 rotor turns on a through shaft carried in two bearing blocks, driven by one outrunner through
-a single stage toothed belt at 3.5 to 1. Blade pitch comes from a four-bar arrangement hung
+a single stage toothed belt at 4.25 to 1. Blade pitch comes from a four-bar arrangement hung
 off an offset ring, and thrust vectoring comes from rotating the direction of that offset,
 which is week 3's problem.
 
@@ -20,7 +25,7 @@ rectangle, and what an integrator has to package is the span, not the diameter.
 That 290 mm is the screening figure and not the built envelope. It comes from one packaging rule
 applied to all three layouts here, and the rule takes the greater of the module width and the
 blade span while ignoring frame, mounts and the pitch mechanism. The module that came out of week
-3 packages into 364.4 by 316.1 by 362.1 mm. The comparison below stands because the same rule
+3 packages into 364.4 by 316.5 by 362.5 mm. The comparison below stands because the same rule
 reached every row, and [09-packaging-and-integration.md](09-packaging-and-integration.md) works
 the ordering through on the swept diameter as well. See D44.
 
@@ -47,16 +52,25 @@ mm. Largest dimension is that width or the span, whichever wins.
 
 | Layout | Per rotor radius | Per rotor thrust | rpm | Reynolds | Blade area | Largest dimension | Module mass | Nominal T/W | Conservative T/W |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| single, 3 blades | 110 mm | 18.0 N | 2405 | 134,000 | 0.0632 m2 | 290 mm | 580 g | 3.163 | 2.517 |
-| two rotors | 80 mm | 9.0 N | 3215 | 94,800 | 0.0669 m2 | 400 mm | 786 g | 2.334 | 1.855 |
-| three rotors | 65 mm | 6.0 N | 3976 | 77,400 | 0.0663 m2 | 490 mm | 985 g | 1.863 | 1.479 |
+| single, 3 blades | 110 mm | 17.0 N | 2337 | 130,300 | 0.0632 m2 | 290 mm | 637 g | 2.720 | 2.163 |
+| two rotors | 80 mm | 8.5 N | 3124 | 92,100 | 0.0669 m2 | 400 mm | 786 g | 2.204 | 1.752 |
+| three rotors | 65 mm | 5.7 N | 3864 | 75,200 | 0.0663 m2 | 490 mm | 985 g | 1.759 | 1.397 |
 
 Every column in that table is the week 2 mass envelope, because the comparison had to run
 on one common build-up and the other two layouts have no refined budget behind them. On
-the week 4 budget the winning row is 2.5457 rather than 2.517, and the losing rows do not
+the week 4 budget the winning row is 2.1569 rather than 2.163, and the losing rows do not
 move at all. See D47.
 
-The single rotor wins the first metric by 36 percent and every other metric as well. It is
+One caveat belongs on that table and it runs in the cluster's favour, which is where every
+other caveat here already runs. D67 corrected six mass lines and only the single rotor row
+carries the correction, because the cluster rows were never rebuilt on it. Three of those
+six lines are per-rotor ones, worth 32.4 g each time a rotor is added, so correcting the
+cluster rows the same way puts at least 65 g on the two rotor figure and at least 97 g on
+the three rotor one, before the frame and harness lines that grow with packaged width. That
+moves them to roughly 851 g and 1082 g, or 2.04 and 1.60 on the nominal metric. The single
+rotor's margin widens rather than narrows, so the row it wins on here is the pessimistic one.
+
+The single rotor wins the first metric by 23 percent and every other metric as well. It is
 smallest, and it has a third of the rotor hardware.
 
 How the cluster masses are built, since a number nobody can reproduce is not evidence. Seven
@@ -73,13 +87,13 @@ because smaller rotors run at lower tip speed for the same per-rotor thrust and 
 to make it up. So the cluster pays twice and gets a shorter span back.
 
 One thing points the other way and is worth stating, because the audit caught this document
-claiming the opposite. Per-rotor Reynolds falls as the thrust is split: 134,000 single, 94,800
-at two rotors, 77,400 at three. Read against Shrestha's invariance range, which stops at
+claiming the opposite. Per-rotor Reynolds falls as the thrust is split: 130,300 single, 92,100
+at two rotors, 75,200 at three. Read against Shrestha's invariance range, which stops at
 100,000, the cluster rows sit closer to the support than the single rotor does. Read against
 Kellen, who measured this shape family from 100,000 to 300,000, the single rotor is the one
 inside and both cluster rows fall below. D37 says why the second reading governs now. On
 either reading the point is small, it is included in the comparison anyway, and it does not
-come close to covering a 36 percent gap in the decision metric.
+come close to covering a 23 percent gap in the decision metric.
 
 D2 is therefore confirmed, this time on a like-for-like comparison rather than on a rejected
 copy. Recorded as D18.
@@ -100,7 +114,7 @@ buildable as a closed foam and skin cell with a real spar inside it. Ramsey chos
 claiming it does.
 
 **One motor with a belt reduction rather than a direct drive or per-blade actuation.** Rotor
-torque at the design point is 1.42 Nm at 2405 rpm. No outrunner in the mass class this module
+torque at the design point is 1.54 Nm at 2337 rpm. No outrunner in the mass class this module
 can afford makes that torque directly, so the choice is between a reduction and a much heavier
 motor. Per-blade servo pitching would remove the linkage and add three actuators, which is the
 wrong trade on a module whose non-blade hardware already carries most of the mass.
@@ -123,11 +137,11 @@ claim.
 - geometry.blades = 3
 - geometry.pitch_amplitude_deg = 40.0
 - geometry.pitch_axis_pct_chord = 30.0
-- operating.rpm = 2404.79
-- operating.reynolds = 134074
-- performance.thrust_N = 18.0
+- operating.rpm = 2337.04
+- operating.reynolds = 130296
+- performance.thrust_N = 17.0
 - performance.solidity = 0.3151
 - performance.blade_area_m2 = 0.06325
-- performance.belt_ratio = 3.5
-- results.mass_envelope_g = 580.05
-- results.thrust_to_weight_conservative = 2.5457
+- performance.belt_ratio = 4.25
+- results.mass_envelope_g = 637.23
+- results.thrust_to_weight_conservative = 2.1569
