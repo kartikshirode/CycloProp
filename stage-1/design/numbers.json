@@ -1284,7 +1284,15 @@
       "motor_input_current_A": 15.17,
       "drive": "T-Motor Antigravity MN5006 KV450",
       "belt_ratio": 4.1875,
-      "drive_consequence": "Antigravity MN5006 KV450 on a 67 tooth rotor pulley, 4.188 to 1. 15.17 A of the 20.8 A continuous, 323 W of 520 W, 0.3029 Nm of 0.4414 Nm and 74% of the speed ceiling. The binding line is speed at 74%, so the row has 26% in hand"
+      "drive_consequence": "Antigravity MN5006 KV450 on a 67 tooth rotor pulley, 4.1875 to 1. 15.17 A of the 20.8 A continuous, 323 W of 520 W, 0.3029 Nm of 0.4414 Nm and 66% of the speed ceiling. The binding line is current at 73%, so the row has 27% in hand",
+      "motor_power_frac": 0.6214,
+      "motor_rpm": 8558.0,
+      "motor_speed_ceiling_rpm": 12910.4,
+      "motor_speed_frac": 0.6629,
+      "motor_current_frac": 0.7293,
+      "motor_torque_frac": 0.6862,
+      "binding_line": "current",
+      "binding_frac": 0.7293
     },
     {
       "thrust_N": 16.0,
@@ -1296,7 +1304,15 @@
       "motor_input_current_A": 17.71,
       "drive": "T-Motor Antigravity MN5006 KV450",
       "belt_ratio": 4.375,
-      "drive_consequence": "Antigravity MN5006 KV450 on a 70 tooth rotor pulley, 4.375 to 1. 17.71 A of the 20.8 A continuous, 441 W of 520 W, 0.3568 Nm of 0.4414 Nm and 86% of the speed ceiling. The binding line is speed at 86%, so the row has 14% in hand"
+      "drive_consequence": "Antigravity MN5006 KV450 on a 70 tooth rotor pulley, 4.375 to 1. 17.71 A of the 20.8 A continuous, 441 W of 520 W, 0.3568 Nm of 0.4414 Nm and 77% of the speed ceiling. The binding line is current at 85%, so the row has 15% in hand",
+      "motor_power_frac": 0.8484,
+      "motor_rpm": 9919.4,
+      "motor_speed_ceiling_rpm": 12841.8,
+      "motor_speed_frac": 0.7724,
+      "motor_current_frac": 0.8514,
+      "motor_torque_frac": 0.8083,
+      "binding_line": "current",
+      "binding_frac": 0.8514
     },
     {
       "thrust_N": 17.0,
@@ -1308,7 +1324,15 @@
       "motor_input_current_A": 19.29,
       "drive": "T-Motor Antigravity MN5006 KV450",
       "belt_ratio": 4.25,
-      "drive_consequence": "Antigravity MN5006 KV450 on a 68 tooth rotor pulley, 4.25 to 1. 19.29 A of the 20.8 A continuous, 483 W of 520 W, 0.3902 Nm of 0.4414 Nm and 86% of the speed ceiling. The binding line is power at 93%, so the row has 7% in hand"
+      "drive_consequence": "Antigravity MN5006 KV450 on a 68 tooth rotor pulley, 4.25 to 1. 19.29 A of the 20.8 A continuous, 483 W of 520 W, 0.3902 Nm of 0.4414 Nm and 78% of the speed ceiling. The binding line is power at 93%, so the row has 7% in hand",
+      "motor_power_frac": 0.9292,
+      "motor_rpm": 9932.2,
+      "motor_speed_ceiling_rpm": 12799.2,
+      "motor_speed_frac": 0.776,
+      "motor_current_frac": 0.9274,
+      "motor_torque_frac": 0.8841,
+      "binding_line": "power",
+      "binding_frac": 0.9292
     },
     {
       "thrust_N": 18.0,
@@ -1320,7 +1344,17 @@
       "motor_input_current_A": null,
       "drive": "none in the shortlist",
       "belt_ratio": null,
-      "drive_consequence": "no shortlist drive covers it. On the best whole tooth ratio available, 4.125 to 1, the binding line is power at 101% of the MN5006's continuous rating: 526 W of motor input against 520 W. Nothing lighter in the shortlist carries more, and no ratio moves a power limit"
+      "drive_consequence": "no shortlist drive covers it. On the best whole tooth ratio available, 4.125 to 1 on a 66 tooth rotor pulley, the binding line is power at 101% of the MN5006's continuous rating: 526 W of motor input against 520 W. Nothing lighter in the shortlist carries more, and no ratio moves a power limit",
+      "motor_power_frac": 1.0124,
+      "best_available_ratio": 4.125,
+      "best_available_teeth": 66,
+      "motor_rpm": null,
+      "motor_speed_ceiling_rpm": null,
+      "motor_speed_frac": null,
+      "motor_current_frac": null,
+      "motor_torque_frac": null,
+      "binding_line": "power",
+      "binding_frac": 1.0124
     },
     {
       "thrust_N": 20.0,
@@ -1332,7 +1366,17 @@
       "motor_input_current_A": null,
       "drive": "none in the shortlist",
       "belt_ratio": null,
-      "drive_consequence": "no shortlist drive covers it. On the best whole tooth ratio available, 3.875 to 1, the binding line is power at 119% of the MN5006's continuous rating: 617 W of motor input against 520 W. Nothing lighter in the shortlist carries more, and no ratio moves a power limit"
+      "drive_consequence": "no shortlist drive covers it. On the best whole tooth ratio available, 3.875 to 1 on a 62 tooth rotor pulley, the binding line is power at 119% of the MN5006's continuous rating: 617 W of motor input against 520 W. Nothing lighter in the shortlist carries more, and no ratio moves a power limit",
+      "motor_power_frac": 1.1858,
+      "best_available_ratio": 3.875,
+      "best_available_teeth": 62,
+      "motor_rpm": null,
+      "motor_speed_ceiling_rpm": null,
+      "motor_speed_frac": null,
+      "motor_current_frac": null,
+      "motor_torque_frac": null,
+      "binding_line": "power",
+      "binding_frac": 1.1858
     }
   ],
   "bom": [

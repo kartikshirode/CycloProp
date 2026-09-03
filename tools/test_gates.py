@@ -288,13 +288,45 @@ def honest_numbers():
     bom_bought = sum(r["line_cost_inr"] for r in bom if r["make_or_buy"] == "buy")
     bom_made = sum(r["line_cost_inr"] for r in bom if r["make_or_buy"] == "make")
 
-    sensitivity = [
-        {"thrust_N": t,
-         "mass_ceiling_g": math.floor(t / (2.5 * G) * 1000.0),
-         "ideal_power_W": t ** 1.5 / math.sqrt(2 * RHO * mom_area),
-         "rpm": rpm * math.sqrt(t / thrust)}
-        for t in (10.0, 12.0, thrust)
-    ]
+    # Sensitivity rows carry their whole drive case, because the gate recomputes which of
+    # power, current, torque and speed actually stops each one. Built here the way the gate
+    # reads them, so the honest tree passes and an attack has to break one field.
+    cont_t = 9.5493 / kv_sel * 67.0
+    sensitivity = []
+    for t in (10.0, 12.0, thrust):
+        rpm_t = rpm * math.sqrt(t / thrust)
+        shaft_t = shaft * (t / thrust) ** 1.5
+        rotor_t = shaft_t / (rpm_t * 2.0 * math.pi / 60.0)
+        motor_t = rotor_t / (ratio_belt * eff[0])
+        amps_t = motor_t / (9.5493 / kv_sel) + idle_A
+        vl_t = v_nom - amps_t * res_ohm
+        ceil_t = kv_sel * vl_t
+        watts_t = shaft_t / (eff[0] * eff[1])
+        fr = {"power": watts_t / 320.0, "current": amps_t / 67.0,
+              "torque": motor_t / cont_t, "speed": rpm_t * ratio_belt / ceil_t}
+        binds = max(fr, key=fr.get)
+        sensitivity.append({
+            "thrust_N": t,
+            "mass_ceiling_g": math.floor(t / (2.5 * G) * 1000.0),
+            "ideal_power_W": t ** 1.5 / math.sqrt(2 * RHO * mom_area),
+            "rpm": rpm_t,
+            "rotor_torque_Nm": rotor_t,
+            "belt_ratio": ratio_belt,
+            "motor_input_W": watts_t,
+            "motor_input_current_A": amps_t,
+            "motor_rpm": rpm_t * ratio_belt,
+            "motor_speed_ceiling_rpm": ceil_t,
+            "motor_power_frac": fr["power"],
+            "motor_current_frac": fr["current"],
+            "motor_torque_frac": fr["torque"],
+            "motor_speed_frac": fr["speed"],
+            "binding_line": binds,
+            "binding_frac": fr[binds],
+            "drive_consequence": (
+                f"outrunner A on a {ratio_belt} to 1 belt. The binding line is {binds} at "
+                f"{fr[binds] * 100:.0f}%, so the row has {(1 - fr[binds]) * 100:.0f}% "
+                f"in hand"),
+        })
 
     return {
         "geometry": {"radius_m": R, "chord_m": c, "span_m": S, "blades": nb,
@@ -1828,6 +1860,61 @@ def wrong_mass_ceiling(d):
 
 case("a sensitivity row whose mass ceiling does not follow is rejected", False,
      wrong_mass_ceiling, week=2)
+
+
+# The four attacks below were all live in the real table until 4 September. The first two
+# are what the 13 N and 16 N rows said: a binding line that was not the binding line, and a
+# speed fraction the pack could not give. Nothing read either field, so nothing caught them.
+
+
+def wrong_binding_line(d):
+    r = d["thrust_sensitivity"][-1]
+    r["binding_line"] = "speed" if r["binding_line"] != "speed" else "torque"
+    return d
+
+
+case("a sensitivity row naming a line that does not bind it is rejected", False,
+     wrong_binding_line, week=2)
+
+
+def speed_fraction_the_pack_cannot_give(d):
+    r = d["thrust_sensitivity"][-1]
+    r["motor_speed_frac"] = r["motor_speed_frac"] * 1.14
+    return d
+
+
+case("a sensitivity row whose speed fraction the pack does not give is rejected", False,
+     speed_fraction_the_pack_cannot_give, week=2)
+
+
+def sentence_without_the_binding_number(d):
+    r = d["thrust_sensitivity"][-1]
+    r["drive_consequence"] = ("outrunner A on a belt reduction, comfortably inside every "
+                              "continuous rating the datasheet publishes")
+    return d
+
+
+case("a sensitivity row whose sentence hides the binding fraction is rejected", False,
+     sentence_without_the_binding_number, week=2)
+
+
+def row_states_no_input_power(d):
+    del d["thrust_sensitivity"][-1]["motor_input_W"]
+    return d
+
+
+case("a sensitivity row that states no motor input power is rejected", False,
+     row_states_no_input_power, week=2)
+
+
+def torque_fraction_off_the_ratio(d):
+    r = d["thrust_sensitivity"][0]
+    r["motor_torque_frac"] = r["motor_torque_frac"] * 0.80
+    return d
+
+
+case("a sensitivity row whose torque fraction ignores the belt is rejected", False,
+     torque_fraction_off_the_ratio, week=2)
 
 
 # ---- round 7: schema added by review with no gate behind it --------------------

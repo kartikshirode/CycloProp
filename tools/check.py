@@ -956,6 +956,97 @@ def check_thrust_sensitivity(data, r):
     return ok
 
 
+def check_sensitivity_drive(data):
+    """Every row of the sensitivity table says which line stops the drive and by how much.
+    This recomputes all four lines from the row's own numbers and the selected motor.
+
+    The table is maintained by hand and its percentages drifted. The 13 N row claimed the
+    binding line was speed at 74 percent when speed is 66 and current binds at 73. The 16 N
+    row claimed speed at 86 when speed is 77 and current binds at 85. Both survived the pass
+    that corrected exactly this on the 18 N and 20 N rows, because nothing read them.
+
+    The sentence in `drive_consequence` has to carry the binding fraction too, since that
+    sentence is what reaches the report."""
+    rows = dotted(data, "thrust_sensitivity")
+    if not isinstance(rows, list) or not rows:
+        return report(False, "week2: the sensitivity table exists to be checked")
+
+    drives = dotted(data, "drive_candidates")
+    sel = None
+    if isinstance(drives, list):
+        sel = next((c for c in drives if isinstance(c, dict) and c.get("selected")), None)
+        if sel is None and drives:
+            sel = drives[0] if isinstance(drives[0], dict) else None
+    if not isinstance(sel, dict):
+        return report(False, "week2: the sensitivity table names a selected drive")
+
+    kv = sel.get("kv")
+    res = sel.get("internal_resistance_ohm")
+    p_cont = sel.get("continuous_power_W")
+    i_cont = sel.get("continuous_current_A")
+    t_cont = sel.get("continuous_torque_Nm")
+    v_nom = num(data, "performance.pack_voltage_nominal_V")
+    belt = num(data, "efficiency.transmission")
+    if None in (kv, res, p_cont, i_cont, t_cont, v_nom, belt):
+        return report(False, "week2: the drive the sensitivity rows are read against is complete")
+
+    bad, checked = [], 0
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        t = row.get("thrust_N")
+        watts = snum(row, "motor_input_W")
+        stored_pf = snum(row, "motor_power_frac")
+        if watts is None or stored_pf is None:
+            bad.append(f"{t} N row states no motor input power or power fraction")
+            continue
+        lines = {"power": watts / p_cont}
+        if not close(stored_pf, lines["power"], TOL):
+            bad.append(f"{t} N: power fraction {stored_pf}, "
+                       f"{watts} of {p_cont} W gives {lines['power']:.4f}")
+
+        ratio, amps = snum(row, "belt_ratio"), snum(row, "motor_input_current_A")
+        rpm, tq = snum(row, "rpm"), snum(row, "rotor_torque_Nm")
+        if ratio is not None and amps is not None and rpm and tq:
+            v_load = v_nom - amps * res
+            ceil = kv * v_load
+            for key, want in (("motor_rpm", rpm * ratio),
+                              ("motor_speed_ceiling_rpm", ceil)):
+                got = snum(row, key)
+                if got is None or not close(got, want, TOL):
+                    bad.append(f"{t} N: {key} {got}, the row's own numbers give {want:.1f}")
+            lines["current"] = amps / i_cont
+            lines["torque"] = tq / ratio / belt / t_cont
+            lines["speed"] = rpm * ratio / ceil
+            for key, want in (("motor_current_frac", lines["current"]),
+                              ("motor_torque_frac", lines["torque"]),
+                              ("motor_speed_frac", lines["speed"])):
+                got = snum(row, key)
+                if got is None or not close(got, want, TOL):
+                    bad.append(f"{t} N: {key} {got}, recomputed {want:.4f}")
+        elif snum(row, "best_available_ratio") is None:
+            bad.append(f"{t} N row has no drive and names no best available ratio")
+
+        want_line = max(lines, key=lines.get)
+        got_line = row.get("binding_line")
+        if got_line != want_line:
+            bad.append(f"{t} N: binding line stated as {got_line!r}, the fractions make it "
+                       f"{want_line!r} at {lines[want_line]:.4f}")
+        got_frac = snum(row, "binding_frac")
+        if got_frac is None or not close(got_frac, lines[want_line], TOL):
+            bad.append(f"{t} N: binding fraction {got_frac}, recomputed "
+                       f"{lines[want_line]:.4f}")
+        # The prose is what the reader sees, so it carries the number too.
+        prose = str(row.get("drive_consequence", ""))
+        pct = f"{lines[want_line] * 100:.0f}%"
+        if want_line not in prose or pct not in prose:
+            bad.append(f"{t} N: the row's sentence does not say {want_line} at {pct}")
+        checked += 1
+
+    return report(not bad, "week2: every sensitivity row names the line that really binds it",
+                  "; ".join(bad[:4]) if bad else f"{checked} rows recomputed")
+
+
 def measured_shape_family(data, sigma, c_over_r, nominal):
     """The measured coefficient scenario, if any, that was taken on this design's own shape
     family. Returns the scenario or None. Fails closed: a scenario that does not declare its
@@ -1378,6 +1469,7 @@ def week2(data):
     # Thrust is a free variable, so the sensitivity of everything to it gets frozen here.
     # Week 4 may only pick a row from this table, never invent a new thrust under deadline.
     ok &= check_thrust_sensitivity(data, r)
+    ok &= check_sensitivity_drive(data)
     ok &= check_fm_transfer(data)
     ok &= check_week2_selection(data, r)
 
