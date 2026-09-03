@@ -127,13 +127,15 @@ before it is an aerodynamic one. See D49 and D68.
 Required item 7, the submission, the PDF and the staged email are done. What is left is the
 human gate, the real team facts, and one short run to fold them in.
 
-**1. Week H still blocks it.** All five markers in [stage-1/human-gate.md](stage-1/human-gate.md)
-are pending and `check.py` fails week 5 until a person adds every one. An agent never writes one.
+**1. Week H still blocks it.** Registration and eligibility are now confirmed in
+[stage-1/human-gate.md](stage-1/human-gate.md). Roster, sender and technical-read markers remain
+pending, so `check.py` still fails week 5 until a person adds the remaining ones. An agent never
+writes one.
 The count used to read four because the gate searched the whole file and found
 `TECHNICAL-READ-COMPLETE` inside the sentence explaining how to write it. Fixed in D59, and the
-project state never changed: five were always outstanding.
+the gate now counts only asserted lines. Two confirmations are recorded and three remain.
 
-**2. The nine placeholders.** `[P-1]` to `[P-9]`, listed in one table at the top of
+**2. The nine tracked fields.** `[P-1]` to `[P-9]`, listed in one table at the top of
 [07-team-and-execution.md](stage-1/design/07-team-and-execution.md) and referenced from the
 submission's identity table and the email draft. Four are also week H markers. Filling them is
 the substance of what is left, per D55.
@@ -154,28 +156,29 @@ for byte from that pair.
   rewritten. All 7 required items in the official order, the 8 row criteria map, a claims and
   risk table, a provenance section naming which sources were read and which were not, and an
   appendix of 12 examiner questions. The stale week 2 mass figures are gone
-- **The PDF is built, read back and inspected.** 21 pages, 1 of title and contents, 15 of body,
-  the rest appendix. The xelatex log is clean of overfull lines after two were fixed
+- **The PDF was rebuilt after the report identity and figure changes.** It is currently 30 pages.
+  The final page count and attachment filename still need a human check
 - **The coverage gate defect is fixed.** `margin=25mm` in the pandoc header is build
   configuration, not a design claim, and the skip is positional so the same text in the body
   still fails. 124 self-tests to 128. See D54
-- **The email is drafted and staged.** Nothing was sent. The registration reference is a marked
-  placeholder and the draft lists the six things a person does before pressing send
+- **The email is drafted and staged.** Nothing was sent. It now carries the Competition ID and
+  Team ID, and the sender name and final filename still need a human check
 
 ## Still worth a human doing, in this order
 
 **1. Eligibility, first.** The clause disqualifies a whole team at any stage, including after
-results are announced, so an ineligible roster turns every other week into wasted effort. Then
-add `ELIGIBILITY-CHECKED`.
+results are announced, so an ineligible roster turns every other week into wasted effort. This is
+now checked and `ELIGIBILITY-CHECKED` is present.
 
-**2. Register** on techfest.org and keep the reference. Then add `REGISTRATION-CONFIRMED`, and
-put the reference into `[P-7]`, which is the placeholder in the email subject and body.
+**2. Register** on techfest.org and keep the Competition ID and Team ID. No separate registration
+reference was issued. Both IDs are now in the report identity table and the email draft, and
+`REGISTRATION-CONFIRMED` is present.
 
 **3. Confirm the roster and the sender**, then add `ROSTER-CONFIRMED` and `SENDER-CONFIRMED`.
 That is four of the five and the fifth, `TECHNICAL-READ-COMPLETE`, comes after step 6 below.
 
-**4. Fill `[P-1]` to `[P-9]`** in `07-team-and-execution.md`, and the three identity fields at
-the top of the submission.
+**4. Fill the remaining `[P-1]` to `[P-9]` fields** in `07-team-and-execution.md`, then check the
+identity table at the top of the submission.
 
 **5. Rebuild the PDF.** The command is in `.claude/codemap.md`. A stale PDF passes the page
 count and fails the string check.
@@ -202,11 +205,10 @@ PDFs, which is E13 in the ledger. Same reason.
 
 ## The human gate
 
-All five markers in [stage-1/human-gate.md](stage-1/human-gate.md) are outstanding and they are
-the only thing failing `--week 5`. They were advisory before week 2 and the engineering
-did not depend on them, so weeks 2, 3 and 4 ran. Week 5 cannot finish without them, because a
-capability section with invented names and a submission staged against no registration reference
-would both be fabrication rather than work.
+Registration and eligibility are confirmed in [stage-1/human-gate.md](stage-1/human-gate.md).
+Roster, sender and technical-read remain outstanding and are the human work still blocking
+`--week 5`. They were advisory before week 2 and the engineering did not depend on them, so weeks
+2, 3 and 4 ran. Week 5 cannot finish with invented team details or an unread final attachment.
 
 ## Standing constraints
 
@@ -251,8 +253,8 @@ positional so the same text in the body still fails. The 1 September hardening p
   project. What it has now is a bound: the selection breaks even at 0.7927, no lower thrust row
   holds the stacked case, and no larger motor fits the mass. A dynamometer run is the first drive
   gate in Stage 2. See D61
-- **Working solo**, confirmed 27 August. Weekly hours still unstated, which matters because there
-  is nobody to absorb a slipped week and week 2 already used two of its slots
+- **Three-person roster at VPKBIET**, with 5 hours per week recorded. Member roles, programmes and
+  prior work still need to be written into item 7
 - **The two scripts had a hand resolved run order and now it is gated.** Running them backwards
   leaves `structure.pitch_link_load_N` holding the value from before the blade moved while
   `pitch.peak_link_force_N` carries the new one, and `check_solver_order` reads that gap. Note
@@ -271,12 +273,11 @@ positional so the same text in the body still fails. The 1 September hardening p
   being gated once its progress file is written, so `--week N` fails in the window between the
   done marker and the audit file. That is stricter than `.claude/weekly-loop.md` describes and it
   is the code that is right. Harmless in the order the loop actually runs
-- **The page limit and the file naming convention were never answered.** The questions were
-  drafted for early September and never sent. The working assumption is 15 pages of body plus
-  cited appendices, the built report is 21 pages on that reading, and the question now rides at
-  the end of the staged submission email. See D57
-- **The submission carries `[P-1]`, `[P-2]` and `[P-7]` in its identity table** and will print
-  "to be completed" in the attachment until a person fills them and rebuilds the PDF
+- **The page limit and the file naming convention were never answered.** The question remains at
+  the end of the staged submission email. The final filename and page count need a human check
+  before sending. See D57
+- **The submission identity table now carries the team name, institution, Competition ID and Team
+  ID.** Rebuild the attachment after the coding and document changes, then read it end to end
 - [stage-1/organiser-email.md](stage-1/organiser-email.md) is cut back to the record of three
   questions the problem statement answered. Its two live ones ride at the end of the
   submission email

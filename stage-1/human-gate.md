@@ -15,13 +15,14 @@ clause disqualifies a whole team at any stage, including after results are annou
 ineligible roster turns every other week into wasted effort. Check every member against the
 clause quoted in [../context.md](../context.md) before the team is fixed.
 
-**2. Registration** on techfest.org, and keep the registration reference. The submission
-email is expected to quote it.
+**2. Registration** on techfest.org, and keep the identifiers it provides. This registration
+shows a Competition ID and a Team ID, with no separate registration reference. Quote both IDs
+in the submission email and report.
 
-**3. Roster confirmed.** Currently one person, confirmed 27 August. If that is still true at week 5, the capability section is written for a solo entry.
-Week 5 writes the team capability section around real capability, and the problem
-statement's preference list reads like a spec for it. Structure comes from the agent, the
-substance comes from you.
+**3. Roster confirmed.** The current submission lists three members. The capability section still
+needs each member's role and programme before the roster can be confirmed. Week 5 writes the team
+capability section around real capability, and the problem statement's preference list reads like
+a spec for it. Structure comes from the agent, the substance comes from you.
 
 **4. Sender confirmed.** Who sends the submission on 26 September, from which address.
 Sending is a blocked trigger for every agent in this repo, so a person has to own it.
@@ -32,7 +33,7 @@ Both are cheap now and expensive on 26 September. They are in
 [organiser-email.md](organiser-email.md) and neither is answered by the problem statement:
 
 - Is there a page limit on the Stage 1 report, and a preferred file naming convention
-- What registration reference should the submission quote, and in what format
+- Whether the Competition ID and Team ID are the identifiers the submission should quote
 
 ## Also before week 5
 
@@ -43,7 +44,7 @@ exists.
 
 The human technical read happens on 25 September. Replace
 `TECHNICAL-READ-PENDING` below with `TECHNICAL-READ-COMPLETE` only after opening the final
-PDF and checking the title, team details, registration reference, figures and main design
+PDF and checking the title, team details, Competition ID, Team ID, figures and main design
 claims. This fifth marker does not block the start of week 5. It blocks final staging.
 
 ## Status
@@ -51,8 +52,8 @@ claims. This fifth marker does not block the start of week 5. It blocks final st
 Add each marker below on its own line as it is confirmed. Week 5 fails until the first four
 are present, and final staging fails without the fifth.
 
-REGISTRATION-PENDING
-ELIGIBILITY-PENDING
+REGISTRATION-CONFIRMED
+ELIGIBILITY-CHECKED
 ROSTER-PENDING
 SENDER-PENDING
 TECHNICAL-READ-PENDING
