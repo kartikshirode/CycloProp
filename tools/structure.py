@@ -23,9 +23,9 @@ from a shape factor. Skin, spar and foam each contribute to EI about the chord a
 the skin sets the allowable because a 0.142 mm laminate over foam wrinkles long before the
 fibre fails.
 
-Centrifugal load is the big term. At 2405 rpm each blade pulls 220 N against a peak
-aerodynamic 24 N, so the blade attachment and the blade bending case are both sized on it,
-and the overspeed case is what actually decides them.
+Centrifugal load is the big term. At the design point each blade pulls roughly nine times
+its peak aerodynamic load, so the blade attachment and the blade bending case are both sized
+on it, and the overspeed case is what actually decides them.
 
 The mass budget lines carry the word "blade" only when they are blade mass. check.py
 derives per-blade mass by summing every budget line whose item name contains "blade", so
@@ -1135,7 +1135,7 @@ def write(data, b, m):
         "blade_foam_downgrade_density_kgm3": FOAM_DOWNGRADE["rho"],
         "blade_foam_downgrade_blade_g": round(bs["foam_downgrade_blade_g"], 4),
         "torque_reference": (
-            "rotor shaft, downstream of the 3.5 to 1 belt reduction. The motor shaft "
+            "rotor shaft, downstream of the belt reduction. The motor shaft "
             "carries motor_shaft_torque_Nm, which is this figure divided by the ratio and "
             "by the 0.93 belt efficiency"),
     })
@@ -1157,9 +1157,10 @@ def write(data, b, m):
             "the headroom on the datasheet number itself"),
         "motor_speed_ceiling_rpm": (
             "KV times the pack voltage after the resistive drop at the working current, on "
-            "6 cells at 3.70 V nominal. motor_speed_rule is the 90 percent of it that week "
-            "2 screened belt ratios against, which is the rule that emptied the 100 mm "
-            "radius row and which lived in prose until now"),
+            "pack_cells at 3.70 V nominal. motor_speed_rule is the 90 percent of it that "
+            "belt ratios are screened against. It used to be the rule that emptied the 100 "
+            "mm radius row; since the pack went to 8S in D67 that row is emptied by motor "
+            "power instead"),
         "thrust_floor_stacked_N": (
             "design thrust the stacked downside needs to hold thrust to weight 2.5, from "
             "the conservative mass and the coefficient haircut. It is what stops the design "
@@ -1175,9 +1176,9 @@ def write(data, b, m):
             "the top of the published 3 to 4 range because that range is simulated. The "
             "rerun week 3 model gives 2.501 and is not used here"),
         "shaft_torque_Nm": (
-            "aerodynamic power plus tare, divided by rotor angular speed at 2404.79 rpm. "
-            "This is the rotor shaft, downstream of the 3.5 to 1 belt reduction. It "
-            "reproduces the rotor_torque_Nm week 2 published in the sensitivity table"),
+            "aerodynamic power plus tare, divided by rotor angular speed at the design "
+            "point. This is the rotor shaft, downstream of the belt reduction. It "
+            "reproduces the rotor_torque_Nm published in the sensitivity table"),
         "pitch_link_load_N": (
             "peak pitch link force from the week 3 four-bar solution, rerun in "
             "tools/linkage.py against the week 4 blade. The blade is not chordwise "
@@ -1189,9 +1190,12 @@ def write(data, b, m):
             "stress over the foam, not at the 400 MPa laminate allowable, and the spar "
             "would take 63.2 Nm before the skin takes 25.3"),
         "blade_attachment_allowable_N": (
-            "two 693ZZ pitch bearings per blade at a 270 N static rating each, supplier "
-            "listing. They are the softest element in the path from the blade to the "
-            "spider arm, softer than the bonded root fitting or the bracket bolts"),
+            "pitch_bearings_per_blade 693ZZ bearings, each at the ISO 76 basic static "
+            "rating computed from its own ball complement rather than at a supplier "
+            "listing, and shared at pitch_bearing_share because two bearings on one pin do "
+            "not split a radial load perfectly. They are the softest element in the path "
+            "from the blade to the spider arm, softer than the bonded root fitting or the "
+            "bracket bolts. See D67"),
         "blade_skin_band_worst_margin": (
             "worst blade_combined_margin_overspeed found sweeping the skin modulus from "
             "blade_skin_band_low of its published class value up to all of it. The sweep "
