@@ -407,3 +407,106 @@ goes at the end of the submission email where it costs nothing.
 The email is drafted and staged and it is not sent. The registration reference is a placeholder,
 because nobody has recorded it and an agent inventing one is inventing a fact about the team.
 What is left for a person is short and it is in the handoff.
+
+
+## 1 September 2026, the hardening pass and then the review that undid it
+
+Two sessions in one day and the second one took the first apart.
+
+The hardening pass came first. Six gates went in around things the weekly loop had been
+trusting rather than checking, and D59 to D64 carry them one by one. The one worth remembering
+is the marker sweep. `TECHNICAL-READ-COMPLETE` was satisfied by the sentence in `human-gate.md`
+telling a person how to write it, because the check was a substring search over a whole file.
+The same defect was in four progress files reading "write STATUS: WEEK-COMPLETE once it is
+finished" and in the audit gate, where `audit/week-4.md` passed its own audit check by quoting
+the marker in a sentence about the marker. One pattern, four places, and every one of them had
+been green since the week it was written. That is the shape of the whole day: nothing failed,
+and nothing had been asked a real question either.
+
+Then the five pass review, which was the point of writing the gates first. 63 findings, and the
+three that mattered were all in Tier 1. Figure of merit was being read at Kellen's 0.6 while the
+thrust coefficient was cut below his, which spends the same conservatism twice, because figure
+of merit goes as the coefficient to the power of one and a half. Motor current was input power
+over pack voltage, which is the draw of an ideal resistor and runs low by roughly the
+efficiency. The servo gear ratio was applied backwards. Six mass lines did not reproduce from
+the geometry they claimed.
+
+I wrote the plan as six phases with the gates first on purpose. A gate written after the fix is
+a gate nobody has watched fail.
+
+## 1 September 2026, phases 1 and 2, and the design gets worse
+
+Phase 1 was supposed to produce a red tree and it did: 246 gate passes with 9 of them failing,
+every failure a finding waiting on Phase 2.
+
+Phase 2 is where the design moved. The consistent figure of merit is 0.5215, not 0.6. Current
+from torque through Kt plus the published idle current is 19.29 A, not the 16.9 the quotient
+gave. The 693ZZ static rating computed from its own ball complement through ISO 76 is 216.985 N
+against a supplier listing of 270 that nobody could produce a catalogue page for. Six mass lines
+redrawn. The module went from 607.97 g to 677.91 g and the design point from 18 N to the 17 N
+the drive actually covers on its continuous rating.
+
+The part I keep coming back to is the pack. The mechanical output a motor can make is capped at
+the speed rule times the loaded pack voltage times the continuous current, and KV cancels out of
+that product exactly, because two pi over sixty times 9.5493 is one. So gearing slides the
+operating point along that line and cannot move the line. At 6S the cap is 392 W against the 406
+this rotor asks. No belt ratio fixes that. The pack interface had to go to 8S and the module has
+to declare it, since the battery sits outside the module boundary.
+
+The stacked conservative thrust to weight fell to 2.1569, under the requirement. Three of four
+cases now miss 2.5 where all four cleared before. That is what the corrections cost and the
+report says so rather than finding a reading that recovers it.
+
+## 3 September 2026, phase 3, and six things the corrections did not cause
+
+126 declarations across the nine design documents, 64 in the submission, eight tables
+regenerated from `numbers.json` rather than edited. The submission's narrative numbers that
+traced to nothing went from 123 to zero.
+
+What made the day worth it was the six errors that were nobody's correction. Phase 2 had broken
+the packaging rule for exactly one row, the selected one, by writing the built envelope where
+the screening rule belonged, and the two cluster rows kept the rule. D44 says the comparison
+holds because one rule reached every row, so that was a real regression and the rule reproducing
+400 and 490 for the clusters is what proved it rather than my opinion. A foam substitution claim
+in `06` was wrong before the corrections and wrong after them, in the same direction both times.
+Two sensitivity rows named the wrong cap. The 13 N row was running the motor as hard as the
+design point because Phase 2 had taken the first feasible belt ratio instead of the best one.
+Four strings the solver writes carried numbers that had moved. And the controller cannot take
+the pack Phase 2 declared: the F411-WSE class board is rated 6 to 30 V and 8S reaches 33.6 V
+charged.
+
+The untraced ratchet went from 210 to 215 as I added prose. Its own docstring says it can fall
+and cannot grow. Raising the ceiling would have been one line. Storing the four derived
+structural values the prose quotes was the right answer and it took twenty minutes, and two of
+those four sit behind the two tightest margins in the module.
+
+## 4 September 2026, phases 4 and 5, and what the figures found
+
+Phase 4 is the figures. `tools/figures.py` renders seven of them from `numbers.json`, taking the
+four-bar from `linkage.py` and the blade section from `check.py` rather than redrawing either,
+and every figure writes down the stored values it drew. A gate reads those back, so a figure
+rendered before a number moved fails the way a stale sentence does.
+
+Drawing things is a good way to find out that you were wrong about them. The vector map caption
+I wrote first said 120 degrees of phase authority buys 9.078 degrees of thrust tilt. That is not
+what `side_force_tilt_deg` is. It is the lag between the resultant and the offset direction at
+zero command, and the map spans the full 120 degrees one to one. The linkage diagram printed a
+pitch of plus 353.6 degrees at one azimuth because I had left the wrap off. Both were caught by
+looking at the picture, which is the argument for having pictures.
+
+Then the figures pulled a thread. The submission's structural section was still the pre-Phase 2
+one: seven stale margins, two empty demand cells, a claim that two margins sit under 2 when
+neither does, and the attachment named as the tightest joint after duplexing had taken it off
+that spot. Appendix A answered on 18 N, a 6S pack and a stacked thrust to weight of 2.5457.
+Phase 3 corrected the body and stopped at the sources section. I had reported that phase as
+complete and it was not.
+
+The sensitivity table had the same disease one level down. The 13 N row said the binding line
+was speed at 74 percent when speed is 66 and current binds at 73. The 16 N row said speed at 86
+when speed is 77 and current binds at 85. Both are hand written percentages that no gate read,
+and both survived the pass that corrected exactly this on the 18 N and 20 N rows. Each row
+carries all four fractions as fields now and the sentence is written from them.
+
+Phase 5 was the records, and the one that matters is the marker count. Four files said week 5
+blocks on four markers. The code blocks on five. That disagreement sat in the file the only
+person who can unblock this project reads to unblock it.

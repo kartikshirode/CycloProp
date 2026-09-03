@@ -282,6 +282,38 @@ positional so the same text in the body still fails. The 1 September hardening p
   questions the problem statement answered. Its two live ones ride at the end of the
   submission email
 
+## Week 2 debts, reconciled
+
+The week 2 ledger left five debts owned by "week 4" and week 4 retired week 3's debts without
+naming them. Six debts recorded as open in the files a fresh session is told to read are closed,
+and one instruction inside frozen decision D30 was reassigned to nobody. This is that
+reconciliation, done in Phase 5 rather than left for a reader to work out. Debt numbers are week
+2's.
+
+| # | Owner then | Where it actually stands |
+| --- | --- | --- |
+| 1 | week 4 | Retired by D35, then reopened by D67 and closed differently. The stacked case is 2.1569, under 2.5, held to a declared floor of 2.0 with 104.76 g published as the closing gap. The D17 target of 2.75 is further away than it was and is not claimed |
+| 2 | week 4 | Open. Only the MN5006 was read off a manufacturer's sheet and the other four rows plus the ESC are still supplier listings. The lower KV on more cells idea D30 raised was overtaken: D67 moved the pack to 8S for a different reason, which is the capacity line rather than the speed ceiling |
+| 3 | human | Open and it stays human. No endurance requirement exists to size the derate against. D67 restated the break even at 0.7433, so a true continuous derate of 0.75 still holds |
+| 4 | week 4 | Open, and it is the most load bearing of these. The three efficiencies are still assumed and the motor figure still sets motor input power and therefore the drive selection. Week 4 never touched it. It is a bench measurement, listed in Stage 2 |
+| 5 | week 4 | Closed. The cluster rows carry their own stored mass, thrust and recomputed thrust to weight, and the candidate comparison gate recomputes each row from its own numbers |
+| 6 | week 3 and 4 | Closed by measurement of a sort. The solved schedule gives a peak to mean of 2.5458 against the earlier 2.37, and structure is still sized on the published 4.0 rather than on either |
+| 7 | blocked on a paper | Open. Heimerl is still unread and the 28 degree stall cap is still stated rather than measured |
+| 8 | week 3 | Closed. Week 3 reran the model against the solved linkage and side force is no longer zero by construction |
+| 9 | week 4 | Closed. The spar is sized against the section build-up and its dimensions are stored, and the blade allowable is set by skin wrinkling rather than by the spar |
+| 10 | closed by D30 | Still closed, and D67 made it moot: the 2.75 target is 164.6 g away |
+| 11 | human | Closed in Phase 5. `organiser-email.md` is cut down and its question count now matches the draft |
+| 12 | week 4 | Closed, twice. Week 4 restated the stacked figure and Phase 3 restated it again after D67 moved it |
+| 13 | human | Closed in Phase 5. The loop config describes the current thrust to weight rule and the five markers |
+| 14 | none, recorded | Still recorded. The first run's prose dates itself 2 September against commits dated 30 August, and the commit dates are authoritative |
+
+**The D30 instruction that went to nobody.** D30 asked for the lower KV route to be priced. No
+week owned it and no later ledger carried it. It is answered rather than assigned now: D67's
+capacity identity shows that KV cancels out of the mechanical output cap, so a lower KV motor on
+the same pack and the same continuous current makes the same mechanical power. Pricing that
+route would not have moved the limit. What moves it is more continuous power in the same mass
+class, and that is what the Stage 2 drive item asks for.
+
 ## Standing risk
 
 Week 4 was interrupted by an API failure partway through and recovered from an uncommitted
