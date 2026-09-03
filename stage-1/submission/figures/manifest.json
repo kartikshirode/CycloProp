@@ -1,0 +1,115 @@
+{
+ "_note": "Written by tools/figures.py. Every value is a dotted path into numbers.json as it stood when the figure was drawn, and check.py reads them back, so a stale figure fails a gate.",
+ "figures": [
+  {
+   "id": "fig-arrangement",
+   "title": "Module general arrangement",
+   "file": "figures/fig-arrangement.pdf",
+   "caption": "Module general arrangement. Rotor radius 110 mm, 3 blades of 72.6 mm chord and 290.4 mm span, swept diameter 296.5 mm, packaged envelope 364.4 by 316.5 by 362.5 mm on 4 mount points.",
+   "values": {
+    "geometry.radius_m": 0.11,
+    "geometry.chord_m": 0.0726,
+    "geometry.span_m": 0.2904,
+    "geometry.blades": 3,
+    "packaging.envelope_length_mm": 364.4,
+    "packaging.envelope_width_mm": 316.5,
+    "packaging.envelope_height_mm": 362.5,
+    "packaging.mount_points": 4,
+    "packaging.swept_diameter_mm": 296.5,
+    "pitch.swept_outer_radius_mm": 148.25,
+    "pitch.swept_inner_radius_mm": 86.92,
+    "pitch.offset_m": 0.01153
+   }
+  },
+  {
+   "id": "fig-linkage",
+   "title": "Four-bar pitch kinematics",
+   "file": "figures/fig-linkage.pdf",
+   "caption": "Four-bar pitch kinematics at four azimuths. L1 110.0 mm rotor arm, L2 11.53 mm offset, L3 108.0 mm pitch link, L4 18.0 mm horn. The dotted path is the horn tip locus. Transmission angle runs 53.88 to 135.68 degrees, worst 44.32 degrees read folded.",
+   "values": {
+    "geometry.radius_m": 0.11,
+    "pitch.offset_m": 0.01153,
+    "pitch.horn_m": 0.018,
+    "pitch.pitch_link_m": 0.108,
+    "geometry.pitch_amplitude_deg": 40.0,
+    "pitch.transmission_angle_min_deg": 53.88,
+    "pitch.transmission_angle_max_deg": 135.68,
+    "pitch.transmission_angle_worst_folded_deg": 44.32,
+    "pitch.axis_keepout_mm": 0.019
+   }
+  },
+  {
+   "id": "fig-pitch-schedule",
+   "title": "Blade pitch schedule",
+   "file": "figures/fig-pitch-schedule.pdf",
+   "caption": "Blade pitch schedule from the solved four-bar, against the 40 degree sinusoid it is usually assumed to be. The mechanism is not sinusoidal and the residual is what the load model runs on, rms 1.1406 degrees, peak pitch delayed 7.75 degrees past the offset direction.",
+   "values": {
+    "geometry.pitch_amplitude_deg": 40.0,
+    "pitch.phase_delay_deg": 7.75,
+    "pitch.schedule_rms_residual_deg": 1.1406,
+    "pitch_schedule.0.pitch_deg": -6.4473,
+    "pitch_schedule.9.pitch_deg": 40.1199,
+    "pitch_schedule.18.pitch_deg": 5.5203
+   }
+  },
+  {
+   "id": "fig-blade-load",
+   "title": "Azimuthal blade load",
+   "file": "figures/fig-blade-load.pdf",
+   "caption": "Blade force against azimuth on the solved pitch schedule. Peak vertical 14.4260 N against a cycle mean of 5.6667 N, a peak to mean of 2.5458, which is what the structure is sized on rather than the mean.",
+   "values": {
+    "performance.thrust_N": 17.0,
+    "geometry.blades": 3,
+    "performance.blade_load_peak_to_mean": 2.5458,
+    "aero_azimuthal_loads.0.normal_force_N": 0.6371,
+    "aero_azimuthal_loads.9.normal_force_N": 13.7348,
+    "aero_azimuthal_loads.18.normal_force_N": -0.0041
+   }
+  },
+  {
+   "id": "fig-vector-map",
+   "title": "Thrust vector map",
+   "file": "figures/fig-vector-map.pdf",
+   "caption": "Thrust vector map. Left, the resultant at each phase command, spanning 120 degrees. Right, direction against command on a one to one line. The magnitude is flat at 17.0000 N across the sweep, and that is the load model being rotationally equivariant rather than a measured result: turning the schedule and the inflow together turns the whole solution and preserves its size. At zero command the resultant already sits 9.078 degrees off the offset direction, which is a lag in the aerodynamics and not a commanded tilt.",
+   "values": {
+    "pitch.vector_range_deg": 120.0,
+    "pitch.phase_authority_deg": 120.0,
+    "pitch.side_force_tilt_deg": 9.078,
+    "performance.thrust_N": 17.0,
+    "vector_map.0.resultant_N": 17.0,
+    "vector_map.2.resultant_N": 17.0,
+    "vector_map.4.resultant_N": 17.0,
+    "vector_map.0.lateral_force_N": -14.7224,
+    "vector_map.0.resultant_direction_deg": -60.0,
+    "vector_map.4.resultant_direction_deg": 60.0
+   }
+  },
+  {
+   "id": "fig-blade-section",
+   "title": "Blade section",
+   "file": "figures/fig-blade-section.pdf",
+   "caption": "Blade section. NACA 0020 at 72.6 mm chord on a 8.712 mm spar tube at 30 percent chord, which is also the pitch axis. EI 51.115 Nm2 and GJ 7.8058 Nm2 come from this section, and so does the 25.2528 Nm allowable that the 8.4153 Nm combined root moment is held against. Skin wrinkling governs at 215.2638 MPa.",
+   "values": {
+    "geometry.chord_m": 0.0726,
+    "geometry.pitch_axis_pct_chord": 30.0,
+    "structure.blade_ei_Nm2": 51.115,
+    "structure.blade_gj_Nm2": 7.8058,
+    "structure.blade_allowable_Nm": 25.2528,
+    "structure.blade_wrinkle_stress_MPa": 215.2638,
+    "structure.blade_combined_Nm": 8.4153
+   }
+  },
+  {
+   "id": "fig-mass",
+   "title": "Module mass breakdown",
+   "file": "figures/fig-mass.pdf",
+   "caption": "Module mass by group. 33 drawn lines totalling 677.91 g nominal and 763.24 g conservative, with the line count per group in brackets. Thrust to weight is 2.5563 at the design point and 2.1569 with the coefficient and mass downsides stacked.",
+   "values": {
+    "results.thrust_to_weight": 2.5563,
+    "results.thrust_to_weight_conservative": 2.1569,
+    "results.total_mass_g": 677.91,
+    "results.mass_g_conservative": 763.24
+   }
+  }
+ ]
+}
