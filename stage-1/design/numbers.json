@@ -1531,7 +1531,7 @@
       "line_cost_inr": 1400,
       "lead_time_weeks": 2,
       "make_or_buy": "buy",
-      "source": "Composites Today, Chennai",
+      "source": "Composites Today, Chennai, distributor list level estimate per square metre",
       "priced_date": "31 August 2026"
     },
     {
@@ -1542,7 +1542,7 @@
       "line_cost_inr": 1600,
       "lead_time_weeks": 1,
       "make_or_buy": "buy",
-      "source": "Composites Today, Chennai",
+      "source": "Composites Today, Chennai, distributor list level estimate for a 500 g kit",
       "priced_date": "31 August 2026"
     },
     {
@@ -1553,7 +1553,7 @@
       "line_cost_inr": 950,
       "lead_time_weeks": 1,
       "make_or_buy": "buy",
-      "source": "Huntsman distributor, Mumbai",
+      "source": "Huntsman distributor, Mumbai, list level estimate for a 50 ml paste cartridge",
       "priced_date": "31 August 2026"
     },
     {
@@ -1564,7 +1564,7 @@
       "line_cost_inr": 2900,
       "lead_time_weeks": 3,
       "make_or_buy": "buy",
-      "source": "Carbon Fiber India, Coimbatore",
+      "source": "Carbon Fiber India, Coimbatore, list level estimate per metre over four diameters",
       "priced_date": "31 August 2026"
     },
     {
@@ -1597,7 +1597,7 @@
       "line_cost_inr": 900,
       "lead_time_weeks": 1,
       "make_or_buy": "buy",
-      "source": "fastener stockist, Mumbai",
+      "source": "fastener stockist, Mumbai, over the counter rate for a mixed pack of M3 hardware",
       "priced_date": "31 August 2026"
     },
     {

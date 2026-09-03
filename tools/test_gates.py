@@ -683,8 +683,20 @@ def submission_doc(path, data, rows=None, items=None, figures=()):
 
 def build(root, data, upto=4):
     d = Path(root)
-    doc(d / "context.md", ["Context", "Stage 1: the seven required items",
-                           "Evaluation criteria", "The thrust-to-weight basis, settled"])
+    # context.md is written out rather than filled, because week 1's gate now reads what
+    # the settled section says instead of counting its headings. The three assertions below
+    # are the ones every later week rests on.
+    (d / "context.md").write_text("\n".join([
+        "# Context", "", FILLER[:3600], "",
+        "## Stage 1: the seven required items", "", FILLER[:1800], "",
+        "## Evaluation criteria", "", FILLER[:1800], "",
+        "## The thrust-to-weight basis, settled", "",
+        "The ratio is taken on the module and not on the vehicle, so the requirement of",
+        "2.5 applies to what this design delivers and the thrust requirement of 10 N is a",
+        "floor rather than the operating point. The 408 g figure is not the limit: it is",
+        "only the mass ceiling at exactly 10 N, and it moves with thrust.", "",
+        FILLER[:1800], "",
+    ]), encoding="utf-8")
     doc(d / "stage-1" / "plan.md", ["Plan", "Calendar"])
     doc(d / "stage-1" / "design" / "evidence-ledger.md",
         ["Evidence ledger", "Selection rules"])
@@ -1944,6 +1956,60 @@ case("a packaging allowance deleted from the schema is rejected", False,
      allowance_deleted, week=3)
 
 
+# R63. Week 1's gate was five heading strings, so a settled section could lose the argument
+# under its own heading and stay green. These are the three ways it can lose it.
+
+
+def _settled(root, replace, with_):
+    p = root / "context.md"
+    t = p.read_text(encoding="utf-8")
+    assert replace in t, replace
+    p.write_text(t.replace(replace, with_), encoding="utf-8")
+
+
+def basis_drops_the_module(root, data):
+    _settled(root, "taken on the module and not on the vehicle",
+             "taken on the airframe and not on any one part")
+
+
+case("a settled basis that stops saying the ratio is on the module is rejected", False,
+     upto=1, week=1, tweak=basis_drops_the_module)
+
+
+def basis_drops_the_thrust_floor(root, data):
+    """Both mentions have to go. Leaving the second one behind is not the attack, and the
+    gate was right to pass it."""
+    _settled(root, "the thrust requirement of 10 N is a", "the thrust requirement is a")
+    _settled(root, "the mass ceiling at exactly 10 N", "the mass ceiling at the floor")
+
+
+case("a settled basis that stops stating the thrust floor is rejected", False,
+     upto=1, week=1, tweak=basis_drops_the_thrust_floor)
+
+
+def basis_leaves_408_standing(root, data):
+    _settled(root, """The 408 g figure is not the limit: it is
+only the mass ceiling at exactly 10 N, and it moves with thrust.""",
+             "The mass budget for this module is 408 g.")
+
+
+case("a settled basis that leaves 408 g standing as the limit is rejected", False,
+     upto=1, week=1, tweak=basis_leaves_408_standing)
+
+
+def context_is_a_stub(root, data):
+    (root / "context.md").write_text(
+        "\n".join(["# Context", "",
+                    "## Stage 1: the seven required items", "",
+                    "## Evaluation criteria", "",
+                    "## The thrust-to-weight basis, settled", "",
+                    "Module ratio 2.5, thrust 10 N."]), encoding="utf-8")
+
+
+case("a context file that is five headings and a sentence is rejected", False,
+     upto=1, week=1, tweak=context_is_a_stub)
+
+
 # ---- round 7: schema added by review with no gate behind it --------------------
 
 def empty_candidate_list(d):
@@ -2495,8 +2561,21 @@ def pdf_selftests():
     left = [g for g in chk.LIGATURES if g in text]
     out = [("the PDF reader hands back no ligature glyphs", not left,
             "clean" if not left else f"{len(left)} glyph(s) survived")]
-    out.append(("a double f word is findable in the extracted text", "off" in text,
-                "found" if "off" in text else "the ligature is still one character"))
+    # Read once more without the expansion. The old probe only asked whether "off" appeared
+    # somewhere in the expanded text, and the report also contains the word where xelatex
+    # did not ligature it, so deleting the expansion left the probe green. This asks the
+    # raw extraction to actually contain a ligature glyph, which is what makes the
+    # expansion load bearing, and then asks the expanded text to have lost it.
+    import pypdf
+    raw = "\n".join(pg.extract_text() or "" for pg in pypdf.PdfReader(str(pdf)).pages)
+    present = [g for g in chk.LIGATURES if g in raw]
+    out.append(("the raw PDF really does carry a ligature glyph to expand", bool(present),
+                f"{len(present)} glyph(s) in the raw text"
+                if present else "nothing for the expansion to do, so it proves nothing"))
+    out.append(("expanding the ligature is what makes a double f word findable",
+                bool(present) and "off" in text and
+                not any(g in text for g in present),
+                "expanded" if present else "no ligature in this build"))
     flat = "".join(text.split()).lower()
     want = "".join("Team capability and execution plan".split()).lower()
     out.append(("a heading broken by kerning still matches", want in flat,

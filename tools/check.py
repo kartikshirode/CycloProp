@@ -73,6 +73,37 @@ TW_DOWNSIDE_FLOOR = 2.0
 PLANNING_MASS_AT_10N_G = 408.0   # reported for reference, never gated
 
 MIN_BASIS_CHARS = 25     # a basis field has to say something
+MIN_BASIS_WORDS = 5      # and it has to say it in words
+MIN_BASIS_LONG_WORDS = 3   # three of which carry meaning rather than glue
+
+# Words that pad a length test without adding a reason. A basis made only of these and
+# numbers is a basis that says nothing, which is what a character count could not tell.
+BASIS_GLUE = {"a", "an", "and", "as", "at", "by", "for", "from", "in", "is", "it", "its",
+              "of", "on", "or", "per", "the", "this", "to", "with"}
+
+
+def thin_basis(text):
+    """Why a basis field is not a basis, or None when it is one.
+
+    The rule used to be twenty five characters, so twenty six junk characters passed. A
+    reason is written in words: several of them, and several carrying content rather than
+    glue. This does not judge whether the reason is a good one. It refuses a field that is
+    not a reason at all."""
+    s = str(text or "").strip()
+    if len(s) < MIN_BASIS_CHARS:
+        return f"{len(s)} chars, need {MIN_BASIS_CHARS}"
+    words = [w.strip(".,;:()[]/").lower() for w in s.split()]
+    words = [w for w in words if w]
+    if len(words) < MIN_BASIS_WORDS:
+        return f"{len(words)} words, need {MIN_BASIS_WORDS}"
+    content = {w for w in words
+               if len(w) >= 4 and w not in BASIS_GLUE and not w.replace(".", "").isdigit()}
+    if len(content) < MIN_BASIS_LONG_WORDS:
+        return (f"{len(content)} distinct content word(s), need {MIN_BASIS_LONG_WORDS}: "
+                f"{s[:40]!r}")
+    return None
+
+
 MIN_MASS_LINE_G = 0.5    # no vanishing components
 MIN_MARGIN = 1.5
 MIN_DECLARED_NUMBERS = 3
@@ -901,6 +932,12 @@ def require_rows(data, key, week):
 
 
 def week1(data):
+    """Week 1 settled the thrust to weight basis, and its gate used to be five heading
+    strings. A document can carry all five and still have lost the argument under them, and
+    the argument is the one every later week rests on: the ratio is measured on the module
+    and not on the vehicle, so the mass ceiling moves with thrust instead of sitting at
+    408 g. This asks the settled section to still say that, and asks the literature file to
+    still carry the numbers week 2 transferred from."""
     ok = True
     ok &= require_headings("context.md", [
         "Stage 1: the seven required items", "Evaluation criteria",
@@ -909,6 +946,45 @@ def week1(data):
     ok &= require_headings("stage-1/literature.md", [
         "Geometry and measured performance", "Published mass breakdowns",
     ])
+    ok &= require_substance("context.md", 1200)
+    ok &= require_substance("stage-1/literature.md", 800)
+
+    p = ROOT / "context.md"
+    if p.is_file():
+        block = section_under(p.read_text(encoding="utf-8"), "thrust-to-weight basis")
+        low = " ".join(block or []).lower()
+        # The three things the settled section has to still assert. Week 2 onwards is built
+        # on all three and a heading alone carries none of them.
+        for needle, label in ((("module",), "the ratio is taken on the module"),
+                              (("2.5",), "the requirement is stated as 2.5"),
+                              (("10 n", "10n"), "the thrust requirement is stated as 10 N")):
+            ok &= report(any(n in low for n in needle),
+                         f"week1: the settled basis says {label}",
+                         fail_detail=f"nothing under that heading says {label}")
+        # 408 g is the planning figure at exactly 10 N and it is not the requirement, so
+        # somewhere under this heading the section has to say so. Asked positively on
+        # purpose. The first version required every mention to be qualified and fired on
+        # three sentences that were arguing the point, including the derivation showing
+        # where 0.408 kg comes from and one saying 408 g fails the strict inequality. A
+        # keyword list cannot tell an argument for from an argument against, so it is not
+        # asked to: one qualified mention is the claim, and a document naming the figure
+        # once as the budget has not made it.
+        mentions = [c.strip() for c in re.split(r"(?<=[.!?])\s+", low) if "408" in c]
+        qualified = [c for c in mentions
+                     if any(q in c for q in ("not ", "no reason", "only ", "at exactly",
+                                             "rather than", "moves with", "ceiling at",
+                                             "fails", "10 n", "exact"))]
+        ok &= report(not mentions or bool(qualified),
+                     "week1: 408 g is not left standing as the limit",
+                     f"{len(qualified)} of {len(mentions)} mentions qualify it"
+                     if mentions else "the section does not name it",
+                     fail_detail="names 408 g and never says it is only the ceiling at 10 N")
+
+    thrust = num(data, "performance.thrust_N")
+    if thrust is not None:
+        ok &= report(thrust >= THRUST_MINIMUM_N,
+                     "week1: the design thrust clears the stated requirement",
+                     f"{thrust} N against {THRUST_MINIMUM_N} N")
     return ok
 
 
@@ -1230,7 +1306,7 @@ def week2(data):
                     bad.append(f"{b.get('item','?')}.{f}={v!r}")
                 else:
                     vals[f] = float(v)
-            if len(str(b.get("basis", "")).strip()) < MIN_BASIS_CHARS:
+            if thin_basis(b.get("basis")):
                 bad.append(f"{b.get('item','?')} basis too thin")
             # D15: the drive is not a fixed mass, so every line says how it scales.
             if str(b.get("scaling_class")) not in SCALING_CLASSES:
@@ -2830,7 +2906,7 @@ def check_bom(data):
             bad.append(f"{nm}: no unit cost")
         if lead is None or lead < 0:
             bad.append(f"{nm}: lead time {x.get('lead_time_weeks')!r}")
-        if len(str(x.get("source", "")).strip()) < MIN_BASIS_CHARS:
+        if thin_basis(x.get("source")):
             bad.append(f"{nm}: the source does not say where the price came from")
         if len(str(x.get("priced_date", "")).strip()) < 8:
             bad.append(f"{nm}: no priced date")
@@ -2878,8 +2954,8 @@ def week4(data):
 
     if isinstance(budget, list) and budget:
         thin = [b.get("item", "?") for b in budget
-                if len(str(b.get("basis", "")).strip()) < MIN_BASIS_CHARS]
-        ok &= report(not thin, f"week4: every mass line states a basis of {MIN_BASIS_CHARS}+ chars",
+                if thin_basis(b.get("basis"))]
+        ok &= report(not thin, "week4: every mass line states a basis that reads as a reason",
                      "thin: " + ", ".join(thin[:5]) if thin else "")
         tiny = [b.get("item", "?") for b in budget
                 if not isinstance(b.get("mass_g"), (int, float))
