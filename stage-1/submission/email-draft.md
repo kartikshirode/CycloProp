@@ -5,14 +5,14 @@ this repository under D5, and it stays a human action. Nothing below has been tr
 anywhere. A person sends it on 26 September 2026, a day before the deadline, from the registered
 address, and keeps the sent message as the record.
 
-Two things have to be filled in before it goes. Both are marked in the draft and both are
-listed under "Before you press send".
+The Competition ID and Team ID are recorded below. The sender name and the remaining team
+details still need a last check before it goes.
 
 ## The draft
 
 ```
 To: pushpak_gc2026@aero.iitb.ac.in
-Subject: PUSHPAK Grand Challenge Stage 1 submission, CycloProp cyclorotor module, [REGISTRATION REFERENCE]
+Subject: PUSHPAK Grand Challenge Stage 1 submission, CycloProp cyclorotor module, CP-439436FADAD2, TM-5A7C41AF909
 
 Dear PUSHPAK Grand Challenge team,
 
@@ -20,12 +20,13 @@ Please find attached our Stage 1 preliminary design submission for the PUSHPAK
 Grand Challenge, covering the design of an indigenous cycloidal rotor propulsion
 module.
 
-Registration reference: [REGISTRATION REFERENCE]
-Team: [TEAM NAME]
-Institution: [INSTITUTION]
-Contact: [SENDER NAME AND EMAIL]
+Competition ID: CP-439436FADAD2
+Team ID: TM-5A7C41AF909
+Team: Kalash, 3 members
+Institution: VPKBIET
+Contact: [SENDER NAME], kartikshirode123@gmail.com
 
-The attachment is cycloprop-stage1.pdf, a 21 page report. It covers all seven
+The attachment is cycloprop-stage1.pdf. It covers all seven
 required Stage 1 items in the order the problem statement lists them, and it adds
 a map from each of the eight published evaluation criteria to the section that
 answers it, a claims and risk table, and an appendix of examiner questions with
@@ -39,39 +40,33 @@ low thrust coefficient are applied together, and the report says what closing th
 would take rather than leaving it implied.
 
 One question, if it is easy to answer. The problem statement does not state a page
-limit or a file naming convention for the Stage 1 report, so the attachment is
-named for the module and the main body runs to 19 pages with the two appendices
-after it. If either is wrong for your process, we will resend in whatever form
-you prefer.
+limit or a file naming convention for the Stage 1 report. If either is wrong for your process, we
+will resend in whatever form you prefer.
 
 Thank you for organising the challenge.
 
 Regards,
 [SENDER NAME]
-[TEAM NAME]
-[INSTITUTION]
+Kalash
+VPKBIET
 ```
 
 ## Before you press send
 
-1. **Replace `[REGISTRATION REFERENCE]`**, in the subject line and in the body. It is the
-   reference techfest.org issues at registration, and the problem statement expects the
-   submission to quote it. Nobody has recorded it yet, which is why it is a placeholder rather
-   than a number: an agent inventing one would be inventing a fact about the team. It is also
-   `REGISTRATION-CONFIRMED` in `../human-gate.md` and `[P-7]` in the report
-2. **Replace `[TEAM NAME]`, `[INSTITUTION]` and `[SENDER NAME AND EMAIL]`.** Same reason. These
-   are `[P-1]`, `[P-2]` and `[P-6]`
-3. **Fill the same three fields in the report's own identity table** at the top of
-   `cycloprop-stage1.md`, then rebuild the PDF. The report ships with them blank and marked, and
-   a reviewer opening a submission whose first table says "to be completed" will read the rest of
-   it differently
+1. **Keep both identifiers**, in the subject line and in the body. The site provides a Competition
+   ID and a Team ID, not a separate registration reference. They are `REGISTRATION-CONFIRMED` in
+   `../human-gate.md` and correspond to `[P-7]` in the team form
+2. **Replace `[SENDER NAME]`** with the person who will send the message. The sender address is
+   `kartikshirode123@gmail.com`; send only from the registered address
+3. **Check the report identity table** at the top of `cycloprop-stage1.md`, then rebuild the PDF.
+   The team, institution and both IDs must match this draft
 4. **Rebuild the attachment after any edit.** The command is in `.claude/codemap.md` and it is
    pandoc through xelatex. A stale PDF passes the page count and fails the gate that reads the
    file back
 5. **Read the built PDF end to end**, then add `TECHNICAL-READ-COMPLETE` to `../human-gate.md`.
-   Check the title, the three identity fields, the section order, the numbers in the summary and
-   the claims table. That marker is the last thing before staging is finished and only a person
-   can add it
+   Check the title, the team, the institution, both IDs, the section order, the numbers in the
+   summary and the claims table. That marker is the last thing before staging is finished and only
+   a person can add it
 6. **Send from the registered address**, on 26 September 2026, and keep the sent copy
 
 ## What the email deliberately does not do
