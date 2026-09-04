@@ -152,6 +152,7 @@ quoted for it. Confirming them is Stage 2 work and it is carried as a debt. The 
 | 40 A 8S brushless controller | buy | 1 | 3600 | 3600 | 2 wk | Robu.in, Pune |
 | 20 g class digital metal gear servo | buy | 2 | 1900 | 3800 | 2 wk | Robu.in, Pune |
 | Matek F411-WSE class controller board | buy | 1 | 3900 | 3900 | 3 wk | Quadkopters, New Delhi |
+| step down regulator, 42 V in, 12 V out | buy | 1 | 900 | 900 | 2 wk | Robu.in, Pune |
 | 693ZZ miniature bearing | buy | 12 | 60 | 720 | 1 wk | local bearing house, Mumbai |
 | MR128ZZ miniature bearing | buy | 2 | 90 | 180 | 1 wk | local bearing house, Mumbai |
 | 61802 deep groove bearing | buy | 2 | 240 | 480 | 1 wk | local bearing house, Mumbai |
@@ -174,8 +175,8 @@ quoted for it. Confirming them is Stage 2 work and it is carried as a debt. The 
 | carrier ring gear and servo sector gear | make | 1 | 5500 | 5500 | 3 wk | gear cutting job work, 6061 |
 | rotor assembly and balancing jig | make | 1 | 3000 | 3000 | 2 wk | aluminium extrusion and a dial indicator mount |
 
-Bought parts and material come to 39130 INR, tooling and fabrication to 28800, and the module
-totals 67930 INR. Longest single lead is 4 weeks.
+Bought parts and material come to 40030 INR, tooling and fabrication to 28800, and the module
+totals 68830 INR. Longest single lead is 4 weeks.
 
 **The five lines above 4500 INR, and what each one rests on.** Together they are 50 percent of
 the total, so they are the ones worth defending. The motor at 8500 is the one component in the
@@ -200,11 +201,11 @@ above depends on the core moduli, so the fallback is a thicker skin and a rerun.
 ## Mass reserve
 
 The budget carries a visible 15.00 g reserve on the frame and mounting group, which is 2.2
-percent of the 677.91 g nominal module. It sits on that group because the frame is the least
+percent of the 687.91 g nominal module. It sits on that group because the frame is the least
 developed part of the design and week 2 said so first, and it covers gussets, cable clamps, the
 servo bracket and the ESC tray. None of those is drawn.
 
-That reserve is separate from the conservative column. 763.24 g against 677.91 is 85.33 g of
+That reserve is separate from the conservative column. 775.74 g against 687.91 is 85.33 g of
 growth allowance, itemised line by line at a rate set by what each line is made of, and the
 thrust to weight requirement is tested against the conservative figure. The module therefore
 carries its uncertainty twice: once as an undrawn hardware allowance inside the nominal budget,
@@ -225,11 +226,11 @@ and once as a per line growth rate over the top of it.
 
 ## Numbers used
 
-- results.total_mass_g = 677.91
-- results.mass_g_conservative = 763.24
-- results.bom_bought_inr = 39130
+- results.total_mass_g = 687.91
+- results.mass_g_conservative = 775.74
+- results.bom_bought_inr = 40030
 - results.bom_tooling_inr = 28800
-- results.bom_total_inr = 67930
+- results.bom_total_inr = 68830
 - results.bom_longest_lead_weeks = 4
 - structure.blade_allowable_Nm = 25.2528
 - structure.blade_ei_Nm2 = 51.115

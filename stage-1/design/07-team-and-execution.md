@@ -123,7 +123,7 @@ and the gate that closes it.
 | 6 | Material selection and mass estimate | 7 | Items 1 and 4 | Coupon test and the CAD mass properties | `[P-1]` | Cured laminate modulus and areal mass measured on a panel built the way the blade is built |
 | 7 | Thrust-to-weight ratio estimate | 7 | Items 3 and 6 | The existing gate script | `[P-1]` | All four cases recomputed on measured inputs, and the stacked case still above 2.5 |
 | 8 | Manufacturability and assembly plan | 8 | Items 1 and 6 | Drawings | `[P-1]` | Every part has a drawing, a tolerance and a process, and the assembly order survives a dry run |
-| 9 | Bill of materials and cost estimate | 1 and 8 | Item 6 for material quantities | Supplier quotations | `[P-1]` | Written quotes for the five lines above 4500 INR, which are 52 percent of the total |
+| 9 | Bill of materials and cost estimate | 1 and 8 | Item 6 for material quantities | Supplier quotations | `[P-1]` | Written quotes for the five lines above 4500 INR, which are 49.8 percent of the total |
 | 10 | Risk assessment and mitigation | 8 | Everything above | Risk register | `[P-1]` | Every open item in the Stage 1 claims table has an owner, a trigger and a mitigation |
 | 11 | Build and test plan | 8 to 9 | Items 8 and 10 | Test plan and a facility | `[P-1]` `[P-9]` | A staged spin plan, an instrumented thrust measurement and a named place to run it |
 

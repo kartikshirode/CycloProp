@@ -2,7 +2,7 @@
 
 Built 26 August 2026, day 1 of week 1. This replaces the parameter table that was in [plan.md](plan.md), which came out of search-result summaries and was wrong in several places. Nothing downstream should cite that table again.
 
-Four sources were opened and read as full text. Two more are recorded from summaries only and marked as such, because the handoff was right that a clean-looking table hides how little of it was actually checked.
+Five sources were opened and read as full text. One more is recorded from summaries only and marked as such, because the handoff was right that a clean-looking table hides how little of it was actually checked. S5 is the one that changed: it is marked read from 31 August, when a second attempt got the thesis, and the note below records what the first attempt could and could not do.
 
 ## Status column
 
@@ -19,7 +19,7 @@ Four sources were opened and read as full text. Two more are recorded from summa
 | S2 | Benedict, M. "Fundamental Understanding of the Cycloidal-Rotor Concept for Micro Air Vehicle Applications", PhD dissertation, University of Maryland, 2010 | read |
 | S3 | Xisto, C., Leger, J., Pascoa, J. et al. "Parametric Analysis of a Large-Scale Cycloidal Rotor in Hovering Conditions", Journal of Aerospace Engineering, 2016 | read |
 | S4 | Shrestha, E., Yeo, D., Benedict, M., Chopra, I. "Development of a meso-scale cycloidal-rotor aircraft for micro air vehicle application", International Journal of Micro Air Vehicles 9(3), 2017, 218-231 | publisher |
-| S5 | "Performance Measurements on a UAV-Scale Cycloidal Rotor in Hover", thesis, Texas A&M University | summary |
+| S5 | Kellen, A. J. "Performance Measurements on a UAV-Scale Cycloidal Rotor in Hover", MS thesis, Texas A&M University, 2019, handle 1969.1/184958 | read |
 | S6 | Adams, Z., Benedict, M., Hrishikeshavan, V., Chopra, I. "Design, Development, and Flight Test of a Small-Scale Cyclogyro UAV Utilizing a Novel Cam-Based Passive Blade Pitching Mechanism", International Journal of Micro Air Vehicles 5(2), 2013, 145 | summary |
 
 One correction to the handoff. The Sirohi paper is University of Maryland work, not UT Austin. Sirohi moved to UT Austin afterwards and his UT page hosts the PDF, which is probably where the confusion started. Chopra is the common thread through S1, S2, S4 and S6.
@@ -40,7 +40,7 @@ One correction to the handoff. The Sirohi paper is University of Maryland work, 
 | S1 | Kim et al. 2003 | not given | not given | 150 mm | not given | 800 mm | not given | NACA 0012 | not given | to 600 rpm | power loading 12 to 5 kgf/HP at Re 260,000 | secondhand |
 | S1 | Wheatley 1930s NACA | 4 | 1220 mm | 95 mm | 0.078 | 2440 mm | 25.7 | NACA 0012 | not given | not given | not given | secondhand |
 
-S5 could not be downloaded. The TAMU repository refused the request from here and the item page timed out. Its three quoted shape numbers do check out against each other though: c/R of 0.66 with a blade aspect ratio of 4 gives a span of 2.64 R, so the rotor aspect ratio comes to 1.32 against the 1.33 quoted. Three numbers agreeing by construction is decent evidence the summary read them correctly. It still is not the same as opening the thesis.
+S5 could not be downloaded on 26 August. The TAMU repository refused the request and the item page timed out, so day 1 kept it as a summary and checked what it could: c/R of 0.66 with a blade aspect ratio of 4 gives a span of 2.64 R, so the rotor aspect ratio comes to 1.32 against the 1.33 quoted, which is decent evidence the summary read the shape right. A second attempt on 31 August got the thesis. The machine text extract is at `../reference/kellen2019-extract.txt` and rows E17 and E18 of the evidence ledger are read off its Table 2.1 and Figures 3.25, 3.27 and 3.28. Anything below written as though S5 were unread dates from before that.
 
 ## What the old table got wrong
 

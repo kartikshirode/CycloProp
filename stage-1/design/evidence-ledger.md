@@ -17,10 +17,10 @@ scenarios.
 | catalogue | a supplier datasheet figure |
 | assumed | no source. A number I chose, with the reasoning stated and the sensitivity given |
 
-Until 31 August 2026 nothing here was class measured. Two rows are now, and the distinction
-they rest on has to be stated precisely, because it is easy to overclaim.
+Until 31 August 2026 nothing here was class measured. Four rows are now, E4, E5, E17 and E18,
+and the distinction they rest on has to be stated precisely, because it is easy to overclaim.
 
-Nobody has put this rotor on a load cell. E18 and E19 are Kellen's measurements on Kellen's
+Nobody has put this rotor on a load cell. E17 and E18 are Kellen's measurements on Kellen's
 rotor, and that rotor is this design's shape family rather than this design: 3 blades, NACA
 0020, chord-to-radius 0.6667 against our 0.66, solidity 0.3183 against our 0.3151, blade aspect
 ratio 4.0 in both, pitching plus or minus 40 degrees in both. Solidity and chord-to-radius agree
@@ -55,6 +55,7 @@ is still labelled for what it is.
 | E18 | blade-area thrust coefficient 0.6648, measured on this shape family | measured | Kellen 2019, Table 2.1 configuration 8. CT/sigma read off the vector paths of Fig 3.25 (1.04424) and Fig 3.28 (1.04428), agreeing to 0.003 percent, converted by coeff = (2/pi)(CT/sigma) out of Kellen's A = span times 2R convention. Cross-checked twice: FM closes at 0.595 against his stated 0.6, and power loading at his stated 60 N/m2 disk loading closes at 0.1202 against Fig 3.27's 0.1201 | blade area, converted from Kellen's projected area | 3 blades, NACA 0020, 5.5 in chord, 8.25 in radius, 22 in span, c/R 0.6667, solidity 0.3183, pitch plus or minus 40 degrees | 186,000 | retires the configuration-transfer half of the haircut, which is D23's test and D35's answer. Not adopted as the nominal, per D36 |
 | E19 | blade-area thrust coefficient 0.7211 | derived | Benedict 2010 printed p.236, at the operating RPM of 1800, each rotor produced around 1.91 N of thrust, repeated as 195 grams at 1800 rpm on p.225. Geometry from p.220 and p.233. This is what E1 should have been | same as E1 | as E1 | 31,600 | the corrected quad point. Held in reserve rather than adopted, per D36 |
 | E16 | efficiencies: belt 0.93, motor 0.84, ESC 0.95 | assumed | No source. Belt drive is published at 0.95 to 0.98 at these speeds so 0.93 is pessimistic; the motor figure is the sensitive one and at 0.78 the motor input rises from 458 W to 493 W | not applicable | not applicable | not applicable | the whole electrical power chain and the drive selection |
+| E20 | controller step down regulator: 10.0 g, rated 42 V in, 12 V out at 1 A, 0.85 conversion | assumed | No source and no supplier listing was read. The pitch controller is rated 6 to 30 V and a charged 8S pack is 33.6 V, so a step down has to exist; what is assumed is its mass and its efficiency, both at the pessimistic end of the switching regulator modules in this class. The mass carries a 25 percent growth rate because nothing is drawn. See D70 | not applicable | not applicable | not applicable | 10.0 g of the module budget, 1.4118 W of module electrical draw, and the interface that lets the board sit behind an 8S pack |
 
 Seven rows deserve sentences rather than cells.
 
@@ -179,13 +180,14 @@ inputs carrying evidence. D30 changed that rule after the numbers came in and th
 recorded rather than quietly applied. Geometry now freezes on three hard cases: the design
 point, the mass downside alone and the coefficient downside alone, each above 2.5. The stacked
 case has to be stated and reproduce, and a miss would have handed week 4 a computed mass target.
-That branch is now unused: since D35 the stacked case is 2.517 and clears the limit, so the
-target is gone from `numbers.json` rather than sitting there stale. The hard stacked test still
+That branch is in use. D35 read the stacked case above the limit and cleared it, D67 took it to
+2.1221 where it does not, and the computed mass target is back in `numbers.json` at 658.48 g
+because of it. The hard stacked test still
 moved to week 4, where the mass lines are real sections and catalogue parts instead of eight
 lines carrying a blanket 20 or 25 percent growth rate, six of them on an assumed section. Week 4
 also has to build its conservative column line by line rather than state a total, which is D33.
 The 2.75 internal target from D17 stands as a target and is still not met on the stacked case:
-it wants the conservative column at 633.8 g against the 692.4 g it holds, a gap of 58.6 g.
+it wants the conservative column at 598.62 g against the 775.74 g it holds, a gap of 177.12 g.
 
 ## Disclosed gaps
 

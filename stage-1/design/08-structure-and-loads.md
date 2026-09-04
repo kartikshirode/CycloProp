@@ -139,7 +139,7 @@ load goes up with it, so the margin barely moved from the 3.30 week 4 reported.
 That margin is the number behind the decision not to balance the blade, and the reason it gives
 has changed. A chordwise balance would take the link to 76.52 N and the margin to 6.20, and it
 costs 35.5 g across three blades. Week 4 declined it because that mass took the stacked case
-under 2.5. The stacked case is under 2.5 anyway since D67, and the 35.5 g leaves it at 2.0610,
+under 2.5. The stacked case is under 2.5 anyway since D67, and the 35.5 g leaves it at 2.0292,
 still over the declared floor. What declines it now is that 3.29 is already more than twice the
 1.5 floor, so the mass buys nothing the design needs. See D46, D53 and D67.
 
@@ -181,8 +181,8 @@ a later week lowers.
 
 Worth being plain about which of the two cases is actually binding. At the frozen 1.20
 overspeed the 1.5 strength floor already asks more of the rating than the 2.0 wear floor does,
-so the strength case still governs today and blade attachment at 2.59 is what sizes the joint,
-even though it is no longer the tightest margin in the module. The wear floor starts to bite only if a later week drops the overspeed, which is exactly
+so the strength case still governs today and the bearings at 2.59 are what size the joint,
+even though they are no longer the tightest margin in the module. The wear floor starts to bite only if a later week drops the overspeed, which is exactly
 the trade it exists to catch.
 
 Friction settles the alternative. Twelve deep groove bearings at a swing rate set by 38.95 Hz
@@ -208,7 +208,7 @@ plates.
 
 The lug pattern is 320 mm along the rotor axis by 240 mm across it, inside the 364.4 by 316.5 mm
 packaged envelope. Thrust is 17.0 N and it swings across 120 degrees, so the worst single lug
-sees roughly half the thrust rather than a quarter. Add its share of the 6.6503 N module weight
+sees roughly half the thrust rather than a quarter. Add its share of the 6.7484 N module weight
 and the torque couple across the 240 mm transverse spacing, and the worst lug carries about 13.4
 N. A 7075-T6 lug of 8 by 3 mm section with an M3 hole has 5.8 kN of net section capacity, so the
 mount is not strength driven either. What it is driven by is the stiffness of an airframe
@@ -230,16 +230,28 @@ needs the shaft section properties and those live in the script rather than in
 | rotor shaft torsion | 1.54226 Nm | 24.96 Nm | 16.18 |
 | rotor shaft, bending and torsion combined | 5.56 MPa | 55 MPa | 9.90 |
 | pitch link path, horn governs | 144.19 N | 474.1 N | 3.29 |
-| blade attachment, centrifugal | 209.16 N | 781.1 N | 3.73 |
-| blade attachment at 1.20 overspeed | 301.19 N | 781.1 N | 2.59 |
+| blade root pitch bearings, centrifugal | 209.16 N | 781.1 N | 3.73 |
+| blade root pitch bearings at 1.20 overspeed | 301.19 N | 781.1 N | 2.59 |
 
 The spread is the point, and it reads differently since D67. Two margins sit under 3 and both of
 them are the overspeed cases, which says the declared 1.20 overspeed is what sizes this module
 rather than any operating load. Everything at the design point is over 3. The blade in combined
-bending at overspeed is the tightest at 2.08, and it took that place from the blade attachment,
-which was 1.69 on a supplier listing and is 2.59 on a computed rating with twice the bearings.
-So the effort in Stage 2 goes to the blade section first and the attachment second, and the
-shaft and the frame are not close.
+bending at overspeed is the tightest at 2.08, and it took that place from the root bearings,
+which were 1.69 on a supplier listing and are 2.59 on a computed rating with twice the bearings.
+So the effort in Stage 2 goes to the blade section first and the root second, and the shaft and
+the frame are not close.
+
+**Read that last pair of rows for what they are.** They are a bearing capacity check, not a
+qualification of the bonded root fitting, and the 4 September audit was right that calling them
+a blade attachment margin let one stand in for the other. The bearings are named as the softest
+element in the path from blade to spider arm, softer than the bond or the bracket bolts, and
+that is an argument from stiffness rather than a calculation: no adhesive shear area, no peel
+stress, no stress concentration at the fitting and no cyclic knockdown has been computed here.
+The bond carries 209.16 N steady with a load cycling at three per revolution on top of it, and
+until a coupon and a local model exist, the honest statement is that the root has a screened
+bearing margin and an unquantified joint. Stage 2 item 4 owns the coupon, the root detail and
+the fatigue case. The belt tooth and pulley are in the same position: screened on geometry and
+a factor, with no supplier tooth rating or life curve behind them.
 
 ## What the blade allowable actually turns on
 
@@ -357,4 +369,4 @@ otherwise.
 - pitch.peak_blade_moment_Nm = 2.0967
 - performance.blade_tip_deflection_mm = 0.09
 - performance.blade_twist_deg = 0.014
-- results.weight_N = 6.6503
+- results.weight_N = 6.7484

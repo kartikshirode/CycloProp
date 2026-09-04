@@ -201,19 +201,24 @@ End to end takes 0.173 s at the published 0.13 s per 60 degrees, which is a vect
 not a control loop, so that is fast enough by a wide margin. Two servos at 0.35 A on 6 V draw
 4.2 W, inside the 6.0 W week 2 carried for them.
 
-**The controller, and an open item D67 created.** A Matek Systems F411-WSE class board, 8.5 g
-in a 28 by 28 by 14 mm case, with four servo outputs and a servo rail selectable to 5 or 6 V at
-3.5 A continuous. 3.5 A covers two servos drawing 0.35 A each with room over, and at 8.5 g it
-is 0.5 g above the 8.0 g nominal for the pitch offset controller and inside that line's 9.2 g
-conservative figure.
+**The controller, and the regulator D70 put in front of it.** A Matek Systems F411-WSE class
+board, 8.5 g in a 28 by 28 by 14 mm case, with four servo outputs and a servo rail selectable to
+5 or 6 V at 3.5 A continuous. 3.5 A covers two servos drawing 0.35 A each with room over.
 
-Its input range is 6 to 30 V and that no longer covers the pack. This document used to say the
+Its input range is 6 to 30 V and that does not cover the pack. This document used to say the
 board takes the pack directly and the module needs no separate regulator. On 6S that was true.
 D67 moved the declared pack interface to 8S, which is 29.6 V nominal and **33.6 V on a full
-charge**, so the board would sit 3.6 V over its rating at the top of every flight. The module
-therefore needs either a step-down ahead of the board or a controller rated past 34 V. Neither
-is a large part and neither is drawn, so this is an open item rather than a solved one, and the
-8.0 g line does not yet carry it. Stage 2 item 5 closes it.
+charge**, so the board would sit 3.6 V over its rating at the top of every flight. That was
+carried as an open item for three days with no part behind it, which is how the 4 September
+audit found it.
+
+What closes it is a switching regulator between the pack and the board, rated at least 42 V in
+against the 33.6 V it will actually see, putting out 12 V at 1 A, which lands in the middle of
+the board's window rather than at an edge of it. It costs 10.0 g nominal and 12.5 g
+conservative, and it carries the servo rail behind the board as well, so its conversion loss of
+1.4118 W is a module electrical draw rather than a rounding error. No supplier listing has been
+read for a specific part, so the line is a requirement and a mass allowance and the growth class
+says so. Stage 2 item 5 turns it into a part number.
 
 **Command to force.** Five commands across the authority, with vertical and lateral resolved in
 module axes and vertical taken along the design resultant.
@@ -245,7 +250,7 @@ rotation. Of that, the pitch peak accounts for 7.75 and the aerodynamics for the
 
 The measured range is not small. Sirohi measured about 10 degrees, Adams 15 to 35 depending on
 amplitude and rpm, and Benedict's twin sat at 30 at its operating point, so the band the design
-works to is 10 to 35 degrees. Benedict's figure 2.33 is the reason to expect this design high in
+works to is 10 to 35 degrees. Benedict's figure 2.33 is the reason to expect this design high in <!-- allow: 2.33 is a figure number in Benedict 2010, not the retired servo margin -->
 that band rather than low. It sweeps 2, 3, 4 and 5 bladed rotors at 35 and 40 degrees of
 pitching amplitude from 400 to 2000 rpm, and his text states both trends in words: the tilt
 rises with rotational speed, and it rises with blade count. No number is taken off that figure,
@@ -293,8 +298,8 @@ it.
   would take those to 1.0177 Nm and 76.52 N. The stored numbers are the unbalanced ones.
   Week 4 priced the balance at 35.5 g across three blades and declined it, and the reason it
   gave has weakened. That reason was that the mass took the stacked conservative case under
-  2.5. The stacked case is under 2.5 anyway since D67, and 35.5 g takes it from 2.1569 to
-  2.0610, which still clears the declared floor of 2.0. What still declines the balance is the
+  2.5. The stacked case is under 2.5 anyway since D67, and 35.5 g takes it from 2.1221 to
+  2.0292, which still clears the declared floor of 2.0. What still declines the balance is the
   structure: the pitch link path carries the unbalanced load on a margin of 3.29 against a 1.5
   floor, so the mass buys nothing the design needs. See D46 and D67
 - The three per revolution carrier ripple at 117 Hz is above any servo's control bandwidth. The

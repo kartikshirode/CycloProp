@@ -56,7 +56,7 @@ which is what makes the drive single ended.
   |  and | block  |plate|          blades and hubs       |plate| block  | carrier|
   |pulley|        |     |                                |     |        |  + 2   |
   +------+--------+-----+--------------------------------+-----+--------+ servos +
-  |======= rotor shaft, 14 mm dia, stops here ==========================|        |
+  |======= rotor shaft, 16 mm dia, stops here ==========================|        |
                                                               pitch     |  post  |
                                                               plane --->|<-------|
   |<------------------------------ 364.4 overall ----------------------------->|
@@ -109,9 +109,10 @@ steerable thrust, and a three point mount puts that torque into a triangle whose
 carries most of it.
 
 The reaction torque path runs: blade, spider arm, hub, through shaft, main bearing, bearing
-block, frame tube, mount lug. Motor torque is 0.3902 Nm at the motor shaft and the belt
-multiplies it by 4.25 into the rotor, so the frame sees that product as a steady moment about the
-rotor axis whenever the module is producing thrust. Both bearing blocks take it, which is why
+block, frame tube, mount lug. Motor torque is 0.3902 Nm at the motor shaft and the belt turns
+that into 1.54226 Nm at the rotor, which is the ratio of 4.25 less the 0.93 the belt keeps, so
+the frame sees 1.54226 Nm as a steady moment about the rotor axis whenever the module is
+producing thrust. Both bearing blocks take it, which is why
 they sit on the frame tubes and not on the side plates.
 
 Thrust reacts separately and it does not stay put. The resultant can be commanded anywhere
@@ -126,16 +127,18 @@ a damaged blade does not mean stripping the mechanism. The ESC and the offset co
 mount on the outside of the frame on the motor side, where they are in the rotor's own downwash.
 The controller is a Matek Systems F411-WSE class board, 28 by 28 by 14 mm and 8.5 g, feeding
 both servos off its own selectable 5 or 6 V rail at 3.5 A. It used to take the pack directly.
-Its input range is 6 to 30 V and the declared pack is 8S, which reaches 33.6 V charged, so the
-module needs a step-down ahead of the board or a controller rated past 34 V. That part is not
-drawn and the 8.0 g line does not carry it. See D67 and `03-pitch-and-vectoring.md`.
+Its input range is 6 to 30 V and the declared pack is 8S, which reaches 33.6 V charged, so a
+10.0 g step down regulator sits between the two, rated 42 V in and putting out 12 V. It mounts
+on the same face as the board and adds nothing to the envelope, because that face already
+carries the ESC and is set by the ESC rather than by anything beside it. See D70 and
+`03-pitch-and-vectoring.md`.
 
 ## Drivetrain
 
 One T-Motor Antigravity MN5006 KV450 on a single stage HTD-3M toothed belt at 4.25 to 1, 68
 teeth against 16, turning at 9932 rpm to give the rotor 2337. Motor input is 483.2 W at 19.29 A
-on an 8S pack, and the module draws 516.6 W once the actuator and controller allowances are
-added. The pack moved from 6S to 8S in D67, because a 6S MN5006 caps at 392 W of mechanical
+on an 8S pack, and the module draws 518.0 W once the actuator, controller and regulator
+allowances are added. The pack moved from 6S to 8S in D67, because a 6S MN5006 caps at 392 W of mechanical
 output against the 406 W the corrected rotor asks, and no belt ratio moves that cap.
 
 The belt sits at the drive end outboard of the bearing block, on the opposite end of the module
@@ -155,7 +158,7 @@ Mechanical, to the airframe:
 | Mount pattern | 4 lugs, in the plane containing the rotor axis, taking thrust and reaction torque |
 | Envelope reserved | 364.4 by 316.5 by 362.5 mm, with the swept annulus kept clear |
 | Thrust vector | 17.0 N, steerable over 120 degrees in the plane normal to the rotor axis |
-| Reaction torque | steady, about the rotor axis, motor torque times the belt ratio |
+| Reaction torque | steady, about the rotor axis, 1.54226 Nm, which is motor torque through the belt ratio and the belt efficiency |
 | Service faces | non-drive end for the pitch mechanism, drive end for the belt |
 
 Electrical, to the vehicle:
@@ -194,7 +197,7 @@ it. `03-pitch-and-vectoring.md` has what that costs.
 - performance.motor_input_W = 483.158
 - performance.motor_input_current_A = 19.2876
 - performance.belt_ratio = 4.25
-- performance.module_electrical_power_W = 516.588
+- performance.module_electrical_power_W = 518.0
 - performance.actuator_power_W = 6.0
 - efficiency.transmission = 0.93
 - efficiency.motor = 0.84

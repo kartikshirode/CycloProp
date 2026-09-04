@@ -4,9 +4,9 @@ Required Stage 1 item 2. Geometry, the radius trade, the blade section, and the 
 envelope that decides whether any of it closes.
 
 Read the last section first if you only have a minute. The sizing works and the geometry is
-frozen, and the design case clears thrust to weight 2.5 at 2.5563 on the week 4 refined budget.
-The stacked conservative case does not. It sits at 2.1569, and closing it would take 104.76 g
-out of a 763.2 g conservative column. D67 is where that changed: a corrected figure of merit
+frozen, and the design case clears thrust to weight 2.5 at 2.5191 on the week 4 refined budget.
+The stacked conservative case does not. It sits at 2.1221, and closing it would take 117.26 g
+out of a 775.7 g conservative column. D67 is where that changed: a corrected figure of merit
 moved the design point from 18 N to 17 N and six mass lines went up. The downside cases are
 held to a declared floor of 2.0 now and the gap is published rather than trimmed away. See D30,
 D35, D47 and D67.
@@ -124,7 +124,7 @@ lower-power rotor with heavier blades and a heavier shaft, and power alone canno
 
 | Radius | rpm | Ideal power | Aero power | Rotor torque | Motor input | Belt | Module mass | Conservative T/W |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 100 mm | 2828 | 194.9 W | 373.7 W | 1.402 Nm | 531.5 W | none fits | 662 g | 2.211 |
+| 100 mm | 2828 | 194.9 W | 373.7 W | 1.402 Nm | 531.5 W | none fits | 662 g | 2.1745 |
 | 110 mm | 2337 | 177.2 W | 339.7 W | 1.542 Nm | 483.2 W | 4.25 to 1 | 678 g | 2.157 |
 | 120 mm | 1964 | 162.4 W | 311.4 W | 1.683 Nm | 442.9 W | 4.625 to 1 | 696 g | 2.099 |
 | 130 mm | 1673 | 149.9 W | 287.5 W | 1.823 Nm | 408.9 W | 5.0 to 1 | 717 g | 2.038 |
@@ -137,7 +137,7 @@ envelope the earlier version of this table used.
 
 **The binding constraint is the drive, and it is worth being exact about where.** Conservative
 thrust to weight rises all the way down the radius range, because the geometry-scaled mass
-falls faster than the drive mass rises. The 100 mm row would give 2.211, which is better than
+falls faster than the drive mass rises. The 100 mm row would give 2.1745, which is better than
 anything the design can actually reach. No shortlist motor holds it, and since D67 the reason
 is power rather than speed: 100 mm asks 531.5 W at the motor terminals against the 520 W the
 MN5006 carries continuously, and nothing lighter in the shortlist carries more. The
@@ -172,7 +172,7 @@ for the housing their own description gives, a motor plate at 8 g against 14 g, 
 hard coded at 3.00 g, shaft plugs with no allowance for the journal they sit on, and a harness
 priced as one conductor when current goes out and comes back. Week 4 separately replaced the
 whole thing line by line with real sections and catalogue parts, and that budget is in
-`05-mass-and-tw.md`: 677.9 g nominal and 763.2 g conservative.
+`05-mass-and-tw.md`: 687.9 g nominal and 775.7 g conservative.
 
 | Line | Class | Nominal | Conservative | Rate |
 | --- | --- | --- | --- | --- |
@@ -186,17 +186,18 @@ whole thing line by line with real sections and catalogue parts, and that budget
 | transmission | power | 50.2 g | 60.3 g | 20 |
 | esc | power | 20.0 g | 23.0 g | 15 |
 | vectoring actuator | power | 40.0 g | 46.0 g | 15 |
-| pitch offset controller | fixed | 8.0 g | 9.2 g | 15 |
+| pitch offset controller and regulator | fixed | 18.0 g | 21.7 g | 15 |
 | module wiring harness | geometry | 26.0 g | 31.2 g | 20 |
 | fasteners and bonded joints | geometry | 22.0 g | 27.5 g | 25 |
-| **total** | | **637.2 g** | **761.1 g** | 19.4 |
+| **total** | | **647.2 g** | **773.6 g** | 19.4 |
 
 Geometry-scaled lines come to 339 g, power or torque-scaled to 290 g, and genuinely fixed to
-**8 g**.
+**18 g**.
 
 That last number is the one to sit with. D11 and D13 argue that the thrust to weight case
 rests on fixed hardware amortising over five times the thrust. Sorted honestly, this module has
-one fixed line in it, an 8 g controller board. Wiring follows the envelope. Fasteners follow
+two fixed lines in it, an 8 g controller board and the 10 g regulator D70 put in front of it.
+Wiring follows the envelope. Fasteners follow
 the frame. Servo torque follows the pitch link load, which follows thrust. Bearings and the
 shaft follow rotor torque. The amortisation argument is therefore much weaker than D11 and D13
 assume, and the week 2 answer reflects that: almost nothing in this module is free when the
@@ -217,10 +218,10 @@ most of week 2.
 
 | Case | Thrust | Mass | T/W | Against 2.5 |
 | --- | --- | --- | --- | --- |
-| design point | 17.00 N | 677.9 g | 2.5563 | clears by 2 percent |
-| coefficient downside alone | 16.15 N | 677.9 g | 2.4284 | misses by 3 percent |
-| mass downside alone | 17.00 N | 763.2 g | 2.2705 | misses by 9 percent |
-| both stacked | 16.15 N | 763.2 g | 2.1569 | misses by 14 percent |
+| design point | 17.00 N | 687.9 g | 2.5191 | clears by 0.8 percent |
+| coefficient downside alone | 16.15 N | 687.9 g | 2.3931 | misses by 4 percent |
+| mass downside alone | 17.00 N | 775.7 g | 2.2339 | misses by 11 percent |
+| both stacked | 16.15 N | 775.7 g | 2.1221 | misses by 15 percent |
 
 Every row is on the week 4 refined budget now, nominal and conservative both. The earlier
 version of this table mixed the week 2 envelope into rows 1 and 3 and the refined column into
@@ -236,8 +237,8 @@ around it is thinner than week 2 reported and the downside cases are now below t
 rather than above it.
 
 What the downside cases are held to instead is a declared floor of 2.0, and the stacked case
-sits at 2.1569 against it. The gate also requires the closing mass be computed and published:
-104.76 g out of the 763.2 g conservative column, or a target of 658.5 g. That is a mass
+sits at 2.1221 against it. The gate also requires the closing mass be computed and published:
+117.26 g out of the 775.7 g conservative column, or a target of 658.5 g. That is a mass
 reduction programme for Stage 2 and not an arithmetic change available now, and D67 says so in
 those words rather than moving a threshold quietly.
 
@@ -251,7 +252,7 @@ an assumed section. Eight is what `mass_envelope_g` gives, and the 95.6 g of gro
 those eight carry is the correct figure.
 
 The internal 2.75 target from D17 is further away than it was and is still not claimed. It
-needs the conservative column at 598.6 g against the 763.2 g it holds, so 164.6 g. Week 4 took
+needs the conservative column at 598.6 g against the 775.7 g it holds, so 164.6 g. Week 4 took
 7.7 g off and stopped, because every remaining line is a drawn section or a catalogue part and
 trimming one to reach a number is what D33 exists to prevent. Nothing here has been trimmed to
 reach a number since.
@@ -269,6 +270,6 @@ reach a number since.
 - performance.blade_twist_deg = 0.014
 - performance.thrust_N_conservative = 16.1493
 - performance.motor_input_W = 483.158
-- results.mass_envelope_g = 637.23
-- results.mass_g_conservative = 763.24
-- results.thrust_to_weight_conservative = 2.1569
+- results.mass_envelope_g = 647.23
+- results.mass_g_conservative = 775.74
+- results.thrust_to_weight_conservative = 2.1221

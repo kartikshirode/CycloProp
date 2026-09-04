@@ -180,6 +180,23 @@ line and cannot move the line. At 6S the MN5006 caps at 392 W of mechanical outp
 corrected rotor asks 406 W, so no belt ratio and no KV was ever going to fix it. At 8S the cap
 is 532 W. See D67.
 
+**8S is a pack the ESC sees and the motor does not.** The datasheet lists the MN5006 as a 4 to
+6S motor, so declaring an 8S pack over it reads like running a part out of range, and it reads
+that way right up to the point where the terminal voltage is worked out instead of assumed. An
+ESC is a buck converter. What the windings see is the back EMF plus the resistive drop, and at
+9932 rpm on a KV of 450 with 19.29 A through 60 mOhm that is **23.2293 V**. Six cells off the
+charger are 25.2 V, so at the design point the motor sits inside its own catalogue window and it
+is the pack outside it, not the machine. The pack has to be 8S because of sag rather than
+appetite: under this current a 6S pack holds less than the windings are asking for, and gearing
+slides along the line without moving it. What actually meets 33.6 V is the ESC, the harness and
+the pitch offset controller, each rated or regulated for it on its own terms.
+
+Two things that does not settle, and both are written down rather than argued away. The 650 W
+and 26 A ratings were published against a test the manufacturer ran on 6S, so a written
+confirmation at this duty is a Stage 2 action rather than a closed one. And ESC switching
+losses rise with the higher rail, which the 0.95 efficiency in the chain above does not
+separately account for. See D70.
+
 4.25 to 1 is the smallest whole tooth ratio that leaves 6 percent on every line at this radius,
 which is what picked 68 teeth against the 16 tooth motor pulley.
 
@@ -207,7 +224,7 @@ breaks the selection. 650 W times 0.75 is 487.5 W against the 483.2 W the design
 times 0.75 is 19.5 A against 19.29 A. Both still hold, narrowly.
 
 Below 0.7433 neither exit is open, and that has not changed. Backing the design point down a
-row does not work: the stacked case needs 19.7045 N of design thrust to hold 2.5 and no row of
+row does not work: the stacked case needs 20.0272 N of design thrust to hold 2.5 and no row of
 the sensitivity table comes near it from below. A larger motor does not work either, because
 motor mass is a power class item and the conservative column is already 104.8 g over the 2.5
 ceiling rather than under it.
@@ -259,11 +276,11 @@ was limited by torque and speed together. It draws more now, and the limit it hi
 one no gearing can slide.
 
 Stacked conservative thrust to weight rises all the way down the radius range and peaks at 100
-mm, at 2.211, where no drive fits. The best row a drive actually covers is 17 N at 110 mm, and
+mm, at 2.1745, where no drive fits. The best row a drive actually covers is 17 N at 110 mm, and
 that is the row the design freezes on per D30. The sweep column for it reads 2.157, and on the
-week 4 refined budget the same row is **2.1569**. Only one of the four cases clears 2.5: 2.5563
-at the design point, against 2.4284 and 2.2705 on each downside alone and 2.1569 stacked. That
-is the change D67 made and `05-mass-and-tw.md` sets it out row by row, along with the 104.76 g
+week 4 refined budget the same row is **2.1221**. Only one of the four cases clears 2.5: 2.5191
+at the design point, against 2.3931 and 2.2339 on each downside alone and 2.1221 stacked. That
+is the change D67 made and `05-mass-and-tw.md` sets it out row by row, along with the 117.26 g
 that would carry the stacked case back over the requirement.
 `stage-1/progress/week-2.md` carries the fallbacks that were worked before the freeze, and
 `05-mass-and-tw.md` carries the refined budget.
@@ -279,7 +296,7 @@ that would carry the stacked case back over the requirement.
 - performance.power_spread = 0.1928
 - performance.tare_power_W = 37.744
 - performance.electrical_power_W = 508.588
-- performance.module_electrical_power_W = 516.588
+- performance.module_electrical_power_W = 518.0
 - performance.momentum_area_m2 = 0.063888
 - performance.induced_velocity_ms = 10.4215
 - performance.inflow_ratio = 0.3871
@@ -294,10 +311,13 @@ that would carry the stacked case back over the requirement.
 - performance.motor_current_frac_180s = 0.7418
 - performance.motor_power_frac_180s = 0.7433
 - performance.pack_voltage_nominal_V = 29.6
+- performance.pack_voltage_charged_V = 33.6
+- performance.motor_terminal_voltage_V = 23.2293
+- performance.motor_catalogue_ceiling_V = 25.2
 - performance.pack_voltage_loaded_V = 28.4427
 - performance.motor_speed_ceiling_rpm = 12799.2
 - performance.motor_speed_rule = 0.9
 - performance.motor_rpm_frac_ceiling = 0.776
-- performance.thrust_floor_stacked_N = 19.7045
+- performance.thrust_floor_stacked_N = 20.0272
 - operating.tip_speed_ms = 26.9207
 - efficiency.motor = 0.84

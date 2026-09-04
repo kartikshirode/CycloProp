@@ -3,16 +3,16 @@
 Required Stage 1 item 5. This is the refined component mass budget and the thrust to weight it
 gives, replacing the coarse envelope week 2 used to decide whether the design closed at all.
 
-Short version. The module weighs 677.91 g nominal and 763.24 g in the conservative column. At
-17.0 N that is a thrust to weight of 2.5563, which clears the 2.5 requirement. Stacking the low
-thrust coefficient on the conservative mass gives 2.1569, which does not, and closing that
-would take 104.76 g out of the conservative column. The internal 2.75 target from D17 is not
+Short version. The module weighs 687.91 g nominal and 775.74 g in the conservative column. At
+17.0 N that is a thrust to weight of 2.5191, which clears the 2.5 requirement. Stacking the low
+thrust coefficient on the conservative mass gives 2.1221, which does not, and closing that
+would take 117.26 g out of the conservative column. The internal 2.75 target from D17 is not
 met either and its gap is 164.6 g. D67 is where the design point and six envelope lines moved;
 this document is the budget after that.
 
 ## Mass budget
 
-33 lines, every one of them a drawn section, a catalogue part or a stated allowance, and every
+34 lines, every one of them a drawn section, a catalogue part or a stated allowance, and every
 one pointing at the week 2 envelope line it refines. `tools/structure.py` builds it and writes
 it, so the arithmetic is rerunnable rather than typed.
 
@@ -48,10 +48,11 @@ it, so the arithmetic is rerunnable rather than typed.
 | esc, 40 A 8S class | 19.50 g | 21.06 g | catalogue | esc |
 | vectoring actuator servos, 2 off | 40.00 g | 43.20 g | catalogue | vectoring actuator |
 | pitch offset controller | 8.50 g | 9.18 g | catalogue | pitch offset controller |
+| controller step down regulator | 10.00 g | 12.50 g | allowance | pitch offset controller |
 | module wiring harness | 25.20 g | 31.50 g | allowance | module wiring harness |
 | fasteners and threaded inserts | 14.00 g | 17.50 g | allowance | fasteners and bonded joints |
 | structural adhesive at module joints | 7.50 g | 9.38 g | allowance | fasteners and bonded joints |
-| **total** | **677.91 g** | **763.24 g** | | |
+| **total** | **687.91 g** | **775.74 g** | | |
 
 **The growth rate is a property of the line, not of the module.** Week 2 gave nine of thirteen
 lines a blanket 20 or 25 percent because their sections were assumed. Week 4 sorts every line
@@ -93,7 +94,7 @@ the blades while everything else collapsed.
 | transmission | 50.23 g | 60.21 g | +19.9 percent | 66.92 g |
 | esc | 20.00 g | 19.50 g | -2.5 percent | 21.06 g |
 | vectoring actuator | 40.00 g | 40.00 g | 0 | 43.20 g |
-| pitch offset controller | 8.00 g | 8.50 g | +6.2 percent | 9.18 g |
+| pitch offset controller | 18.00 g | 18.50 g | +2.8 percent | 21.68 g |
 | module wiring harness | 26.01 g | 25.20 g | -3.1 percent | 31.50 g |
 | fasteners and bonded joints | 22.00 g | 21.50 g | -2.3 percent | 26.88 g |
 
@@ -128,15 +129,15 @@ happens when an allowance becomes a part.
 
 ## Thrust-to-weight
 
-Weight is 6.6503 N at the nominal budget. Four cases, and all four are reported, because
+Weight is 6.7484 N at the nominal budget. Four cases, and all four are reported, because
 reporting one of them is how week 2 confused itself for a fortnight. D32 makes that a rule.
 
 | Case | Thrust | Mass | T/W | Against 2.5 |
 | --- | --- | --- | --- | --- |
-| design point | 17.00 N | 677.91 g | 2.5563 | clears by 2 percent |
-| coefficient downside alone | 16.15 N | 677.91 g | 2.4284 | misses by 3 percent |
-| mass downside alone | 17.00 N | 763.24 g | 2.2705 | misses by 9 percent |
-| both stacked | 16.15 N | 763.24 g | 2.1569 | misses by 14 percent |
+| design point | 17.00 N | 687.91 g | 2.5191 | clears by 0.8 percent |
+| coefficient downside alone | 16.15 N | 687.91 g | 2.3931 | misses by 4 percent |
+| mass downside alone | 17.00 N | 775.74 g | 2.2339 | misses by 11 percent |
+| both stacked | 16.15 N | 775.74 g | 2.1221 | misses by 15 percent |
 
 **The design case clears the requirement and the three downside cases do not.** Before D67 all
 four cleared. What moved was the figure of merit, which took the design point from 18 N to 17,
@@ -146,13 +147,13 @@ well was this project's own discipline rather than the competition's, and that i
 corrections spent.
 
 What the downsides are held to now is a declared floor of 2.0, which the stacked case clears at
-2.1569, and the gate requires the closing mass to be computed and published rather than argued
-away. **It is 104.76 g.** The conservative column would have to reach 658.48 g and it holds
-763.24. That is a mass reduction programme, and Stage 2 item 6 is where it belongs.
+2.1221, and the gate requires the closing mass to be computed and published rather than argued
+away. **It is 117.26 g.** The conservative column would have to reach 658.48 g and it holds
+775.74. That is a mass reduction programme, and Stage 2 item 6 is where it belongs.
 
 The fallback list is worth reading against that. The decision gate offered three moves in order:
 take another row of the frozen thrust sensitivity table, trim a budget line with genuine slack,
-or reopen radius. The first is closed, because no row below 17 N comes near the 19.7045 N the
+or reopen radius. The first is closed, because no row below 17 N comes near the 20.0272 N the
 stacked case would need. The second is closed by D33, because every remaining line is a drawn
 section or a catalogue part. The third is closed because the regenerated radius sweep still puts
 110 mm at the top of what a drive covers. So no line was trimmed to reach a number and radius
@@ -160,8 +161,8 @@ was not reopened, and the gap is published instead.
 
 ## Margin against the 2.75 target
 
-D17 wants the conservative column at 2.75, which needs 598.62 g. It holds 763.24, so the gap is
-164.62 g. On the envelope the same gap is 162.43 g, so refinement did not pay it back at all.
+D17 wants the conservative column at 2.75, which needs 598.62 g. It holds 775.74, so the gap is
+177.12 g. On the envelope the same gap is 174.93 g, so refinement did not pay it back at all.
 It cost 2.19 g.
 
 That is worth setting out, because refinement pushed in both directions at once and the two
@@ -172,17 +173,17 @@ corrected hub bosses and shaft plugs and bearing blocks and motor plate. 38.49 l
 the conservative column 2.19 g heavier than the envelope it refines.
 
 **Neither target is met and neither is claimed.** 2.75 is a judgment target from D17 and 2.5 on
-the downside cases was this project's own rule, and this document does not treat a 2.1569 as if
+the downside cases was this project's own rule, and this document does not treat a 2.1221 as if
 it were either. What would close them is not another pass over the budget, because every
 remaining line is a drawn section or a catalogue part and trimming one to land a number is
 exactly the move D33 exists to stop. The routes that would actually close them are a lighter
 drive than the MN5006 at this power, which nothing in the shortlist offers, or a measured blade
 area coefficient that retires the last 5 percent of the haircut and takes the conservative
-thrust back to 17.0 N. The second alone moves the stacked case to 2.2705, still short.
+thrust back to 17.0 N. The second alone moves the stacked case to 2.2339, still short.
 
 One thing week 4 could have spent and did not. Balancing the blade chordwise would take the
 pitch link from 144.19 N to 76.52 N, and it costs 35.47 g of nose ballast across three blades.
-That drops the stacked case from 2.1569 to 2.0610, which still clears the declared floor, so the
+That drops the stacked case from 2.1221 to 2.0292, which still clears the declared floor, so the
 mass argument that used to decline it no longer decides. What decides it is the load path: the
 pitch link carries the unbalanced blade on a margin of 3.29 against a balanced 6.20, and 3.29 is
 already more than twice the 1.5 floor, so the mass buys nothing the design needs. Both link
@@ -190,12 +191,12 @@ loads come from the solver under `--balanced`. See D46, D53 and D67.
 
 ## Numbers used
 
-- results.total_mass_g = 677.91
-- results.weight_N = 6.6503
-- results.thrust_to_weight = 2.5563
-- results.mass_g_conservative = 763.24
-- results.thrust_to_weight_conservative = 2.1569
-- results.mass_envelope_g = 637.23
+- results.total_mass_g = 687.91
+- results.weight_N = 6.7484
+- results.thrust_to_weight = 2.5191
+- results.mass_g_conservative = 775.74
+- results.thrust_to_weight_conservative = 2.1221
+- results.mass_envelope_g = 647.23
 - performance.thrust_N = 17.0
 - performance.thrust_N_conservative = 16.1493
 - structure.pitch_link_load_N = 144.19

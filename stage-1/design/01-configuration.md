@@ -2,11 +2,11 @@
 
 Required Stage 1 item 1. This is the frozen configuration for Stage 1, frozen at 17 N of design
 thrust and a 110 mm radius by D30, with 120 mm carried as the insurance radius. On the week 4
-refined budget the design case clears thrust to weight 2.5 at 2.5563. The three downside cases
-do not. The coefficient downside on its own gives 2.4284, the mass downside on its own 2.2705,
-and the two stacked together 2.1569. D67 is what changed that: it moved the design point from
+refined budget the design case clears thrust to weight 2.5 at 2.5191. The three downside cases
+do not. The coefficient downside on its own gives 2.3931, the mass downside on its own 2.2339,
+and the two stacked together 2.1221. D67 is what changed that: it moved the design point from
 18 N to 17 N on a corrected figure of merit and it corrected six mass lines, and this is the
-price. The downside cases are held to a declared floor of 2.0 now, and the 104.76 g that would
+price. The downside cases are held to a declared floor of 2.0 now, and the 117.26 g that would
 carry the stacked case back over 2.5 is published in
 [05-mass-and-tw.md](05-mass-and-tw.md) rather than argued away. What follows is the layout the
 comparison chose and the reasoning behind it.
@@ -58,7 +58,7 @@ mm. Largest dimension is that width or the span, whichever wins.
 
 Every column in that table is the week 2 mass envelope, because the comparison had to run
 on one common build-up and the other two layouts have no refined budget behind them. On
-the week 4 budget the winning row is 2.1569 rather than 2.163, and the losing rows do not
+the week 4 budget the winning row is 2.1221 rather than 2.163, and the losing rows do not
 move at all. See D47.
 
 One caveat belongs on that table and it runs in the cluster's favour, which is where every
@@ -143,5 +143,5 @@ claim.
 - performance.solidity = 0.3151
 - performance.blade_area_m2 = 0.06325
 - performance.belt_ratio = 4.25
-- results.mass_envelope_g = 637.23
-- results.thrust_to_weight_conservative = 2.1569
+- results.mass_envelope_g = 647.23
+- results.thrust_to_weight_conservative = 2.1221
