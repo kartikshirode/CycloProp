@@ -103,6 +103,16 @@ a mismatch usually means the URL lost its `id_`.
 
 `cycloprop-problem-statement.pdf` and `cycloprop-problem-statement.txt` are the official
 Techfest problem statement, and `techfest-api-cycloprop.json` is the API payload it was pulled
-from. `context.md` at the repository root is built from these and outranks every other document
+from, captured 26 August 2026.
+
+`techfest-api-cycloprop-4sep.json` is the same record pulled again on 4 September and kept
+beside it rather than over it, which is what makes a diff possible at all. Everything that
+governs the submission is identical across the two, and the PDF at the live URL still hashes to
+the bytes committed here. Registrations moved from 11 to 57 and the sponsor image and link were
+cleared. To repeat the check on the send date:
+
+```
+curl -s https://techfest.org/api/compis/ | python -c "import json,sys;print([c for c in json.load(sys.stdin) if c['compi_id']=='cycloprop'][0])"
+``` `context.md` at the repository root is built from these and outranks every other document
 here on what the competition actually requires. The PDF is small enough to commit, so it is
 committed.
