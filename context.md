@@ -37,7 +37,7 @@ Item 4 asks for **power**, not just thrust. The old plan treated power as an opt
 
 Item 5 splits weight from the ratio, so both the component mass budget and the computed T/W have to appear as results, not as one number.
 
-Item 7 is a **team capability and execution plan**, which nothing in the repo had until now. It is not a technical section. Given that the stated purpose of Stage 1 is "to identify technically promising teams for detailed design support", this section is doing real work in the shortlisting, and 15 slots against a national call is not generous.
+Item 7 is a **team capability and execution plan**, which nothing in the repo had until now. It is not a technical section. Given that the stated purpose of Stage 1 is "to identify technically promising teams for detailed design support", this section is doing real work in the shortlisting, and 15 slots against a national call is not generous. The API record showed 11 registrations on 26 August and 57 on 4 September, and registration stays open until the deadline, so 57 is a floor rather than the field.
 
 ## Evaluation criteria
 
@@ -194,6 +194,16 @@ Stage 2 brings domestic travel and accommodation support per IIT Bombay norms. S
 | Thrust vectoring not mentioned | Required, and carries 15% |
 | Stage 1 funding contradiction | No contradiction. No money during Stage 1, 1 lakh after results |
 | Prize ceiling is a vague 25.5 lakh | Broken out by named award |
+
+## Re-checked on 4 September 2026
+
+The whole competition record was pulled again and diffed field by field against the 26 August snapshot, which is what R50 asked for. Every field that governs the submission is unchanged: the timeline including the 27 September deadline, the rules, the structure text with its eligibility clause, the FAQ, the contact address `pushpak_gc2026@aero.iitb.ac.in`, the team size of 5 and the problem statement URL. The problem statement PDF at that URL is byte identical to the copy in `reference/`, same 206,463 bytes and same sha256, so the document this whole project is built on has not moved at all.
+
+Three fields did move and none of them is a requirement. Registrations went from 11 to 57. The sponsor image and sponsor link were cleared to null. The second snapshot is kept at [reference/techfest-api-cycloprop-4sep.json](reference/techfest-api-cycloprop-4sep.json) beside the first, rather than overwriting it.
+
+Two things worth knowing from the re-read. Nothing published anywhere states a page limit or a file naming convention for the attachment, so the question at the end of the staged email is still the only route to an answer. And the competition page itself still renders client side and returns nothing to a fetcher, exactly as the note at the top of this file says, so the API is still the only readable source.
+
+This does not retire the check. The problem statement reserves the right to change any stage, so it is worth one more pull on the send date, and that one is quick because the diff script and both snapshots are already here.
 
 ## Still open
 

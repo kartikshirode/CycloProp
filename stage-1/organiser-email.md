@@ -12,7 +12,9 @@ what there was to ask.
 | Is there a detailed problem statement? | There is, and we have it. See [../context.md](../context.md) |
 
 One question survives and it is about submission format, which the problem statement never
-specifies: whether there is a page limit and a naming convention for the attachment. It is not
+specifies: whether there is a page limit and a naming convention for the attachment. The
+4 September re-read of the live record confirmed nothing published answers it: not the rules,
+not the FAQ, not the structure text, not the problem statement itself. It is not
 here any more. It rides at the end of the staged submission email in
 [submission/email-draft.md](submission/email-draft.md), which is the mail that will actually be
 sent, so asking it costs nothing extra. See D57.
