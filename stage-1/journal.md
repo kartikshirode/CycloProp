@@ -544,3 +544,26 @@ Two findings I disagreed with in part and both are recorded in the response file
 stacked case arithmetic was wrong, and its 62 is scored against a rubric the problem statement
 attaches to the final evaluation rather than to Stage 1, which is a defensible way to score and
 not the only one.
+
+
+## 4 September 2026, later: R50, and an assumption that cost three weeks
+
+Closed the last open review item that was not a human marker. The audit called it a job for a
+person with a browser and so did I, twice, in two different status reports. It took one curl.
+
+The competition page is a JavaScript shell and returns nothing to a fetcher, which is true and is
+written at the top of `context.md`. What nobody re-read was the next sentence, which says the
+data lives at the API behind it and answers plain requests. R50 sat open from 1 September to
+4 September as a browser job because the first person to look at it, me, stopped reading at the
+first half of a note I had written myself.
+
+The result is dull in the best way. Twenty three fields identical to the 26 August snapshot,
+deadline and rules and eligibility clause and contact address among them, and the problem
+statement PDF byte identical to the committed copy. Registrations 11 to 57. Sponsor image
+cleared. Nothing that governs the submission has moved.
+
+Two things worth keeping. Fifteen Stage 1 slots against a field of at least 57 that is still
+open, which does not change the work but does change how thin a 0.8 percent margin on the
+headline requirement feels. And no page limit is published anywhere, checked directly this time
+across the rules, the FAQ, the structure text and the problem statement, so the question at the
+end of the staged email is the only route to one.

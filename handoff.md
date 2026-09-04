@@ -132,6 +132,13 @@ before it is an aerodynamic one. See D49 and D68.
 Required item 7, the submission, the PDF and the staged email are done. What is left is the
 human gate, the real team facts, and one short run to fold them in.
 
+**0. The organiser channels were re-read on 4 September and nothing moved.** R50 and the
+audit's F10 are closed. Twenty three fields of the competition record are identical to the
+26 August snapshot, including the deadline, the rules, the eligibility clause and the contact
+address, and the problem statement PDF still hashes to the bytes in `reference/`. Registrations
+went from 11 to 57. Both snapshots and the repeat command are in
+[reference/README.md](reference/README.md), so doing it once more on the send date is a minute.
+
 **1. Week H still blocks it, on one marker.** Registration, eligibility, roster and sender are
 confirmed in [stage-1/human-gate.md](stage-1/human-gate.md). `TECHNICAL-READ-COMPLETE` is the
 only one left, and it goes in after the built PDF has been read end to end. An agent never

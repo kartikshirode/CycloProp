@@ -20,7 +20,7 @@ turned out to need arguing with rather than fixing. The tree it left behind pass
 | F7 | Live evidence files carry retired numbers and statuses | Right on all four counts | Fixed, and gated so it cannot recur |
 | F8 | A 14 mm shaft in a 16 mm design, and a reaction torque missing the belt efficiency | Right | Fixed |
 | F9 | Five evidence classes named where seven are used, three values called independent, a cost share of 52 percent | Right on all three | Fixed |
-| F10 | Nobody has rechecked the official channels | Right, and no agent can | Open, needs a browser |
+| F10 | Nobody has rechecked the official channels | Right that nobody had. It turned out to be doable from here after all | Closed, nothing that governs the submission has moved |
 | F11 | Figures are numbered and tables are not | Right, and declined for now with a reason | Recorded |
 
 ## F1, which is the one worth reading
@@ -173,12 +173,35 @@ closed by better writing.
 
 ## What is left
 
-Two items, and neither is an agent's to close:
+One item, and it is not an agent's to close:
 
 1. **The human fields.** Item 7 carries `[P-1]` through `[P-9]`, every Stage 2 row names `[P-1]`
    as owner, and the email says `[SENDER NAME]`. Real names, roles, programmes, tools and
    facilities go in, then the PDF is rebuilt and read end to end, then `TECHNICAL-READ-COMPLETE`
    goes into `human-gate.md`. It is the last of the five markers.
-2. **The official channels, F10 and R50.** Nothing has re-read the organiser's page since the
-   26 August requirements snapshot, and the problem statement reserves the right to change any
-   stage. It needs a browser and it is the cheapest item on the list.
+## F10 and R50, closed the same afternoon
+
+The audit said a human with a browser had to re-read the organiser's channels. It was right that
+nobody had done it since 26 August and wrong that it needed a person, because the competition
+page is a JavaScript shell and the readable source is the API behind it, which answers plain
+curl. No browser tool is connected to this session and none was needed.
+
+The whole record was pulled and diffed field by field against the 26 August snapshot. Twenty
+three fields are identical, including every one that governs the submission: the timeline with
+its 27 September deadline, the rules, the structure text carrying the eligibility clause, the
+FAQ, the contact address, the team size and the problem statement URL. The PDF at that URL is
+byte identical to the copy in `reference/`, 206,463 bytes to the same sha256, so the document
+this project is built on has not changed a character.
+
+Three fields moved and none is a requirement. Registrations went from 11 to 57, which is worth
+knowing rather than acting on: 15 Stage 1 slots against a field that is at least 57 and still
+open. The sponsor image and link were cleared to null.
+
+The second snapshot sits at `reference/techfest-api-cycloprop-4sep.json` beside the first rather
+than over it, and `reference/README.md` carries the one line command to repeat the check. Doing
+it once more on the send date costs a minute now that both snapshots and the diff exist.
+
+One thing the re-read confirms by absence. No page limit and no file naming convention is
+published anywhere: not in the rules, the FAQ, the structure text or the problem statement. The
+question at the end of the staged email is the only route to an answer, which settles the page
+count argument in F11's favour rather than against it.
