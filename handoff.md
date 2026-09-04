@@ -13,7 +13,7 @@ review on 1 September found 63 things and a codex audit on 4 September found ele
 `python tools/check.py --all` passes 288 gates and `python tools/test_gates.py` passes 221
 self-tests. Read [stage-1/audit/codex-final-response.md](stage-1/audit/codex-final-response.md)
 before anything else: D70 closed both electrical interfaces, and the 10 g regulator it added
-took the design case from 2.5563 to **2.5191**, which clears 2.5 by 0.8 percent rather than by
+took the design case from 2.5563 to **2.5191**, which clears 2.5 by 0.8 percent rather than by <!-- allow: naming the retired value is the point of the sentence, it is a before and after -->
 2.3. All four thrust to weight cases moved.
 
 What changed under them is the part to read rather than the pass count. The figure of merit was
