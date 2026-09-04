@@ -504,8 +504,14 @@ def recompute(data):
             out["electrical_power_W"] = out["shaft_power_W"] / (chain[0] * chain[1] * chain[2])
             act = num(data, "performance.actuator_power_W")
             ctl = num(data, "performance.controller_power_W")
+            # The regulator that makes the pitch controller usable on an 8S pack converts
+            # for the board and the servo rail behind it, so its loss is a module draw.
+            # D70 added it. A tree without one is a tree where the controller sits across
+            # 33.6 V, which is the interface the audit found open.
+            reg = num(data, "performance.regulator_loss_W") or 0.0
             if act and ctl:
-                out["module_electrical_power_W"] = out["electrical_power_W"] + act + ctl
+                out["module_electrical_power_W"] = (out["electrical_power_W"] + act + ctl
+                                                    + reg)
 
     for tag, dem, allow in (("blade_margin", "structure.blade_root_bending_Nm",
                              "structure.blade_allowable_Nm"),
@@ -795,6 +801,71 @@ DESIGN_DOCS = ["stage-1/design/01-configuration.md",
                "stage-1/design/07-team-and-execution.md",
                "stage-1/design/08-structure-and-loads.md",
                "stage-1/design/09-packaging-and-integration.md"]
+
+
+# Values this project published and then superseded. A live document quoting one is quoting
+# something that was true and is not.
+#
+# This list exists because the same failure keeps coming back and no general gate can see it.
+# `check_numeric_coverage` audits a number followed by a unit, which is the right scope for
+# it, so a dimensionless figure is invisible: the chord Reynolds sat stale for three weeks, the
+# break even derate said 0.7927 in the ledger and 0.7433 in the report, the servo margin said
+# 2.33 in the report's prose and 1.982 in its own declaration block, and the drive paragraph
+# carried a pre-D67 power fraction while the claims table three pages later carried the current
+# one. Each was found by a person reading, which is not a mechanism.
+#
+# A retired value is exact rather than banded, so this has no false positives to tune away. A
+# number that legitimately repeats one takes the same allow marker every other deliberate near
+# miss takes, with a reason written on the line.
+RETIRED_VALUES = [
+    ("134,074", "chord Reynolds before the radius sweep settled the design at 130,296"),
+    ("0.7927", "the break even derate read off current, before D67 moved the binding line"),
+    ("0.704", "the motor power fraction of the 180 s rating before D67"),
+    ("2.517", "the stacked thrust to weight at D35, before D67 took it under 2.5"),
+    ("692.4", "the conservative mass column before the week 4 budget replaced the envelope"),
+    ("2.406", "the stacked case after chordwise ballast, on the pre-D70 mass"),
+    ("4.69", "the balanced pitch link margin before the horn allowable was corrected"),
+    ("2.5563", "the design thrust to weight before D70 added the regulator"),
+    ("2.1569", "the stacked thrust to weight before D70"),
+    ("2.4284", "the coefficient downside alone before D70"),
+    ("2.2705", "the mass downside alone before D70"),
+    ("2.0610", "the ballasted stacked case before D70"),
+    ("677.91", "the nominal module mass before D70"),
+    ("763.24", "the conservative module mass before D70"),
+    ("104.76", "the mass that closed the stacked case before D70"),
+    ("637.23", "the week 2 envelope total before D70"),
+    ("516.588", "module electrical power before the regulator loss was counted"),
+    ("19.7045", "the stacked thrust floor before D70"),
+    ("16.6257", "the nominal thrust floor before D70"),
+    ("67930", "the bill of materials total before D70"),
+    ("39130", "the bought subtotal before D70"),
+    ("2.33", "the servo torque margin before the gear ratio was corrected to 1.982"),
+]
+LIVE_DOCS = DESIGN_DOCS + ["stage-1/submission/cycloprop-stage1.md",
+                           "stage-1/design/evidence-ledger.md",
+                           "stage-1/literature.md", "handoff.md", "context.md"]
+
+
+def check_retired_values():
+    """No live document quotes a number this project has already superseded.
+
+    Deliberately not applied to `decisions.md`, `journal.md`, `progress/` or `audit/`. A
+    superseded number in those is the record working correctly, and a gate that could not
+    tell the two apart would push the project towards editing its own history."""
+    bad = []
+    for rel in LIVE_DOCS:
+        p = ROOT / rel
+        if not p.is_file():
+            continue
+        for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
+            if allow_reason(line) or allow_reason(line, table=True):
+                continue
+            for tok, why in RETIRED_VALUES:
+                if re.search(r"(?<![\w.])" + re.escape(tok) + r"(?![\w])", line):
+                    bad.append(f"{rel}:{i} quotes {tok}, which is {why}")
+    return report(not bad, "no live document quotes a superseded value",
+                  "; ".join(bad[:4]) if bad else
+                  f"{len(RETIRED_VALUES)} retired values, {len(LIVE_DOCS)} documents")
 
 
 def check_design_coverage(data):
@@ -2140,6 +2211,125 @@ def check_solver_order(data):
 MOTOR_SPEED_RULE_MAX = 0.90
 
 
+def check_drive_voltage(data):
+    """Every voltage in the module against the rating of the thing that sees it.
+
+    The 4 September audit found the hole this closes. The selected motor is catalogued 4 to
+    6S and the design declares an 8S pack, and nothing in the tree recorded the cell range
+    at all, so no gate could notice. The same audit found the pitch controller sitting
+    across a pack 3.6 V above its listed maximum, which two documents had written down as an
+    open item and no gate had ever read.
+
+    Three separate parts see three different voltages and the design only closes if that is
+    said out loud:
+
+    The motor sees its own back EMF plus the resistive drop, because an ESC is a buck
+    converter and the windings never see the pack. That figure is recomputed here from rpm,
+    KV and the draw, and it has to sit under what the catalogue's own top cell count reaches
+    off the charger. If it does not, the motor really is out of range and the selection
+    fails.
+
+    The ESC and the harness see the charged pack, which is what they are rated for.
+
+    The pitch controller sees whatever is put in front of it. Where the charged pack is over
+    its listed maximum, a regulator has to exist as a real mass line, be rated above the
+    pack, and land inside the board's window. A note in prose is not a part.
+
+    A pack over the motor's catalogue range is a declared interface rather than a hidden
+    one, so the argument has to be in the thrust and power document where a reader will meet
+    it, not only in this file."""
+    ok = True
+    drives = dotted(data, "drive_candidates")
+    if not isinstance(drives, list) or not drives:
+        return report(False, "week4: the drive candidate list is stated")
+    sel = [d for d in drives if d.get("selected")]
+    if len(sel) != 1:
+        return report(False, "week4: exactly one drive is selected", f"{len(sel)} selected")
+    sel = sel[0]
+
+    missing = [c["name"] for c in drives if "cells_basis" not in c]
+    ok &= report(not missing, "week4: every drive row records where its cell range came "
+                              "from, or that the listing carried none",
+                 "; ".join(missing[:3]) if missing else f"{len(drives)} rows")
+
+    cmax = sel.get("cells_max")
+    ok &= report(cmax is not None,
+                 "week4: the selected drive carries a catalogue cell range",
+                 f"{sel['name']} lists {sel.get('cells_min')} to {cmax}S" if cmax is not None
+                 else f"{sel['name']} has no cell range and it is the selected row")
+    if cmax is None:
+        return ok
+
+    keys = ["performance.motor_rpm", "performance.motor_input_current_A",
+            "performance.motor_terminal_voltage_V", "performance.pack_voltage_charged_V",
+            "performance.motor_catalogue_ceiling_V", "performance.pack_cells",
+            "performance.controller_input_max_V"]
+    ok &= require_positive(data, keys, "week4: every declared voltage is a stored number")
+    if any(num(data, k) is None for k in keys):
+        return ok
+
+    rpm, amps = num(data, "performance.motor_rpm"), num(data, "performance.motor_input_current_A")
+    want_v = rpm / float(sel["kv"]) + amps * float(sel["internal_resistance_ohm"])
+    got_v = num(data, "performance.motor_terminal_voltage_V")
+    ok &= report(close(got_v, want_v, DISPLAY_TOL),
+                 "week4: motor terminal voltage follows from rpm, KV and the draw",
+                 f"stated {got_v} V, computed {want_v:.4f} V")
+
+    ceiling = num(data, "performance.motor_catalogue_ceiling_V")
+    ok &= report(got_v <= ceiling,
+                 "week4: the motor runs inside its own catalogue voltage range",
+                 f"{got_v} V at the windings against {ceiling} V, which is {cmax}S charged")
+
+    charged = num(data, "performance.pack_voltage_charged_V")
+    cells = num(data, "performance.pack_cells")
+    if cells > cmax:
+        # The pack is outside the motor's printed range. That is allowed, and only while
+        # the document a reader actually opens explains why, with the number in it.
+        rel = "stage-1/design/04-thrust-and-power.md"
+        ok &= report(states_value(rel, got_v, DISPLAY_TOL,
+                                  ("terminal", "winding", "back emf", "buck")),
+                     "week4: a pack over the motor's catalogue range is argued where a "
+                     "reader will meet it",
+                     f"{rel} states the {got_v} V the windings see"
+                     if states_value(rel, got_v, DISPLAY_TOL,
+                                     ("terminal", "winding", "back emf", "buck"))
+                     else f"{rel} declares {cells}S over a {cmax}S motor and never says "
+                          f"what the windings see")
+
+    cmax_v = num(data, "performance.controller_input_max_V")
+    if charged > cmax_v:
+        # Only a module whose pack is over the board asks these questions. A design that
+        # kept its pack inside the board's window needs no regulator and should not be made
+        # to declare one.
+        ok &= require_positive(data, ["performance.regulator_input_min_V",
+                                      "performance.regulator_output_V",
+                                      "performance.regulator_loss_W",
+                                      "performance.controller_input_min_V"],
+                               "week4: the regulator that closes the controller interface "
+                               "is a stored part")
+        if any(num(data, f"performance.{k}") is None for k in
+               ("regulator_input_min_V", "regulator_output_V", "controller_input_min_V")):
+            return ok
+        budget = dotted(data, "mass_budget_g") or []
+        reg = [r for r in budget if "regulator" in str(r.get("item", "")).lower()]
+        ok &= report(len(reg) == 1,
+                     "week4: a controller under a pack it cannot take carries a real "
+                     "regulator line",
+                     f"{reg[0]['item']} at {reg[0]['mass_g']} g" if len(reg) == 1
+                     else f"{len(reg)} regulator lines in the mass budget against a "
+                          f"{charged} V pack and a {cmax_v} V board")
+        rin = num(data, "performance.regulator_input_min_V")
+        rout = num(data, "performance.regulator_output_V")
+        cmin_v = num(data, "performance.controller_input_min_V")
+        ok &= report(rin >= charged,
+                     "week4: the regulator is rated above the pack it sits across",
+                     f"{rin} V rating against {charged} V charged")
+        ok &= report(cmin_v <= rout <= cmax_v,
+                     "week4: the regulator output lands inside the board's window",
+                     f"{rout} V out against {cmin_v} to {cmax_v} V")
+    return ok
+
+
 def check_drive_margin(data):
     """What the 0.80 continuous derate costs, gated rather than argued.
 
@@ -3238,6 +3428,7 @@ def week4(data):
     ok &= check_bom(data)
     ok &= check_pitch_bearing_duty(data)
     ok &= check_drive_margin(data)
+    ok &= check_drive_voltage(data)
     ok &= check_solver_order(data)
     ok &= check_blade_sensitivity(data)
     ok &= check_structure_recompute(data)
@@ -3404,6 +3595,7 @@ def week5(data):
     ok &= check_numeric_coverage("stage-1/submission/cycloprop-stage1.md", data)
     ok &= check_design_coverage(data)
     ok &= check_reynolds_stated(data)
+    ok &= check_retired_values()
 
     figs_ok, probes = check_figures(data, text)
     ok &= figs_ok

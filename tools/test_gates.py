@@ -359,6 +359,15 @@ def honest_numbers():
                         "motor_speed_rule": 0.90,
                         "motor_torque_frac_continuous": motor_dem / (9.5493 / kv_sel * 67.0),
                         "pack_cells": 6,
+                        # What each part of the module sees. This fixture is an honest 6S
+                        # design, so the windings, the pack and the board are all inside
+                        # their own ratings and no regulator is needed.
+                        "pack_voltage_charged_V": 6 * 4.20,
+                        "motor_terminal_voltage_V": m_rpm / kv_sel + m_in_A * res_ohm,
+                        "motor_cells_min": 4, "motor_cells_max": 6,
+                        "motor_catalogue_ceiling_V": 6 * 4.20,
+                        "controller_input_min_V": 6.0,
+                        "controller_input_max_V": 30.0,
                         "motor_mech_capacity_W": 0.90 * v_load * 67.0,
                         "motor_mech_required_W": shaft / eff[0],
                         "thrust_floor_nominal_N": 2.5 * (total / 1000.0) * G,
@@ -394,13 +403,17 @@ def honest_numbers():
              "max_power_180s_W": 320.0 / derate, "peak_current_180s_A": 67.0 / derate,
              "internal_resistance_ohm": res_ohm,
              "mass_g": 62.0, "selected": True,
+             "cells_min": 4, "cells_max": 6,
+             "cells_basis": "supplier datasheet for this outrunner",
              "basis": "supplier listing for an outrunner in this power class",
              "verdict": "selected, covers the design point on its continuous rating"},
             {"name": "outrunner B", "continuous_power_W": 400.0, "kv": 350,
              "continuous_current_A": 77.0, "continuous_torque_Nm": 9.5493 / 350 * 77.0,
              "max_power_180s_W": 400.0 / derate, "peak_current_180s_A": 77.0 / derate,
              "internal_resistance_ohm": 0.06,
-             "mass_g": 88.0, "selected": False}],
+             "mass_g": 88.0, "selected": False,
+             "cells_min": None, "cells_max": None,
+             "cells_basis": "the listing did not print a cell range for this row"}],
         "linkage_dimensions": [
             {"link": "crank", "length_mm": 24.0}, {"link": "coupler", "length_mm": 61.0},
             {"link": "rocker", "length_mm": 33.0}, {"link": "ground", "length_mm": 70.0}],
@@ -2010,6 +2023,39 @@ case("citing another rotor's Reynolds beside this one passes", True, upto=5, wee
      tweak=another_rotors_reynolds_is_fine)
 
 
+def a_retired_value_back_in_the_report(root, data):
+    """How every one of these got in: a paragraph written when the number was true, left
+    alone when a later decision moved it. 0.7927 was the break even derate until D67 took
+    the binding line off current."""
+    p = root / "stage-1" / "submission" / "cycloprop-stage1.md"
+    t = p.read_text(encoding="utf-8")
+    p.write_text(t.replace("## Numbers used",
+                           "The selection breaks even at 0.7927 of the published "
+                           "rating.\n\n## Numbers used"), encoding="utf-8")
+    build_pdf_from(p, p.with_suffix(".pdf"))
+
+
+case("a report quoting a value this project retired is rejected", False, upto=5, week=5,
+     tweak=a_retired_value_back_in_the_report)
+
+
+def a_retired_number_that_means_something_else(root, data):
+    """2.33 is a retired servo margin and also a figure number in Benedict 2010. A written
+    reason is what tells the two apart, and it is the same escape every other deliberate
+    near miss takes."""
+    p = root / "stage-1" / "submission" / "cycloprop-stage1.md"
+    t = p.read_text(encoding="utf-8")
+    p.write_text(t.replace("## Numbers used",
+                           "Benedict's figure 2.33 gives the resultant phase. "
+                           "<!-- allow: 2.33 is a figure number, not the retired margin "
+                           "-->\n\n## Numbers used"), encoding="utf-8")
+    build_pdf_from(p, p.with_suffix(".pdf"))
+
+
+case("a retired number with a written reason beside it passes", True, upto=5, week=5,
+     tweak=a_retired_number_that_means_something_else)
+
+
 # R63. Week 1's gate was five heading strings, so a settled section could lose the argument
 # under its own heading and stay green. These are the three ways it can lose it.
 
@@ -2842,6 +2888,105 @@ def current_from_power_over_volts(d):
 
 case("motor current taken as input power over pack voltage is rejected", False,
      current_from_power_over_volts)
+
+
+def pack_over_the_motor_with_no_argument(d):
+    """The 4 September audit's headline. Put the pack two cells above what the motor is
+    catalogued for, leave the windings above the catalogue ceiling, and say nothing about
+    it anywhere a reader would look."""
+    p = d["performance"]
+    p["pack_cells"] = 8
+    p["pack_voltage_charged_V"] = 8 * 4.20
+    p["pack_voltage_nominal_V"] = 8 * 3.70
+    sel = [x for x in d["drive_candidates"] if x.get("selected")][0]
+    p["motor_rpm"] = p["motor_rpm"] * 1.35
+    p["motor_terminal_voltage_V"] = (p["motor_rpm"] / sel["kv"]
+                                     + p["motor_input_current_A"]
+                                     * sel["internal_resistance_ohm"])
+    return d
+
+
+case("a motor run above its own catalogue cell range is rejected", False,
+     pack_over_the_motor_with_no_argument)
+
+
+def terminal_voltage_from_the_pack(d):
+    """The reading that makes the problem disappear by assuming it away: take what the
+    windings see to be the pack, rather than the back EMF plus the drop."""
+    p = d["performance"]
+    p["motor_terminal_voltage_V"] = p["pack_voltage_loaded_V"]
+    return d
+
+
+case("a terminal voltage taken as the pack voltage is rejected", False,
+     terminal_voltage_from_the_pack)
+
+
+def selected_drive_without_a_cell_range(d):
+    sel = [x for x in d["drive_candidates"] if x.get("selected")][0]
+    sel["cells_max"] = None
+    return d
+
+
+case("a selected drive carrying no catalogue cell range is rejected", False,
+     selected_drive_without_a_cell_range)
+
+
+def cell_range_provenance_dropped(d):
+    for x in d["drive_candidates"]:
+        x.pop("cells_basis", None)
+    return d
+
+
+case("a drive row that does not say where its cell range came from is rejected", False,
+     cell_range_provenance_dropped)
+
+
+def board_under_a_pack_with_no_regulator(d):
+    """The interface D67 opened and left open: a board rated under the charged pack, with
+    a note about it somewhere and no part and no gram behind the note."""
+    d["performance"]["controller_input_max_V"] = 20.0
+    return d
+
+
+case("a controller under a pack it cannot take, with no regulator line, is rejected", False,
+     board_under_a_pack_with_no_regulator)
+
+
+def regulator_that_cannot_take_the_pack(d):
+    p = d["performance"]
+    p["controller_input_max_V"] = 20.0
+    p["regulator_input_min_V"] = 24.0            # under the charged pack it sits across
+    p["regulator_output_V"] = 12.0
+    p["regulator_loss_W"] = 1.4
+    d["mass_budget_g"].append(
+        {"item": "controller step down regulator", "mass_g": 10.0,
+         "conservative_g": 12.5, "refines": "pitch offset controller",
+         "basis": "switching regulator between the pack and the board. Growth class "
+                  "allowance, 25%"})
+    return d
+
+
+case("a regulator rated below the pack it sits across is rejected", False,
+     regulator_that_cannot_take_the_pack)
+
+
+def regulator_output_outside_the_board(d):
+    p = d["performance"]
+    p["controller_input_max_V"] = 20.0
+    p["regulator_input_min_V"] = 42.0
+    p["regulator_output_V"] = 3.3                # under the board's own 6 V minimum
+    p["regulator_loss_W"] = 1.4
+    d["mass_budget_g"].append(
+        {"item": "controller step down regulator", "mass_g": 10.0,
+         "conservative_g": 12.5, "refines": "pitch offset controller",
+         "basis": "switching regulator between the pack and the board. Growth class "
+                  "allowance, 25%"})
+    return d
+
+
+case("a regulator whose output misses the board's window is rejected", False,
+     regulator_output_outside_the_board)
 
 
 def idle_current_dropped(d):
