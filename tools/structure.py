@@ -480,6 +480,14 @@ def build(data):
          "Matek F411-WSE class flight controller board, supplier listing, 8.5 g against "
          "the 8.0 g week 2 carried, which is the debt week 3 left open"),
 
+        ("controller step down regulator", REGULATOR_MASS_G, "pitch offset controller",
+         "allowance",
+         f"switching regulator between the pack and the pitch controller, rated at least "
+         f"{REGULATOR_INPUT_MIN_V:.0f} V in against the {PACK_CELLS * CELL_CHARGED_V:.1f} V "
+         f"a charged {PACK_CELLS}S pack reaches, {REGULATOR_OUTPUT_V:.0f} V out at 1 A, "
+         f"which is inside the board's 6 to 30 V window. No supplier listing has been read "
+         f"for one, so this is a requirement and a mass allowance rather than a part"),
+
         ("module wiring harness", harness_g, "module wiring harness", "allowance",
          f"14 AWG silicone power leads at {WIRE_G_PER_M:.0f} g/m over "
          f"{WIRE_RUN_M * 1000:.0f} mm, {WIRE_CONDUCTORS} conductors because current goes "
@@ -744,9 +752,22 @@ MOTOR_DERATE = 0.80
 # of mechanical output against 406 W wanted, and no gear ratio moves that line. See D67.
 PACK_CELLS = 8
 CELL_NOMINAL_V = 3.70
+CELL_CHARGED_V = 4.20           # a lithium polymer cell off the charger, which is what the
+                                # ESC, the wiring and the pitch controller actually see
 MOTOR_IDLE_CURRENT_A = 0.9      # evidence row E12, and it was being left out of the draw
 MOTOR_SPEED_RULE = 0.90
 TW_FLOOR = 2.5
+
+# The pitch offset controller is rated 6 to 30 V and a charged 8S pack is 33.6 V, so the
+# board cannot sit across the pack. A step down regulator ahead of it is the part that
+# closes the interface, and it is carried here as a requirement and a mass line rather than
+# as a named product, because no supplier listing has been read for one. See D70.
+CONTROLLER_INPUT_MIN_V = 6.0    # the F411-WSE class board's own listed input window
+CONTROLLER_INPUT_MAX_V = 30.0
+REGULATOR_INPUT_MIN_V = 42.0    # what the part has to be rated to, not what it will see
+REGULATOR_OUTPUT_V = 12.0       # inside the board's 6 to 30 V window with room either side
+REGULATOR_EFFICIENCY = 0.85
+REGULATOR_MASS_G = 10.0
 
 
 def drive_margin(data):
@@ -798,6 +819,18 @@ def drive_margin(data):
     mech_cap_W = MOTOR_SPEED_RULE * v_load * float(sel["continuous_current_A"])
     mech_need_W = b["shaft_power_W"] / float(data["efficiency"]["transmission"])
 
+    # The motor is catalogued 4 to 6S and the pack is 8S, which reads like an out of range
+    # part until the terminal voltage is computed instead of assumed. An ESC is a buck
+    # converter: what the windings see is the back EMF plus the resistive drop, never the
+    # pack. At this operating point that is rpm over KV plus I times R, and it has to sit
+    # under what the catalogue's own top cell count reaches off the charger. The pack is
+    # 8S because a 6S pack sags below this figure under load, not because the motor wants
+    # 33.6 V across it. What does see the full pack is the ESC, the harness and the pitch
+    # controller, and each of those is rated or regulated for it separately. See D70.
+    v_terminal = motor_rpm / float(sel["kv"]) + amps * float(sel["internal_resistance_ohm"])
+    cells_max = sel.get("cells_max")
+    v_cat_ceiling = None if cells_max is None else float(cells_max) * CELL_CHARGED_V
+
     # Thrust floors. The design case is the one the competition requires and the one the
     # design point is pinned to from below. The stacked case is the coefficient haircut and
     # the mass growth applied together, and since 1 September it no longer clears, so what
@@ -819,6 +852,11 @@ def drive_margin(data):
         "pack_cells": PACK_CELLS,
         "pack_v_nominal": v_nom,
         "pack_v_loaded": v_load,
+        "pack_v_charged": PACK_CELLS * CELL_CHARGED_V,
+        "motor_terminal_V": v_terminal,
+        "motor_cells_min": sel.get("cells_min"),
+        "motor_cells_max": cells_max,
+        "motor_catalogue_ceiling_V": v_cat_ceiling,
         "speed_ceiling_rpm": ceiling,
         "speed_rule": MOTOR_SPEED_RULE,
         "speed_frac": motor_rpm / ceiling,
@@ -866,6 +904,9 @@ BOM = [
      "Robu.in, Pune, catalogue listing for a 3.9 kgf.cm metal gear servo"),
     ("Matek F411-WSE class controller board", "drive", 1, 3900, 3, "buy",
      "Quadkopters, New Delhi, catalogue listing for the board class"),
+    ("step down regulator, 42 V in, 12 V out", "drive", 1, 900, 2, "buy",
+     "Robu.in, Pune, price band for a switching regulator module of this rating. No "
+     "listing was read for a specific part, so this is the band and not a line item"),
     ("693ZZ miniature bearing", "hardware", 12, 60, 1, "buy",
      "local bearing house, Mumbai, counter price for the size"),
     ("MR128ZZ miniature bearing", "hardware", 2, 90, 1, "buy",
@@ -1277,6 +1318,26 @@ def write(data, b, m):
     perf["pack_cells"] = dm["pack_cells"]
     perf["pack_voltage_nominal_V"] = round(dm["pack_v_nominal"], 3)
     perf["pack_voltage_loaded_V"] = round(dm["pack_v_loaded"], 4)
+    perf["pack_voltage_charged_V"] = round(dm["pack_v_charged"], 2)
+    perf["motor_terminal_voltage_V"] = round(dm["motor_terminal_V"], 4)
+    perf["motor_cells_min"] = dm["motor_cells_min"]
+    perf["motor_cells_max"] = dm["motor_cells_max"]
+    perf["motor_catalogue_ceiling_V"] = (
+        None if dm["motor_catalogue_ceiling_V"] is None
+        else round(dm["motor_catalogue_ceiling_V"], 2))
+    # The regulator converts for the board and the servo rail behind it, so the loss is
+    # taken on both. It is a module electrical draw the week 4 chain did not carry.
+    perf["controller_input_min_V"] = CONTROLLER_INPUT_MIN_V
+    perf["controller_input_max_V"] = CONTROLLER_INPUT_MAX_V
+    perf["regulator_input_min_V"] = REGULATOR_INPUT_MIN_V
+    perf["regulator_output_V"] = REGULATOR_OUTPUT_V
+    perf["regulator_efficiency"] = REGULATOR_EFFICIENCY
+    perf["regulator_loss_W"] = round(
+        (float(perf["actuator_power_W"]) + float(perf["controller_power_W"]))
+        * (1.0 / REGULATOR_EFFICIENCY - 1.0), 4)
+    perf["module_electrical_power_W"] = round(
+        float(perf["electrical_power_W"]) + float(perf["actuator_power_W"])
+        + float(perf["controller_power_W"]) + float(perf["regulator_loss_W"]), 3)
     perf["motor_speed_ceiling_rpm"] = round(dm["speed_ceiling_rpm"], 1)
     perf["motor_speed_rule"] = dm["speed_rule"]
     perf["motor_rpm_frac_ceiling"] = round(dm["speed_frac"], 4)

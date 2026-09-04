@@ -24,7 +24,7 @@
     "electrical_power_W": 508.588,
     "actuator_power_W": 6.0,
     "controller_power_W": 2.0,
-    "module_electrical_power_W": 516.588,
+    "module_electrical_power_W": 518.0,
     "momentum_area_m2": 0.063888,
     "ideal_power_W": 177.166,
     "figure_of_merit": 0.5215,
@@ -52,13 +52,24 @@
     "motor_speed_ceiling_rpm": 12799.2,
     "motor_speed_rule": 0.9,
     "motor_rpm_frac_ceiling": 0.776,
-    "thrust_floor_stacked_N": 19.7045,
+    "thrust_floor_stacked_N": 20.0272,
     "motor_idle_current_A": 0.9,
     "motor_torque_frac_continuous": 0.884,
     "pack_cells": 8,
     "motor_mech_capacity_W": 532.448,
     "motor_mech_required_W": 405.853,
-    "thrust_floor_nominal_N": 16.6257
+    "thrust_floor_nominal_N": 16.871,
+    "pack_voltage_charged_V": 33.6,
+    "motor_terminal_voltage_V": 23.2293,
+    "motor_cells_min": 4,
+    "motor_cells_max": 6,
+    "motor_catalogue_ceiling_V": 25.2,
+    "regulator_efficiency": 0.85,
+    "regulator_loss_W": 1.4118,
+    "controller_input_min_V": 6.0,
+    "controller_input_max_V": 30.0,
+    "regulator_input_min_V": 42.0,
+    "regulator_output_V": 12.0
   },
   "efficiency": {
     "transmission": 0.93,
@@ -83,10 +94,10 @@
       "rotor_pulley_teeth": null,
       "covered_by_shortlist": false,
       "swept_diameter_mm": 266.0,
-      "module_mass_g": 661.69,
-      "module_mass_conservative_g": 744.56,
-      "thrust_to_weight": 2.6189,
-      "thrust_to_weight_conservative": 2.211
+      "module_mass_g": 671.69,
+      "module_mass_conservative_g": 757.06,
+      "thrust_to_weight": 2.5799,
+      "thrust_to_weight_conservative": 2.1745
     },
     {
       "radius_m": 0.11,
@@ -105,10 +116,10 @@
       "rotor_pulley_teeth": 68,
       "covered_by_shortlist": true,
       "swept_diameter_mm": 292.6,
-      "module_mass_g": 677.91,
-      "module_mass_conservative_g": 763.24,
-      "thrust_to_weight": 2.5563,
-      "thrust_to_weight_conservative": 2.1569
+      "module_mass_g": 687.91,
+      "module_mass_conservative_g": 775.74,
+      "thrust_to_weight": 2.5191,
+      "thrust_to_weight_conservative": 2.1221
     },
     {
       "radius_m": 0.12,
@@ -127,10 +138,10 @@
       "rotor_pulley_teeth": 74,
       "covered_by_shortlist": true,
       "swept_diameter_mm": 319.2,
-      "module_mass_g": 696.18,
-      "module_mass_conservative_g": 784.26,
-      "thrust_to_weight": 2.4892,
-      "thrust_to_weight_conservative": 2.0991
+      "module_mass_g": 706.18,
+      "module_mass_conservative_g": 796.76,
+      "thrust_to_weight": 2.4539,
+      "thrust_to_weight_conservative": 2.0661
     },
     {
       "radius_m": 0.13,
@@ -149,10 +160,10 @@
       "rotor_pulley_teeth": 80,
       "covered_by_shortlist": true,
       "swept_diameter_mm": 345.8,
-      "module_mass_g": 716.63,
-      "module_mass_conservative_g": 807.81,
-      "thrust_to_weight": 2.4182,
-      "thrust_to_weight_conservative": 2.0379
+      "module_mass_g": 726.63,
+      "module_mass_conservative_g": 820.31,
+      "thrust_to_weight": 2.3849,
+      "thrust_to_weight_conservative": 2.0068
     },
     {
       "radius_m": 0.14,
@@ -171,10 +182,10 @@
       "rotor_pulley_teeth": 86,
       "covered_by_shortlist": true,
       "swept_diameter_mm": 372.4,
-      "module_mass_g": 739.36,
-      "module_mass_conservative_g": 834.0,
-      "thrust_to_weight": 2.3438,
-      "thrust_to_weight_conservative": 1.9739
+      "module_mass_g": 749.36,
+      "module_mass_conservative_g": 846.5,
+      "thrust_to_weight": 2.3125,
+      "thrust_to_weight_conservative": 1.9447
     }
   ],
   "configuration_candidates": [
@@ -196,11 +207,11 @@
       "drive": "T-Motor Antigravity MN5006 KV450",
       "drive_covers_design_point": true,
       "largest_dimension_mm": 290.4,
-      "module_mass_g": 637.23,
-      "module_mass_conservative_g": 761.05,
+      "module_mass_g": 647.23,
+      "module_mass_conservative_g": 773.55,
       "thrust_N": 17.0,
-      "module_tw": 2.7195,
-      "module_tw_conservative": 2.1631,
+      "module_tw": 2.6774,
+      "module_tw_conservative": 2.1281,
       "selected": true
     },
     {
@@ -221,11 +232,11 @@
       "drive": "T-Motor Antigravity MN5006 KV450",
       "drive_covers_design_point": false,
       "largest_dimension_mm": 400.0,
-      "module_mass_g": 786.12,
-      "module_mass_conservative_g": 939.85,
+      "module_mass_g": 796.12,
+      "module_mass_conservative_g": 952.35,
       "thrust_N": 17.0,
-      "module_tw": 2.2044,
-      "module_tw_conservative": 1.7516,
+      "module_tw": 2.1767,
+      "module_tw_conservative": 1.7286,
       "selected": false
     },
     {
@@ -246,11 +257,11 @@
       "drive": "T-Motor Antigravity MN5006 KV450",
       "drive_covers_design_point": false,
       "largest_dimension_mm": 490.0,
-      "module_mass_g": 984.94,
-      "module_mass_conservative_g": 1178.44,
+      "module_mass_g": 994.94,
+      "module_mass_conservative_g": 1190.94,
       "thrust_N": 17.0,
-      "module_tw": 1.7594,
-      "module_tw_conservative": 1.3969,
+      "module_tw": 1.7417,
+      "module_tw_conservative": 1.3823,
       "selected": false
     }
   ],
@@ -490,7 +501,10 @@
       "continuous_torque_Nm": 0.1446,
       "selected": false,
       "basis": "supplier datasheet: 187 W and 12.3 A maximum for 180 s, 46 g. Continuous figures are those derated by 0.80, and continuous torque follows from 9.5493 over KV at the derated current",
-      "verdict": "149.6 W continuous after derating, an order short of the 483 W the design point wants at the motor terminals"
+      "verdict": "149.6 W continuous after derating, an order short of the 483 W the design point wants at the motor terminals",
+      "cells_min": null,
+      "cells_max": null,
+      "cells_basis": "the week 2 supplier listing did not print a cell range for this row"
     },
     {
       "name": "T-Motor Antigravity MN4006 KV380",
@@ -504,7 +518,10 @@
       "continuous_torque_Nm": 0.3518,
       "selected": false,
       "basis": "supplier datasheet: 380 W and 17.5 A maximum for 180 s, 57 g. Continuous figures are those derated by 0.80, and continuous torque follows from 9.5493 over KV at the derated current",
-      "verdict": "304.0 W continuous, still short of 483 W, and it is the lightest thing that covers the 13 N sensitivity row"
+      "verdict": "304.0 W continuous, still short of 483 W, and it is the lightest thing that covers the 13 N sensitivity row",
+      "cells_min": null,
+      "cells_max": null,
+      "cells_basis": "the week 2 supplier listing did not print a cell range for this row"
     },
     {
       "name": "T-Motor Navigator MN3110 KV470",
@@ -518,7 +535,10 @@
       "continuous_torque_Nm": 0.2438,
       "selected": false,
       "basis": "supplier datasheet: 330 W and 15.0 A maximum for 180 s, 98 g. Continuous figures are those derated by 0.80, and continuous torque follows from 9.5493 over KV at the derated current",
-      "verdict": "264.0 W continuous and heavier than the MN4006 that beats it, so it is dominated"
+      "verdict": "264.0 W continuous and heavier than the MN4006 that beats it, so it is dominated",
+      "cells_min": null,
+      "cells_max": null,
+      "cells_basis": "the week 2 supplier listing did not print a cell range for this row"
     },
     {
       "name": "T-Motor Antigravity MN5006 KV450",
@@ -532,7 +552,10 @@
       "continuous_torque_Nm": 0.4414,
       "selected": true,
       "basis": "supplier datasheet: 650 W and 26.0 A maximum for 180 s, 106 g. Continuous figures are those derated by 0.80, and continuous torque follows from 9.5493 over KV at the derated current",
-      "verdict": "selected. 483.2 W of its 520 W continuous, 19.29 A of 20.8 A, 0.3902 Nm of 0.4414 Nm on a 68 tooth rotor pulley, and 9932 of 12799 motor rpm on 8S. It does not fit on 6S at any belt ratio: the mechanical output a motor can make is the speed rule times the loaded pack voltage times the continuous current, which is 392 W at 6S against the 406 W the rotor asks for, and KV cancels out of that product so gearing cannot move it. See D67"
+      "verdict": "selected. 483.2 W of its 520 W continuous, 19.29 A of 20.8 A, 0.3902 Nm of 0.4414 Nm on a 68 tooth rotor pulley, and 9932 of 12799 motor rpm on 8S. It does not fit on 6S at any belt ratio: the mechanical output a motor can make is the speed rule times the loaded pack voltage times the continuous current, which is 392 W at 6S against the 406 W the rotor asks for, and KV cancels out of that product so gearing cannot move it. See D67",
+      "cells_min": 4,
+      "cells_max": 6,
+      "cells_basis": "supplier datasheet PDF, evidence row E12"
     },
     {
       "name": "T-Motor Navigator MN3510 KV700",
@@ -546,7 +569,10 @@
       "continuous_torque_Nm": 0.2728,
       "selected": false,
       "basis": "supplier datasheet: 555 W and 25.0 A maximum for 180 s, 118 g. Continuous figures are those derated by 0.80, and continuous torque follows from 9.5493 over KV at the derated current",
-      "verdict": "444.0 W continuous, short of 483 W, and 12 g heavier than the MN5006 that carries more"
+      "verdict": "444.0 W continuous, short of 483 W, and 12 g heavier than the MN5006 that carries more",
+      "cells_min": null,
+      "cells_max": null,
+      "cells_basis": "the week 2 supplier listing did not print a cell range for this row"
     }
   ],
   "pitch": {
@@ -968,9 +994,9 @@
     },
     {
       "item": "pitch offset controller",
-      "nominal_g": 8.0,
-      "conservative_g": 9.2,
-      "basis": "one controller board driving the pitch offset servos. The only line in the envelope whose mass genuinely does not move with radius, thrust or torque",
+      "nominal_g": 18.0,
+      "conservative_g": 21.7,
+      "basis": "one controller board driving the pitch offset servos, 8.0 g, plus the 10.0 g step down regulator D70 added between it and the pack. Week 2 did not know the pack would be 8S and carried the board alone. The regulator is the same allowance in both lists rather than two independent estimates, because it is sized against a rating and nothing has been drawn",
       "scaling_class": "fixed"
     },
     {
@@ -1200,6 +1226,13 @@
       "refines": "pitch offset controller"
     },
     {
+      "item": "controller step down regulator",
+      "mass_g": 10.0,
+      "conservative_g": 12.5,
+      "basis": "switching regulator between the pack and the pitch controller, rated at least 42 V in against the 33.6 V a charged 8S pack reaches, 12 V out at 1 A, which is inside the board's 6 to 30 V window. No supplier listing has been read for one, so this is a requirement and a mass allowance rather than a part. Growth class allowance, 25%",
+      "refines": "pitch offset controller"
+    },
+    {
       "item": "module wiring harness",
       "mass_g": 25.2,
       "conservative_g": 31.5,
@@ -1268,17 +1301,17 @@
     }
   },
   "results": {
-    "total_mass_g": 677.91,
-    "weight_N": 6.6503,
-    "thrust_to_weight": 2.5563,
-    "mass_envelope_g": 637.23,
-    "mass_g_conservative": 763.24,
-    "thrust_to_weight_conservative": 2.1569,
-    "bom_bought_inr": 39130,
+    "total_mass_g": 687.91,
+    "weight_N": 6.7484,
+    "thrust_to_weight": 2.5191,
+    "mass_envelope_g": 647.23,
+    "mass_g_conservative": 775.74,
+    "thrust_to_weight_conservative": 2.1221,
+    "bom_bought_inr": 40030,
     "bom_tooling_inr": 28800,
-    "bom_total_inr": 67930,
+    "bom_total_inr": 68830,
     "bom_longest_lead_weeks": 4,
-    "mass_to_close_stacked_g": 104.76,
+    "mass_to_close_stacked_g": 117.26,
     "mass_target_week4_g": 658.48
   },
   "thrust_sensitivity": [
@@ -1433,6 +1466,17 @@
       "lead_time_weeks": 3,
       "make_or_buy": "buy",
       "source": "Quadkopters, New Delhi, catalogue listing for the board class",
+      "priced_date": "31 August 2026"
+    },
+    {
+      "item": "step down regulator, 42 V in, 12 V out",
+      "category": "drive",
+      "qty": 1,
+      "unit_cost_inr": 900,
+      "line_cost_inr": 900,
+      "lead_time_weeks": 2,
+      "make_or_buy": "buy",
+      "source": "Robu.in, Pune, price band for a switching regulator module of this rating. No listing was read for a specific part, so this is the band and not a line item",
       "priced_date": "31 August 2026"
     },
     {
