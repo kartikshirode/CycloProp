@@ -31,11 +31,11 @@ degrees about an axis at 30 percent chord, turning at 2337 rpm, driven by a sing
 through a toothed belt at 4.25 to 1. Design thrust is 17.0 N against a requirement of at least
 10 N.
 
-The module weighs 677.91 g at the nominal budget and 763.24 g in the conservative column, so
-thrust to weight is 2.5563 at the design point, above the 2.5 requirement. Four cases are
+The module weighs 687.91 g at the nominal budget and 775.74 g in the conservative column, so
+thrust to weight is 2.5191 at the design point, above the 2.5 requirement. Four cases are
 reported rather than one, because reporting a single case is how this design misread itself for
 a fortnight early on. The worst of the four stacks a low thrust coefficient on the conservative
-mass and gives 2.1569, under the requirement, and the 104.76 g that would close it is published
+mass and gives 2.1221, under the requirement, and the 117.26 g that would close it is published
 in the mass section rather than argued away.
 
 Blade pitch is passive. One four-bar per blade, all three sharing a single offset pivot 11.53 mm
@@ -70,9 +70,9 @@ the thrust drops the per rotor Reynolds number.
 
 | Layout | Per rotor thrust | Rotor speed | Largest dimension | Module mass | Stacked T/W |
 | --- | --- | --- | --- | --- | --- |
-| single, 3 blades | 17.0 N | 2337 rpm | 290.4 mm | 637.23 g | 2.1631 |
-| two rotors | 8.5 N | 3124 rpm | 400.0 mm | 786.12 g | 1.7516 |
-| three rotors | 5.6667 N | 3864 rpm | 490.0 mm | 984.94 g | 1.3969 |
+| single, 3 blades | 17.0 N | 2337 rpm | 290.4 mm | 647.23 g | 2.1281 |
+| two rotors | 8.5 N | 3124 rpm | 400.0 mm | 796.12 g | 1.7516 |
+| three rotors | 5.6667 N | 3864 rpm | 490.0 mm | 994.94 g | 1.3969 |
 
 The single rotor wins the decision metric by 36 percent and it wins every other column too. The
 reason is not subtle once the mass lines are sorted: splitting the thrust splits the aerodynamics
@@ -83,7 +83,7 @@ lower tip speed for the same per rotor thrust. Chord Reynolds falls with the spl
 measured band and the single rotor stays inside it.
 
 Those three rows are built on the week 2 mass envelope, applied identically to all three layouts.
-The refined budget later in this report moves the winning row from 2.1631 to 2.1569 and leaves
+The refined budget later in this report moves the winning row from 2.1281 to 2.1221 and leaves
 the other two where they are. Only the single rotor row carries the six corrected mass lines, and
 three of those are per rotor, so correcting the cluster rows widens the gap rather than closing
 it.
@@ -271,7 +271,7 @@ everything the model leaves out, and none of it is symmetric.
 
 Holding torque peaks at 0.1287 Nm at three per revolution, 120 Hz, which is above any servo's
 control bandwidth. Through the step up and across two servos that is 0.0965 Nm each against half
-of a 0.3825 Nm stall figure, a margin of 2.33, and the phase jitter is bounded by gear backlash at
+of a 0.3825 Nm stall figure, a margin of 1.982, and the phase jitter is bounded by gear backlash at
 0.1432 degrees of carrier rather than by the servo loop.
 
 **Side force is the open risk in this section and it is stated as one.** The model puts the
@@ -359,7 +359,7 @@ should not be trusted for magnitude.
 | electrical power at the ESC input | 508.588 W | motor input over 0.95 |
 | actuator draw | 6.0 W | two servos holding against residual link load |
 | controller draw | 2.0 W | offset controller board |
-| module electrical power | 516.588 W | the three above |
+| module electrical power | 518.0 W | the three above |
 
 The three efficiencies are assumed rather than measured and they are the only unevidenced links
 in the chain. The motor figure is the sensitive one.
@@ -371,12 +371,14 @@ derated by 0.80 before anything is selected against it. Nothing justifies 0.80 r
 or 0.90 except ordinary practice, and the problem statement states no endurance requirement to
 size it against. It is an assumption and it is marked as one.
 
-The consequence is bounded even though the number is not sourced. The design draws 0.704 of the
-published 180 second power and 0.7927 of the current, and that second figure is also the derate
-at which the selection breaks even. Neither exit is open below it: the stacked thrust to weight
-case needs 19.7045 N so no lower sensitivity row helps, and motor mass is a power class item
-on a conservative column that is already 104.76 g over the 2.5 ceiling. What makes it tolerable is the duty. 0.7927 is a
-fraction of a three minute rating, so a demonstration inside three minutes runs with a fifth of
+The consequence is bounded even though the number is not sourced. The design draws 0.7433 of
+the published 180 second power and 0.7418 of the current, and the larger of the two, the power
+fraction, is the derate at which the selection breaks even. It used to be the current fraction
+and D67 moved it, which is worth saying because a derate checked against the line that stopped
+binding is a check that passes for the wrong reason. Neither exit is open below it: the stacked thrust to weight
+case needs 20.0272 N so no lower sensitivity row helps, and motor mass is a power class item
+on a conservative column that is already 117.26 g over the 2.5 ceiling. What makes it tolerable is the duty. 0.7433 is a
+fraction of a three minute rating, so a demonstration inside three minutes runs with a quarter of
 the datasheet figure spare. A dynamometer run is the first drive gate in Stage 2.
 
 A drive is accepted only if four things hold at once. Power: 483.158 W of a derated 520.0 W
@@ -385,6 +387,18 @@ at 4.25 to 1 through a 0.93 belt, 88 percent. Current: 19.2876 A of 20.8 A, deri
 torque rather than from input power over pack voltage. Speed: the motor turns 9932.4 rpm against
 a ceiling of 12799.2 rpm the pack can reach at the working current, 78 percent. Four other motors
 were screened and each one fails at least one of the four.
+
+**The motor is catalogued 4 to 6S and the pack is 8S, and those two facts do not conflict.** An
+ESC is a buck converter, so the windings never see the pack. What they see is the back EMF plus
+the resistive drop, which at 9932.4 rpm on a KV of 450 and 19.2876 A through 60 mOhm is
+23.2293 V against the 25.2 V six cells reach off the charger. The motor is inside its catalogue
+window at the design point. The pack is 8S because a 6S pack sags under this current to less
+than the windings ask for, not because anything wants 33.6 V across it. What does meet 33.6 V is
+the ESC, rated for it, the harness, and the pitch offset controller, which is rated 6 to 30 V and
+therefore sits behind a 10.0 g step down regulator rated 42 V in and putting out 12 V. Two things
+this does not settle and neither is buried: the 650 W and 26 A ratings were published against a
+6S test, so a written manufacturer confirmation at this duty is a Stage 2 gate, and ESC switching
+losses rise with the higher rail beyond what the assumed 0.95 accounts for.
 
 The pack interface is 8S and the module declares it, because the battery sits outside the module
 boundary. It has to be declared: the mechanical output a motor can make is capped at the speed
@@ -409,7 +423,7 @@ bearing and frame load rather than a thrust loss.
 
 # Estimated module weight and thrust-to-weight ratio
 
-The module is 33 budget lines, every one a drawn section, a catalogue part or a stated allowance,
+The module is 34 budget lines, every one a drawn section, a catalogue part or a stated allowance,
 and every one pointing at the coarse envelope line it refines. The budget is built by a script
 from the section drawing and the material densities, so the arithmetic reruns rather than being
 typed.
@@ -446,10 +460,11 @@ typed.
 | esc, 40 A 8S class | 19.50 g | 21.06 g | catalogue |
 | vectoring actuator servos, 2 off | 40.00 g | 43.20 g | catalogue |
 | pitch offset controller | 8.50 g | 9.18 g | catalogue |
+| controller step down regulator | 10.00 g | 12.50 g | allowance |
 | module wiring harness | 25.20 g | 31.50 g | allowance |
 | fasteners and threaded inserts | 14.00 g | 17.50 g | allowance |
 | structural adhesive at module joints | 7.50 g | 9.38 g | allowance |
-| **module total** | **677.91 g** | **763.24 g** | |
+| **module total** | **687.91 g** | **775.74 g** | |
 
 **The growth rate is a property of the line, not of the module.** Each line is sorted into one of
 four classes and each class carries a rate, decided before the total was looked at: 8 percent for
@@ -464,7 +479,8 @@ least developed part of the module. It covers gussets, cable clamps, the servo b
 ESC tray, none of which is drawn. It is not spread across rounded lines and it is not buried
 inside a growth rate.
 
-**What is genuinely fixed in this module is one 8.5 g controller board.** That is worth saying
+**What is genuinely fixed in this module is an 8.5 g controller board and the 10.0 g regulator
+behind it.** That is worth saying
 plainly, because the usual thrust to weight argument for a bigger rotor is that fixed hardware
 amortises over more thrust. Sorted honestly, the wiring follows the envelope, the fasteners follow
 the frame, the servo torque follows the pitch link load which follows thrust, and the bearings,
@@ -472,18 +488,18 @@ shaft and transmission follow rotor torque. Almost nothing here is free when the
 
 | Case | Thrust | Mass | Weight | T/W |
 | --- | --- | --- | --- | --- |
-| design point | 17.0 N | 677.91 g | 6.6503 N | 2.5563 |
-| coefficient downside alone | 16.1493 N | 677.91 g | | 2.4284 |
-| mass downside alone | 17.0 N | 763.24 g | | 2.2705 |
-| both stacked | 16.1493 N | 763.24 g | | 2.1569 |
+| design point | 17.0 N | 687.91 g | 6.7484 N | 2.5191 |
+| coefficient downside alone | 16.1493 N | 687.91 g | | 2.3931 |
+| mass downside alone | 17.0 N | 775.74 g | | 2.2339 |
+| both stacked | 16.1493 N | 775.74 g | | 2.1221 |
 
 **The design case clears the requirement and the three downside cases do not.** The requirement
-is a thrust to weight above 2.5 on the module and the design estimate meets it at 2.5563. This
+is a thrust to weight above 2.5 on the module and the design estimate meets it at 2.5191. This
 project also held the downside cases to 2.5, which was its own discipline rather than the
 competition's, and a correction to the figure of merit and to six mass lines spent it. The
 downside cases are held to a declared floor of 2.0 now, which the stacked case clears, and the
 mass that would carry the stacked case back over 2.5 is published rather than argued away: it is
-**104.76 g** out of a 763.24 g conservative column. That is a mass reduction programme and it is
+**117.26 g** out of a 775.74 g conservative column. That is a mass reduction programme and it is
 Stage 2 item 6.
 
 An internal target of 2.75 on the stacked case was set early as a margin goal. It is not met, it
@@ -493,12 +509,12 @@ budget rules exist to stop. The two routes that would close it are a lower KV mo
 and a measured thrust coefficient, and both are Stage 2 work.
 
 One trade was priced and declined. Balancing the blade chordwise would lift the pitch link
-margin from 3.30 to 4.69, and the nose ballast that needs across three blades takes the stacked
-case to 2.406, under the hard limit. Spending a requirement
-to improve a margin that already passes twice over is the wrong trade, so the blade stays
-unbalanced and the load path carries it.
+margin from 3.2878 to 6.20, and the nose ballast that needs across three blades takes the
+stacked case from 2.1221 to 2.0292, which still clears the declared floor of 2.0 but only
+just. Spending mass to improve a margin that already passes twice over is the wrong trade, so the
+blade stays unbalanced and the load path carries it.
 
-![Module mass by group. 33 drawn lines totalling 677.91 g nominal and 763.24 g conservative, with the line count per group in brackets. Thrust to weight is 2.5563 at the design point and 2.1569 with the coefficient and mass downsides stacked.](figures/fig-mass.pdf)
+![Module mass by group. 34 drawn lines totalling 687.91 g nominal and 775.74 g conservative, with the line count per group in brackets. Thrust to weight is 2.5191 at the design point and 2.1221 with the coefficient and mass downsides stacked.](figures/fig-mass.pdf)
 
 # Structural design and margins
 
@@ -520,15 +536,25 @@ where Runco measured 4.4 on a much smaller rotor.
 | rotor shaft torsion | 1.54226 Nm | 24.9563 Nm | 16.1817 |
 | rotor shaft, bending and torsion combined | 1.99506 Nm of bending | von Mises on the tube | 9.8968 |
 | pitch link path, the horn governs | 144.19 N | 474.074 N | 3.2878 |
-| blade attachment, centrifugal | 209.161 N | 781.148 N | 3.7347 |
-| blade attachment at 1.20 overspeed | 301.192 N | 781.148 N | 2.5935 |
+| blade root pitch bearings, centrifugal | 209.161 N | 781.148 N | 3.7347 |
+| blade root pitch bearings at 1.20 overspeed | 301.192 N | 781.148 N | 2.5935 |
 
 The spread is the point. Two margins sit under 3 and everything else is over 3, and both of the
 two are overspeed cases, so what sizes this module is the declared 1.20 factor rather than any
 load it sees in normal operation. The tightest is the blade in combined bending at
-2.0839, and it took that place from the blade attachment
+2.0839, and it took that place from the root bearings
 during the correction described below. Stage 2 effort belongs at the blade root rather than at
-the shaft or the frame. The blade's own section allowable is set by skin wrinkling over the foam
+the shaft or the frame.
+
+Those last two rows are a bearing capacity check and not a qualification of the bonded root
+fitting, and the difference matters enough to say rather than leave to the row label. The
+bearings are the softest element in the path from blade to spider arm, softer than the bond or
+the bracket bolts, which is an argument from stiffness rather than a calculation. No adhesive
+shear area, peel stress, stress concentration or cyclic knockdown has been computed for the
+fitting itself. It carries 209.161 N steady with a load cycling at three per revolution on top,
+and until a coupon and a local model exist the honest statement is a screened bearing margin
+over an unquantified joint. The belt tooth and pulley stand in the same place, screened on
+geometry and a factor with no supplier tooth rating behind them. The blade's own section allowable is set by skin wrinkling over the foam
 and not by the laminate, and the spar would take more than twice the section's rating on its own.
 
 **The attachment was the tightest joint until its rating was checked properly, and the
@@ -631,11 +657,11 @@ going over centre, since the worst transmission angle is 135.68 degrees and it w
 rather than assuming. Then a static pull on one attachment above the overspeed load of 301.192 N,
 and a first spin staged in four steps with current logged against prediction.
 
-Bought parts and material come to 39130 INR, tooling and fabrication to 28800, and the module
-totals 67930 INR at a longest single lead of 4 weeks. **These are indicative prices at
+Bought parts and material come to 40030 INR, tooling and fabrication to 28800, and the module
+totals 68830 INR at a longest single lead of 4 weeks. **These are indicative prices at
 distributor list level and they are not obtained quotations.** No supplier was contacted, and the
 source column of the full bill of materials names the distributor a part would be bought from
-rather than one that has quoted for it. Five lines above 4500 INR carry 52 percent of the total
+rather than one that has quoted for it. Five lines above 4500 INR carry 49.8 percent of the total
 and those are what Stage 2 has to replace with written quotes.
 
 The schedule driver is a 4 week foam import with no Indian source. Everything on a 3 week lead
@@ -717,24 +743,27 @@ Stage 2 does about that.
 | Claim | Where it comes from | Confidence | Main failure mode | Stage 2 validation |
 | --- | --- | --- | --- | --- |
 | Blade area coefficient 0.6055 gives 17.0 N | transferred from a recomputed hover point, bracketed above by 0.6648 measured on this shape family | medium | the transfer is wrong in the unsafe direction, or the model overstates thrust at an inflow ratio of 0.3871 | transient CFD, then a load cell run |
-| Module mass 677.91 g nominal, 763.24 g conservative | 33 drawn or catalogue lines, growth by line class | medium to high | a wet layup blade comes out heavy, or undrawn frame parts eat the 15.0 g reserve | CAD mass properties, a mould trial, weighed parts |
+| Module mass 687.91 g nominal, 775.74 g conservative | 33 drawn or catalogue lines, growth by line class | medium to high | a wet layup blade comes out heavy, or undrawn frame parts eat the 15.0 g reserve | CAD mass properties, a mould trial, weighed parts |
 | Blade deflection 0.09 mm, wind up 2.2346 degrees | closed form beam and torsion on the integrated section | medium | cured laminate modulus under the class value, which moves these two even though it barely moves the strength margin | coupon panel, then FEA |
 | Direction follows the vector command one to one at 17.0 N | model symmetry, not measurement | low on magnitude | wake skew, the frame in the flow, the blade meeting its own wake | two axis load cell across the range |
-| Stacked conservative thrust to weight 2.1569 | recomputed from geometry and the mass lines | medium | it is under the 2.5 requirement and held to a declared floor of 2.0, with 104.76 g published as the gap | Stage 2 items 3, 6 and 7 together |
+| Stacked conservative thrust to weight 2.1221 | recomputed from geometry and the mass lines | medium | it is under the 2.5 requirement and held to a declared floor of 2.0, with 117.26 g published as the gap | Stage 2 items 3, 6 and 7 together |
 | Blade attachment margin 2.5935 at overspeed | ISO 76 static rating over recomputed centrifugal load, oscillating duty computed | medium | 0.5533 of full recirculation, so it wears where it sits and no catalogue figure covers that | run to failure at speed, on the flight grease |
 | Structural blade load factor 4.0, against a solved peak to mean of 2.5458 | published simulated range, top of it taken, and the solved schedule sits under it | low to medium | the true peak is higher under dynamic stall | measured blade forces, or CFD |
-| Module electrical power 516.588 W | momentum floor, figure of merit, efficiency chain | medium | all three efficiencies are assumed and the motor one is sensitive | bench measurement on the built module |
+| Module electrical power 518.0 W | momentum floor, figure of merit, efficiency chain | medium | all three efficiencies are assumed and the motor one is sensitive | bench measurement on the built module |
 | The drive holds the design point continuously | derated ratings against power, torque, current and speed | medium | the 0.80 derate has no source and breaks even at 0.7433, with power the binding line at 93 percent | dynamometer run at the working current, early |
 | Side force tilt 9.078 degrees | quasi steady model with uniform inflow | low | measurement puts it far higher and it moves with rotor speed | load cell calibration across the speed range |
-| Module cost 67930 INR, longest lead 4 weeks | distributor list prices, nothing quoted | low on price | gear cutting is priced by setup at a quantity of one | written quotations |
+| Module cost 68830 INR, longest lead 4 weeks | distributor list prices, nothing quoted | low on price | gear cutting is priced by setup at a quantity of one | written quotations |
 | Material allowables | published typical values per class | medium | no certificate, no coupon, and the foam is the sensitive one rather than the laminate: the floor arrives at 0.6144 of the published foam properties | wrinkling coupon on the delivered foam, then a laminate panel and a bond shear coupon |
 
 # Sources and how they were read
 
-Five evidence classes are used: measured, somebody measured this quantity on this configuration
+Seven evidence classes are used: measured, somebody measured this quantity on this configuration
 and the figure was read off the source; derived, computed here from figures measured on a
 different configuration; transferred, a derived value carried across a change of geometry or
-Reynolds number; summary, only a summary of the source has been read; assumed, no source at all.
+Reynolds number; catalogue, a manufacturer or supplier figure for a part; summary, only a summary
+of the source has been read; downside, a deliberately pessimistic value carried to bound a case;
+assumed, no source at all. Four rows in the ledger are class measured and none of them was
+measured on this hardware.
 
 **Nobody has put this rotor on a load cell.** Where this report says measured, it means measured
 by somebody else on a rotor of this shape family, and the distinction is kept everywhere it
@@ -773,20 +802,22 @@ report was changed rather than the answer smoothed.
 anyone believe 17.0 N?** They should believe the conservative case first. The nominal 0.6055 is
 transferred, and its original provenance was wrong, so it was recomputed from the printed pages
 and the corrected value is 0.7211, higher than what is used. Kellen then measured 0.6648 on a
-rotor whose solidity and chord to radius are within 1.1 percent of this one. Three independent
-values sit above the number the design is built on. That is the argument, and it does not make
+rotor whose solidity and chord to radius are within 1.1 percent of this one. Three values sit
+above the number the design is built on, and they are three values from two studies rather than
+three independent ones: 0.7211 and 0.8114 both come out of Benedict 2010, on his quad and his
+twin. That is the argument, and it does not make
 17.0 N a measurement. The claim is that the design closes on a coefficient deliberately below the
 evidence, and the requirement is 10 N.
 
 **2. The published benchmark for a module like this is between 1.78 and 2.13 depending on
-allocation. You claim 2.5563 at the design point. Why is that credible?**
+allocation. You claim 2.5191 at the design point. Why is that credible?**
 Because the benchmark is a 70 gram micro-scale vehicle re-cut onto this boundary, and blade mass
 per newton is roughly scale invariant while the drive and structure are not. This module makes
 17.0 N from one motor, one belt, one shaft and one pitch mechanism, where the
 benchmark makes a fraction of that per rotor from four sets of hardware. The gap is not a claim
 to have beaten anybody at the same scale. It is amortisation, and the report is careful about how
 little of it is real: the genuinely fixed mass in this module is one 8.5 g board. The stacked
-conservative case is 2.1569, which lands inside the
+conservative case is 2.1221, which lands inside the
 benchmark band rather than above it, and that is the number to argue with.
 
 **3. What in the module is actually fixed as the rotor grows?** Almost nothing. The 8.5 g
@@ -895,7 +926,7 @@ narrative carrying a physical unit has to match a computed value in the same dim
 
 - performance.thrust_N = 17.0
 - geometry.radius_m = 0.11
-- results.thrust_to_weight_conservative = 2.1569
+- results.thrust_to_weight_conservative = 2.1221
 - geometry.chord_m = 0.0726
 - geometry.span_m = 0.2904
 - geometry.blades = 3
@@ -917,7 +948,7 @@ narrative carrying a physical unit has to match a computed value in the same dim
 - performance.power_spread = 0.1928
 - performance.tare_power_W = 37.744
 - performance.electrical_power_W = 508.588
-- performance.module_electrical_power_W = 516.588
+- performance.module_electrical_power_W = 518.0
 - performance.actuator_power_W = 6.0
 - performance.controller_power_W = 2.0
 - performance.induced_velocity_ms = 10.4215
@@ -927,6 +958,10 @@ narrative carrying a physical unit has to match a computed value in the same dim
 - performance.motor_rpm = 9932.4
 - performance.motor_torque_Nm = 0.3902
 - performance.motor_input_current_A = 19.2876
+- performance.pack_voltage_charged_V = 33.6
+- performance.motor_terminal_voltage_V = 23.2293
+- performance.motor_catalogue_ceiling_V = 25.2
+- performance.regulator_loss_W = 1.4118
 - performance.belt_ratio = 4.25
 - performance.blade_tip_deflection_mm = 0.09
 - performance.blade_twist_deg = 0.014
@@ -983,12 +1018,12 @@ narrative carrying a physical unit has to match a computed value in the same dim
 - structure.pitch_link_allowable_N = 474.074
 - structure.pitch_link_margin = 3.3015
 - structure.blade_windup_deg = 2.2346
-- results.total_mass_g = 677.91
-- results.mass_envelope_g = 637.23
-- results.mass_g_conservative = 763.24
-- results.weight_N = 6.6503
-- results.thrust_to_weight = 2.5563
-- results.bom_bought_inr = 39130
+- results.total_mass_g = 687.91
+- results.mass_envelope_g = 647.23
+- results.mass_g_conservative = 775.74
+- results.weight_N = 6.7484
+- results.thrust_to_weight = 2.5191
+- results.bom_bought_inr = 40030
 - results.bom_tooling_inr = 28800
-- results.bom_total_inr = 67930
+- results.bom_total_inr = 68830
 - results.bom_longest_lead_weeks = 4

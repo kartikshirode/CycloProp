@@ -105,12 +105,12 @@
    "id": "fig-mass",
    "title": "Module mass breakdown",
    "file": "figures/fig-mass.pdf",
-   "caption": "Module mass by group. 33 drawn lines totalling 677.91 g nominal and 763.24 g conservative, with the line count per group in brackets. Thrust to weight is 2.5563 at the design point and 2.1569 with the coefficient and mass downsides stacked.",
+   "caption": "Module mass by group. 34 drawn lines totalling 687.91 g nominal and 775.74 g conservative, with the line count per group in brackets. Thrust to weight is 2.5191 at the design point and 2.1221 with the coefficient and mass downsides stacked.",
    "values": {
-    "results.thrust_to_weight": 2.5563,
-    "results.thrust_to_weight_conservative": 2.1569,
-    "results.total_mass_g": 677.91,
-    "results.mass_g_conservative": 763.24
+    "results.thrust_to_weight": 2.5191,
+    "results.thrust_to_weight_conservative": 2.1221,
+    "results.total_mass_g": 687.91,
+    "results.mass_g_conservative": 775.74
    }
   }
  ]
