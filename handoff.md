@@ -1,6 +1,6 @@
 # CycloProp handoff
 
-Updated 1 September 2026. Stage 1 is due **27 September 2026** and we submit on 26 September.
+Updated 4 September 2026. Stage 1 is due **27 September 2026** and we submit on 26 September.
 This file is where a fresh session starts.
 
 NEXT-WEEK: 5
@@ -9,9 +9,12 @@ Weeks 1 to 4 are done. Geometry froze in week 2, the mechanism in week 3, and we
 structure, the refined mass budget and the materials and manufacturing case.
 
 **The gates are green again and the design behind them is weaker than it was.** A five pass
-review on 1 September found 63 things. Phase 1 wrote the gates that expose the three which move
-the design, Phase 2 corrected the physics and Phase 3 corrected the documents. `python
-tools/check.py --all` passes 269 gates and `python tools/test_gates.py` passes 187 self-tests.
+review on 1 September found 63 things and a codex audit on 4 September found eleven more.
+`python tools/check.py --all` passes 288 gates and `python tools/test_gates.py` passes 221
+self-tests. Read [stage-1/audit/codex-final-response.md](stage-1/audit/codex-final-response.md)
+before anything else: D70 closed both electrical interfaces, and the 10 g regulator it added
+took the design case from 2.5563 to **2.5191**, which clears 2.5 by 0.8 percent rather than by
+2.3. All four thrust to weight cases moved.
 
 What changed under them is the part to read rather than the pass count. The figure of merit was
 being read inconsistently with the thrust coefficient, so the design point came down from 18 N
@@ -83,16 +86,16 @@ is how week 2 confused itself for a fortnight:
 
 | Case | Thrust | Mass | T/W |
 | --- | --- | --- | --- |
-| design point | 17.00 N | 677.91 g | 2.5563 |
-| coefficient downside alone | 16.15 N | 677.91 g | 2.4284 |
-| mass downside alone | 17.00 N | 763.24 g | 2.2705 |
-| both stacked | 16.15 N | 763.24 g | 2.1569 |
+| design point | 17.00 N | 687.91 g | 2.5191 |
+| coefficient downside alone | 16.15 N | 687.91 g | 2.3931 |
+| mass downside alone | 17.00 N | 775.74 g | 2.2339 |
+| both stacked | 16.15 N | 775.74 g | 2.1221 |
 
 **One of the four clears the hard limit of 2.5 and three do not.** Before D67 all four cleared.
-The requirement is stated on the module and the design estimate meets it at 2.5563. Holding the
+The requirement is stated on the module and the design estimate meets it at 2.5191. Holding the
 downside cases to 2.5 as well was this project's own discipline, and the corrections spent it.
 The downside cases are held to a declared floor of 2.0 now, and the gate requires the closing
-mass to be computed and published: **104.76 g** out of a 763.24 g conservative column, or a
+mass to be computed and published: **117.26 g** out of a 775.74 g conservative column, or a
 target of 658.48 g. Since week 4 the mass in that table is a 33 line budget of drawn sections and
 catalogue parts rather than an estimate.
 
@@ -129,13 +132,13 @@ before it is an aerodynamic one. See D49 and D68.
 Required item 7, the submission, the PDF and the staged email are done. What is left is the
 human gate, the real team facts, and one short run to fold them in.
 
-**1. Week H still blocks it.** Registration and eligibility are now confirmed in
-[stage-1/human-gate.md](stage-1/human-gate.md). Roster, sender and technical-read markers remain
-pending, so `check.py` still fails week 5 until a person adds the remaining ones. An agent never
+**1. Week H still blocks it, on one marker.** Registration, eligibility, roster and sender are
+confirmed in [stage-1/human-gate.md](stage-1/human-gate.md). `TECHNICAL-READ-COMPLETE` is the
+only one left, and it goes in after the built PDF has been read end to end. An agent never
 writes one.
 The count used to read four because the gate searched the whole file and found
 `TECHNICAL-READ-COMPLETE` inside the sentence explaining how to write it. Fixed in D59, and the
-the gate now counts only asserted lines. Two confirmations are recorded and three remain.
+the gate now counts only asserted lines. Four confirmations are recorded and one remains.
 
 **2. The nine tracked fields.** `[P-1]` to `[P-9]`, listed in one table at the top of
 [07-team-and-execution.md](stage-1/design/07-team-and-execution.md) and referenced from the
@@ -260,23 +263,24 @@ positional so the same text in the body still fails. The 1 September hardening p
   recirculation, so it wears where it sits, and it carries a static safety factor of 4.15 at the
   operating load against a declared floor of 2.0. What is still missing is a run to failure at
   speed on the flight grease. See D60 and D67
-- **The stacked conservative thrust to weight is 2.1569, under the 2.5 requirement.** The design
-  estimate clears at 2.5563 and the downside cases are held to a declared floor of 2.0. Closing
-  the stacked case needs 104.76 g out of a 763.24 g conservative column, which is a Stage 2 mass
+- **The stacked conservative thrust to weight is 2.1221, under the 2.5 requirement.** The design
+  estimate clears at 2.5191 and the downside cases are held to a declared floor of 2.0. Closing
+  the stacked case needs 117.26 g out of a 775.74 g conservative column, which is a Stage 2 mass
   programme. See D67 and D68
 - **The pitch offset controller cannot take the declared pack.** The F411-WSE class board is
   rated 6 to 30 V and 8S reaches 33.6 V charged. The module needs a step-down ahead of it or a
   board rated past 34 V. Neither is drawn and no mass line carries it. See D68
 - **The BOM is priced and not quoted.** No supplier was contacted. The 5 lines above 4500 INR are
-  50 percent of the 67930 INR total and they need written quotes at Stage 2. See D52
+  50 percent of the 68830 INR total and they need written quotes at Stage 2. See D52
 - **Material allowables are published typical values for the class**, not batch certificates, and
   no coupon has been tested. The foam is the sensitive one and the laminate is not: over a 2 to 1
   band on the skin modulus the overspeed margin moves under 3 percent, while the blade reaches
   its floor at 0.6144 of the published foam properties. Stage 2's first coupon is a wrinkling
   test on the delivered foam. See D63
 - **The 0.80 continuous derate still has no source** and cannot be given one from inside the
-  project. What it has now is a bound: the selection breaks even at 0.7927, no lower thrust row
-  holds the stacked case, and no larger motor fits the mass. A dynamometer run is the first drive
+  project. What it has now is a bound: the selection breaks even at 0.7433 on power, which has
+  been the binding line since D67 moved it off current, no lower thrust row holds the stacked
+  case, and no larger motor fits the mass. A dynamometer run is the first drive
   gate in Stage 2. See D61
 - **Three-person roster at VPKBIET**, with 5 hours per week recorded. Member roles, programmes and
   prior work still need to be written into item 7
@@ -317,7 +321,7 @@ reconciliation, done in Phase 5 rather than left for a reader to work out. Debt 
 
 | # | Owner then | Where it actually stands |
 | --- | --- | --- |
-| 1 | week 4 | Retired by D35, then reopened by D67 and closed differently. The stacked case is 2.1569, under 2.5, held to a declared floor of 2.0 with 104.76 g published as the closing gap. The D17 target of 2.75 is further away than it was and is not claimed |
+| 1 | week 4 | Retired by D35, then reopened by D67 and closed differently. The stacked case is 2.1221, under 2.5, held to a declared floor of 2.0 with 117.26 g published as the closing gap. The D17 target of 2.75 is further away than it was and is not claimed |
 | 2 | week 4 | Open. Only the MN5006 was read off a manufacturer's sheet and the other four rows plus the ESC are still supplier listings. The lower KV on more cells idea D30 raised was overtaken: D67 moved the pack to 8S for a different reason, which is the capacity line rather than the speed ceiling |
 | 3 | human | Open and it stays human. No endurance requirement exists to size the derate against. D67 restated the break even at 0.7433, so a true continuous derate of 0.75 still holds |
 | 4 | week 4 | Open, and it is the most load bearing of these. The three efficiencies are still assumed and the motor figure still sets motor input power and therefore the drive selection. Week 4 never touched it. It is a bench measurement, listed in Stage 2 |
