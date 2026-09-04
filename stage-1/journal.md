@@ -510,3 +510,37 @@ carries all four fractions as fields now and the sentence is written from them.
 Phase 5 was the records, and the one that matters is the marker count. Four files said week 5
 blocks on four markers. The code blocks on five. That disagreement sat in the file the only
 person who can unblock this project reads to unblock it.
+
+
+## 4 September 2026, the codex audit and what it cost
+
+A fresh Codex session audited the whole repository against the plan and against what IIT Bombay
+asked for, scored it 62 out of 100 and said not to send it. Eleven findings. Three of them were
+worth the round on their own.
+
+The one that mattered most was the motor. The MN5006 is catalogued 4 to 6S, the design declares
+8S, and nothing in the tree recorded a cell range at all, so no gate could have noticed. The
+audit called it a blocker. It is not one, and working out why took the argument from a shrug to
+a number: an ESC bucks, the windings see 23.2293 V, and six cells off the charger are 25.2 V. The
+motor is inside its own window and the pack is outside it, which are different sentences. What
+the audit was right about is that nobody had written either of them down.
+
+The controller was the real blocker and I had already flagged it twice without fixing it. Rated
+6 to 30 V, sitting across a 33.6 V charged pack, carried as an open item since D67 with no part
+and no mass line. It has a regulator now and the regulator has a gram count, and the gram count
+is what the entry above is really about: 10 g takes the design case from 2.5563 to 2.5191. The
+requirement is still cleared and the margin is now 0.8 percent. That is the honest number and it
+is worse than the one before it.
+
+Then the part I should have caught in the re-audit three days ago. The report's prose said the
+servo margin was 2.33 while its own declaration block eleven pages later said 1.982. The drive
+paragraph said the selection breaks even at 0.7927 on current, which is exactly the defect I
+fixed in the gate on 4 September and never chased into the document. The claims table on the next
+page said 0.7433 on power. Four times now a stale dimensionless number has been found by
+somebody reading rather than by a gate, and reading is not a mechanism, so there is a retired
+value list in `check.py` now. It caught three more inside a minute.
+
+Two findings I disagreed with in part and both are recorded in the response file. The audit's
+stacked case arithmetic was wrong, and its 62 is scored against a rubric the problem statement
+attaches to the final evaluation rather than to Stage 1, which is a defensible way to score and
+not the only one.

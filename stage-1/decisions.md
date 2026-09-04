@@ -1989,3 +1989,68 @@ the human gate alone, with three of five markers outstanding. The report is 30 p
 and that is over the 15 page target the plan set for itself when no organiser limit was supplied.
 No organiser limit exists, so this is recorded rather than acted on, and the page question rides
 at the end of the staged email.
+
+
+## D70: the electrical interfaces, closed and gated
+
+Taken 4 September 2026, answering findings F1 and F6 of the codex audit in
+[audit/codex-final.md](audit/codex-final.md). Supersedes the open item D67 left in
+`03-pitch-and-vectoring.md` and `09-packaging-and-integration.md`.
+
+**The pitch controller gets a regulator, and it is a mass line.** The F411-WSE class board is
+rated 6 to 30 V and a charged 8S pack is 33.6 V. That has been written down as an open item
+since D67 with no part and no gram behind it, which is a note rather than a design. A switching
+regulator now sits between them, rated at least 42 V in and putting out 12 V at 1 A, which lands
+in the middle of the board's window rather than at an edge. It carries the servo rail behind the
+board as well, so its conversion loss at an assumed 0.85 is 1.4118 W of module electrical draw.
+
+It costs 10.0 g nominal and 12.5 g conservative, on the allowance growth class because nothing is
+drawn and no supplier listing has been read for one. Evidence row E20 says so. What that buys is
+the difference between an interface that works and one that does not, and what it costs is
+visible: the design case falls from 2.5563 to **2.5191** and the stacked case from 2.1569 to
+**2.1221**. The design case still clears 2.5 and the margin on it is now 0.8 percent rather than
+2.3. The mass that would carry the stacked case back over 2.5 rises to 117.26 g.
+
+The alternative was a controller rated past 34 V, which needs a catalogue nobody here can reach
+without a browser, and which would have replaced a known 8.5 g part with an unknown one.
+
+**The motor is inside its catalogue range and the pack is not, and those are different
+statements.** The MN5006 is listed 4 to 6S in E12 and the design declares 8S, which the audit
+called a blocker on the selected drive. It is not one, and the reason is worth freezing because
+it will be asked in a viva. An ESC is a buck converter, so the windings never see the pack. They
+see the back EMF plus the resistive drop, which at 9932.4 rpm on a KV of 450 and 19.2876 A
+through 60 mOhm is **23.2293 V**, against the 25.2 V six cells reach off the charger. The pack is
+8S because a 6S pack sags under this current below what the windings ask for, not because
+anything wants 33.6 V across the machine.
+
+What genuinely meets 33.6 V is the ESC, which is specified for it, the harness, and the pitch
+controller, which is why the regulator above exists. Two things this does not settle and both are
+written into the report rather than argued away: the 650 W and 26 A ratings were published
+against a manufacturer test on 6S, so a written confirmation at this duty is a Stage 2 gate, and
+ESC switching losses rise with the higher rail beyond what the assumed 0.95 accounts for.
+
+**Both are gated.** `check_drive_voltage` recomputes the terminal voltage from rpm, KV and the
+draw, holds it under the catalogue ceiling, requires every drive row to record where its cell
+range came from or that the listing carried none, and requires the thrust and power document to
+state what the windings see whenever the pack sits over the motor's printed range. Where a
+charged pack is over the board, it requires a regulator that is a real mass line, rated above the
+pack and landing inside the board's window. Seven self-tests, including the audit's own attack.
+
+**And one gate that is not about voltage.** `check_retired_values` lists every number this
+project has published and superseded, and fails any live document quoting one. It exists because
+this is the fourth time the same failure has been found by a person reading rather than by a
+gate: chord Reynolds sat stale for three weeks, the break even derate said 0.7927 in one file and
+0.7433 in another, the report's prose carried a servo margin of 2.33 against 1.982 in its own
+declaration block, and the drive paragraph carried pre-D67 fractions while the claims table three
+pages later carried the current ones. `check_numeric_coverage` cannot see any of them, because it
+audits a number followed by a unit and every one of these is dimensionless. A retired value is an
+exact token rather than a band, so there is nothing to tune, and a number that legitimately
+repeats one takes the same allow marker every deliberate near miss takes. It found three more the
+moment it ran, one of them in `handoff.md`.
+
+`decisions.md`, `journal.md`, `progress/` and `audit/` are deliberately outside it. A superseded
+number in those is the record working correctly.
+
+**Where it stands.** 288 gates pass on the cumulative tree and 221 self-tests behave as expected.
+Week 5 fails on the human gate alone, with `TECHNICAL-READ-COMPLETE` the only marker outstanding.
+The report is 30 pages.
