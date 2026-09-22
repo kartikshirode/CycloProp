@@ -100,7 +100,7 @@ target of 658.48 g. Since week 4 the mass in that table is a 33 line budget of d
 catalogue parts rather than an estimate.
 
 The internal 2.75 target from D17 is further away than it was and still not claimed. It wants the
-conservative column at 598.6 g, so the gap is 164.6 g. Refinement no longer pays any of it back;
+conservative column at 598.6 g, so the gap is 177.1 g. Refinement no longer pays any of it back;
 it costs 2.19 g, because 38.49 g saved on growth allowance is less than the 40.68 g the nominal
 column gained.
 
@@ -131,6 +131,15 @@ before it is an aerodynamic one. See D49 and D68.
 
 Required item 7, the submission, the PDF and the staged email are done. What is left is the
 human gate, the real team facts, and one short run to fold them in.
+
+**Round 9, 23 September.** Codex scored the submission 60 and said not to send. All eight
+findings held up. Seven are fixed and the eighth is the team facts. Read
+[stage-1/audit/codex-round-9-response.md](stage-1/audit/codex-round-9-response.md) and D71. The
+report is 32 pages, frames the result as a preliminary pass by 0.8 percent, and has a reference
+list. A narrow verification round, round 10, is prepared in `_codex-prompt.md` and
+`_codex-context.md` and should run on 24 September. The organiser record was pulled again on
+23 September: 25 of 26 fields unchanged, the problem statement still byte identical, and
+registrations at 301 against 15 Stage 1 slots.
 
 **0. The organiser channels were re-read on 4 September and nothing moved.** R50 and the
 audit's F10 are closed. Twenty three fields of the competition record are identical to the
@@ -166,7 +175,7 @@ pandoc stage-1/submission/cycloprop-stage1.md --from=markdown --pdf-engine=xelat
 --number-sections --resource-path=stage-1/submission -o stage-1/submission/cycloprop-stage1.pdf
 ```
 
-It is 30 pages and carries seven figures. That is over the 15 page target the plan set for itself
+It is 32 pages and carries seven figures and a full reference list. That is over the 15 page target the plan set for itself
 when no organiser limit was supplied, and no organiser limit exists. The question rides at the
 end of the staged email.
 
@@ -180,7 +189,7 @@ end of the staged email.
   rewritten. All 7 required items in the official order, the 8 row criteria map, a claims and
   risk table, a provenance section naming which sources were read and which were not, and an
   appendix of 12 examiner questions. The stale week 2 mass figures are gone
-- **The PDF was rebuilt after the report identity and figure changes.** It is currently 30 pages.
+- **The PDF was rebuilt after the report identity and figure changes.** It is currently 32 pages, rebuilt 23 September.
   The final page count and attachment filename still need a human check
 - **The coverage gate defect is fixed.** `margin=25mm` in the pandoc header is build
   configuration, not a design claim, and the skip is positional so the same text in the body
@@ -337,7 +346,7 @@ reconciliation, done in Phase 5 rather than left for a reader to work out. Debt 
 | 7 | blocked on a paper | Open. Heimerl is still unread and the 28 degree stall cap is still stated rather than measured |
 | 8 | week 3 | Closed. Week 3 reran the model against the solved linkage and side force is no longer zero by construction |
 | 9 | week 4 | Closed. The spar is sized against the section build-up and its dimensions are stored, and the blade allowable is set by skin wrinkling rather than by the spar |
-| 10 | closed by D30 | Still closed, and D67 made it moot: the 2.75 target is 164.6 g away |
+| 10 | closed by D30 | Still closed, and D67 made it moot: the 2.75 target is 177.1 g away |
 | 11 | human | Closed in Phase 5. `organiser-email.md` is cut down and its question count now matches the draft |
 | 12 | week 4 | Closed, twice. Week 4 restated the stacked figure and Phase 3 restated it again after D67 moved it |
 | 13 | human | Closed in Phase 5. The loop config describes the current thrust to weight rule and the five markers |

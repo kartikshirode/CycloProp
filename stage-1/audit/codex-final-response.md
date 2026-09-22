@@ -2,6 +2,11 @@ RESPONSE-COMPLETE
 
 # Answering the codex audit
 
+**This answers the 4 September audit, which is at commit `1b331cb`.** The 23 September audit
+replaced it in `codex-final.md`, and its answer is
+[codex-round-9-response.md](codex-round-9-response.md). The F numbers below refer to the older
+audit and do not match the current file.
+
 Written 4 September 2026, against [codex-final.md](codex-final.md). Every finding was checked
 before it was acted on, because an audit is evidence and not a verdict, and two of the eleven
 turned out to need arguing with rather than fixing. The tree it left behind passes 288 gates and
