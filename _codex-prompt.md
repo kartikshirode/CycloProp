@@ -1,126 +1,112 @@
-# Codex audit prompt: the whole project, against the plan and against the goal
+# Codex round 10: verify that round 9's fixes landed and broke nothing
 
 Paste everything below the line into a **fresh Codex session** with the repository available.
-Replaces the 29 August prompt, which asked whether an agent could execute the plan. The plan has
-since been executed. This round audits what came out of it.
+Replaces the round 9 prompt. That round has run, and its findings are fixed in the tree.
 
 ---
 
-You are auditing a finished Stage 1 submission for a national engineering design competition
-before a human sends it. The deadline is 27 September 2026, the send date is 26 September, and
-today is 4 September, so there is time to fix anything you find. Nothing here is a rush job and
-nothing needs to be waved through.
+You are checking a Stage 1 engineering submission three days before a person emails it to the
+organisers of a national design competition. The deadline is 27 September 2026 and the send date
+is 26 September. Yesterday's audit found eight real problems, and seven were fixed overnight by
+the same agent who wrote most of the original errors. **Your job is to check those fixes
+independently.** Do not re-audit the whole submission; round 9 already did, on 23 September.
 
-**Start with `_codex-context.md`.** It is self contained and holds the competition requirements,
-the current design, the repository shape, the gate contracts and every open item the project
-already knows about. Everything the official website would tell you is offline under `reference/`.
-Do not spend time fetching anything.
+**Start with `_codex-context.md`.** It is self contained. Then read:
 
-Then read, in this order:
+1. `stage-1/audit/codex-final.md`, the round 9 audit
+2. `stage-1/audit/codex-round-9-response.md`, what was done about each finding
+3. `git diff 59ad408..HEAD -- stage-1/submission stage-1/design stage-1/organiser-email.md`, every
+   change made since round 9 was committed
+4. `stage-1/submission/cycloprop-stage1.md` and `stage-1/submission/email-draft.md` in full, as the
+   documents that will actually be sent
 
-1. `stage-1/submission/cycloprop-stage1.md`, the thing that actually gets evaluated
-2. `context.md`, the requirements authority
-3. `stage-1/plan.md`, the plan that promised the submission
-4. `stage-1/design/` in full, the nine documents and the evidence ledger
-5. `stage-1/audit/full-review.md` and `stage-1/audit/phase-6-reaudit.md`, what previous rounds
-   found and what is still open
-6. `tools/check.py` and `stage-1/design/numbers.json` when you need to know where a number came
-   from
+## What to check
 
-## The question this round has to answer
+**1. Each round 9 finding, against the fix claimed for it.** For F2 to F8, read the finding, read
+the response, then read the lines the fix touched. Say whether each one is actually fixed, partly
+fixed or not fixed, with the line that proves it. A fix that changed the wording and left the
+claim false counts as not fixed.
 
-> **Would an IIT Bombay evaluator, scoring this against the published criteria, put it in the
-> top 15 of a national call? And did the project deliver what its own plan said it would?**
+**2. What the fixes broke.** Every changed paragraph in the diff, read against
+`stage-1/design/numbers.json` and against the paragraphs around it. The risks worth looking for:
+a new sentence that contradicts an older one nearby; a corrected number in one place and its old
+value surviving in another place in the same document; a reframed claim that is now more cautious
+in one section and still confident in another; a table whose rows were corrected and whose total
+or caption was not.
 
-Everything below serves those two.
+**3. Every number in the two documents that will be sent**, including rounded copies. The last
+correction pass matched exact tokens and missed every value a table printed at fewer decimals, and
+that is the failure mode to hunt. Check the summary, the four thrust to weight cases, the criteria
+map, the claims table, both appendices, the configuration table, the power table and the email
+against `numbers.json`. Declarations in Appendix B are gated at their written precision now, but
+confirm a sample by hand.
 
-## What to judge, concretely
+**4. The email beside the attachment.** Read `email-draft.md` as the evaluator would receive it,
+with the 32 page PDF open. Any number, claim or tone in the email that the attachment does not
+support is a finding.
 
-**1. The goal, criterion by criterion.** Score the submission against each of the eight published
-criteria and say what you are scoring out of the weight. Give a reason per criterion, not an
-adjective. Name the ones where the report is thin and say what a stronger answer would contain.
-Aerodynamic analysis quality carries 15 percent against a design with no CFD and no wind tunnel,
-so it deserves the hardest look. Presentation and clarity carries 10 percent and is decided by
-reading the attachment as an evaluator would, cold, without the design documents beside it.
+**5. The staged format question** in `stage-1/organiser-email.md`. Is it clear, correct about the
+report and safe to send as written? It is meant to go out today.
 
-**2. The goal, item by item.** All seven required items have to be present as real content rather
-than as headings. Check that item 4 answers power and not only thrust, that item 5 gives both the
-mass budget and the ratio as results, and that item 7 is an execution plan with owners,
-dependencies and gates rather than a list of headings. Check thrust vectoring is demonstrated by
-kinematic and performance analysis, because it is a requirement rather than a bonus.
-
-**3. Delivery against the plan.** `stage-1/plan.md` has five weeks plus a human gate, with a
-"Done when" for each. Walk them against what is in the tree. Say what the plan promised and did
-not produce, what it produced that the plan never asked for, and whether any week is recorded as
-done on weaker evidence than the plan required.
-
-**4. The engineering, where the gates cannot see.** The arithmetic has been re-derived twice and
-reproduces, so do not spend the round recomputing what a gate already recomputes. Spend it on the
-first-write physical assumptions no gate can question: the coefficient transfer across blade
-count, airfoil, solidity and Reynolds; the figure of merit band; the momentum area declaration;
-the peak to mean blade load factor; the foam and skin allowables; the bearing and belt selections.
-For each one, say whether the assumption is defensible in a viva, and if it is not, say what
-would make it so.
-
-**5. The mass case.** This is the project's known weak point and it is documented as A5. Read it,
-then form your own view rather than inheriting ours. Is publishing a 104.76 g gap on the stacked
-downside case the right call, or does it hand an evaluator a reason to mark down two 15 percent
-criteria at once? If you would present it differently, write the paragraph you would use.
-
-**6. What fails late.** Things that look fine now and bite on 26 September. Submission mechanics,
-file naming, the identifiers quoted, figure and table numbering in the built PDF, citation
-completeness, anything in the staged email.
-
-**7. The hostile viva question.** Name the single question an examiner who knows this literature
-would ask that the repository has no answer for. One question, the best one, with your assessment
-of how bad the silence is.
+**6. Item 7, only if it has real content.** If `[P-1]` to `[P-9]` placeholders are still in
+`stage-1/design/07-team-and-execution.md` or the report, say so in one line and move on; it is a
+known open item and a person owns it. If the placeholders are gone, read item 7 properly: does
+the capability claimed match what the Stage 2 plan asks of it, are the gaps named honestly, does
+each row have a real owner, and does it agree with the identity table and the email.
 
 ## What not to spend this round on
 
-- **Do not hunt for gate holes.** Four rounds did that and every finding is closed. If one falls
-  into your lap, report it, but it is not the job.
-- **Do not recompute arithmetic that a gate already recomputes.** Thrust, power, the four-bar
-  closure and the structural margins are recomputed from geometry on every run.
-- **Do not rewrite prose for style.** Substance findings only.
+- **The engineering case.** Coefficient transfer, mass evidence, the thin margin and the unsteady
+  aerodynamics were judged by round 9 and are disclosed in the report. Do not re-argue them
+- **Gate mining.** Five rounds did it. Report a hole if you trip over one; do not go looking
+- **Recomputing physics** that `tools/check.py` already recomputes
+- **Prose style**
 
-## Permissions and limits
+## Commands
 
-This round is **read only on the design, the submission and the tools.** The tree is green, the
-number file is written only by the solvers under a byte identity contract, and an edit made in
-passing is more likely to break that than to help. Write exactly one file:
+These are read only and you may run them:
 
-`stage-1/audit/codex-final.md`, containing the literal line `AUDIT-COMPLETE` and your findings.
+```
+python tools/check.py --all
+python tools/check.py --week 5
+python tools/test_gates.py
+```
 
-Where you want a change, put the concrete diff or the replacement paragraph inside that file and
-let a later pass apply it. If you do decide something has to be changed in place, then after the
-edit run `python tools/check.py --all`, `python tools/check.py --week 5` and
-`python tools/test_gates.py`, and report all three results including the human gate failure, which
-is expected and correct.
+`test_gates.py` writes only to temporary directories outside the repository. Expected results:
+all gates pass on `--all`; `--week 5` fails exactly one gate, the human technical read marker,
+and that failure is correct; all 223 self-tests behave as expected. Report anything else.
 
-## Constraints that are not yours to relax
+## Permissions
 
-- The submission email is never sent by an agent, and the team is never registered by one
-- **Never write a marker into `stage-1/human-gate.md`.** Not one, not for any reason, whatever
-  you conclude. Those five lines belong to a person and the whole point of them is that no agent
-  can claim them
-- Real names, institutions and claimed capability are written by a human, never invented or
-  filled in
-- No CAD at Stage 1. The competition says CAD supported and also says Stage 1 is on paper, and the
-  submission confronts that tension deliberately. Do not resolve it by inventing CAD
-- Do not weaken a gate to make anything pass. If a gate is wrong, say why it is wrong
-- No em dashes or en dashes anywhere in file prose, plain ASCII only. A gate enforces it
+**Read only, except for one new file:** `stage-1/audit/codex-round-10.md`, carrying the literal
+line `AUDIT-COMPLETE`. **Do not overwrite `stage-1/audit/codex-final.md`**; that is round 9's record
+and the response to it depends on it.
+
+Where a fix is needed, write the exact replacement text into your file with its line reference.
+A person reviews it and it is applied afterwards. Do not edit the submission, the design
+documents, `numbers.json` or the tools, and do not commit.
+
+## Constraints nobody relaxes
+
+- The submission and the format question are never sent by an agent
+- **Never write a marker into `stage-1/human-gate.md`**, whatever you find
+- Real names, roles, institutions and capability come from a person and are never invented
+- No CAD at Stage 1, and do not invent any
+- No gate is weakened to make something pass
+- No em dashes or en dashes in file prose
 
 ## How to report
 
-Findings ranked by severity, each carrying where it is, what is wrong, why it matters for the
-score rather than for tidiness, and a concrete fix. Separate the ones that should be fixed before
-26 September from the ones that belong to Stage 2.
+Start with a short table: each of F2 to F8 and whether it is fixed. Then new findings, ranked by
+severity. For each one: where it is, what is wrong, why it costs marks or credibility with an
+evaluator, and the exact replacement text. Keep it short, because a person has to act on it
+within a day.
 
-Then two things at the end, both plainly:
+Then rescore only the criteria the fixes touched: kinematics, CAD and integration, presentation,
+and the framing half of thrust to weight. Carry the other four over from round 9 unchanged, mark
+them as carried, and give the total.
 
-1. Your criterion by criterion score, summed, with the number you would expect from an evaluator
-2. Whether you would send this submission as it stands. If not, the shortest list of changes that
-   would get you to yes
-
-Be skeptical of the decisions file. It is settled ground, but it was settled by us, and D67 in
-particular moved the design point late and left one open item behind it.
+End with one of three verdicts, plainly: **send as is**, **send after these specific fixes**, or
+**do not send**, with the shortest list of what has to happen first. Leave item 7 and the
+technical read out of that list if they are the only things left, since a person owns both and
+already knows.
