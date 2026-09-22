@@ -567,3 +567,35 @@ open, which does not change the work but does change how thin a 0.8 percent marg
 headline requirement feels. And no page limit is published anywhere, checked directly this time
 across the rules, the FAQ, the structure text and the problem statement, so the question at the
 end of the staged email is the only route to one.
+
+
+## 23 September 2026, round 9 and a night of rounded numbers
+
+Nineteen days since the last commit and three to the send date. Codex ran a round against the
+competition and scored it 60, and every one of its eight findings held up when I checked it.
+
+The one that stung was the criteria map. "Four cases, all clearing the limit", in the row an
+evaluator reads first for a 15 percent criterion, directly under a table showing three of four
+miss. That sentence survived D67, D70 and two audits of my own. It is the kind of error that makes
+a reader stop trusting the rest, and it was sitting in the one table built to be read by someone
+scoring the report.
+
+The mechanism story is worse than the error. On 4 September I built a ratchet for retired values
+and said the class was closed. It was not. The D70 resync I wrote the same day matched exact
+tokens, so every table that printed 2.1569 as 2.157, or 677.91 as 678 g, kept the old number, and
+the ratchet could not flag what it had never been told was retired. The whole configuration table
+in `01-configuration.md` was stale. So were four rows of the radius sweep, and the report's own
+comparison table, and a "wins by 36 percent" that the arithmetic says is 23.
+
+What found those was a near miss scan: every multi-decimal number in the prose, checked against
+every stored value, printing the ones that sit close without matching. It is noisy and it is not a
+gate. It found in ten minutes what three audits had not. It is in the round 9 response so it runs
+again after the team facts go in.
+
+The declaration gate was the other real fix. A 2 percent tolerance on a machine readable copy was
+always the wrong rule, and it took a stale 2.501 against 2.5458 to show it. Declarations are held
+to the precision they are written at now, and 319 of 324 already were.
+
+Three things only Kartik can do before 26 September. The team facts, which make item 7 a section
+rather than a form. The format question, which is staged as its own email and needs sending today.
+And the read.

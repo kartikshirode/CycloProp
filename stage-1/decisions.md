@@ -2054,3 +2054,38 @@ number in those is the record working correctly.
 **Where it stands.** 288 gates pass on the cumulative tree and 221 self-tests behave as expected.
 Week 5 fails on the human gate alone, with `TECHNICAL-READ-COMPLETE` the only marker outstanding.
 The report is 30 pages.
+
+
+## D71: the attachment says what the result is, and declarations match as written
+
+Taken 23 September 2026, answering the round 9 audit now in [audit/codex-final.md](audit/codex-final.md).
+Nothing in `numbers.json` moved. Everything in this entry is about what the documents say.
+
+**The report frames the thrust to weight result as a preliminary nominal pass with an open
+compliance risk.** The design point clears 2.5 by 0.8 percent on a mass estimate that is not
+accurate to 0.8 percent, and all three downside cases miss. The report used to add that the
+stacked case clears a declared floor of 2.0. That floor is this project's own, set in D67 after
+the 2.5 rule on the downside cases broke, and offered to an evaluator it reads as a target moved
+after the design failed it. It is gone from the evaluator facing text. It stays in
+`tools/check.py` and the design documents as a screen, where it stops a future edit from quietly
+publishing a much worse stacked case. The report says instead that the project set out to hold
+every downside case to 2.5, that a correction broke that, and that Stage 2 treats 658.48 g on the
+conservative column as a gate. This supersedes the reporting half of D67 and leaves its gate
+half alone.
+
+**A declaration matches at the precision it is written.** `check_declared_numbers` compared at
+the 2 percent display tolerance, and two superseded values sat inside it in four blocks for three
+weeks. A declaration is a machine readable copy, so 2.501 claims three decimals and is held to
+three. Five of 324 declarations failed the stricter rule, and they were those two values.
+
+**The page limit question is asked before the submission, not inside it.** D57 put it at the end
+of the submission email, where the answer would arrive after there was time to act on it. It is
+its own staged email now, in `organiser-email.md`, with a cut order if the answer is under 32
+pages.
+
+**The report carries a reference list.** Eight numbered works and a locator table for twelve
+borrowed numbers, built only from bibliographic data the repository holds. Nothing guessed.
+
+**Where it stands.** 289 gates pass on the cumulative tree and 223 self-tests behave as expected.
+Week 5 fails on the human gate alone. The report is 32 pages. Item 7 still has no team facts in
+it, which is what `ROSTER-CONFIRMED` in the marker file says it should have.
