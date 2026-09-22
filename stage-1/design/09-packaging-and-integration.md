@@ -165,7 +165,7 @@ Electrical, to the vehicle:
 
 | Item | Definition |
 | --- | --- |
-| Power in | 8S pack, 516.6 W at the module boundary including actuators and controller |
+| Power in | 8S pack, 518.0 W at the module boundary including actuators, controller and the regulator loss |
 | Motor phases | three, motor to ESC, inside the module |
 | ESC signal | one channel, throttle, sets rotor speed and therefore thrust magnitude |
 | Actuator signal | one channel, phase command, driving both servos in parallel |

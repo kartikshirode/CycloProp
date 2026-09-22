@@ -7,7 +7,7 @@ Short version. The module weighs 687.91 g nominal and 775.74 g in the conservati
 17.0 N that is a thrust to weight of 2.5191, which clears the 2.5 requirement. Stacking the low
 thrust coefficient on the conservative mass gives 2.1221, which does not, and closing that
 would take 117.26 g out of the conservative column. The internal 2.75 target from D17 is not
-met either and its gap is 164.6 g. D67 is where the design point and six envelope lines moved;
+met either and its gap is 177.1 g. D67 is where the design point and six envelope lines moved;
 this document is the budget after that.
 
 ## Mass budget

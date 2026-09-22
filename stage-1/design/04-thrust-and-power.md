@@ -134,7 +134,8 @@ The full module power chain:
 | electrical power at the ESC input | 508.6 W | motor input over 0.95 |
 | actuator draw | 6.0 W | two servos holding against residual link load |
 | controller draw | 2.0 W | offset controller board |
-| module electrical power | 516.6 W | the last three above |
+| regulator conversion loss | 1.4118 W | board and servo rail through a 0.85 step down |
+| module electrical power | 518.0 W | the last four above |
 
 Tare sits at the rotor shaft, before the transmission, which is why it is added to aerodynamic
 power and not to electrical power. Actuator and controller draw sit outside the drive chain
@@ -226,7 +227,7 @@ times 0.75 is 19.5 A against 19.29 A. Both still hold, narrowly.
 Below 0.7433 neither exit is open, and that has not changed. Backing the design point down a
 row does not work: the stacked case needs 20.0272 N of design thrust to hold 2.5 and no row of
 the sensitivity table comes near it from below. A larger motor does not work either, because
-motor mass is a power class item and the conservative column is already 104.8 g over the 2.5
+motor mass is a power class item and the conservative column is already 117.3 g over the 2.5
 ceiling rather than under it.
 
 That sounds worse than it is, and the reason is the duty. 0.7433 is the fraction of a 180
@@ -277,8 +278,9 @@ one no gearing can slide.
 
 Stacked conservative thrust to weight rises all the way down the radius range and peaks at 100
 mm, at 2.1745, where no drive fits. The best row a drive actually covers is 17 N at 110 mm, and
-that is the row the design freezes on per D30. The sweep column for it reads 2.157, and on the
-week 4 refined budget the same row is **2.1221**. Only one of the four cases clears 2.5: 2.5191
+that is the row the design freezes on per D30. The sweep column for it reads **2.1221**, the
+same figure the week 4 refined budget gives, because the sweep row at the frozen radius carries
+that budget rather than an estimate of its own. Only one of the four cases clears 2.5: 2.5191
 at the design point, against 2.3931 and 2.2339 on each downside alone and 2.1221 stacked. That
 is the change D67 made and `05-mass-and-tw.md` sets it out row by row, along with the 117.26 g
 that would carry the stacked case back over the requirement.
@@ -300,7 +302,7 @@ that would carry the stacked case back over the requirement.
 - performance.momentum_area_m2 = 0.063888
 - performance.induced_velocity_ms = 10.4215
 - performance.inflow_ratio = 0.3871
-- performance.blade_load_peak_to_mean = 2.501
+- performance.blade_load_peak_to_mean = 2.5458
 - pitch.side_force_tilt_deg = 9.078
 - pitch.peak_lateral_force_N = 9.8252
 - performance.motor_input_W = 483.158

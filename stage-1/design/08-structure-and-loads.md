@@ -337,7 +337,7 @@ otherwise.
 - structure.blade_load_factor = 4.0
 - structure.pitch_link_load_N = 144.19
 - structure.pitch_link_allowable_N = 474.074
-- structure.pitch_link_margin = 3.3015
+- structure.pitch_link_margin = 3.2878
 - structure.carrier_phase_jitter_deg = 0.1432
 - structure.pitch_bearing_balls = 7
 - structure.pitch_bearing_ball_mm = 1.5875

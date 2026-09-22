@@ -52,13 +52,13 @@ mm. Largest dimension is that width or the span, whichever wins.
 
 | Layout | Per rotor radius | Per rotor thrust | rpm | Reynolds | Blade area | Largest dimension | Module mass | Nominal T/W | Conservative T/W |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| single, 3 blades | 110 mm | 17.0 N | 2337 | 130,300 | 0.0632 m2 | 290 mm | 637 g | 2.720 | 2.163 |
-| two rotors | 80 mm | 8.5 N | 3124 | 92,100 | 0.0669 m2 | 400 mm | 786 g | 2.204 | 1.752 |
-| three rotors | 65 mm | 5.7 N | 3864 | 75,200 | 0.0663 m2 | 490 mm | 985 g | 1.759 | 1.397 |
+| single, 3 blades | 110 mm | 17.0 N | 2337 | 130,300 | 0.0632 m2 | 290 mm | 647 g | 2.677 | 2.128 |
+| two rotors | 80 mm | 8.5 N | 3124 | 92,100 | 0.0669 m2 | 400 mm | 796 g | 2.177 | 1.729 |
+| three rotors | 65 mm | 5.7 N | 3864 | 75,200 | 0.0663 m2 | 490 mm | 995 g | 1.742 | 1.382 |
 
 Every column in that table is the week 2 mass envelope, because the comparison had to run
 on one common build-up and the other two layouts have no refined budget behind them. On
-the week 4 budget the winning row is 2.1221 rather than 2.163, and the losing rows do not
+the week 4 budget the winning row is 2.1221 rather than 2.128, and the losing rows do not
 move at all. See D47.
 
 One caveat belongs on that table and it runs in the cluster's favour, which is where every
@@ -67,7 +67,7 @@ carries the correction, because the cluster rows were never rebuilt on it. Three
 six lines are per-rotor ones, worth 32.4 g each time a rotor is added, so correcting the
 cluster rows the same way puts at least 65 g on the two rotor figure and at least 97 g on
 the three rotor one, before the frame and harness lines that grow with packaged width. That
-moves them to roughly 851 g and 1082 g, or 2.04 and 1.60 on the nominal metric. The single
+moves them to roughly 861 g and 1092 g, or 2.01 and 1.59 on the nominal metric. The single
 rotor's margin widens rather than narrows, so the row it wins on here is the pessimistic one.
 
 The single rotor wins the first metric by 23 percent and every other metric as well. It is

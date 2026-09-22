@@ -17,7 +17,7 @@ is reproducible rather than asserted.
 Passive cyclic pitch, one four-bar per blade, and all three sharing a common offset pivot. That
 is the architecture week 2 screened in and this week confirms it. The reason is mass: per-blade
 actuators would put three servos and three controllers inside a module whose conservative mass
-already sits 104.8 g over the 2.5 ceiling since D67, and there is nothing to take them out of.
+already sits 117.3 g over the 2.5 ceiling since D67 and D70, and there is nothing to take them out of.
 
 The topology is Kellen's, taken off a vehicle he built rather than invented here. His printed
 pages 13 and 55 name four fixed lengths. L1 is the rotor radius. L2 is an offset link from the
@@ -163,7 +163,7 @@ mechanism and would not for a fitted curve.
 **Phase delay 7.75 degrees.** The pitch peak lags the offset direction by that much. It is not
 a free parameter and it is not the aerodynamic tilt further down; it falls out of the four-bar,
 because the offset pivot direction and the horn angle each contribute a term and the two are 90
-degrees apart in phase. It was 11.00 degrees on the link set week 3 picked, and the corrected
+degrees apart in phase. It was 11.00 degrees on the link set week 3 picked, and the corrected <!-- allow: the week 3 value named as history, the current one is in the heading -->
 sweep in D67 brought it down.
 
 **Residual against the harmonic it approximates.** Fitting `40*cos(psi - 90 - 7.75)` leaves an

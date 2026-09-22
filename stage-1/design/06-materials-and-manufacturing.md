@@ -240,7 +240,7 @@ and once as a per line growth rate over the top of it.
 - structure.centrifugal_load_overspeed_N = 301.192
 - structure.blade_combined_margin = 3.0008
 - structure.blade_combined_margin_overspeed = 2.0839
-- structure.pitch_link_margin = 3.3015
+- structure.pitch_link_margin = 3.2878
 - structure.blade_wrinkle_stress_MPa = 215.2638
 - structure.blade_allow_skin_Nm = 25.2528
 - structure.blade_allow_spar_Nm = 63.1857

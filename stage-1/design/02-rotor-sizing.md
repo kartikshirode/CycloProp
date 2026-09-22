@@ -124,11 +124,11 @@ lower-power rotor with heavier blades and a heavier shaft, and power alone canno
 
 | Radius | rpm | Ideal power | Aero power | Rotor torque | Motor input | Belt | Module mass | Conservative T/W |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 100 mm | 2828 | 194.9 W | 373.7 W | 1.402 Nm | 531.5 W | none fits | 662 g | 2.1745 |
-| 110 mm | 2337 | 177.2 W | 339.7 W | 1.542 Nm | 483.2 W | 4.25 to 1 | 678 g | 2.157 |
-| 120 mm | 1964 | 162.4 W | 311.4 W | 1.683 Nm | 442.9 W | 4.625 to 1 | 696 g | 2.099 |
-| 130 mm | 1673 | 149.9 W | 287.5 W | 1.823 Nm | 408.9 W | 5.0 to 1 | 717 g | 2.038 |
-| 140 mm | 1443 | 139.2 W | 266.9 W | 1.963 Nm | 379.6 W | 5.375 to 1 | 739 g | 1.974 |
+| 100 mm | 2828 | 194.9 W | 373.7 W | 1.402 Nm | 531.5 W | none fits | 672 g | 2.1745 |
+| 110 mm | 2337 | 177.2 W | 339.7 W | 1.542 Nm | 483.2 W | 4.25 to 1 | 688 g | 2.1221 |
+| 120 mm | 1964 | 162.4 W | 311.4 W | 1.683 Nm | 442.9 W | 4.625 to 1 | 706 g | 2.0661 |
+| 130 mm | 1673 | 149.9 W | 287.5 W | 1.823 Nm | 408.9 W | 5.0 to 1 | 727 g | 2.0068 |
+| 140 mm | 1443 | 139.2 W | 266.9 W | 1.963 Nm | 379.6 W | 5.375 to 1 | 749 g | 1.9447 |
 
 Power times radius is constant across the sweep, which is the 1 over R behaviour the family
 predicts, and Reynolds is 130,300 on every row because it depends on thrust and not on size.
@@ -151,7 +151,7 @@ So the radius is chosen at 110 mm because that is the smallest radius a named dr
 continuously, not because it is where the physics wants to be. That is a real finding and it
 points at the cheapest fix available.
 
-**Second candidate: 120 mm.** It costs 0.058 of conservative thrust to weight and buys 40 W
+**Second candidate: 120 mm.** It costs 0.056 of conservative thrust to weight and buys 40 W
 less motor input, 373 rpm less rotor speed, and a drive at 85 percent of its continuous power
 instead of 93. It is the row to pick if week 3 finds the linkage cannot be packaged at 110 mm,
 and it is not free, because link lengths, offset geometry and gearing all move with radius and
@@ -252,7 +252,7 @@ an assumed section. Eight is what `mass_envelope_g` gives, and the 95.6 g of gro
 those eight carry is the correct figure.
 
 The internal 2.75 target from D17 is further away than it was and is still not claimed. It
-needs the conservative column at 598.6 g against the 775.7 g it holds, so 164.6 g. Week 4 took
+needs the conservative column at 598.6 g against the 775.7 g it holds, so 177.1 g. Week 4 took
 7.7 g off and stopped, because every remaining line is a drawn section or a catalogue part and
 trimming one to reach a number is what D33 exists to prevent. Nothing here has been trimmed to
 reach a number since.
