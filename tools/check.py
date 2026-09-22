@@ -432,6 +432,24 @@ def states_value(rel, value, tol=TOL, keywords=()):
     return False
 
 
+def declared_as_written(raw, actual):
+    """A declaration is a machine readable copy of a stored value, so it has to match at the
+    precision it is written, not at the 2 percent a person may round prose to.
+
+    It used to be held at DISPLAY_TOL, and that let two stale copies sit in four
+    declaration blocks for three weeks: a peak to mean of 2.501 against a stored 2.5458,
+    1.76 percent out, and a pitch link margin of 3.3015 against 3.2878, 0.42 percent out.
+    Both were superseded values, not roundings, and a tolerance cannot tell those apart. The
+    written precision can. 2.501 claims three decimals, and to three decimals the stored
+    figure is 2.546."""
+    if isinstance(actual, bool) or not isinstance(actual, (int, float)):
+        return False
+    dp = len(raw.split(".")[1]) if "." in raw and "e" not in raw.lower() else 0
+    if "e" in raw.lower():
+        return close(float(raw), actual, TOL)
+    return abs(float(raw) - actual) <= 0.5 * 10 ** -dp + 1e-9
+
+
 def check_declared_numbers(rel, data):
     p = ROOT / rel
     if not p.is_file():
@@ -448,12 +466,13 @@ def check_declared_numbers(rel, data):
                       f"{len(decls)} declarations covering {len(distinct)} key(s)")
     bad = []
     for d in decls:
-        key, val = d.group(1), float(d.group(2))
+        key, raw = d.group(1), d.group(2)
+        val = float(raw)
         actual = dotted(data, key)
         if actual is None:
             bad.append(f"{key} not in numbers.json")
-        elif not close(val, actual, DISPLAY_TOL):
-            bad.append(f"{key} says {val}, numbers.json has {actual}")
+        elif not declared_as_written(raw, actual):
+            bad.append(f"{key} says {raw}, numbers.json has {actual}")
     return report(not bad, f"{rel} numbers agree with numbers.json",
                   "; ".join(bad[:4]) if bad else f"{len(decls)} checked")
 
@@ -840,8 +859,32 @@ RETIRED_VALUES = [
     ("67930", "the bill of materials total before D70"),
     ("39130", "the bought subtotal before D70"),
     ("2.33", "the servo torque margin before the gear ratio was corrected to 1.982"),
+    # Found by the 23 September audit, every one a live copy the gates let through.
+    ("677.9", "the nominal module mass before D70, rounded"),
+    ("763.2", "the conservative module mass before D70, rounded"),
+    ("516.6", "module electrical power before the regulator loss was counted, rounded"),
+    ("2.501", "the blade peak to mean before the azimuthal model was rerun on the solved "
+              "schedule"),
+    ("3.3015", "the pitch link margin before the horn allowable was corrected"),
+    ("58.58", "the minimum transmission angle on the link set week 3 picked, before D67"),
+    ("0.978", "the aerodynamic share of the side force tilt before D67"),
+    ("11.00", "the linkage phase delay on the week 3 link set, before D67"),
+    # Rounded copies the D70 resync missed, because it matched exact tokens only.
+    ("104.8", "the stacked closing mass before D70, rounded"),
+    ("2.157", "the stacked thrust to weight before D70, rounded"),
+    ("2.720", "the selected configuration's nominal ratio before D70"),
+    ("2.163", "the selected configuration's stacked ratio before D70"),
+    ("2.204", "the two rotor nominal ratio before D70"),
+    ("1.752", "the two rotor stacked ratio before D70"),
+    ("1.7516", "the two rotor stacked ratio before D70"),
+    ("1.759", "the three rotor nominal ratio before D70"),
+    ("1.397", "the three rotor stacked ratio before D70"),
+    ("1.3969", "the three rotor stacked ratio before D70"),
+    ("164.6", "the gap to the 2.75 internal target before D70"),
+    ("164.62", "the gap to the 2.75 internal target before D70"),
 ]
 LIVE_DOCS = DESIGN_DOCS + ["stage-1/submission/cycloprop-stage1.md",
+                           "stage-1/submission/email-draft.md",
                            "stage-1/design/evidence-ledger.md",
                            "stage-1/literature.md", "handoff.md", "context.md"]
 

@@ -17,6 +17,7 @@ Exit 0 means every case behaved as expected.
 
 import json
 import math
+import re
 import shutil
 import subprocess
 import sys
@@ -2054,6 +2055,40 @@ def a_retired_number_that_means_something_else(root, data):
 
 case("a retired number with a written reason beside it passes", True, upto=5, week=5,
      tweak=a_retired_number_that_means_something_else)
+
+
+def _redeclare(root, how):
+    """Rewrite the first multi-decimal declaration in the thrust and power document."""
+    p = root / "stage-1" / "design" / "04-thrust-and-power.md"
+    lines = p.read_text(encoding="utf-8").split("\n")
+    for i, line in enumerate(lines):
+        m = re.match(r"^(\s*-\s*[A-Za-z0-9_.]+\s*=\s*)(-?\d+\.(\d{3,}))\s*$", line)
+        if m and float(m.group(2)) != 0:
+            lines[i] = m.group(1) + how(m.group(2), len(m.group(3)))
+            p.write_text("\n".join(lines), encoding="utf-8")
+            return
+    raise AssertionError("no multi-decimal declaration to rewrite")
+
+
+def declaration_stale_inside_display_tolerance(root, data):
+    """The 23 September audit's find. 2.501 declared against a stored 2.5458 is 1.76 percent
+    out, inside the 2 percent a person may round prose to, and it is not a rounding. It is a
+    value from before the model was rerun, written at three decimals it no longer has."""
+    _redeclare(root, lambda raw, dp: f"{float(raw) * 1.015:.{dp}f}")
+
+
+case("a declaration stale by less than the display tolerance is rejected", False, upto=2,
+     week=2, tweak=declaration_stale_inside_display_tolerance)
+
+
+def declaration_honestly_rounded(root, data):
+    """The same gate must still let a person write fewer places than are stored. Rounding
+    to two decimals claims two decimals, and to two decimals it is right."""
+    _redeclare(root, lambda raw, dp: f"{round(float(raw), 2):.2f}")
+
+
+case("a declaration rounded honestly to fewer places passes", True, upto=2, week=2,
+     tweak=declaration_honestly_rounded)
 
 
 # R63. Week 1's gate was five heading strings, so a settled section could lose the argument
