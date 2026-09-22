@@ -34,14 +34,15 @@ answers.
 
 The module is a single cycloidal rotor with three blades, passive four-bar cyclic
 pitch and thrust vectoring by rotation of the pitch offset. Design thrust is 17.0 N
-against the 10 N requirement, and thrust to weight is 2.5563 at the design point,
-above the 2.5 target. It falls to 2.1569 when the conservative mass budget and the
-low thrust coefficient are applied together, and the report says what closing that
-would take rather than leaving it implied.
+against the 10 N requirement. On the current mass estimate thrust to weight is
+2.5191 at the design point, a preliminary pass on the 2.5 requirement by 0.8
+percent. With the conservative mass budget and the low thrust coefficient applied
+together it falls to 2.1221, and the report sets out the 117.26 g that closing it
+would take and how Stage 2 would verify the mass rather than estimate it.
 
-One question, if it is easy to answer. The problem statement does not state a page
-limit or a file naming convention for the Stage 1 report. If either is wrong for your process, we
-will resend in whatever form you prefer.
+We found no page limit or file naming convention in the published rules for the
+Stage 1 report. If the report should be in a different form, we will resend it
+promptly in whatever form you prefer.
 
 Thank you for organising the challenge.
 
@@ -53,6 +54,10 @@ VPKBIET
 
 ## Before you press send
 
+0. **Send the format question first, as its own email, now.** It is staged in
+   [../organiser-email.md](../organiser-email.md). Asking it inside this email, on 26 September,
+   leaves one day to act on the answer, and a page limit would mean cutting a 32 page report.
+   The line near the end of the draft above only offers a resend and asks nothing
 1. **Keep both identifiers**, in the subject line and in the body. The site provides a Competition
    ID and a Team ID, not a separate registration reference. They are `REGISTRATION-CONFIRMED` in
    `../human-gate.md` and correspond to `[P-7]` in the team form
@@ -71,11 +76,15 @@ VPKBIET
 
 ## What the email deliberately does not do
 
-It does not claim a result nobody has measured. The three numbers in it are the ones the report
-leads with and each one is recomputed by the gate script from the stored geometry rather than
-typed. It does not describe the design as validated, tested or CAE supported, because none of
+It does not claim a result nobody has measured. The four numbers in it are the ones the report
+leads with, and each one is recomputed by the gate script from the stored geometry and mass
+lines rather than typed. It calls the design case a preliminary pass by 0.8 percent because that
+is what it is, and a message that said only "above the 2.5 target" would be read against an
+attachment that says the margin is not one to rely on. It does not describe the design as validated, tested or CAE supported, because none of
 those is true at Stage 1 and the report says so on its second page.
 
-The page limit question is asked once, at the end, and framed so it needs no reply. It was
-worth asking in early September and it was not sent then, so asking it beside the submission is
-the last cheap chance to get the format right.
+The page limit question is not asked here any more. It was worth asking in early September and
+was not sent then, and the 23 September audit pointed out what that costs: asked beside the
+submission, the answer arrives after there is time to use it. It is staged as its own short
+email in `../organiser-email.md`, to go as soon as possible, and this draft keeps only an offer
+to resend.
