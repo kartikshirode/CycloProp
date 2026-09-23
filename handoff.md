@@ -52,7 +52,7 @@ clear. See D58, D60 to D63 and D66, and "What is left of week 5" below.
    [week-5.md](stage-1/audit/week-5.md) audits the preparation pass the same way
 7. **[stage-1/submission/cycloprop-stage1.md](stage-1/submission/cycloprop-stage1.md)** is the
    assembled report and [email-draft.md](stage-1/submission/email-draft.md) is the staged mail.
-   Both carry `[P-n]` placeholders and neither is finished until a person fills them
+   The team facts went into both on 23 September and no placeholder remains
 
 `brief.md`, `_shared-timeline.md` and `_plan-review-round1.md` are earlier work kept as history.
 They were written from page summaries and contradict `context.md` in several places. When they
@@ -131,6 +131,12 @@ before it is an aerodynamic one. See D49 and D68.
 
 Required item 7, the submission, the PDF and the staged email are done. What is left is the
 human gate, the real team facts, and one short run to fold them in.
+
+**Team facts, 23 September.** Item 7, the identity table and both emails now carry the roster
+(Kartik Shirode, Mandar Wagh, Aditya Shilalkar, all B.Tech third year, programmers), 5 to 7 hours
+per member per week, a workshop and a 3D printer, and Kartik Shirode as sender. The tools and the
+Stage 2 owners were left to the plan and are set in D72; the team confirms the owners before
+3 October. No `[P-n]` or `[SENDER NAME]` placeholder remains in anything that is sent.
 
 **Round 10, 23 September.** Codex checked the round 9 fixes and scored 65. It found two more
 errors, a wrong year on reference 8 and a vector map caption that blamed the whole tilt on the
@@ -304,8 +310,8 @@ positional so the same text in the body still fails. The 1 September hardening p
   been the binding line since D67 moved it off current, no lower thrust row holds the stacked
   case, and no larger motor fits the mass. A dynamometer run is the first drive
   gate in Stage 2. See D61
-- **Three-person roster at VPKBIET**, with 5 hours per week recorded. Member roles, programmes and
-  prior work still need to be written into item 7
+- **Three-person roster at VPKBIET**, all programmers, 5 to 7 hours per member per week. No
+  mechanical member yet; the plan fills the two open places before the Stage 2 build
 - **The two scripts had a hand resolved run order and now it is gated.** Running them backwards
   leaves `structure.pitch_link_load_N` holding the value from before the blade moved while
   `pitch.peak_link_force_N` carries the new one, and `check_solver_order` reads that gap. Note

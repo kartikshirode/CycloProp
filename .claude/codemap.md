@@ -248,7 +248,8 @@ must stay the first heading containing "criteri" and its table must sit directly
 than group totals: group sums exist in no file and eight of them passed the coverage audit only by
 landing within 2 percent of an unrelated stored mass. See D56. One allow comment is used in the
 whole document, on published side force angles, and it hides 3 of the 4 numbers the ceiling
-permits. `[P-1]`, `[P-2]` and `[P-7]` in the identity table are for a person.
+permits. The identity table carries the team facts supplied on 23 September, including the
+contact line, and no build instruction: page 1 is read by the evaluator.
 
 ### stage-1/submission/cycloprop-stage1.pdf
 The built PDF, committed because check.py reads it at week 5 and the attachment is what gets
@@ -269,25 +270,26 @@ fixed.
 
 ### stage-1/submission/email-draft.md
 The staged submission email. Drafted, never sent, per D5. Carries the recipient, a subject line,
-the attachment name, the three team placeholders, the registration reference placeholder and a six
-step list of what a person does before pressing send.
+the attachment name, the team, both IDs, the sender and a short list of what a person does before
+pressing send. No placeholders remain as of 23 September.
 Used by: check.py at week 5, which requires the file and greps it for the attachment name, the
 organiser address, the word attachment and a subject line
-Gotcha: the registration reference is `[REGISTRATION REFERENCE]` in both the subject and the body
-and it is also `[P-7]`. The two live organiser questions from stage-1/organiser-email.md moved
-here, framed so they need no reply.
+Gotcha: the format question moved back out to stage-1/organiser-email.md on 23 September, per
+D71, and this draft only offers a resend. Its numbers must match the attachment by hand; the
+retired values gate covers it through LIVE_DOCS.
 
 ### stage-1/design/07-team-and-execution.md
-Required Stage 1 item 7, written in the week 5 preparation pass. Nine placeholders tagged `[P-1]`
-to `[P-9]` in one table at the top, the roster section, the capability table against the problem
-statement's seven preference areas, four stated gaps, the Stage 2 schedule across all 11 required
-items with a closing gate each, the Stage 2 gates and the route through the missing capability.
+Required Stage 1 item 7. A status table for the nine tracked fields, the roster of three with
+roles and programmes, the capability table against the problem statement's seven preference
+areas, four stated gaps, a tool table on free licences, the Stage 2 schedule across all 11
+required items with an owner and a closing gate each, and the route through the missing
+capability. Team facts filled on 23 September; tools and owners were left to the plan.
 Used by: the week 5 submission, which condenses it into item 7
 Gotcha: needs the headings Team capability, Execution plan and Stage 2, though the title alone
-satisfies two of the three, so the real constraint is D5 rather than the gate: no name,
-institution, qualification, tool licence or capability claim about a person may be written here.
-Claims in the file are about the Stage 1 work, which is checkable. Four of the nine placeholders
-are also week H markers and the table says which. See D55.
+satisfies two of the three, so the real constraint is D5 rather than the gate: no fact about a
+person beyond what the team supplied. Prior work was not supplied and is written as not claimed.
+Only OpenFOAM is verified installed; the other four tools are marked as planned installs. See D55
+and D72.
 
 ### tools/structure.py
 Week 4 solver. Integrates the NACA 0020 section from its ordinate polynomial, builds the blade

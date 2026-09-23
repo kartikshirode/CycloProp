@@ -2089,3 +2089,38 @@ borrowed numbers, built only from bibliographic data the repository holds. Nothi
 **Where it stands.** 289 gates pass on the cumulative tree and 223 self-tests behave as expected.
 Week 5 fails on the human gate alone. The report is 32 pages. Item 7 still has no team facts in
 it, which is what `ROSTER-CONFIRMED` in the marker file says it should have.
+
+
+## D72: item 7 carries the team, and the plan picks the tools and the owners
+
+Taken 23 September 2026, from facts Kartik Shirode supplied that day. Nothing in `numbers.json`
+moved.
+
+**The roster is three programmers**, all B.Tech third year at VPKBIET: Kartik Shirode as core
+programmer and sender, Mandar Wagh as programmer, Aditya Shilalkar as full stack programmer.
+Each commits 5 to 7 hours per week from 3 October. The team has a workshop and a 3D printer. No
+prior project work was supplied, so item 7 says none is claimed and the capability table drops
+its person column rather than filling it. The branch of study wasn't given and isn't written.
+
+**Item 7 leads with the gap it has.** Nobody on the roster claims mechanical, aerospace or
+fabrication experience, and the report says so before it says anything else about the team. The
+plan fills the two open places under the cap of five with mechanical or aerospace students
+before the Stage 2 build and asks a mechanical faculty member to mentor the build. Both are
+intentions and are written as intentions.
+
+**Tools were left to the plan.** Everything is on a free licence so no Stage 2 item waits on a
+seat: CadQuery for a solid model scripted from `numbers.json`, PyChrono for multibody, OpenFOAM
+v2412 for CFD, CalculiX for FEA and FreeCAD for drawings. OpenFOAM is the only one verified
+installed, on the Baramati cluster per `_compute.md`, and the other four are marked as planned
+installs. Scripted CAD was picked over a commercial modeller because it plays to a programming
+team and lets the mass properties feed the gate the same way the solvers do.
+
+**Owners were left to the plan too**, and they are assigned by load: Aditya Shilalkar on CAD,
+material and mass, drawings and the bill of materials; Mandar Wagh on multibody, FEA and drive
+selection; Kartik Shirode on CFD, thrust to weight and risk; all three on build and test. The
+team confirms them before 3 October.
+
+**Page 1 of the attachment lost a build instruction.** The identity section carried "rebuild the
+PDF after any source edit" and an attachment name, both notes to ourselves printed where the
+evaluator starts reading. The contact is a table row now.
+
