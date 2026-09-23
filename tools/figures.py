@@ -426,6 +426,7 @@ def fig_vector_map():
     rng = dotted(d, "pitch.vector_range_deg")
     auth = dotted(d, "pitch.phase_authority_deg")
     tilt = dotted(d, "pitch.side_force_tilt_deg")
+    delay = dotted(d, "pitch.phase_delay_deg")
     thrust = dotted(d, "performance.thrust_N")
 
     fig, (ax, bx) = plt.subplots(1, 2, figsize=(7.2, 3.3), layout="constrained",
@@ -474,7 +475,8 @@ def fig_vector_map():
                  fontsize=8)
 
     values = {"pitch.vector_range_deg": rng, "pitch.phase_authority_deg": auth,
-              "pitch.side_force_tilt_deg": tilt, "performance.thrust_N": thrust,
+              "pitch.side_force_tilt_deg": tilt, "pitch.phase_delay_deg": delay,
+              "performance.thrust_N": thrust,
               "vector_map.0.resultant_N": rows[0]["resultant_N"],
               "vector_map.2.resultant_N": rows[2]["resultant_N"],
               "vector_map.4.resultant_N": rows[4]["resultant_N"],
@@ -487,8 +489,9 @@ def fig_vector_map():
            f"load model being rotationally equivariant rather than a measured result: "
            f"turning the schedule and the inflow together turns the whole solution and "
            f"preserves its size. At zero command the resultant already sits "
-           f"{tilt:.3f} degrees off the offset direction, which is a lag in the "
-           f"aerodynamics and not a commanded tilt.")
+           f"{tilt:.3f} degrees off the offset direction: {delay:.2f} degrees from "
+           f"linkage phase delay and about {tilt - delay:.2f} from the aerodynamic model, "
+           f"not a commanded tilt.")
     return fig, values, cap
 
 

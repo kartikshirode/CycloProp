@@ -70,11 +70,12 @@
    "id": "fig-vector-map",
    "title": "Thrust vector map",
    "file": "figures/fig-vector-map.pdf",
-   "caption": "Thrust vector map. Left, the resultant at each phase command, spanning 120 degrees. Right, direction against command on a one to one line. The magnitude is flat at 17.0000 N across the sweep, and that is the load model being rotationally equivariant rather than a measured result: turning the schedule and the inflow together turns the whole solution and preserves its size. At zero command the resultant already sits 9.078 degrees off the offset direction, which is a lag in the aerodynamics and not a commanded tilt.",
+   "caption": "Thrust vector map. Left, the resultant at each phase command, spanning 120 degrees. Right, direction against command on a one to one line. The magnitude is flat at 17.0000 N across the sweep, and that is the load model being rotationally equivariant rather than a measured result: turning the schedule and the inflow together turns the whole solution and preserves its size. At zero command the resultant already sits 9.078 degrees off the offset direction: 7.75 degrees from linkage phase delay and about 1.33 from the aerodynamic model, not a commanded tilt.",
    "values": {
     "pitch.vector_range_deg": 120.0,
     "pitch.phase_authority_deg": 120.0,
     "pitch.side_force_tilt_deg": 9.078,
+    "pitch.phase_delay_deg": 7.75,
     "performance.thrust_N": 17.0,
     "vector_map.0.resultant_N": 17.0,
     "vector_map.2.resultant_N": 17.0,

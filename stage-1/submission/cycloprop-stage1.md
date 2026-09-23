@@ -293,7 +293,7 @@ is the single largest consumer of authority in the design.
 
 ![Blade pitch schedule from the solved four-bar, against the 40 degree sinusoid it is usually assumed to be. The mechanism is not sinusoidal and the residual is what the load model runs on, rms 1.1406 degrees, peak pitch delayed 7.75 degrees past the offset direction.](figures/fig-pitch-schedule.pdf)
 
-![Thrust vector map. Left, the resultant at each phase command, spanning 120 degrees. Right, direction against command on a one to one line. The magnitude is flat at 17.0000 N across the sweep, and that is the load model being rotationally equivariant rather than a measured result: turning the schedule and the inflow together turns the whole solution and preserves its size. At zero command the resultant already sits 9.078 degrees off the offset direction, which is a lag in the aerodynamics and not a commanded tilt.](figures/fig-vector-map.pdf)
+![Thrust vector map. Left, the resultant at each phase command, spanning 120 degrees. Right, direction against command on a one to one line. The magnitude is flat at 17.0000 N across the sweep, and that is the load model being rotationally equivariant rather than a measured result: turning the schedule and the inflow together turns the whole solution and preserves its size. At zero command the resultant already sits 9.078 degrees off the offset direction: 7.75 degrees from linkage phase delay and about 1.33 from the aerodynamic model, not a commanded tilt.](figures/fig-vector-map.pdf)
 
 # Estimated thrust and power requirement
 
@@ -797,8 +797,10 @@ project does not hold one it could check, and a guessed identifier would be wors
 7. Adams, Z., Benedict, M., Hrishikeshavan, V. and Chopra, I. Design, development, and flight
    test of a small-scale cyclogyro UAV utilizing a novel cam-based passive blade pitching
    mechanism. *International Journal of Micro Air Vehicles* 5(2), 2013, p. 145. Summary class
-8. Alsabri et al. *Aerospace* 13(9), article 765, 2025. Two dimensional URANS. Summary class,
-   not read here
+8. Alsabri, A. A. M., Pekovic, O., Mirkov, N., Simonovic, A. and Grbovic, A. Independent
+   effects of blade number and solidity on cyclorotor hover performance: a parametric CFD study
+   for design optimization. *Aerospace* 13(9), article 765, 2026.
+   https://doi.org/10.3390/aerospace13090765. Two dimensional URANS. Summary class, not read here
 
 Not read and not cited as evidence anywhere in this report: Ramsey, R. A., *Development and
 Flight Testing of a 25-Kilogram Quad-Cyclocopter*, MS thesis, Texas A&M University, 2022,
