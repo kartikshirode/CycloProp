@@ -229,7 +229,7 @@ Two allocations week 2 has to decide and state: whether the DYS XSD7A ESCs, abou
 
 ### Smaller findings that hold
 
-- **Peak blade thrust runs 3 to 4 times the cycle mean** on 2 and 3 bladed rotors, which a cycle-averaged coefficient hides entirely. Week 4 uses 4.0, the top of that range, until measured Heimerl data replaces it. Attributed to Alsabri et al., Aerospace 13(9):765, 2025, 2D URANS, and not yet read here
+- **Peak blade thrust runs 3 to 4 times the cycle mean** on 2 and 3 bladed rotors, which a cycle-averaged coefficient hides entirely. Week 4 uses 4.0, the top of that range, until measured Heimerl data replaces it. Attributed to Alsabri et al., Aerospace 13(9):765, 2026, 2D URANS, and not yet read here
 - **Coefficient conversion.** Blade-area to projected-area is a factor of (N/2)(c/R), which for 3 blades at c/R 0.66 is 0.99. The two conventions happen to coincide for this geometry, which is a coincidence of the shape and not an identity. Checked and correct. It also confirms the projected area 2R times span used as the momentum area cap
 - **Thicker airfoils help at every scale.** Kellen at UAV scale and Xisto at large scale both support NACA 0020, at a possible cost in peak thrust against power loading
 - **Vectoring offset angles.** Adams 2013 measured the resultant tilted 15 to 35 degrees in the direction of rotation depending on amplitude and rpm, Sirohi about 10 degrees, Benedict 30 degrees. The offset grows with pitch amplitude and varies with rpm, so it is a schedule and not a constant

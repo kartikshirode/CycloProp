@@ -99,7 +99,7 @@ For the target family (N = 3, c/R 0.66): factor = 1.5 × 0.66 = **0.99** — so 
 #### 2.2 — Published spread of the coefficient
 > **GAP:** an openly tabulated blade-area C_T across blade count/airfoil/solidity/Re is **not** extractable from accessible secondary sources — the raw values live inside the primary parametric figures (Benedict 2010; Kellen 2019; Hu 2015/2019). What is established directionally:
 - Thrust per unit blade area **drops steeply as blade number rises** (Kellen, MEASURED).
-- (Alsabri et al., *Aerospace* MDPI 13(9):765, 2025, 2D URANS, blade number 2–8, solidity 0.24–0.60, 26 points): "At fixed rotational speed, **increasing solidity raises both the thrust and power coefficients and lowers power loading**." Peak-to-mean thrust ratios of 3–4 for 2- and 3-bladed rotors (a structural-load design constraint invisible in cycle-averaged numbers — relevant to your blade sizing).
+- (Alsabri et al., *Aerospace* MDPI 13(9):765, 2026, 2D URANS, blade number 2–8, solidity 0.24–0.60, 26 points): "At fixed rotational speed, **increasing solidity raises both the thrust and power coefficients and lowers power loading**." Peak-to-mean thrust ratios of 3–4 for 2- and 3-bladed rotors (a structural-load design constraint invisible in cycle-averaged numbers — relevant to your blade sizing).
 - Optimal solidity range **0.30–0.40** (Kellen, MEASURED).
 
 > The 0.516 placeholder (85% of nominal) is a reasonable caution but is not anchored to a published lower bound. The defensible statement: the coefficient is configuration-sensitive at roughly the ±10–20% level from solidity/airfoil/blade-count changes, while Reynolds contributes little (see 2.3). If your final solidity leaves the 0.30–0.40 measured-optimal band, re-derive rather than transfer.
