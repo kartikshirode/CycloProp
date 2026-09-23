@@ -9,20 +9,14 @@ toc: true
 
 # Submission identity
 
-The team has supplied the identity details below. The member-level capability fields remain open
-until the roster and sender are confirmed.
-
 | Field | Value |
 | --- | --- |
-| Team name and members | Kalash, 3 |
+| Team name | Kalash |
+| Members | Kartik Shirode, Mandar Wagh, Aditya Shilalkar |
 | Institution | VPKBIET |
 | Competition ID | CP-439436FADAD2 |
 | Team ID | TM-5A7C41AF909 |
-
-Rebuild the PDF after any source edit, then send it only from the confirmed address.
-
-- Attachment name: `cycloprop-stage1.pdf`
-- Address: kartikshirode123@gmail.com
+| Contact | Kartik Shirode, kartikshirode123@gmail.com |
 
 # Summary
 
@@ -676,18 +670,28 @@ moduli, and the fallback is a thicker skin and a rerun.
 
 # Team capability and execution plan
 
-**This section is deliberately incomplete and the reason is worth stating.** Member details, prior
-projects and tool licences behind this entry are facts about a team, and no part of the automated
-work that produced this report may invent them. The structure below is real, the gap analysis is
-real, and the fields still marked `[P-n]` are for a person.
+| Member | Role on the team | Programme |
+| --- | --- | --- |
+| Kartik Shirode | Core programmer, and the contact for this submission | B.Tech, third year, VPKBIET |
+| Mandar Wagh | Programmer | B.Tech, third year, VPKBIET |
+| Aditya Shilalkar | Full stack programmer | B.Tech, third year, VPKBIET |
 
-Roster: Kalash, three members at VPKBIET. Individual names, roles and programmes still need to be
-confirmed before submission. Team size is capped at 5 and the two solver workstreams in Stage 2
-are where the additional members first pay for themselves.
+**All three of us are programmers, and nobody on the roster claims mechanical, aerospace or
+fabrication experience.** That's the largest gap in this section and it's stated first. The team
+cap is 5, so two places are open, and the plan is to fill them with mechanical or aerospace
+students before the Stage 2 build weeks and to ask a faculty member in mechanical engineering to
+mentor the build. Neither has happened yet. Each member commits 5 to 7 hours per week from
+3 October. The team has a workshop and a 3D printer; a layup setup and a test rig are not
+confirmed.
+
+What the team does bring is software, and the Stage 1 work shows it. Every number in this report
+is recomputed from stored geometry by Python solvers and a gate script with 223 self-tests, so a
+stale or contradicted number fails a check before it reaches the page. Stage 2 keeps that method.
 
 The problem statement names seven areas where preference may be given, which is close to a
 specification for this section, so it is answered area by area including the areas that are not
-covered.
+covered. No member claims prior project work in any of them, so the table carries only what the
+Stage 1 files show.
 
 | Preference area | What the Stage 1 work shows | The gap |
 | --- | --- | --- |
@@ -700,19 +704,24 @@ covered.
 | UAV subsystem integration and testing | interface definitions, an assembly order and six pre-spin measurements | nothing has been built or tested |
 
 **Execution plan for Stage 2.** The window is 3 October to 2 December 2026 and this plan submits
-on 1 December. All 11 Stage 2 items are scheduled below with the gate that closes each one, and
-`07-team-and-execution.md` carries the same schedule with the tool category, the dependency and
-the owner against every item.
+on 1 December. All 11 Stage 2 items are scheduled below with an owner and the gate that closes
+each one. The design record carries the same schedule item by item, with the dependency and the
+tool against every row.
 
-| Weeks | Stage 2 items | Closed when |
-| --- | --- | --- |
-| 1 to 2 | CAD model of the module, and supplier quotations started | every budget line exists as a solid and the model's mass properties reproduce the budget |
-| 2 to 3 | kinematic model, then motor, actuator, bearing and controller selection | the multibody schedule matches the closed form one and reproduces the pitch link load |
-| 4 to 5 | aerodynamic analysis for thrust prediction | a converged run at the design point with mesh and timestep independence shown |
-| 6 | structural analysis of blades, supports, frame, shaft and linkages | the 8 margins reproduce or move, with every difference explained |
-| 7 | material selection, mass estimate and thrust to weight | a wrinkling coupon on the delivered foam, which is what the blade allowable turns on, then the laminate panel |
-| 8 | manufacturability and assembly plan, bill of materials, risk assessment | written quotes for the five lines above 4500 INR, and every open risk owned |
-| 8 to 9 | build and test plan, then the report | a staged spin plan, an instrumented thrust measurement and a place to run it |
+| Weeks | Stage 2 items | Owner | Closed when |
+| --- | ------------- | -------- | ---------------- |
+| 1 to 2 | CAD model of the module, and supplier quotations started | Aditya Shilalkar | every budget line exists as a solid and the model's mass properties reproduce the budget |
+| 2 to 3 | kinematic model, then motor, actuator, bearing and controller selection | Mandar Wagh | the multibody schedule matches the closed form one and reproduces the pitch link load |
+| 4 to 5 | aerodynamic analysis for thrust prediction | Kartik Shirode | a converged run at the design point with mesh and timestep independence shown |
+| 6 | structural analysis of blades, supports, frame, shaft and linkages | Mandar Wagh | the 8 margins reproduce or move, with every difference explained |
+| 7 | material selection and mass estimate, then thrust to weight | Aditya Shilalkar, then Kartik Shirode | a wrinkling coupon on the delivered foam, which is what the blade allowable turns on, then the laminate panel |
+| 8 | manufacturability and assembly plan and bill of materials, then risk assessment | Aditya Shilalkar, then Kartik Shirode | written quotes for the five lines above 4500 INR, and every open risk owned |
+| 8 to 9 | build and test plan, then the report | all three | a staged spin plan, an instrumented thrust measurement and a place to run it |
+
+Every tool in the plan is on a free licence, so nothing waits on a seat: CadQuery for a solid
+model scripted from the same numbers file, PyChrono for the multibody model, OpenFOAM for CFD,
+CalculiX for FEA and FreeCAD for drawings. OpenFOAM already runs on the team's cluster account,
+checked on a converged case. The other four are installs.
 
 Quotations sit in week 1 rather than week 8 because the 4 week foam lead gates the build plan.
 The aerodynamic item is the one most likely to overrun, and its fallback is a 2D transient study
@@ -722,8 +731,9 @@ Three of the four capability gaps have a route that needs no new person. CFD has
 option and a validation case in Kellen's measured rotor, whose shape family matches this design to
 within 1.1 percent. FEA is wanted for three small parts already sized by beam formulae, so its job
 is to find where the idealisation was wrong. Multibody has a published answer to reproduce on day
-one, so it is cheapest and goes first. Testing is the gap with no software route: `[P-9]` a layup
-bench, a test frame, a load cell and somewhere safe to spin a rotor.
+one, so it is cheapest and goes first. Testing is the gap with no software route. The workshop and
+the printer cover jigs and fit checks, and a layup bench, a test frame, a load cell and somewhere
+safe to spin a rotor are still to be found.
 
 # Evaluation criteria map
 

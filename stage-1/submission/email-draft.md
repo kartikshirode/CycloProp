@@ -24,7 +24,7 @@ Competition ID: CP-439436FADAD2
 Team ID: TM-5A7C41AF909
 Team: Kalash, 3 members
 Institution: VPKBIET
-Contact: [SENDER NAME], kartikshirode123@gmail.com
+Contact: Kartik Shirode, kartikshirode123@gmail.com
 
 The attachment is cycloprop-stage1.pdf. It covers all seven
 required Stage 1 items in the order the problem statement lists them, and it adds
@@ -47,7 +47,7 @@ promptly in whatever form you prefer.
 Thank you for organising the challenge.
 
 Regards,
-[SENDER NAME]
+Kartik Shirode
 Kalash
 VPKBIET
 ```
@@ -61,8 +61,8 @@ VPKBIET
 1. **Keep both identifiers**, in the subject line and in the body. The site provides a Competition
    ID and a Team ID, not a separate registration reference. They are `REGISTRATION-CONFIRMED` in
    `../human-gate.md` and correspond to `[P-7]` in the team form
-2. **Replace `[SENDER NAME]`** with the person who will send the message. The sender address is
-   `kartikshirode123@gmail.com`; send only from the registered address
+2. **The sender is Kartik Shirode**, from `kartikshirode123@gmail.com`, the registered address.
+   Send only from that address
 3. **Check the report identity table** at the top of `cycloprop-stage1.md`, then rebuild the PDF.
    The team, institution and both IDs must match this draft
 4. **Rebuild the attachment after any edit.** The command is in `.claude/codemap.md` and it is
