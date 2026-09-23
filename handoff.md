@@ -132,6 +132,12 @@ before it is an aerodynamic one. See D49 and D68.
 Required item 7, the submission, the PDF and the staged email are done. What is left is the
 human gate, the real team facts, and one short run to fold them in.
 
+**Round 10, 23 September.** Codex checked the round 9 fixes and scored 65. It found two more
+errors, a wrong year on reference 8 and a vector map caption that blamed the whole tilt on the
+aerodynamics. Both are fixed; see
+[stage-1/audit/codex-round-10-response.md](stage-1/audit/codex-round-10-response.md). That leaves
+the sender name, item 7 and the technical read, all of which a person owns.
+
 **Round 9, 23 September.** Codex scored the submission 60 and said not to send. All eight
 findings held up. Seven are fixed and the eighth is the team facts. Read
 [stage-1/audit/codex-round-9-response.md](stage-1/audit/codex-round-9-response.md) and D71. The
