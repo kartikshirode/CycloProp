@@ -132,6 +132,10 @@ before it is an aerodynamic one. See D49 and D68.
 Required item 7, the submission, the PDF and the staged email are done. What is left is the
 human gate, the real team facts, and one short run to fold them in.
 
+**Form submission, 26 September.** The organisers want a Google Form upload: one zip on their
+report template plus a signed T&C PDF. See D73. Build with
+`python stage-1/submission/form/build_form_report.py` then `python stage-1/submission/form/make_zip.py`.
+
 **Team facts, 23 September.** Item 7, the identity table and both emails now carry the roster
 (Kartik Shirode, Mandar Wagh, Aditya Shilalkar, all B.Tech third year, programmers), 5 to 7 hours
 per member per week, a workshop and a 3D printer, and Kartik Shirode as sender. The tools and the

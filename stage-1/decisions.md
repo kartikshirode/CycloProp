@@ -2124,3 +2124,34 @@ team confirms them before 3 October.
 PDF after any source edit" and an attachment name, both notes to ourselves printed where the
 evaluator starts reading. The contact is a table row now.
 
+
+## D73: the submission goes through the organisers' form, on their template
+
+Taken 26 September 2026, when the submission instructions arrived. They replace the email route
+this project had staged since D5 and D57.
+
+**The route is a Google Form, one submission per team.** It takes one zip named Grand Challenge
+Title_Team ID, holding the report "as per template shared" and the supporting documents, plus a
+signed and scanned copy of the terms and conditions as a separate PDF. A colon can't go in a
+Windows file name, so the zip is `CycloProp Advanced UAV Propulsion Challenge_TM-5A7C41AF909.zip`.
+
+**The template is filled from numbers.json, not retyped.** `submission/form/build_form_report.py`
+opens the organisers' own docx, writes all 16 sections from the stored numbers, asserts the
+arithmetic it quotes, and exports a PDF through Word. Three figures the template asks for did
+not exist and are drawn there: the three layout concepts, thrust and power against rpm, and a
+power flow. The template's evaluation weights differ from the problem statement's, with
+aerodynamics and kinematics at 15 each and mass and T/W at 12, so the 32 page report goes in as
+a supporting design note rather than as the report.
+
+**Two things were decided rather than supplied.** The design name, Kalash CR-1, and the concept
+selection matrix weights. The matrix scores thrust, power and mass from the configuration table
+and says in the text that the other rows are judgement.
+
+**Section 15 declares the AI tools.** The terms forbid concealing material third party
+contributions and ask for significant tools to be disclosed, so the table names Claude through
+Claude Code and Codex, and what each did, at the extent they were actually used.
+
+**The calculations travel.** The zip carries `linkage.py`, `structure.py` and `numbers.json` in
+the layout the scripts expect, and running the two with `--write` from that folder reproduces
+the file byte for byte. `check.py` stays out because it reads the whole tree.
+
