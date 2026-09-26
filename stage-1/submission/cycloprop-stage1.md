@@ -1,7 +1,7 @@
 ---
 title: "CycloProp: a cyclorotor propulsion module"
 subtitle: "PUSHPAK Grand Challenge, Stage 1 preliminary design report"
-date: "Prepared 31 August 2026, for submission on 26 September 2026"
+date: "Detailed design note, supporting the Stage 1 report of 27 September 2026"
 geometry: margin=25mm
 fontsize: 11pt
 toc: true
