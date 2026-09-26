@@ -20,7 +20,6 @@ FILES = {
     "03_Calculations/tools/linkage.py": ROOT / "tools" / "linkage.py",
     "03_Calculations/tools/structure.py": ROOT / "tools" / "structure.py",
     "03_Calculations/stage-1/design/numbers.json": S / "design" / "numbers.json",
-    "04_Design_Record/decisions.md": S / "decisions.md",
     "04_Design_Record/evidence-ledger.md": S / "design" / "evidence-ledger.md",
 }
 for p in sorted((S / "design").glob("0*.md")):

@@ -1,35 +1,19 @@
 # Team capability and execution plan
 
 Required Stage 1 item 7. The execution plan, the capability structure and the gap analysis are
-written from the work the repository already contains. The member details come from the team,
-supplied on 23 September 2026, and nothing about a person goes in here that the team didn't
-supply. That rule is a blocked trigger in the loop config under D5 and it still holds.
+written from the work this project already contains. The member details came from the team on
+23 September 2026, and nothing about a person is written here that the team didn't supply.
 
-Where the team gave no fact, this file says the fact isn't claimed rather than guessing one. The
-team handed two calls to the plan, the tool choice and the Stage 2 owners, so both are made here
-on cost and fit and marked as the plan's choice.
+Where the team gave no fact, this file says the fact isn't claimed rather than guessing one.
+Prior project work wasn't supplied, so none is listed. The branch of study wasn't given either.
+The team left two calls to the plan, the tool choice and the Stage 2 owners, so both are made
+here on cost and fit and marked as the plan's choice.
 
 The claims about the Stage 1 work itself are checkable against the files: what was solved, what
 was calculated, what was read off somebody else's measurement and what was neither.
 
-## What the team supplied, and what is still open
-
-Nine fields were tracked for the human handoff. Their state on 23 September:
-
-| Tag | Field | State |
-| --- | --- | --- |
-| P-1 | Roster and each member's role | Supplied. Three members, roster below |
-| P-2 | Institution and programme | Supplied. VPKBIET, B.Tech third year for all three. Branch not stated |
-| P-3 | Prior work behind each preference area | None claimed. The team supplied roles and no prior projects, so none is listed |
-| P-4 | CAD, CFD, FEA and multibody tools | Left to the plan. Chosen below, all on free licences. OpenFOAM already runs and the rest are planned installs |
-| P-5 | Weekly hours from 3 October | 5 to 7 hours per week per member |
-| P-6 | Sender | Kartik Shirode, from the registered address. SENDER-CONFIRMED |
-| P-7 | Competition ID and Team ID | Supplied. REGISTRATION-CONFIRMED |
-| P-8 | Eligibility against the disqualification clause | Checked by the team. ELIGIBILITY-CHECKED |
-| P-9 | Workshop, lab and test access | A workshop and a 3D printer. No composites layup setup and no test rig |
-
-P-8 went first because it's the one that can end the run after results are announced. The clause
-is in `../../context.md`.
+The team has checked every member against the problem statement's disqualification clause,
+which is the one thing that can end the run after results are announced.
 
 ## Team capability
 
@@ -39,7 +23,7 @@ Kalash, 3 members, VPKBIET.
 
 | Member | Role on the team | Programme |
 | --- | --- | --- |
-| Kartik Shirode | Core programmer, and the sender | B.Tech, third year |
+| Kartik Shirode | Core programmer, and team leader | B.Tech, third year |
 | Mandar Wagh | Programmer | B.Tech, third year |
 | Aditya Shilalkar | Full stack programmer | B.Tech, third year |
 
@@ -176,8 +160,8 @@ is cheaper to extend than to rebuild.
   the record of what it was
 - The four thrust to weight cases stay four. Reporting one of them is how week 2 of Stage 1
   confused itself for a fortnight
-- Each week still ends with a progress file, a fresh context audit, a handoff and a decision
-  entry, which is the protocol that caught the errors listed in the Stage 1 audits
+- Each week still ends with a progress note, an independent review and a numbered decision
+  entry, which is the routine that caught the errors corrected during Stage 1
 
 Only item 3 needs shared hardware. The cluster has no walltime cap and a 2D transient case is
 small next to it, so CFD runs overnight while the other items run on laptops.
