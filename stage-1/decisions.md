@@ -2155,3 +2155,10 @@ Claude Code and Codex, and what each did, at the extent they were actually used.
 the layout the scripts expect, and running the two with `--write` from that folder reproduces
 the file byte for byte. `check.py` stays out because it reads the whole tree.
 
+**The decision log stays out of the zip.** Checking the deliverables on 26 September, this log
+turned out to interleave the engineering decisions with entries about how the work was run, and
+it points at files the zip doesn't carry. The report's section 13 carries the design history, the
+design documents cite decisions by number, and the log is offered on request. The AI tools are
+declared in section 15 either way. `07-team-and-execution.md` lost its handoff tracker and marker
+names in the same check, since it does go in the zip.
+
