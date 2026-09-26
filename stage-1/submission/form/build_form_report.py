@@ -653,8 +653,9 @@ def build():
     rep.answer("Basis for selection:", [
         f"It wins the criterion the challenge makes hard, module thrust to weight, by 23 percent "
         f"on the stacked downside case ({c1['module_tw_conservative']} against "
-        f"{c2['module_tw_conservative']}), and it wins every other column apart from "
-        f"aerodynamic power, where the clusters are about 3 percent better. Splitting the thrust "
+        f"{c2['module_tw_conservative']}), and it wins every other column of the 3.1 table "
+        f"apart from aerodynamic power, where the clusters are 2 to 3 percent better. Splitting "
+        f"the thrust "
         f"splits the aerodynamics but not the hardware: 7 of the 13 mass envelope lines multiply "
         f"by rotor count. Every disputed assumption was set in the clusters' favour, with no wake "
         f"interaction, one shared motor and controller, and the same coefficient despite their "
@@ -723,10 +724,10 @@ def build():
             if any(k in p.text for k in ("Analytical", "Blade Element", "Published")):
                 p.runs[0].text = p.runs[0].text.replace("☐", "☒")
     rep.fill_rows(tb[10], {
-        "Software / calculation tool": ["Python 3 with NumPy and Matplotlib. tools/linkage.py "
-                                        "(kinematics and loads), tools/structure.py (structure and "
-                                        "mass), tools/check.py (recomputes and checks every "
-                                        "number). All inputs and results in numbers.json"],
+        "Software / calculation tool": ["Python 3, standard library only: tools/linkage.py "
+                                        "(kinematics and loads) and tools/structure.py (structure "
+                                        "and mass), both in the zip. All inputs and results in "
+                                        "numbers.json. Figures drawn with Matplotlib"],
         "Operating condition": [f"Hover, {T:.1f} N at {RPM:.0f} rpm, no freestream"],
         "Air density": ["1.225 kg/m3"],
         "Atmospheric conditions": [f"ISA sea level. Viscosity {MU:.3e} Pa s, as implied by the "
@@ -766,7 +767,8 @@ def build():
                f"bracketed by 0.6648 measured by Kellen on this shape family [1], 0.7211 "
                f"recomputed from Benedict's quad rotor hover point [2] and 0.8114 from his twin "
                f"rotor, which we treat as an upside only. The load model uses a thin airfoil "
-               f"lift slope of 2 pi per radian, scaled to the measured mean.")
+               f"lift slope of 2 pi per radian, scaled so the cycle mean equals the {T:.1f} N design "
+               f"thrust.")
 
     # 5.3
     rep.fill_rows(tb[11], {
@@ -1067,22 +1069,21 @@ def build():
                   f"({g('structure.blade_combined_overspeed_Nm')} at 1.20 overspeed)",
                   f"{BLADE_STRESS:.1f} MPa, skin",
                   f"{g('structure.blade_wrinkle_stress_MPa'):.1f} MPa, skin wrinkling",
-                  f"{g('structure.blade_combined_margin'):.2f} "
-                  f"({g('structure.blade_combined_margin_overspeed'):.2f} at overspeed)"],
+                  f"{g('structure.blade_combined_margin'):.2f} / "
+                  f"{g('structure.blade_combined_margin_overspeed'):.2f}"],
         "Shaft": ["CFRP tube 16 x 1.5 mm",
                   f"{Q_ROTOR:.3f} Nm torque + {g('structure.shaft_bending_Nm'):.3f} Nm bending",
                   f"{SHAFT_STRESS:.2f} MPa combined shear", f"{CFRP_TAU_MPA:.0f} MPa shear",
                   f"{g('structure.shaft_combined_margin'):.2f}"],
         "Frame": ["CFRP tubes, 7075-T6 blocks and lugs", "worst lug about 13.4 N",
-                  "not computed", "5.8 kN lug net section",
-                  "over 100; stiffness governs, not strength"],
+                  "not computed; stiffness governs", "5.8 kN lug net section", "> 100"],
         "Hub": ["7075-T6 boss, 693ZZ root bearings",
                 f"{g('structure.centrifugal_load_N')} N per blade "
                 f"({g('structure.centrifugal_load_overspeed_N')} at overspeed)",
                 "load check on bearing rating",
                 f"{g('structure.blade_attachment_allowable_N')} N (4 bearings, ISO 76)",
-                f"{g('structure.blade_attachment_margin'):.2f} "
-                f"({g('structure.blade_attachment_margin_overspeed'):.2f} at overspeed)"],
+                f"{g('structure.blade_attachment_margin'):.2f} / "
+                f"{g('structure.blade_attachment_margin_overspeed'):.2f}"],
         "Pitch linkage": ["7075-T6 horn, CFRP link", f"{g('structure.pitch_link_load_N')} N",
                           f"{HORN_STRESS:.1f} MPa, horn", f"{AL7075_MPA:.0f} MPa (7075-T6)",
                           f"{g('structure.pitch_link_margin'):.2f}"],
@@ -1093,8 +1094,9 @@ def build():
                f"{g('structure.blade_gj_Nm2')} Nm2), with the skin wrinkling stress 0.5 x "
                f"(E_skin E_core G_core)^(1/3). Thin wall torsion and combined shear on the shaft, "
                f"net section bending on the horn, and the ISO 76 static rating for the bearings. "
-               f"FOS is allowable over demand. Stresses in the table are the demand scaled onto "
-               f"the governing allowable.")
+               f"FOS is allowable over demand; where two are given, the second is the 1.20 "
+               f"overspeed case. Stresses in the table are the demand scaled onto the governing "
+               f"allowable.")
     rep.answer("Principal assumptions:",
                "Blade load factor 4.0 on the mean aerodynamic force; a 1.20 overspeed case; "
                "published class allowables with no coupon; a floor of 1.5 on every margin.")
@@ -1348,7 +1350,8 @@ def build():
         ["OpenAI Codex", "Independent audits of the report against the problem statement",
          "Several review rounds. Each finding was checked, then fixed or answered in the design "
          "record"],
-        ["Python 3, NumPy, Matplotlib", "All calculations and figures", "Open source libraries"],
+        ["Python 3, Matplotlib", "All calculations (standard library) and figures",
+         "Open source"],
         ["Pandoc, XeLaTeX, Microsoft Word", "Document preparation", "Formatting only"],
     ])
     rep.fill_rows(tb[33], {"Team Leader:": [TEAM["leader"]], "Date:": [TEAM["date"]]})
@@ -1425,10 +1428,11 @@ def build():
                      "iterations, design-review records, photographs, or other evidence of "
                      "design development.")
     rep.paragraph_after(app_c._p,
-                        "Folder 04_Design_Record holds the design documents for each item, the "
-                        "evidence ledger that grades every borrowed number, and the decision "
-                        "log, 72 dated entries recording each change in section 13.1 and why it "
-                        "was made.")
+                        "Folder 04_Design_Record holds the design document for each item and "
+                        "the evidence ledger that grades every borrowed number by how it was "
+                        "obtained. The design documents cite numbered, dated decisions (for "
+                        "example D67 for the V2 change in section 13.1). The full decision log "
+                        "is available on request.")
     app_d = rep.para("Attach additional papers, datasheets, technical reports, standards, and "
                      "other sources.")
     rep.paragraph_after(app_d._p,
@@ -1441,6 +1445,7 @@ def build():
 
     out_docx = HERE / f"{OUT_STEM}.docx"
     rep.doc.core_properties.author = TEAM["team_name"]
+    rep.doc.core_properties.last_modified_by = TEAM["team_name"]
     rep.doc.core_properties.title = f"{TEAM['design_name']} Stage 1 report"
     rep.doc.save(str(out_docx))
     print("wrote", out_docx)
