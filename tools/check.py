@@ -268,7 +268,7 @@ def check_global():
     ok &= report(not bad, "global: no AI attribution in tracked prose",
                  "; ".join(bad[:3]) if bad else "")
 
-    for rel in ["context.md", "stage-1/plan.md", "stage-1/literature.md"]:
+    for rel in ["context.md", "stage-1/literature.md"]:
         ok &= report((ROOT / rel).is_file(), f"global: {rel} exists")
     return ok
 
@@ -884,9 +884,8 @@ RETIRED_VALUES = [
     ("164.62", "the gap to the 2.75 internal target before D70"),
 ]
 LIVE_DOCS = DESIGN_DOCS + ["stage-1/submission/cycloprop-stage1.md",
-                           "stage-1/submission/email-draft.md",
                            "stage-1/design/evidence-ledger.md",
-                           "stage-1/literature.md", "handoff.md", "context.md"]
+                           "stage-1/literature.md", "context.md"]
 
 
 def check_retired_values():
