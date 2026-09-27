@@ -11,24 +11,23 @@ NAME = "CycloProp Advanced UAV Propulsion Challenge_TM-5A7C41AF909.zip"
 REPORT = "CycloProp_TM-5A7C41AF909_Stage1_Report"
 
 S = ROOT / "stage-1"
+B = HERE / "build"
 FILES = {
+    "00_Contents.pdf": B / "00_Contents.pdf",
     f"01_Report/{REPORT}.pdf": HERE / f"{REPORT}.pdf",
     f"01_Report/{REPORT}.docx": HERE / f"{REPORT}.docx",
     "02_Detailed_Design_Note/CycloProp_Stage1_Detailed_Design_Note.pdf":
         S / "submission" / "cycloprop-stage1.pdf",
-    "03_Calculations/README.txt": HERE / "calculations-README.txt",
-    "03_Calculations/tools/linkage.py": ROOT / "tools" / "linkage.py",
-    "03_Calculations/tools/structure.py": ROOT / "tools" / "structure.py",
-    "03_Calculations/stage-1/design/numbers.json": S / "design" / "numbers.json",
-    "04_Design_Record/evidence-ledger.md": S / "design" / "evidence-ledger.md",
+    "03_Design_Record/CycloProp_Stage1_Design_Record.pdf": B / "CycloProp_Stage1_Design_Record.pdf",
+    "04_Calculations/README.pdf": B / "README.pdf",
+    "04_Calculations/tools/linkage.py": ROOT / "tools" / "linkage.py",
+    "04_Calculations/tools/structure.py": ROOT / "tools" / "structure.py",
+    "04_Calculations/stage-1/design/numbers.json": S / "design" / "numbers.json",
 }
-for p in sorted((S / "design").glob("0*.md")):
-    FILES[f"04_Design_Record/{p.name}"] = p
-for p in sorted((S / "submission" / "figures").glob("*.pdf")):
-    FILES[f"05_Figures/{p.name}"] = p
-for p in sorted((HERE / "build").glob("fig-*.png")):
-    if p.stem in ("fig-concepts", "fig-rpm", "fig-powerflow"):
-        FILES[f"05_Figures/{p.name}"] = p
+ORDER = ["fig-arrangement", "fig-concepts", "fig-blade-section", "fig-rpm", "fig-linkage",
+         "fig-pitch-schedule", "fig-vector-map", "fig-powerflow", "fig-mass", "fig-blade-load"]
+for i, stem in enumerate(ORDER, 1):
+    FILES[f"05_Figures/Figure_{i:02d}_{stem[4:]}.png" if i < 10 else "05_Figures/Figure_A1_blade-load.png"] = B / f"{stem}.png"
 
 out = HERE / NAME
 missing = [str(v) for v in FILES.values() if not v.is_file()]
