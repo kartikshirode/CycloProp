@@ -1403,7 +1403,7 @@ def build():
     app_a = rep.para("Attach detailed hand calculations, spreadsheet outputs, MATLAB/Python "
                      "calculations, or other supporting engineering calculations.")
     p = rep.paragraph_after(app_a._p,
-                            "Supporting files in the zip, folder 03_Calculations: "
+                            "Supporting files in the zip, folder 04_Calculations: "
                             "stage-1/design/numbers.json holds every input and result; "
                             "tools/linkage.py solves the four-bar, the pitch schedule, the "
                             "aerodynamic loads and the vector map; tools/structure.py builds the "
@@ -1423,12 +1423,12 @@ def build():
                         "No CAD model exists at Stage 1. The dimensioned layout is Figure 1, the "
                         "blade section Figure 3 and the linkage Figure 5, all drawn from the same "
                         "numbers file. The packaging and interface definition is in "
-                        "04_Design_Record/09-packaging-and-integration.md.")
+                        "the Packaging and integration chapter of 03_Design_Record.")
     app_c = rep.para("Attach preliminary sketches, earlier design versions, calculation "
                      "iterations, design-review records, photographs, or other evidence of "
                      "design development.")
     rep.paragraph_after(app_c._p,
-                        "Folder 04_Design_Record holds the design document for each item and "
+                        "Folder 03_Design_Record holds the design document for each item and "
                         "the evidence ledger that grades every borrowed number by how it was "
                         "obtained. The design documents cite numbered, dated decisions (for "
                         "example D67 for the V2 change in section 13.1). The full decision log "
