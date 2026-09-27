@@ -33,7 +33,7 @@ Team ID: TM-5A7C41AF909
 Thank you.
 
 Regards,
-[SENDER NAME]
+Kartik Shirode
 Kalash
 VPKBIET
 ```
