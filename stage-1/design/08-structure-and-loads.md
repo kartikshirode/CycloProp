@@ -153,10 +153,10 @@ degrees of authority the side force uncertainty already reserves.
 
 ## Pitch bearing oscillating duty
 
-The tightest margin in the module is a bearing static rating, and a static rating is the wrong
-yardstick for a bearing that never turns. Each blade hangs on two 693ZZ bearings that swing
-through 80 degrees once a revolution while the centrifugal pull holds its direction in the
-spider arm. There are four per blade since D67, two at each root station. Fixed load, oscillating rings, small amplitude. That is the arrangement false
+The blade root bearings were the tightest margin in the module until D67, and they are still
+checked on a static rating, which is the wrong yardstick for a bearing that never turns. Each
+blade hangs on four 693ZZ bearings, two at each root station, that swing through 80 degrees once
+a revolution while the centrifugal pull holds its direction in the spider arm. Fixed load, oscillating rings, small amplitude. That is the arrangement false
 brinelling is named after, so the duty is worked out here rather than left to the catalogue.
 
 Two numbers decide whether the balls ever roll onto fresh raceway. With the outer ring held
